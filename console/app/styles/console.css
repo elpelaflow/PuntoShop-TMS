@@ -69,6 +69,8 @@ body.console-admin-organizations-index-index .next-table-wrapper > table {
     align-items: center;
     justify-content: center;
     text-align: center;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
 }
 
 #boot-loader > .loader-container {
@@ -82,10 +84,7 @@ body.console-admin-organizations-index-index .next-table-wrapper > table {
     margin-left: 0.5rem;
     font-weight: 600;
     font-size: 0.875rem;
-}
-
-body[data-theme='dark'] #boot-loader > .loader-container > .loading-message {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 body.fleetbase-console .snm-dropdown-search-input {
@@ -112,8 +111,8 @@ body.fleetbase-console .snm-dropdown-card {
     gap: 1rem;
     width: 100%;
     padding: 0.625rem 2.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    background-color: #fff;
+    border-bottom: 1px solid var(--border-default);
+    background-color: var(--bg-surface);
     box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
     z-index: 700;
 }
@@ -125,20 +124,14 @@ body.fleetbase-console .snm-dropdown-card {
 }
 
 body[data-theme='dark'] .console-dashboard-page {
-    border-bottom-color: #1f2937;
-    background-color: #111827;
     box-shadow: 0 1px 2px rgb(2 6 23 / 30%);
 }
 
 .console-dashboard-title h1 {
-    color: #111827;
+    color: var(--text-primary);
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.2;
-}
-
-body[data-theme='dark'] .console-dashboard-title h1 {
-    color: #f9fafb;
 }
 
 .fleetbase-invite-shell {

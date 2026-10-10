@@ -8,7 +8,7 @@
     <div class="max-h-[calc(100vh-10rem)] h-full w-full overflow-y-scroll">
         <div class="h-full w-full">
             {{#each @model as |notification|}}
-                <div class="flex flex-row justify-between px-4 py-3 text-black dark:text-white border-b dark:border-gray-800 border-gray-200 text-sm hover:opacity-60 {{if notification.read_at 'bg-gray-100 dark:bg-gray-900' 'bg-white dark:bg-gray-800'}}">
+                <div class="flex flex-row justify-between px-4 py-3 text-primary border-b border-subtle text-sm hover:opacity-80 {{if notification.read_at 'bg-surface-subtle' 'bg-surface'}}">
                     <div class="flex flex-row flex-1">
                         <div class="flex items-center justify-center mr-6">
                             <Checkbox @value={{includes notification this.selected}} @onToggle={{fn this.selectNotification notification}} />
@@ -16,28 +16,28 @@
                         <a href="javascript:;" class="flex-1 flex flex-row" {{on "click" (fn this.markNotificationAsRead notification)}}>
                             <div class="mr-4 flex items-center justify-center">
                                 {{#if notification.read_at}}
-                                    <FaIcon @icon="envelope-open" class="text-gray-200" />
+                                    <FaIcon @icon="envelope-open" class="text-muted" />
                                 {{else}}
-                                    <FaIcon @icon="envelope" class="text-gray-200" />
+                                    <FaIcon @icon="envelope" class="text-brand" />
                                 {{/if}}
                             </div>
                             <div class="flex flex-col">
                                 <div class="flex flex-row space-x-2">
                                     <h1 class="text-sm font-semibold antialiased leading-4">{{notification.data.subject}}</h1>
-                                    <div class="text-xs antialiased text-gray-900 dark:text-gray-200">- {{notification.data.message}}</div>
+                                    <div class="text-xs antialiased text-secondary">- {{notification.data.message}}</div>
                                 </div>
-                                <div class="text-gray-300 text-xs antialiased mt-1">{{t "console.notifications.received"}} {{notification.createdAgo}}</div>
+                                <div class="text-muted text-xs antialiased mt-1">{{t "console.notifications.received"}} {{notification.createdAgo}}</div>
                             </div>
                         </a>
                         <div>
-                            <FaIcon @icon="clock" class="text-gray-400 dark:text-gray-700" @size="sm" />
-                            <span class="text-gray-400 dark:text-gray-600 text-xs">{{notification.createdAt}}</span>
+                            <FaIcon @icon="clock" class="text-muted" @size="sm" />
+                            <span class="text-muted text-xs">{{notification.createdAt}}</span>
                         </div>
                     </div>
                 </div>
             {{else}}
                 <div class="flex items-center justify-center h-full w-full">
-                    <p class="text-base text-gray-800 dark:text-gray-300 italic">{{t "console.notifications.message"}}</p>
+                    <p class="text-base text-secondary italic">{{t "console.notifications.message"}}</p>
                 </div>
             {{/each}}
         </div>

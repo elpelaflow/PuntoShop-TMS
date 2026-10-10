@@ -13,9 +13,9 @@
         {{/if}}
         {{#if this.showMethodSelection}}
             <label class="text-base font-medium">Choose an authentication method</label>
-            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">In addition to your username and password, you'll have to enter a code (delivered via app or SMS) to sign in to your account</p>
+            <p class="text-sm text-secondary mt-1">In addition to your username and password, you'll have to enter a code (delivered via app or SMS) to sign in to your account</p>
             {{#each @twoFaMethods as |method|}}
-                <div class="border rounded-lg px-4 py-3 mt-2 transition duration-300 {{if (eq this.selectedTwoFaMethod method.key) 'border-blue-500' 'border-gray-200 dark:border-gray-700'}}">
+                <div class="border rounded-lg px-4 py-3 mt-2 transition duration-300 {{if (eq this.selectedTwoFaMethod method.key) 'border-brand-primary' 'border-default'}}">
                     <input
                         type="radio"
                         name="2fa-method"
@@ -27,12 +27,12 @@
                     <label for="{{method.name}}">
                         {{method.name}}
                         {{#if method.recommended}}
-                            <span class="bg-blue-500 rounded-xl text-white px-2 py-1 ml-2 text-xs font-semibold">Recommended</span>
+                            <span class="bg-brand-primary rounded-xl text-white px-2 py-1 ml-2 text-xs font-semibold">Recommended</span>
                         {{/if}}
                         {{#if method.requiresSetup}}
-                            <span class="bg-gray-200 dark:bg-gray-700 rounded-xl text-gray-800 dark:text-gray-100 px-2 py-1 ml-2 text-xs font-semibold">Needs setup</span>
+                            <span class="bg-surface-subtle border border-default rounded-xl text-primary px-2 py-1 ml-2 text-xs font-semibold">Needs setup</span>
                         {{/if}}
-                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{method.description}}</p>
+                        <p class="text-sm text-secondary mt-1">{{method.description}}</p>
                     </label>
                 </div>
             {{/each}}

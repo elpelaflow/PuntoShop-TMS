@@ -44,7 +44,7 @@
                             src={{@model.logo_url}}
                             @fallbackSrc={{config "defaultValues.placeholderImage"}}
                             alt={{concat @model.name " logo"}}
-                            class="h-20 w-64 border dark:border-gray-900 rounded-md mr-4"
+                            class="h-20 w-64 border border-default rounded-md mr-4"
                         />
                         <FileUpload @name={{t "console.settings.index.logo"}} @accept="image/*" @onFileAdded={{fn this.uploadFile "logo"}} as |queue|>
                             <a tabindex={{0}} class="flex items-center px-0 mt-2 text-xs no-underline truncate btn btn-sm btn-default">
@@ -70,7 +70,7 @@
                             src={{@model.backdrop_url}}
                             @fallbackSrc={{config "defaultValues.placeholderImage"}}
                             alt={{concat @model.name " backdrop"}}
-                            class="h-20 w-64 border dark:border-gray-900 rounded-md mr-4"
+                            class="h-20 w-64 border border-default rounded-md mr-4"
                         />
                         <FileUpload @name={{t "console.settings.index.backdrop"}} @accept="image/*" @onFileAdded={{fn this.uploadFile "backdrop"}} as |queue|>
                             <a tabindex={{0}} class="flex items-center px-0 mt-2 text-xs no-underline truncate btn btn-sm btn-default">

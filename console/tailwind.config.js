@@ -19,7 +19,60 @@ module.exports = {
             ringColor: {
                 DEFAULT: 'transparent',
             },
+            borderColor: {
+                subtle: 'var(--border-subtle)',
+                DEFAULT: 'var(--border-default)',
+                strong: 'var(--border-strong)',
+            },
+            textColor: {
+                primary: 'var(--text-primary)',
+                secondary: 'var(--text-secondary)',
+                muted: 'var(--text-muted)',
+                inverse: 'var(--text-inverse)',
+            },
             colors: {
+                // Semantic surface & canvas tokens
+                canvas: 'var(--bg-canvas)',
+                surface: {
+                    DEFAULT: 'var(--bg-surface)',
+                    subtle: 'var(--bg-surface-subtle)',
+                },
+                overlay: 'var(--bg-overlay)',
+
+                // Semantic content & text tokens
+                'content-primary': 'var(--text-primary)',
+                'content-secondary': 'var(--text-secondary)',
+                'content-muted': 'var(--text-muted)',
+                'content-inverse': 'var(--text-inverse)',
+
+                // Semantic border tokens
+                'border-subtle': 'var(--border-subtle)',
+                'border-default': 'var(--border-default)',
+                'border-strong': 'var(--border-strong)',
+
+                // Semantic brand tokens
+                brand: {
+                    DEFAULT: 'var(--brand-default)',
+                    hover: 'var(--brand-hover)',
+                    subtle: 'var(--brand-subtle)',
+                    text: 'var(--brand-text)',
+                },
+
+                // Semantic state tokens
+                state: {
+                    'success-bg': 'var(--state-success-bg)',
+                    'success-text': 'var(--state-success-text)',
+                    'success-border': 'var(--state-success-border)',
+                    'warning-bg': 'var(--state-warning-bg)',
+                    'warning-text': 'var(--state-warning-text)',
+                    'warning-border': 'var(--state-warning-border)',
+                    'danger-bg': 'var(--state-danger-bg)',
+                    'danger-text': 'var(--state-danger-text)',
+                    'danger-border': 'var(--state-danger-border)',
+                    'info-bg': 'var(--state-info-bg)',
+                    'info-text': 'var(--state-info-text)',
+                    'info-border': 'var(--state-info-border)',
+                },
                 sky: {
                     100: '#e6f0fb',
                     200: '#bad5f5',

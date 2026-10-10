@@ -1,6 +1,6 @@
 <div class="space-y-6" ...attributes>
     <ContentPanel @title="API Rate Limiting" @open={{true}} @wrapperClass="bordered-classic">
-        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <p class="mb-4 text-sm text-secondary">
             Limits apply to each API consumer separately (every API key, access token, or anonymous client address), so a single busy integration is throttled on its own without affecting
             anyone else.
         </p>
@@ -11,7 +11,7 @@
 
         {{#unless this.enabled}}
             <div
-                class="mb-4 flex items-center rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-xs text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900 dark:text-yellow-100"
+                class="mb-4 flex items-center rounded-md border border-state-warning-border bg-state-warning-bg px-3 py-2 text-xs text-state-warning-text"
                 data-test-disabled-warning
             >
                 <FaIcon @icon="triangle-exclamation" class="mr-2" />
@@ -43,7 +43,7 @@
         </InputGroup>
 
         {{#if this.unlimitedKeys}}
-            <p class="text-xs text-gray-500 dark:text-gray-400" data-test-unlimited-keys>
+            <p class="text-xs text-muted" data-test-unlimited-keys>
                 {{this.unlimitedKeys}}
                 API key(s) bypass rate limiting via THROTTLE_UNLIMITED_API_KEYS.
             </p>
@@ -52,7 +52,7 @@
 
     {{! Flush body: the overrides table spans the panel edge to edge; text and the picker pad themselves. }}
     <ContentPanel @title="Organization Overrides" @open={{true}} @wrapperClass="bordered-classic" @panelBodyClass="p-0i" @panelBodyWrapperClass="p-0i">
-        <p class="px-4 pt-4 text-sm text-gray-600 dark:text-gray-400">
+        <p class="px-4 pt-4 text-sm text-secondary">
             Give an organization's consumers a different limit, or lift the limit entirely, for high-volume integrations.
         </p>
 
@@ -77,7 +77,7 @@
         </div>
 
         {{#if this.overrides.length}}
-            <div class="border-t border-gray-200 dark:border-gray-700" data-test-overrides-table>
+            <div class="border-t border-default" data-test-overrides-table>
                 <Table @rows={{this.overrides}} @columns={{this.overrideColumns}} />
             </div>
         {{/if}}

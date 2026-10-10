@@ -10,7 +10,7 @@
                         <label class="text-base font-medium">Allow users to change their own password</label>
                         <Toggle @isToggled={{this.allowUsersChangePassword}} @onToggle={{this.onAllowUsersChangePasswordToggled}} />
                     </div>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-3">
+                    <p class="text-sm text-secondary mt-3">
                         When this is off, only administrators and users whose role or policy grants the
                         <code>iam change-password</code>
                         permission can change their own password. Invited users can always set their first password.

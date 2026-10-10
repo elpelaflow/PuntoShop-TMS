@@ -1,0 +1,90 @@
+/**
+ * Design Tokens - PuntoShop TMS Console
+ * Color system for Light and Dark themes.
+ */
+
+:root,
+[data-theme='light'] {
+    /* Superficies y Fondos */
+    --bg-canvas: #f9fafb;
+    --bg-surface: #ffffff;
+    --bg-surface-subtle: #f3f4f6;
+    --bg-overlay: #ffffff;
+
+    /* Textos */
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+    --text-inverse: #ffffff;
+
+    /* Bordes */
+    --border-default: #e5e7eb;
+    --border-subtle: #f3f4f6;
+    --border-strong: #9ca3af;
+
+    /* Marca / Brand */
+    --brand-default: #3485e2;
+    --brand-hover: #1c6cc7;
+    --brand-subtle: #e6f0fb;
+    --brand-text: #ffffff;
+
+    /* Estados y Retroalimentación */
+    --state-success-bg: #ecfdf5;
+    --state-success-text: #047857;
+    --state-success-border: #a7f3d0;
+
+    --state-warning-bg: #fffbeb;
+    --state-warning-text: #92400e;
+    --state-warning-border: #fde68a;
+
+    --state-danger-bg: #fff1f2;
+    --state-danger-text: #be123c;
+    --state-danger-border: #fecdd3;
+
+    --state-info-bg: #f0f9ff;
+    --state-info-text: #0369a1;
+    --state-info-border: #bae6fd;
+}
+
+[data-theme='dark'],
+.dark {
+    /* Superficies y Fondos */
+    --bg-canvas: #111827;
+    --bg-surface: #1f2937;
+    --bg-surface-subtle: #374151;
+    --bg-overlay: #1f2937;
+
+    /* Textos */
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #6b7280;
+    --text-inverse: #111827;
+
+    /* Bordes */
+    --border-default: #374151;
+    --border-subtle: #1f2937;
+    --border-strong: #4b5563;
+
+    /* Marca / Brand */
+    --brand-default: #3485e2;
+    --brand-hover: #61a0e8;
+    --brand-subtle: rgb(52 133 226 / 20%);
+    --brand-text: #ffffff;
+
+    /* Estados y Retroalimentación */
+    --state-success-bg: rgb(6 78 59 / 40%);
+    --state-success-text: #6ee7b7;
+    --state-success-border: #065f46;
+
+    --state-warning-bg: rgb(120 53 15 / 40%);
+    --state-warning-text: #fcd34d;
+    --state-warning-border: #78350f;
+
+    --state-danger-bg: rgb(136 19 55 / 40%);
+    --state-danger-text: #fda4af;
+    --state-danger-border: #881337;
+
+    --state-info-bg: rgb(12 74 110 / 40%);
+    --state-info-text: #7dd3fc;
+    --state-info-border: #0c4a6e;
+}

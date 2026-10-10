@@ -2,16 +2,16 @@
     <LinkTo @route="console" class="flex items-center justify-center">
         <LogoIcon @brand={{@brand}} @size="12" class="rounded-md" />
     </LinkTo>
-    <h2 class="text-lg font-extrabold text-gray-900 dark:text-white truncate">
+    <h2 class="text-lg font-extrabold text-primary truncate">
         {{if this.isSent "Verification Code"}}
     </h2>
 </div>
 
-<div class="flex px-3 py-2 mb-4 rounded-md shadow-sm bg-green-200">
+<div class="flex px-3 py-2 mb-4 rounded-md shadow-sm bg-state-success-bg border border-state-success-border">
     <div>
-        <FaIcon @icon={{if this.isAuthenticatorApp "mobile-screen" "check-circle"}} @size="lg" class="text-green-900 mr-4" />
+        <FaIcon @icon={{if this.isAuthenticatorApp "mobile-screen" "check-circle"}} @size="lg" class="text-state-success-text mr-4" />
     </div>
-    <p class="flex-1 text-sm text-green-900 dark:text-green-900">
+    <p class="flex-1 text-sm text-state-success-text">
         {{#if this.useRecoveryCode}}
             <strong>{{t "auth.two-fa.verify-code.recovery-code-title"}}</strong><br />
             {{t "auth.two-fa.verify-code.recovery-code-subtitle"}}
@@ -58,14 +58,14 @@
 
     <div class="text-center flex flex-row flex-wrap items-center justify-center space-x-4 mt-3.5">
         {{#if this.isAuthenticatorApp}}
-            <a href="#" class="text-sm text-blue-500 hover:underline inline-block" {{on "click" this.toggleRecoveryCode}}>
+            <a href="#" class="text-sm text-brand hover:underline inline-block" {{on "click" this.toggleRecoveryCode}}>
                 {{if this.useRecoveryCode (t "auth.two-fa.verify-code.use-authenticator-code") (t "auth.two-fa.verify-code.use-recovery-code")}}
             </a>
-            <a href="#" class="text-sm text-blue-500 hover:underline inline-block" {{on "click" this.resendCode}}>
+            <a href="#" class="text-sm text-brand hover:underline inline-block" {{on "click" this.resendCode}}>
                 {{t "auth.two-fa.verify-code.send-code-instead"}}
             </a>
         {{else}}
-            <a href="#" class="text-sm text-blue-500 hover:underline inline-block" {{on "click" this.resendCode}}>
+            <a href="#" class="text-sm text-brand hover:underline inline-block" {{on "click" this.resendCode}}>
                 {{t "auth.two-fa.verify-code.resend-code"}}
             </a>
         {{/if}}

@@ -1,11 +1,11 @@
 {{page-title (t "auth.verification.header-title")}}
 
-<div class="bg-white dark:bg-gray-800 py-8 px-4 shadow rounded-lg w-full">
+<div class="bg-surface py-8 px-4 shadow rounded-lg w-full">
     <div class="mb-6">
         <LinkTo @route="console" class="flex items-center justify-center">
             <LogoIcon @brand={{@brand}} @size="12" class="rounded-md" />
         </LinkTo>
-        <h2 class="mt-6 text-center text-lg font-extrabold text-gray-900 dark:text-white truncate">
+        <h2 class="mt-6 text-center text-lg font-extrabold text-primary truncate">
             {{t "auth.verification.title"}}
         </h2>
     </div>
@@ -37,7 +37,7 @@
                 @disabled={{not this.isReadyToSubmit}}
                 @onClick={{perform this.verifyCode}}
             />
-            <a href="javascript:;" {{on "click" this.onDidntReceiveCode}} class="text-sm text-blue-400 hover:text-blue-300">{{t "auth.verification.didnt-receive-a-code"}}</a>
+            <a href="javascript:;" {{on "click" this.onDidntReceiveCode}} class="text-sm text-brand hover:opacity-80">{{t "auth.verification.didnt-receive-a-code"}}</a>
         </div>
 
         {{#if this.stillWaiting}}

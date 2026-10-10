@@ -39,6 +39,21 @@ export default class ConsoleController extends Controller {
     }
 
     /**
+     * Mutate user menu items to filter out external community links
+     *
+     * @param {Array} menuItems
+     * @void
+     */
+    @action mutateUserMenuItems(menuItems) {
+        const removeIds = ['discord', 'support-user-nav-item'];
+        for (let i = menuItems.length - 1; i >= 0; i--) {
+            if (removeIds.includes(menuItems[i].id)) {
+                menuItems.splice(i, 1);
+            }
+        }
+    }
+
+    /**
      * Action to invalidate and log user out
      *
      * @void

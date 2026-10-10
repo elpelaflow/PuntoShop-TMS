@@ -7,7 +7,7 @@
             <ContentPanel @title="Change Email" @open={{true}} @wrapperClass="bordered-classic">
                 <form id="change-email-form" aria-label="change-email" {{on "submit" (perform this.changeEmail)}}>
                     <legend class="mb-3">Change Email</legend>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                    <p class="text-sm text-secondary mb-4">
                         Enter a new email address and your current password. Your login email changes only after you confirm the verification email sent to the new address.
                     </p>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
@@ -52,7 +52,7 @@
                         </div>
                     </form>
                 {{else}}
-                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <p class="text-sm text-secondary">
                         Your organization does not allow you to change your own password. Ask an administrator to change it for you.
                     </p>
                 {{/if}}
@@ -90,7 +90,7 @@
 
                 <ContentPanel @title="Authenticator App" @open={{true}} @wrapperClass="bordered-classic">
                     {{#if this.authenticator.enabled}}
-                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                        <p class="text-sm text-secondary">
                             Your authenticator app is set up.
                             {{this.authenticator.recovery_codes_remaining}}
                             recovery codes left.
@@ -100,7 +100,7 @@
                             <Button @type="danger" @icon="trash" @text="Remove authenticator app" @onClick={{fn this.manageAuthenticator "disable"}} />
                         </div>
                     {{else}}
-                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                        <p class="text-sm text-secondary">
                             Use an app like Google Authenticator, Microsoft Authenticator, Authy or 1Password to get sign-in codes, even without signal.
                         </p>
                         <div class="mt-3">

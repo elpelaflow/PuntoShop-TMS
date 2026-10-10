@@ -4,7 +4,7 @@
             {{#if this.isLoading}}
                 <Spinner class="mr-2i" />
             {{/if}}
-            <h2 class="text-sm font-bold dark:text-gray-100 text-black">{{this.dashboard.title}}</h2>
+            <h2 class="text-sm font-bold text-primary">{{this.dashboard.title}}</h2>
         </div>
         <div>
             <Dashboard::QueryParams @params={{this.dashboard.queryParams}} @onChange={{this.onQueryParamsChanged}} />

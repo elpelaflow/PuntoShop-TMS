@@ -1,6 +1,6 @@
 {{! An editable override field. The row object is edited in place, so the input keeps focus. }}
 {{#if (and (eq @column.inputKey "max_attempts") @row.unlimited)}}
-    <span class="text-xs text-gray-500 dark:text-gray-400" data-test-override-no-limit>No limit</span>
+    <span class="text-xs text-muted" data-test-override-no-limit>No limit</span>
 {{else}}
     <input
         type={{@column.inputType}}
