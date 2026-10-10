@@ -33,7 +33,7 @@ php artisan config:cache
 php artisan route:cache
 
 # Initialize registry
-php artisan registry:init
+php artisan registry:init || true
 
 # Notify open install pages that setup has completed
 php artisan fleetbase:notify-installed || true

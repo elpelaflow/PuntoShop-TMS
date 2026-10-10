@@ -22,7 +22,6 @@
         "appstract/laravel-opcache": "^4.0",
         "fleetbase/core-api": "^1.6.68",
         "fleetbase/fleetops-api": "^0.6.71",
-        "fleetbase/registry-bridge": "^0.1.10",
         "fleetbase/ledger-api": "^0.0.12",
         "fleetbase/valhalla-api": "^0.0.4",
         "fleetbase/vroom-api": "^0.0.4",
