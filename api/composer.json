@@ -24,7 +24,6 @@
         "fleetbase/ai": "^0.0.5",
         "fleetbase/fleetops-api": "^0.6.71",
         "fleetbase/registry-bridge": "^0.1.10",
-        "fleetbase/customer-portal-api": "^0.0.15",
         "fleetbase/ledger-api": "^0.0.12",
         "fleetbase/valhalla-api": "^0.0.4",
         "fleetbase/vroom-api": "^0.0.4",
@@ -61,7 +60,6 @@
                 "fleetbase/core-api",
                 "fleetbase/fleetops-api",
                 "fleetbase/ledger-api",
-                "fleetbase/customer-portal-api",
                 "fleetbase/ai",
                 "fleetbase/valhalla-api",
                 "fleetbase/vroom-api"
