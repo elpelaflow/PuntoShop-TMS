@@ -36,6 +36,3 @@
 [submodule "packages/ledger"]
 	path = packages/ledger
 	url = git@github.com:fleetbase/ledger.git
-[submodule "packages/ai"]
-	path = packages/ai
-	url = git@github.com:fleetbase/ai.git
