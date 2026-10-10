@@ -19,7 +19,6 @@ minimumReleaseAgeExclude:
   - '@fleetbase/ember-core@0.3.25'
   - '@fleetbase/ember-ui@0.4.5'
   - '@fleetbase/fleetops-engine@0.6.71'
-  - '@fleetbase/storefront-engine@0.4.24'
   - '@fleetbase/ledger-engine@0.0.12'
   - '@fleetbase/iam-engine@0.1.13'
   - '@fleetbase/dev-engine@0.2.17'

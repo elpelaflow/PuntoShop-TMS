@@ -34,12 +34,13 @@ RUN apk update && apk add git openssh-client
 RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 # Install app dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # Copy the console directory contents into the container at /console
 COPY . .
 
 # Build the application
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN pnpm build --environment $ENVIRONMENT
 
 # ---- Serve Stage ----
