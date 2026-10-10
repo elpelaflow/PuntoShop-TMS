@@ -13,6 +13,35 @@ module.exports = {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['var(--font-sans)', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            },
+            fontSize: {
+                '2xs': ['var(--text-2xs)', { lineHeight: 'var(--leading-tight)', letterSpacing: 'var(--tracking-wide)' }],
+                xs: ['var(--text-xs)', { lineHeight: 'var(--leading-tight)', letterSpacing: 'var(--tracking-normal)' }],
+                sm: ['var(--text-sm)', { lineHeight: 'var(--leading-normal)', letterSpacing: 'var(--tracking-normal)' }],
+                base: ['var(--text-base)', { lineHeight: 'var(--leading-normal)', letterSpacing: 'var(--tracking-normal)' }],
+                lg: ['var(--text-lg)', { lineHeight: 'var(--leading-snug)', letterSpacing: 'var(--tracking-tight)' }],
+                xl: ['var(--text-xl)', { lineHeight: 'var(--leading-snug)', letterSpacing: 'var(--tracking-tight)' }],
+                '2xl': ['var(--text-2xl)', { lineHeight: 'var(--leading-tight)', letterSpacing: 'var(--tracking-tighter)' }],
+                '3xl': ['var(--text-3xl)', { lineHeight: 'var(--leading-tight)', letterSpacing: 'var(--tracking-tighter)' }],
+            },
+            fontWeight: {
+                normal: 'var(--font-weight-normal)',
+                medium: 'var(--font-weight-medium)',
+                semibold: 'var(--font-weight-semibold)',
+                bold: 'var(--font-weight-bold)',
+                extrabold: 'var(--font-weight-extrabold)',
+            },
+            letterSpacing: {
+                tighter: 'var(--tracking-tighter)',
+                tight: 'var(--tracking-tight)',
+                normal: 'var(--tracking-normal)',
+                wide: 'var(--tracking-wide)',
+                wider: 'var(--tracking-wider)',
+                widest: 'var(--tracking-widest)',
+            },
             gridTemplateColumns: {
                 span: ['span 1', 'span 2', 'span 3', 'span 4', 'span 5', 'span 6', 'span 7', 'span 8', 'span 9', 'span 10', 'span 11', 'span 12'],
             },

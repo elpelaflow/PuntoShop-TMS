@@ -1,21 +1,60 @@
 /**
  * Design Tokens - PuntoShop TMS Console
- * Color system for Light and Dark themes.
+ * Typography and Color system for Light and Dark themes.
  */
+
+:root {
+    /* Tipografía: Familias */
+    --font-sans: 'Inter', system-ui, -apple-system, 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+    --font-mono: ui-monospace, 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+
+    /* Tipografía: Escala de Tamaños */
+    --text-2xs: 0.625rem;
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+
+    /* Tipografía: Altura de Línea (Line Heights) */
+    --leading-none: 1;
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+    --leading-loose: 2;
+
+    /* Tipografía: Pesos */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    /* Tipografía: Tracking (Letter Spacing) */
+    --tracking-tighter: -0.02em;
+    --tracking-tight: -0.01em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.025em;
+    --tracking-wider: 0.05em;
+    --tracking-widest: 0.1em;
+}
 
 :root,
 [data-theme='light'] {
     /* Superficies y Fondos */
     --bg-canvas: #f9fafb;
-    --bg-surface: #ffffff;
+    --bg-surface: #fff;
     --bg-surface-subtle: #f3f4f6;
-    --bg-overlay: #ffffff;
+    --bg-overlay: #fff;
 
     /* Textos */
     --text-primary: #111827;
     --text-secondary: #4b5563;
     --text-muted: #9ca3af;
-    --text-inverse: #ffffff;
+    --text-inverse: #fff;
 
     /* Bordes */
     --border-default: #e5e7eb;
@@ -26,21 +65,24 @@
     --brand-default: #3485e2;
     --brand-hover: #1c6cc7;
     --brand-subtle: #e6f0fb;
-    --brand-text: #ffffff;
+    --brand-text: #fff;
 
-    /* Estados y Retroalimentación */
+    /* Estados y Retroalimentación: Éxito */
     --state-success-bg: #ecfdf5;
     --state-success-text: #047857;
     --state-success-border: #a7f3d0;
 
+    /* Estados y Retroalimentación: Advertencia */
     --state-warning-bg: #fffbeb;
     --state-warning-text: #92400e;
     --state-warning-border: #fde68a;
 
+    /* Estados y Retroalimentación: Peligro */
     --state-danger-bg: #fff1f2;
     --state-danger-text: #be123c;
     --state-danger-border: #fecdd3;
 
+    /* Estados y Retroalimentación: Información */
     --state-info-bg: #f0f9ff;
     --state-info-text: #0369a1;
     --state-info-border: #bae6fd;
@@ -69,21 +111,24 @@
     --brand-default: #3485e2;
     --brand-hover: #61a0e8;
     --brand-subtle: rgb(52 133 226 / 20%);
-    --brand-text: #ffffff;
+    --brand-text: #fff;
 
-    /* Estados y Retroalimentación */
+    /* Estados y Retroalimentación: Éxito */
     --state-success-bg: rgb(6 78 59 / 40%);
     --state-success-text: #6ee7b7;
     --state-success-border: #065f46;
 
+    /* Estados y Retroalimentación: Advertencia */
     --state-warning-bg: rgb(120 53 15 / 40%);
     --state-warning-text: #fcd34d;
     --state-warning-border: #78350f;
 
+    /* Estados y Retroalimentación: Peligro */
     --state-danger-bg: rgb(136 19 55 / 40%);
     --state-danger-text: #fda4af;
     --state-danger-border: #881337;
 
+    /* Estados y Retroalimentación: Información */
     --state-info-bg: rgb(12 74 110 / 40%);
     --state-info-text: #7dd3fc;
     --state-info-border: #0c4a6e;

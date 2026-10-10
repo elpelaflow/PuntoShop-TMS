@@ -1,0 +1,136 @@
+diff --git a/addon/components/ai/route-preview-map.js b/addon/components/ai/route-preview-map.js
+index c5f3ee3dd96fe7afa049ad4d8432a7211e156453..534ad31e076f39359dd62527e45ec4280f2b1969 100644
+--- a/addon/components/ai/route-preview-map.js	
++++ b/addon/components/ai/route-preview-map.js	
+@@ -115,7 +115,7 @@ export default class AiRoutePreviewMapComponent extends Component {
+     }
+ 
+     get center() {
+-        const [lat, lng] = this.coordinates[0] ?? [1.3521, 103.8198];
++        const [lat, lng] = this.coordinates[0] ?? [-34.6037, -58.3816];
+ 
+         return { lat, lng };
+     }
+diff --git a/addon/components/map/google-live-map.js b/addon/components/map/google-live-map.js
+index 9908e5ae2dd3f325bdaebcc1b759a9bff300eb23..8bf23adf8eae60d66d6afd61089b433322788702 100644
+--- a/addon/components/map/google-live-map.js	
++++ b/addon/components/map/google-live-map.js	
+@@ -25,9 +25,9 @@ export default class MapGoogleLiveMapComponent extends Component {
+ 
+     @action async setupMap(element) {
+         const map = await this.mapManager.initializeMap(element, {
+-            lat: this.args.latitude ?? 1.369,
+-            lng: this.args.longitude ?? 103.886,
+-            zoom: this.args.zoom ?? 12,
++            lat: this.args.latitude ?? -34.6037,
++            lng: this.args.longitude ?? -58.3816,
++            zoom: this.args.zoom ?? 10,
+             disableDefaultUI: true,
+             gestureHandling: 'greedy',
+         });
+diff --git a/addon/components/map/leaflet-live-map.js b/addon/components/map/leaflet-live-map.js
+index ded9fcd651e7b9f4110bd44ef828277072257b3c..cb3e1d8ac6c2e0333ccecf45d0021d130d7c761a 100644
+--- a/addon/components/map/leaflet-live-map.js	
++++ b/addon/components/map/leaflet-live-map.js	
+@@ -873,8 +873,8 @@ export default class MapLeafletLiveMapComponent extends Component {
+             return lat;
+         }
+ 
+-        // Fallback to default Singapore latitude
+-        return 1.369;
++        // Fallback to default Buenos Aires latitude
++        return -34.6037;
+     }
+ 
+     /**
+@@ -889,7 +889,7 @@ export default class MapLeafletLiveMapComponent extends Component {
+             return lng;
+         }
+ 
+-        // Fallback to default Singapore longitude
+-        return 103.8864;
++        // Fallback to default Buenos Aires longitude
++        return -58.3816;
+     }
+ }
+diff --git a/addon/components/orchestrator-workbench.js b/addon/components/orchestrator-workbench.js
+index 2c63fedd833aafa3170a936f02edeb6e1fc4acbb..18033da270cb90a2e12139b003c5338d928ee672 100644
+--- a/addon/components/orchestrator-workbench.js	
++++ b/addon/components/orchestrator-workbench.js	
+@@ -104,8 +104,8 @@ export default class OrchestratorWorkbenchComponent extends Component {
+ 
+     // ── Map ───────────────────────────────────────────────────────────────────
+ 
+-    @tracked mapCenter = { lat: 1.369, lng: 103.8864 };
+-    @tracked mapZoom = 11;
++    @tracked mapCenter = { lat: -34.6037, lng: -58.3816 };
++    @tracked mapZoom = 10;
+     @tracked leafletMap = null;
+ 
+     // ── Drag ──────────────────────────────────────────────────────────────────
+diff --git a/addon/components/widget/live-fleet.js b/addon/components/widget/live-fleet.js
+index 84600f692995dbf38c35b8d8c8dee2d60df0018d..398e74bc036059fee2d4bc775cad051cc6d2b80a 100644
+--- a/addon/components/widget/live-fleet.js	
++++ b/addon/components/widget/live-fleet.js	
+@@ -10,8 +10,8 @@ import LeafletTrackingMarkerComponent from '../leaflet-tracking-marker';
+ import ensureLeafletDrawEditNamespace from '../../utils/leaflet-draw-namespace-guard';
+ import { DEFAULT_LEAFLET_TILE_ATTRIBUTION } from '../../utils/leaflet-tile-url';
+ 
+-const DEFAULT_CENTER = [1.31, 103.85];
+-const DEFAULT_ZOOM = 11;
++const DEFAULT_CENTER = [-34.6037, -58.3816];
++const DEFAULT_ZOOM = 10;
+ const TILE_ATTRIBUTION = DEFAULT_LEAFLET_TILE_ATTRIBUTION;
+ const RECONCILE_INTERVAL_MS = 5 * 60_000;
+ 
+diff --git a/addon/services/location.js b/addon/services/location.js
+index ed2c3c7376598f00f277107c520494092fef8f1a..42bd52f631e7fff1bbcc85862b21f18760ce8a67 100644
+--- a/addon/services/location.js	
++++ b/addon/services/location.js	
+@@ -19,14 +19,14 @@ export default class LocationService extends Service {
+      * @type {number}
+      * @static
+      */
+-    static DEFAULT_LATITUDE = 1.369;
++    static DEFAULT_LATITUDE = -34.6037;
+ 
+     /**
+      * Default longitude used when location data is unavailable.
+      * @type {number}
+      * @static
+      */
+-    static DEFAULT_LONGITUDE = 103.8864;
++    static DEFAULT_LONGITUDE = -58.3816;
+ 
+     /**
+      * Service for accessing the current user's data.
+diff --git a/addon/services/map-adapter/google.js b/addon/services/map-adapter/google.js
+index eb78c2a5951233d15f09b1d27b1535c2513151b7..326db74931ebee7960ba5ecaa654dbd52f7dcba1 100644
+--- a/addon/services/map-adapter/google.js	
++++ b/addon/services/map-adapter/google.js	
+@@ -184,8 +184,8 @@ export default class GoogleMapsAdapter extends MapAdapterInterface {
+         this._supportsAdvancedMarkers = Boolean(mapId && mapId !== 'FLEETOPS_MAP');
+ 
+         this._map = new Map(element, {
+-            center: { lat: options.lat ?? 1.3521, lng: options.lng ?? 103.8198 },
+-            zoom: options.zoom ?? 12,
++            center: { lat: options.lat ?? -34.6037, lng: options.lng ?? -58.3816 },
++            zoom: options.zoom ?? 10,
+             mapTypeId: options.mapTypeId ?? googleMaps.maps.MapTypeId.ROADMAP,
+             disableDefaultUI: options.disableDefaultUI ?? true,
+             gestureHandling: options.gestureHandling ?? 'greedy',
+diff --git a/addon/services/map-adapter/leaflet.js b/addon/services/map-adapter/leaflet.js
+index 7465729913b601172797fd55b98256c9c15e687c..6dfda8484597b58ac21ee996d7efd932be2ba469 100644
+--- a/addon/services/map-adapter/leaflet.js	
++++ b/addon/services/map-adapter/leaflet.js	
+@@ -75,8 +75,8 @@ export default class LeafletAdapter extends MapAdapterInterface {
+         ensureLeafletConstructorNamespace();
+ 
+         const mapOptions = {
+-            center: [options.lat ?? 1.3521, options.lng ?? 103.8198],
+-            zoom: options.zoom ?? 12,
++            center: [options.lat ?? -34.6037, options.lng ?? -58.3816],
++            zoom: options.zoom ?? 10,
+             zoomControl: options.zoomControl ?? false,
+             contextmenu: options.contextmenu ?? false,
+             contextmenuWidth: options.contextmenuWidth ?? 140,

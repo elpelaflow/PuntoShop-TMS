@@ -23,21 +23,21 @@
                             </div>
                             <div class="flex flex-col">
                                 <div class="flex flex-row space-x-2">
-                                    <h1 class="text-sm font-semibold antialiased leading-4">{{notification.data.subject}}</h1>
-                                    <div class="text-xs antialiased text-secondary">- {{notification.data.message}}</div>
+                                    <h1 class="type-heading-card antialiased leading-4">{{notification.data.subject}}</h1>
+                                    <div class="type-caption text-secondary antialiased">- {{notification.data.message}}</div>
                                 </div>
-                                <div class="text-muted text-xs antialiased mt-1">{{t "console.notifications.received"}} {{notification.createdAgo}}</div>
+                                <div class="type-caption antialiased mt-1">{{t "console.notifications.received"}} {{notification.createdAgo}}</div>
                             </div>
                         </a>
                         <div>
                             <FaIcon @icon="clock" class="text-muted" @size="sm" />
-                            <span class="text-muted text-xs">{{notification.createdAt}}</span>
+                            <span class="type-caption">{{notification.createdAt}}</span>
                         </div>
                     </div>
                 </div>
             {{else}}
                 <div class="flex items-center justify-center h-full w-full">
-                    <p class="text-base text-secondary italic">{{t "console.notifications.message"}}</p>
+                    <p class="type-body text-base italic">{{t "console.notifications.message"}}</p>
                 </div>
             {{/each}}
         </div>
