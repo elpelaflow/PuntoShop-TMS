@@ -510,6 +510,12 @@ resource:
   integrated-vendors: Proveedores integrados
   issue: Asunto
   issues: Asuntos
+  inspection-form: Formulario de inspección
+  inspection-forms: Formularios de inspección
+  inspection-submission: Inspección
+  inspection-submissions: Inspecciones
+  maintenance-schedule: Cronograma de mantenimiento
+  maintenance-schedules: Cronogramas de mantenimiento
   maintenance: Mantenimiento
   maintenances: Mantenimientos
   order-config: Configuración de pedido
@@ -556,7 +562,7 @@ resource:
   warranties: Garantías
   waypoint: Punto de referencia
   waypoints: Puntos de ruta
-  work-order: orden de trabajo
+  work-order: Orden de trabajo
   work-orders: Órdenes de trabajo
   zone: Zona
   zones: Zonas
@@ -1096,7 +1102,7 @@ column:
   address: Dirección
   country: País
   created-at: Creado en
-  id: IDENTIFICACIÓN
+  id: ID
   internal-id: Identificación interna
   name: Nombre
   phone: Teléfono
@@ -1123,7 +1129,7 @@ column:
   reporter: Reportero
   view: Vista
   volume: Volumen
-  assignee: Cesionario
+  assignee: Asignado a
   category: Categoría
   priority: Prioridad
   city: Ciudad
@@ -4015,3 +4021,455 @@ fuel-transaction:
     display-refresh-error: El cambio se guardó, pero no se pudo actualizar la transacción mostrada. Actualice el libro mayor para ver el estado más reciente.
     updated: '{count, plural, one {Transacción de combustible actualizada.} other {# transacciones de combustible actualizadas.}}'
     refresh-ledger: Actualice el libro mayor para ver las transacciones más recientes.
+
+maintenance:
+  type:
+    preventive: Preventivo
+    corrective: Correctivo
+    predictive: Predictivo
+    routine: De rutina
+    emergency: Emergencia
+    inspection: Inspección
+    repair: Reparación
+    replacement: Reemplazo
+    calibration: Calibración
+  status:
+    scheduled: Programado
+    in_progress: En progreso
+    completed: Completado
+    cancelled: Cancelado
+    on_hold: En pausa
+  hub:
+    eyebrow: Mantenimiento
+    title: Centro de Mantenimiento
+    subtitle: Planifique servicios recurrentes, coordine órdenes de trabajo y mantenga los activos listos para las operaciones diarias.
+    reload: Recargar
+    open-kpi: Abrir {label}
+    action-queue: Cola de acciones
+    action-queue-desc: Señales de cronogramas, órdenes de trabajo, partes y equipos.
+    guides: Guías
+    guides-desc: Lea la guía antes de cambiar los flujos de trabajo de mantenimiento.
+    read-guide-on: Leer la guía sobre {label}
+    sections:
+      safety:
+        title: Seguridad e Inspecciones
+        desc: Ejecute flujos de trabajo de DVIR y reportes de defectos.
+      planning:
+        title: Planificación
+        desc: Programe servicios recurrentes antes de que el trabajo sea urgente.
+      records:
+        title: Registros y Catálogo
+        desc: Mantenga actualizado el historial de servicio y los activos.
+    links:
+      inspection-forms: Plantillas DVIR y requisitos de seguridad.
+      inspection-submissions: Registros DVIR enviados y reportes de fallas.
+      schedules: Intervalos de servicio preventivo y fechas de revisión.
+      work-orders: Tareas de reparación, asignaciones a taller y cierre.
+      maintenances: Historial de servicio y registros por activo.
+      equipment: Equipos asignados y activos operativos disponibles.
+      parts: Inventario de repuestos y control de stock.
+    docs:
+      schedules:
+        title: Cronogramas de mantenimiento
+      inspections:
+        title: Inspecciones
+      work-orders:
+        title: Órdenes de trabajo
+      equipment:
+        title: Equipo
+      parts:
+        title: Partes y repuestos
+    doc-schedules: Planifique ventanas de servicio recurrentes y convierta cronogramas vencidos en órdenes de trabajo.
+    doc-work-orders: Coordine trabajos de mantenimiento asignados, proveedores, fechas de vencimiento y finalización.
+    doc-equipment: Supervise el equipo en servicio que participa en las operaciones de mantenimiento.
+    doc-parts: Gestione el inventario de repuestos y las señales de reabastecimiento del equipo de mantenimiento.
+    kpis:
+      overdue-schedules: Cronogramas vencidos
+      overdue-schedules-caption: Riesgo en servicios recurrentes.
+      due-this-week: Vencen esta semana
+      due-this-week-caption: Próximas ventanas de servicio.
+      open-work-orders: Órdenes de trabajo abiertas
+      open-work-orders-caption: Trabajo de mantenimiento activo.
+      low-stock-parts: Repuestos con bajo stock
+      low-stock-parts-caption: Señales de inventario de repuestos.
+  empty:
+    title: Aún no hay registros de mantenimiento
+    description: Registre eventos de mantenimiento para mantener visibles el historial de servicio, costos y disponibilidad de activos.
+    filtered-title: Ningún registro de mantenimiento coincide con sus filtros
+    filtered-description: Ajuste la búsqueda o los filtros para encontrar otro registro de mantenimiento.
+    new-maintenance: Nuevo mantenimiento
+  form:
+    identification: Identificación
+    details: Detalles del mantenimiento
+    summary: Resumen
+    summary-placeholder: Resumen breve de la actividad de mantenimiento
+    type-status-priority: Tipo, estado y prioridad
+    type: Tipo
+    select-type: Seleccionar tipo de mantenimiento
+    status: Estado
+    select-status: Seleccionar estado
+    priority: Prioridad
+    select-priority: Seleccionar prioridad
+    asset: Activo a mantener
+    asset-type: Tipo de activo
+    select-asset-type: Seleccionar tipo de activo
+    select-asset: Seleccionar activo
+    performed-by: Realizado por
+    performed-by-type: Tipo de ejecutante
+    select-performed-by-type: Seleccionar tipo de ejecutante
+    select-performed-by: Seleccionar ejecutante
+    dates-costs: Fechas y costos
+    scheduled-at: Fecha programada
+    completed-at: Fecha de finalización
+    total-cost: Costo total
+    currency: Moneda
+    notes: Notas adicionales
+    notes-placeholder: Observaciones o detalles técnicos del mantenimiento realizado...
+
+inspection:
+  actions:
+    view-form: Ver formulario
+    edit-form: Editar formulario
+    generate-link: Generar enlace de inspección
+    delete-form: Eliminar formulario
+    view-inspection: Ver inspección
+    edit-inspection: Editar inspección
+    create-issue: Crear incidencia
+    create-work-order: Crear orden de trabajo
+    delete-inspection: Eliminar inspección
+  forms:
+    empty:
+      title: Crea tu primer formulario de inspección
+      description: Diseña listas de verificación y seguridad DVIR para que los conductores las completen antes de que los defectos causen inactividad.
+      filtered-title: Ningún formulario de inspección coincide con tus filtros
+      filtered-description: Ajusta la búsqueda o los filtros para encontrar otro formulario.
+      new-form: Nuevo formulario
+      guide: Guía de inspecciones
+  submissions:
+    empty:
+      title: Aún no hay inspecciones
+      description: Registra envíos de inspecciones DVIR y convierte los elementos con fallas en asuntos u órdenes de trabajo.
+      filtered-title: Ninguna inspección coincide con tus filtros
+      filtered-description: Ajusta la búsqueda o los filtros para encontrar otra inspección.
+      new-inspection: Nueva inspección
+      guide: Guía de inspecciones
+  form:
+    create: Crear nuevo formulario de inspección
+    details: Detalles del formulario
+    name: Nombre del formulario
+    name-placeholder: p. ej. Inspección previa al viaje (DVIR)
+    type: Tipo de formulario
+    type-placeholder: Seleccionar tipo de formulario
+    status: Estado
+    status-placeholder: Seleccionar estado
+    description: Descripción
+    description-placeholder: Explica el propósito de este formulario de inspección...
+    settings: Configuración de automatización
+    setting-create-issue: Crear incidencia automáticamente si hay fallas
+    setting-create-issue-help: Si se marca algún elemento como defectuoso, el sistema abrirá un asunto de inmediato.
+    setting-create-work-order: Crear orden de trabajo si hay fallas críticas
+    setting-create-work-order-help: Genera una orden de trabajo para que el taller atienda el vehículo sin demora.
+    setting-require-signature: Requerir firma digital del conductor
+    setting-require-signature-help: El conductor deberá firmar en pantalla antes de enviar la inspección.
+    builder: Constructor de lista de verificación
+    legacy-checklist: Elementos heredados (Solo lectura)
+    legacy-checklist-help: Lista de verificación anterior a la migración a grupos.
+  builder:
+    help: Agrupa los puntos de revisión por zonas (Cabina, Frenos, Luces, Neumáticos, etc.).
+    new-group: + Nuevo grupo
+    loading: Cargando estructura del formulario...
+    untitled-group: Grupo sin título
+    group-name: Nombre del grupo
+    group-name-placeholder: p. ej. Revisión de Cabina y Tablero
+    group-description: Descripción del grupo
+    group-description-placeholder: Indicaciones para esta sección...
+    new-field: + Nuevo campo
+    grid-size: 'Columnas:'
+    move-up: Mover arriba
+    move-down: Mover abajo
+    untitled-field: Campo sin título
+    no-fields: No hay campos en este grupo todavía.
+    empty-title: Aún no se han agregado grupos de inspección.
+    empty-description: Agrega un grupo para comenzar a diseñar los puntos de revisión.
+  record:
+    create: Registrar nueva inspección
+    details: Datos de la inspección
+    form: Formulario
+    select-form: Seleccionar formulario publicado
+    status: Estado
+    vehicle: Vehículo
+    select-vehicle: Seleccionar vehículo
+    driver: Conductor
+    select-driver: Seleccionar conductor
+    odometer: Odómetro
+    odometer-placeholder: p. ej. 125400
+    checklist: Lista de verificación
+    passed: Aprobado
+    failed: Fallido
+    notes: Observaciones
+    engine-hours: Horas de motor
+    engine-hours-placeholder: p. ej. 3400
+    loading-form: Cargando formulario de inspección...
+    form-has-no-fields: Este formulario no contiene campos para completar.
+    choose-a-form: Selecciona un formulario para cargar su lista de verificación.
+    metadata: Metadatos
+    linked-inspections: Inspecciones vinculadas ({count})
+
+maintenance-schedule:
+  type:
+    oil_change: Cambio de aceite
+    tire_rotation: Rotación de neumáticos
+    inspection: Inspección
+    brake_service: Servicio de frenos
+    air_filter: Filtro de aire
+    transmission: Transmisión
+    coolant: Refrigerante
+    battery: Batería
+    other: Otro
+  status:
+    active: Activo
+    paused: Pausado
+    completed: Completado
+  unit:
+    days: Días
+    weeks: Semanas
+    months: Meses
+    years: Años
+  empty:
+    title: Crea tu primer cronograma de mantenimiento
+    description: Los cronogramas ayudan a automatizar el trabajo preventivo y mantener visibles los intervalos de servicio antes de que los activos se retrasen.
+    filtered-title: Ningún cronograma de mantenimiento coincide con tus filtros
+    filtered-description: Ajusta la búsqueda o los filtros para encontrar otro cronograma.
+    new-schedule: Nuevo cronograma
+    guide: Guía de cronogramas
+  actions:
+    trigger-now: Ejecutar ahora
+    pause: Pausar cronograma
+    resume: Reanudar cronograma
+  form:
+    details: Detalles del cronograma
+    name: Nombre del cronograma
+    name-placeholder: p. ej. Cambio de aceite y filtro — Camión #4
+    type: Tipo de servicio
+    select-type: Seleccionar tipo
+    status: Estado
+    select-status: Seleccionar estado
+    asset: Activo
+    asset-question: ¿A qué activo se aplica este cronograma?
+    asset-type: Tipo de activo
+    select-asset-type: Seleccionar tipo de activo
+    select-asset: Seleccionar activo
+    frequency: Frecuencia y disparadores
+    frequency-help: Define cuándo debe dispararse este mantenimiento (por calendario, kilometraje u horas de motor).
+    time-interval: Intervalo de tiempo
+    meter-interval: Intervalo de odómetro (km)
+    hour-interval: Horas de motor
+    select-interval-method: Seleccionar método de intervalo
+    method-time: Por tiempo (días / semanas / meses)
+    method-distance: Por distancia (km / millas)
+    method-hours: Por horas de motor
+    every: Cada
+    every-km: Cada (km)
+    every-engine-hours: Cada (Horas de motor)
+    unit: Unidad
+    select-unit: Seleccionar unidad
+    next-odometer: Próximo odómetro (km)
+    next-engine-hours: Próximas horas de motor
+    work-order-defaults: Valores predeterminados de orden de trabajo
+    work-order-defaults-help: Estas opciones se utilizan cuando se genera automáticamente una orden de trabajo desde este cronograma.
+    default-priority: Prioridad predeterminada
+    default-assignee-type: Tipo de responsable predeterminado
+    default-assignee: Responsable predeterminado
+    instructions: Instrucciones
+    instructions-placeholder: Instrucciones para el técnico que realizará este mantenimiento...
+    reminder-emails: Correos de recordatorio
+    reminder-emails-help: Enviar recordatorios por correo antes de la próxima fecha de vencimiento.
+    reminder-days-before: Días de anticipación
+    days: días
+    add-days-placeholder: Agregar días (p. ej. 7)
+    reminder-offsets-help: Presiona Enter o coma para agregar días. El responsable predeterminado recibirá un correo para cada recordatorio.
+
+work-order:
+  empty:
+    title: Aún no hay órdenes de trabajo
+    description: Crea órdenes de trabajo para asignar tareas de mantenimiento, supervisar el progreso y finalizar reparaciones.
+    filtered-title: Ninguna orden de trabajo coincide con tus filtros
+    filtered-description: Ajusta la búsqueda o los filtros para encontrar otra orden de trabajo.
+    new-work-order: Nueva orden de trabajo
+    guide: Guía de órdenes de trabajo
+  actions:
+    send-email: Enviar orden de trabajo al proveedor
+  form:
+    identification: Identificación
+    details: Detalles de la orden de trabajo
+    code: Código
+    code-placeholder: Generado automáticamente si se deja en blanco
+    subject: Asunto
+    subject-placeholder: Descripción breve de la orden de trabajo
+    classification: Clasificación de la orden de trabajo
+    category: Categoría
+    select-category: Seleccionar categoría
+    status-priority: Estado y prioridad
+    status: Estado
+    select-status: Seleccionar estado
+    priority: Prioridad
+    select-priority: Seleccionar prioridad
+    target: Activo / Destino
+    target-type: Tipo de activo
+    select-target: Seleccionar activo
+    assignee: Responsable / Asignado
+    assignee-type: Tipo de responsable
+    select-assignee: Seleccionar responsable
+    schedule: Fechas programadas
+    scheduled-start: Inicio programado
+    scheduled-end: Finalización programada
+    due-at: Fecha límite de entrega
+    costs: Costos y presupuesto
+    labor-cost: Costo de mano de obra
+    parts-cost: Costo de repuestos
+    total-cost: Costo total estimado
+    select-target-type: Seleccionar tipo de activo
+    select-assignee-type: Seleccionar tipo de responsable
+    opened-at: Fecha de apertura
+    closed-at: Fecha de cierre
+    instructions: Instrucciones
+    instructions-placeholder: Instrucciones paso a paso para el técnico...
+    completion-details: Detalles de finalización
+    completion-help: Registre lo que realmente se realizó; esto creará automáticamente una entrada en el Historial de mantenimiento.
+    odometer-completion: Odómetro al finalizar (km)
+    engine-hours-completion: Horas de motor al finalizar
+    tax: Impuestos
+    completion-notes: Notas de finalización
+    completion-notes-placeholder: Notas sobre el trabajo realizado, piezas reemplazadas, observaciones...
+
+equipment:
+  type:
+    ppe: EPP (Protección personal)
+    refrigeration_unit: Unidad de refrigeración
+    tool: Herramienta
+    liftgate: Plataforma elevadora / Rampa
+    ramp: Rampa
+    container: Contenedor
+    pallet_jack: Transpaleta
+    forklift: Montacargas
+    safety_equipment: Equipo de seguridad
+    communication_device: Dispositivo de comunicación
+    other: Otro
+  status:
+    available: Disponible
+    in_use: En uso
+    maintenance: En mantenimiento
+    retired: Retirado
+    lost: Extraviado
+    damaged: Dañado
+  empty:
+    title: Agrega tu primer equipo
+    description: Los registros de equipo ayudan a supervisar los activos asignados, su estado, el historial de servicio y la disponibilidad operativa.
+    filtered-title: Ningún equipo coincide con tus filtros
+    filtered-description: Ajusta la búsqueda o los filtros para encontrar otro equipo.
+    new-equipment: Nuevo equipo
+    guide: Guía de equipos
+  form:
+    identification: Identificación
+    upload-photo: Subir una nueva foto
+    upload-image: Subir imagen
+    photo-restrictions: Admite JPG, PNG, GIF de hasta 10 MB
+    details: Detalles del equipo
+    name: Nombre del equipo
+    name-placeholder: p. ej. Transpaleta Eléctrica T-100
+    code: Código interno
+    code-placeholder: Código interno o referencia
+    serial-number: Número de serie
+    serial-number-placeholder: Número de serie del fabricante
+    manufacturer: Fabricante
+    manufacturer-placeholder: Nombre del fabricante
+    model: Modelo
+    model-placeholder: Designación del modelo
+    type-status: Tipo y estado
+    type: Tipo de equipo
+    select-type: Seleccionar tipo
+    status: Estado
+    select-status: Seleccionar estado
+    assignment: Asignación
+    attached-to-type: Conectado a (Tipo)
+    select-attached-type: Seleccionar tipo de activo o conductor
+    attached-to: Conectado a
+    select-attached: Seleccionar activo o conductor
+    purchase-and-warranty: Compra y Garantía
+    purchase-info: Información de compra
+    purchase-price: Precio de compra
+    purchase-date: Fecha de compra
+    select-warranty: Seleccionar garantía (opcional)
+
+part:
+  type:
+    filter: Filtro
+    tire: Neumático
+    belt: Correa
+    brake_pad: Pastilla de freno
+    battery: Batería
+    oil: Aceite
+    coolant: Refrigerante
+    spark_plug: Bujía
+    air_filter: Filtro de aire
+    fuel_filter: Filtro de combustible
+    transmission_fluid: Líquido de transmisión
+    wiper_blade: Escobilla limpiaparabrisas
+    light_bulb: Lámpara / Bombilla
+    fuse: Fusible
+    sensor: Sensor
+    other: Otro
+  status:
+    in_stock: En stock
+    low_stock: Stock bajo
+    out_of_stock: Sin stock
+    discontinued: Descontinuado
+    on_order: En pedido
+  empty:
+    title: Agrega tu primera parte o repuesto
+    description: Las partes mantienen el inventario de repuestos y los detalles de compatibilidad listos para el trabajo de mantenimiento.
+    filtered-title: Ninguna parte coincide con tus filtros
+    filtered-description: Ajusta la búsqueda o los filtros para encontrar otra parte.
+    new-part: Nueva parte
+    guide: Guía de repuestos
+  form:
+    identification: Identificación
+    upload-photo: Subir foto del repuesto
+    upload-image: Subir imagen
+    photo-restrictions: Admite JPG, PNG, GIF de hasta 10 MB
+    details: Detalles de la parte
+    name: Nombre de la parte
+    name-placeholder: p. ej. Filtro de Aceite LF16015
+    sku: SKU / N° de parte
+    sku-placeholder: Número de referencia de almacén (SKU)
+    serial-number: Número de serie
+    serial-number-placeholder: Número de serie
+    barcode: Código de barras / QR
+    barcode-placeholder: Valor del código de barras
+    manufacturer: Fabricante
+    manufacturer-placeholder: Fabricante o marca
+    model: Modelo
+    model-placeholder: Modelo compatible
+    type-status: Tipo y estado
+    type: Tipo de parte
+    select-type: Seleccionar tipo
+    status: Estado del inventario
+    select-status: Seleccionar estado
+    inventory: Inventario y costos
+    in-stock: Cantidad en stock
+    min-stock: Stock mínimo (punto de reorden)
+    unit-cost: Costo unitario
+    storage-location: Ubicación en almacén
+    storage-location-placeholder: p. ej. Pasillo B, Estante 3
+    compatibility: Compatibilidad
+    compatible-asset-type: Tipo de activo compatible
+    select-compatible-asset-type: Seleccionar tipo de activo
+    compatible-asset: Activo compatible
+    select-compatible-asset: Seleccionar activo compatible
+
+priority:
+  low: Baja
+  normal: Normal
+  medium: Media
+  high: Alta
+  critical: Crítica

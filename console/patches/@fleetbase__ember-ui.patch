@@ -24,7 +24,7 @@ diff --git a/addon/components/layout/resource/panel/header-actions.js b/addon/co
 index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..427ceb867a1ae5c19c1fb24ceeffb02852bc7d91 100644
 --- a/addon/components/layout/resource/panel/header-actions.js	
 +++ b/addon/components/layout/resource/panel/header-actions.js	
-@@ -1,7 +1,36 @@
+@@ -1,7 +1,43 @@
  import Component from '@glimmer/component';
 +import { inject as service } from '@ember/service';
  import titleize from 'ember-cli-string-helpers/utils/titleize';
@@ -47,6 +47,13 @@ index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..427ceb867a1ae5c19c1fb24ceeffb028
 +    'custom-entity': 'Entidad personalizada',
 +    user: 'Usuario',
 +    organization: 'Organización',
++    'inspection-form': 'Formulario de inspección',
++    'inspection-submission': 'Inspección',
++    'maintenance-schedule': 'Cronograma de mantenimiento',
++    'work-order': 'Orden de trabajo',
++    'maintenance': 'Mantenimiento',
++    'equipment': 'Equipo',
++    'part': 'Parte',
 +};
 +
  export default class LayoutResourcePanelHeaderActionsComponent extends Component {
