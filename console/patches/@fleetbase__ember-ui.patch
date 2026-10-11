@@ -1,0 +1,112 @@
+diff --git a/addon/components/layout/resource/panel/header-actions.hbs b/addon/components/layout/resource/panel/header-actions.hbs
+index c23f73dc43f3c2ab0d1f55b3d7281dc6c81a43d3..d76f6a1fa90282e3cc086091ccdcf0c41e83709c 100644
+--- a/addon/components/layout/resource/panel/header-actions.hbs	
++++ b/addon/components/layout/resource/panel/header-actions.hbs	
+@@ -5,7 +5,7 @@
+             <Button
+                 @type="primary"
+                 @icon={{if @resource.isNew "check" "save"}}
+-                @text={{if @resource.isNew (concat "Create " this.modelName) "Save Changes"}}
++                @text={{this.buttonText}}
+                 @onClick={{perform @saveTask @resource @saveOptions}}
+                 @disabled={{@saveDisabled}}
+                 @isLoading={{@saveTask.isRunning}}
+@@ -14,7 +14,7 @@
+             <Button
+                 @type="primary"
+                 @icon={{if @resource.isNew "check" "save"}}
+-                @text={{if @resource.isNew (concat "Create " this.modelName) "Save Changes"}}
++                @text={{this.buttonText}}
+                 @onClick={{perform @saveTask @resource @saveOptions}}
+                 @disabled={{or @saveDisabled (cannot-write @resource schema=@authSchema)}}
+                 @isLoading={{@saveTask.isRunning}}
+diff --git a/addon/components/layout/resource/panel/header-actions.js b/addon/components/layout/resource/panel/header-actions.js
+index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..427ceb867a1ae5c19c1fb24ceeffb02852bc7d91 100644
+--- a/addon/components/layout/resource/panel/header-actions.js	
++++ b/addon/components/layout/resource/panel/header-actions.js	
+@@ -1,7 +1,36 @@
+ import Component from '@glimmer/component';
++import { inject as service } from '@ember/service';
+ import titleize from 'ember-cli-string-helpers/utils/titleize';
+ 
++const RESOURCE_TRANSLATIONS = {
++    driver: 'Conductor',
++    vehicle: 'Vehículo',
++    trailer: 'Remolque',
++    fleet: 'Flota',
++    vendor: 'Proveedor',
++    contact: 'Contacto',
++    customer: 'Cliente',
++    place: 'Lugar',
++    'fuel-report': 'Informe de combustible',
++    'fuel-transaction': 'Transacción de combustible',
++    issue: 'Asunto',
++    order: 'Pedido',
++    'service-rate': 'Tarifa de servicio',
++    'custom-field': 'Campo personalizado',
++    'custom-entity': 'Entidad personalizada',
++    user: 'Usuario',
++    organization: 'Organización',
++};
++
+ export default class LayoutResourcePanelHeaderActionsComponent extends Component {
++    @service intl;
++
++    get modelKey() {
++        const model = this.args.resource;
++        const raw = this.args.modelName ?? model?.constructor?.modelName ?? model?._internalModel?.modelName ?? '';
++        return String(raw).toLowerCase().replace(/[_ ]/g, '-');
++    }
++
+     get modelName() {
+         if (this.args.modelName) return this.args.modelName;
+         const model = this.args.resource;
+@@ -13,4 +42,48 @@ export default class LayoutResourcePanelHeaderActionsComponent extends Component
+         const normalized = modelName.replace(/[-_]/g, ' ');
+         return titleize(normalized);
+     }
++
++    get buttonText() {
++        if (this.args.btnText) {
++            return this.args.btnText;
++        }
++
++        const isNew = this.args.resource?.isNew ?? true;
++        if (!isNew) {
++            if (this.intl && typeof this.intl.t === 'function') {
++                try {
++                    const translated = this.intl.t('common.save-changes');
++                    if (translated && !translated.startsWith('Missing translation')) {
++                        return translated;
++                    }
++                } catch (_) {}
++            }
++            return 'Guardar cambios';
++        }
++
++        let translatedModel = null;
++        if (this.intl && typeof this.intl.t === 'function' && this.modelKey) {
++            try {
++                const res = this.intl.t(`resource.${this.modelKey}`);
++                if (res && !res.startsWith('Missing translation')) {
++                    translatedModel = res;
++                }
++            } catch (_) {}
++        }
++        if (!translatedModel) {
++            translatedModel = RESOURCE_TRANSLATIONS[this.modelKey] || this.modelName;
++        }
++
++        let createWord = 'Crear';
++        if (this.intl && typeof this.intl.t === 'function') {
++            try {
++                const res = this.intl.t('common.create');
++                if (res && !res.startsWith('Missing translation')) {
++                    createWord = res;
++                }
++            } catch (_) {}
++        }
++
++        return `${createWord} ${translatedModel}`;
++    }
+ }

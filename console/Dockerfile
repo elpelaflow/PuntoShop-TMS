@@ -7,16 +7,20 @@ WORKDIR /console
 # Create the pnpm directory and set the PNPM_HOME environment variable
 RUN mkdir -p ~/.pnpm
 ENV PNPM_HOME=/root/.pnpm
+ENV PATH=/root/.pnpm/bin:$PATH
 
-# Set environment
+# Install system tools and trust GitHub (cached permanently across builds)
+RUN apk update && apk add --no-cache git openssh-client \
+    && mkdir -p -m 0600 ~/.ssh \
+    && ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+# Install global dependencies (cached permanently across builds)
+RUN npm install -g ember-cli pnpm
+
+# Set environment & attribution
 ARG ENVIRONMENT=production
-
-# Attribution
 ARG DISABLE_FLEETBASE_ATTRIBUTION=false
 ENV DISABLE_FLEETBASE_ATTRIBUTION=$DISABLE_FLEETBASE_ATTRIBUTION
-
-# Add the pnpm global bin to the PATH
-ENV PATH=/root/.pnpm/bin:$PATH
 
 # Copy package metadata first for better dependency caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -25,23 +29,15 @@ COPY patche[s] ./patches/
 # Copy over .npmrc if applicable
 COPY .npmr[c] ./
 
-# Install global dependencies
-RUN npm install -g ember-cli pnpm 
-
-# Install git
-RUN apk update && apk add git openssh-client
-
-# Trust GitHub's RSA host key
-RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-# Install app dependencies
-RUN pnpm install --no-frozen-lockfile
+# Install app dependencies with BuildKit cache mount for downloaded tarballs
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm install --no-frozen-lockfile
 
 # Copy the console directory contents into the container at /console
 COPY . .
 
-# Build the application
-ENV NODE_OPTIONS="--max-old-space-size=2048"
+# Build the application with 4GB heap to avoid garbage collection thrashing during engine compilation
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm build --environment $ENVIRONMENT
 
 # ---- Serve Stage ----

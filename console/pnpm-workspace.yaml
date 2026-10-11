@@ -23,4 +23,5 @@ minimumReleaseAgeExclude:
   - '@fleetbase/iam-engine@0.1.13'
   - '@fleetbase/dev-engine@0.2.17'
 patchedDependencies:
+  '@fleetbase/ember-ui': patches/@fleetbase__ember-ui.patch
   '@fleetbase/fleetops-engine': patches/@fleetbase__fleetops-engine.patch

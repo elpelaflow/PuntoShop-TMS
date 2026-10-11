@@ -130,56 +130,6 @@ index fb87fe250d4337f6bdc09deffa0afbe1c55bae9d..cdbcfe6df23afb0f2039bafa4c1d7b89
                      class="w-full form-input"
                      disabled={{cannot-write @resource}}
                      placeholder={{t "issue.fields.report"}}
-diff --git a/addon/components/layout/resource/panel/header-actions.hbs b/addon/components/layout/resource/panel/header-actions.hbs
-new file mode 100644
-index 0000000000000000000000000000000000000000..a4bca42bb8e8d2ce9e2e60194893eff9ced6eed4
---- /dev/null
-+++ b/addon/components/layout/resource/panel/header-actions.hbs	
-@@ -0,0 +1,37 @@
-+<div class="flex flex-row flex-1 items-center justify-end space-x-2">
-+    {{yield}}
-+    {{#if @saveTask}}
-+        {{#if @pojoResource}}
-+            <Button
-+                @type="primary"
-+                @icon={{if @resource.isNew "check" "save"}}
-+                @text={{if @resource.isNew (concat (t "common.create") " " (or (t (concat "resource." (dasherize this.modelName))) this.modelName)) (t "common.save-changes")}}
-+                @onClick={{perform @saveTask @resource @saveOptions}}
-+                @disabled={{@saveDisabled}}
-+                @isLoading={{@saveTask.isRunning}}
-+            />
-+        {{else}}
-+            <Button
-+                @type="primary"
-+                @icon={{if @resource.isNew "check" "save"}}
-+                @text={{if @resource.isNew (concat (t "common.create") " " (or (t (concat "resource." (dasherize this.modelName))) this.modelName)) (t "common.save-changes")}}
-+                @onClick={{perform @saveTask @resource @saveOptions}}
-+                @disabled={{or @saveDisabled (cannot-write @resource schema=@authSchema)}}
-+                @isLoading={{@saveTask.isRunning}}
-+            />
-+        {{/if}}
-+    {{/if}}
-+    <Layout::Resource::ActionButtons @buttons={{@actionButtons}} @dropdownIcon="ellipsis" @dropdownSize="sm" @renderInPlace={{true}} />
-+    {{#if @onPressCancel}}
-+        <button
-+            type="button"
-+            class="next-content-overlay-panel-cancel-button {{@cancelButtonClass}}"
-+            {{set-height @cancelButtonHeight}}
-+            {{set-width @cancelButtonWidth}}
-+            {{on "click" @onPressCancel}}
-+        >
-+            <FaIcon @icon={{or @cancelIcon "times"}} @size={{@iconSize}} @prefix={{or @iconPrefix "fas"}} class={{@iconClass}} />
-+        </button>
-+    {{/if}}
-+    {{yield to="end"}}
-+</div>
-diff --git a/addon/components/layout/resource/panel/header-actions.js b/addon/components/layout/resource/panel/header-actions.js
-new file mode 100644
-index 0000000000000000000000000000000000000000..7f22ff08de99c44366699b991d09864cbe42a18c
---- /dev/null
-+++ b/addon/components/layout/resource/panel/header-actions.js	
-@@ -0,0 +1 @@
-+export { default } from '@fleetbase/ember-ui/components/layout/resource/panel/header-actions';
 diff --git a/addon/components/map/drawer/device-event-listing.hbs b/addon/components/map/drawer/device-event-listing.hbs
 index 8b75012cae3d11ba18c9461c2d841a2e74baae8e..1083faf2eeba15ab658f36323517d6d308a870b6 100644
 --- a/addon/components/map/drawer/device-event-listing.hbs	
