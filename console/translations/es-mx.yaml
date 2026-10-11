@@ -506,6 +506,10 @@ resource:
   fleets: Flotas
   fuel-report: Informe de combustible
   fuel-reports: Informes de combustible
+  fuel-provider: Proveedor de combustible
+  fuel-providers: Proveedores de combustible
+  fuel-provider-connection: Conexión de combustible
+  fuel-provider-connections: Conexiones de combustible
   integrated-vendor: Proveedor integrado
   integrated-vendors: Proveedores integrados
   issue: Asunto
@@ -1063,6 +1067,9 @@ menu:
   analytics: Analítica
   reports: Informes
   settings: Ajustes
+  settings-hub: Centro de configuración
+  map: Mapa
+  telematics-settings: Ajustes de telemática
   navigator-app: App Navigator
   payments: Pagos
   notifications: Notificaciones
@@ -1172,6 +1179,28 @@ column:
   payee: Beneficiario
   frozen: Congelado
   orientation: Orientación
+  provider: Proveedor
+  event: Evento
+  event-type: Tipo de evento
+  sensors: Sensores
+  connection: Conexión
+  connection-status: Estado de conexión
+  threshold: Umbral
+  last-reading: Última lectura
+  occurred-at: Ocurrido el
+  processed: Procesado
+  severity: Severidad
+  serial-number: Número de serie
+  device-id: ID de dispositivo
+  imei: IMEI
+  source: Origen
+  protocol: Protocolo
+  message: Mensaje
+  code: Código
+  attachment: Vínculo
+  telematic-provider: Proveedor telemático
+  telematic-device: Dispositivo telemático
+  data-frequency: Frecuencia de datos
 map:
   visibility-controls:
     title: Controles de visibilidad
@@ -1432,19 +1461,19 @@ device:
     notes: Notas
     notes-placeholder: Notas
   actions:
-    attach-to-vehicle: Attach to Vehicle
-    detach-from-vehicle: Detach from Vehicle
+    attach-to-vehicle: Conectar a vehículo
+    detach-from-vehicle: Desconectar de vehículo
     attach-to-asset: Conectar a activo
   prompts:
     manager-description: Dispositivos telemáticos instalados en este {resourceType}. Vincule un dispositivo para empezar a recibir posiciones y eventos.
-    attach-to-vehicle-title: Attach device to vehicle
-    attach-device-to-vehicle-title: Attach {deviceName} to vehicle
-    select-vehicle-warning: Select a vehicle to attach this device to.
-    attach-to-vehicle-success: Device attached to vehicle.
-    not-attached-warning: '{deviceName} is not attached to a vehicle.'
-    detach-from-vehicle-title: Detach {deviceName} from vehicle?
-    detach-from-vehicle-body: This detaches {deviceName} from {vehicleName} and stops vehicle telemetry updates until it is attached again.
-    detach-from-vehicle-success: Device detached from vehicle.
+    attach-to-vehicle-title: Conectar dispositivo a vehículo
+    attach-device-to-vehicle-title: Conectar {deviceName} a vehículo
+    select-vehicle-warning: Seleccione un vehículo para conectar este dispositivo.
+    attach-to-vehicle-success: Dispositivo conectado al vehículo exitosamente.
+    not-attached-warning: '{deviceName} no está conectado a ningún vehículo.'
+    detach-from-vehicle-title: ¿Desconectar {deviceName} del vehículo?
+    detach-from-vehicle-body: Esto desconectará {deviceName} de {vehicleName} y detendrá las actualizaciones telemáticas del vehículo hasta que vuelva a conectarse.
+    detach-from-vehicle-success: Dispositivo desconectado del vehículo exitosamente.
     attach-to-asset-title: Conectar dispositivo a activo
     select-asset-warning: Seleccione un vehículo o remolque.
     attach-to-asset-success: Dispositivo conectado al activo.
@@ -2362,17 +2391,17 @@ entity-field-editing-settings:
   enable-driver-to-edit-entity-fields: Permitir al conductor editar los detalles de la entidad
   enable-driver-to-edit-entity-fields-help-text: Habilitar esta opción otorga al conductor permiso para modificar campos de entidad específicos elegidos a continuación.
 driver-onboard-settings:
-  driver-onboard-settings: Configuración integrada del conductor
-  enable-driver-onboard-from-app: Habilite el conductor a bordo desde la aplicación Navigator
-  enable-driver-onboard-from-app-help-text: Habilitar esta configuración permite a los conductores incorporarse de forma independiente (crear su propia cuenta) a través de la aplicación Navigator.
-  select-onboard-method: Seleccione el método de conductor a bordo
-  select-onboard-method-help-text: Esta configuración determina cómo se permite a los conductores crear sus cuentas a través de la aplicación Navigator. Elija "Invitar" si los conductores necesitan recibir una invitación por correo electrónico para crear su cuenta. Seleccione 'Botón' si desea habilitar un botón dentro de la aplicación que permita a cualquiera crear una cuenta de conductor.
-  require-driver-to-upload-onboard-documents: Requerir que el conductor cargue documentos a bordo
-  require-driver-to-upload-onboard-documents-help-text: Esta configuración aplica los documentos que un conductor debe proporcionar antes de que se pueda crear su cuenta.
-  required-onboard-documents: Documentos a bordo requeridos
-  required-onboard-documents-help-text: Ingrese todos los documentos a bordo requeridos que un conductor debe proporcionar a continuación usando el botón "Agregar documento a bordo".
-  enter-document-name: Introduzca el nombre del documento
-  add-onboard-document: Agregar documento a bordo
+  driver-onboard-settings: Configuración de incorporación de conductores
+  enable-driver-onboard-from-app: Habilitar incorporación de conductores desde la app Navigator
+  enable-driver-onboard-from-app-help-text: Habilitar esta configuración permite a los conductores registrarse de forma independiente (crear su propia cuenta) a través de la aplicación Navigator.
+  select-onboard-method: Seleccione el método de incorporación de conductores
+  select-onboard-method-help-text: Esta configuración determina cómo los conductores crean sus cuentas a través de la aplicación Navigator. Elija "Invitar" si deben recibir una invitación por correo electrónico. Seleccione "Botón" para habilitar un botón en la app que permita el registro directo.
+  require-driver-to-upload-onboard-documents: Requerir que el conductor cargue documentos de registro
+  require-driver-to-upload-onboard-documents-help-text: Esta configuración exige los documentos que el conductor debe proporcionar antes de activar su cuenta.
+  required-onboard-documents: Documentos de registro requeridos
+  required-onboard-documents-help-text: Ingrese todos los documentos requeridos que el conductor debe adjuntar usando el botón "Agregar documento de registro".
+  enter-document-name: Ingrese el nombre del documento
+  add-onboard-document: Agregar documento de registro
 cell:
   driver-name:
     not-assigned: Ningún conductor asignado
@@ -3069,40 +3098,214 @@ route-list:
   more-waypoints: más puntos de referencia
 settings:
   avatar-management: Gestión de avatares
-  custom-fields: Campos personalizados
+  custom-fields:
+    title: Campos personalizados
+    manager-title: Administrador de campos personalizados
+    new-field-group: Nuevo grupo de campos
+    create-new-field: Crear nuevo campo personalizado
+    grid-size: 'Tamaño de cuadrícula: '
+    no-groups: Sin grupos de campos personalizados
+    add-first-group-desc: Agregue su primer grupo de campos para comenzar a agregar campos personalizados para {subject}
+    new-group-modal-title: Nuevo grupo de campos personalizados
+    untitled-field: Campo sin título
+    delete-group-title: ¿Eliminar este grupo de campos?
+    delete-group-body: Una vez eliminado este grupo de campos, no se podrá recuperar y se perderán todos los campos personalizados dentro de él.
+    delete-field-title: ¿Eliminar este campo personalizado?
+    delete-field-body: Una vez eliminado este campo personalizado, no se podrá recuperar y se perderán todos los datos asociados.
+  telematics:
+    telematics-settings: Configuración de telemática
+    intro: Elija cuánto tiempo conserva su organización los eventos de dispositivos y el historial de posiciones dentro de los límites establecidos por el administrador del sistema.
+    use-system-default: Usar valores predeterminados del sistema
+    history-policy-maximum: 'Su administrador permite hasta {days} días de historial. La retención ilimitada no está disponible.'
+    history-policy-unlimited: El administrador permite un historial ilimitado. Establezca el período de retención en 0 para conservar el historial para siempre.
+    device-events: Retención de eventos de dispositivos
+    event-retention-days: Conservar eventos de dispositivos por (días)
+    event-retention-days-help: Los eventos anteriores a este plazo se eliminarán de forma permanente. Se aplica tanto a las actualizaciones de telemetría como a las alertas de proveedores.
+    event-compact-after-days: Descartar cargas útiles sin procesar después de (días)
+    event-compact-after-days-help: Los eventos anteriores a este plazo conservan su tipo, gravedad, ubicación y datos normalizados, pero se elimina la carga útil original del proveedor. Las cargas útiles sin procesar constituyen la mayor parte del tamaño de cada evento.
+    compaction-warning: Las cargas útiles sin procesar solo se eliminan de los eventos conservados. Establezca este valor por debajo de la retención de eventos o en 0 para desactivar la compactación.
+    positions: Retención del historial de posiciones
+    position-retention-days: Conservar posiciones por (días)
+    position-retention-days-help: El historial de posiciones de vehículos y remolques anterior a este plazo se elimina permanentemente. La reproducción de rutas y las vistas del historial solo se remontan hasta este límite.
+    inbox: Retención de buzón de entrega y ejecuciones de sincronización
+    processed-retention-hours: Conservar entregas procesadas por (horas)
+    processed-retention-hours-help: Los lotes de proveedores sin procesar se almacenan cifrados hasta que se procesan y se conservan brevemente para reproducción y diagnósticos. Cada lote puede tener cerca de un megabyte.
+    quarantine-retention-days: Conservar entregas en cuarentena por (días)
+    quarantine-retention-days-help: Los lotes que no pudieron procesarse permanecen disponibles para inspección y reproducción durante este tiempo.
+    sync-run-retention-days: Conservar diagnósticos de sincronización por (días)
+    sync-run-retention-days-help: Se registra una fila de ejecución de sincronización por conexión por sondeo. Las ejecuciones en curso nunca se eliminan.
+    activity-logging: Registro de actividad de telemetría
+    log-telemetry-activity: Registrar actividad de telemetría
+    log-telemetry-activity-help: Escribir guardados de dispositivos, eventos y vehículos impulsados por telemetría en el registro de actividad. Desactivado de forma predeterminada; de lo contrario, cada sondeo agrega varias filas de actividad por dispositivo.
+    storage-usage: Uso de almacenamiento de telemática
+    storage-usage-desc: El uso de almacenamiento incluye datos de telemática de todas las organizaciones. La limpieza se aplica a nivel de todo el sistema, utilizando la política del sistema guardada y las preferencias de historial de cada organización dentro de esa política.
+    table: Tabla
+    rows: Filas
+    estimated-rows: '{count} (estimado)'
+    estimated-size: Tamaño estimado
+    oldest: Registro más antiguo
+    not-available: n/d
+    raw-payload-rows: '{count} filas aún contienen cargas útiles sin procesar, {compactable} aptas para compactación ahora'
+    refresh: Actualizar
+    run-cleanup: Ejecutar limpieza del sistema
+    run-cleanup-confirm: Esto pone en cola la limpieza de telemática en todas las organizaciones, utilizando la política del sistema guardada y las preferencias de historial de cada organización. Los registros vencidos se eliminan permanentemente y no se pueden recuperar. ¿Desea continuar?
+    cleanup-queued: Se ha puesto en cola la limpieza de telemática en todas las organizaciones. El uso se actualizará en breve; la limpieza aún puede estar ejecutándose.
+    cleanup-unavailable: No se pudo confirmar la limpieza de telemática del sistema. Inténtelo de nuevo.
+    usage-unavailable: No se pudo cargar el uso de almacenamiento. Seleccione Actualizar para intentarlo de nuevo.
+    space-reclaim-note: El uso incluye todos los datos de telemática del sistema. Los conteos de filas marcados como estimados utilizan estadísticas de la base de datos. Los tamaños incluyen datos de tablas e índices. La eliminación de registros libera espacio para su reutilización dentro de la base de datos; el uso de disco físico puede no disminuir de inmediato.
+    settings-saved: Configuración de telemática guardada.
+    settings-unavailable: No se pudo cargar la configuración de telemática. Inténtelo de nuevo.
+    admin-info: Configure la política de retención de telemática y el registro de actividad para todas las organizaciones. Las organizaciones pueden elegir la retención del historial de eventos de dispositivos y posiciones dentro de estos límites desde Fleet-Ops › Configuración › Telemática. Un valor máximo tiene prioridad sobre las preferencias de la organización, los valores predeterminados heredados y las solicitudes de mantener el historial para siempre. Reducir un máximo puede eliminar el historial existente en la próxima limpieza.
+    system-device-events-policy: Política del sistema de retención de eventos de dispositivos
+    default-event-retention: Retención predeterminada de eventos de dispositivos (días)
+    default-event-retention-help: Retención para organizaciones que heredan el valor predeterminado del sistema. 0 conserva el historial para siempre, sujeto al máximo inferior.
+    max-event-retention: Retención máxima de eventos de dispositivos (días)
+    max-event-retention-help: El período más largo que cualquier organización puede conservar eventos de dispositivos. 0 no establece un máximo y permite a las organizaciones conservar el historial para siempre.
+    system-position-history-policy: Política del sistema de retención del historial de posiciones
+    default-position-retention: Retención predeterminada del historial de posiciones (días)
+    default-position-retention-help: Retención para organizaciones que heredan el valor predeterminado del sistema. 0 conserva el historial para siempre, sujeto al máximo inferior.
+    max-position-retention: Retención máxima del historial de posiciones (días)
+    max-position-retention-help: El período más largo que cualquier organización puede conservar posiciones de vehículos y remolques. 0 no establece un máximo y permite a las organizaciones conservar el historial para siempre.
+    system-raw-payload-retention: Retención de carga útil sin procesar de eventos de dispositivos
+    event-raw-payload-retention: Retención de carga útil sin procesar de eventos de dispositivos (días)
+    event-raw-payload-retention-help: Eliminar las cargas útiles sin procesar del proveedor de los eventos de dispositivos retenidos en todas las organizaciones después de esta cantidad de días. 0 desactiva la compactación. Esto no cambia el tiempo durante el cual se conserva el historial de eventos en sí.
+    system-inbox-sync-retention: Política del sistema de retención de buzón de entrega y ejecuciones de sincronización
+    processed-delivery-retention: Retención de entregas procesadas (horas)
+    processed-delivery-retention-help: Eliminar los paquetes de entrega procesados en todas las organizaciones después de esta cantidad de horas. 0 los conserva para siempre.
+    quarantined-delivery-retention: Retención de entregas en cuarentena (días)
+    quarantined-delivery-retention-help: Eliminar los paquetes de entrega en cuarentena en todas las organizaciones después de esta cantidad de días. 0 los conserva para siempre.
+    sync-run-retention: Retención de diagnósticos de sincronización (días)
+    sync-run-retention-help: Eliminar los diagnósticos de ejecuciones de sincronización finalizadas en todas las organizaciones después de esta cantidad de días. 0 los conserva para siempre.
+    system-activity-logging: Registro de actividad de telemetría del sistema
+    log-telemetry-activity-admin-help: Escribir guardados de dispositivos, eventos y vehículos impulsados por telemetría en el registro de actividad para todas las organizaciones. Cada consulta puede agregar varias filas de actividad por dispositivo.
+    save-system-policy: Guardar política del sistema
+    system-settings-saved: Configuración de telemática del sistema guardada.
+    tables:
+      device_events: Eventos de dispositivo
+      positions: Posiciones
+      telematic_deliveries: Buzón de entrega
+      telematic_sync_runs: Ejecuciones de sincronización
   notifications:
     fleet-ops-notification-settings: Configuración de notificaciones de operaciones de flota
     fleet-ops-notifications: Notificaciones de operaciones de flota
     configure-notifications: Configurar notificaciones
     select-notifiables: Seleccionar notificables
+    settings-saved: Configuración de notificaciones guardada con éxito.
   routing:
     fleet-ops-routing-settings: Configuración de enrutamiento de operaciones de flota
     fleet-ops-routing: Enrutamiento de operaciones de flota
+    fleet-ops-routing-tracking: Rutas y seguimiento de Fleet-Ops
     configure-routing: Configurar enrutamiento
     select-routing-service: Seleccionar servicio de enrutamiento
     routing-service: Servicio de enrutamiento
     routing-service-help-text: Seleccione el servicio que se encarga de calcular y trazar rutas en el mapa.
+    routing-optimization-engine: Motor de optimización de rutas
+    routing-optimization-engine-help-text: Elija qué motor debe optimizar el orden de las paradas antes de trazar la ruta.
+    select-routing-optimization-engine: Seleccionar motor de optimización de rutas
     select-routing-distance-unit: Seleccionar unidad de distancia de ruta
     routing-distance-unit: Unidad de distancia de ruta
     routing-distance-unit-help-text: La unidad utilizada para calcular distancias y rutas.
+    tracking-intelligence: Inteligencia de seguimiento
+    tracking-provider: Proveedor de seguimiento
+    tracking-provider-help-text: Elija el proveedor utilizado para la inteligencia de seguimiento en vivo y cálculo de ETA.
+    select-tracking-provider: Seleccionar proveedor de seguimiento
+    fallback-providers: Proveedores de respaldo
+    fallback-providers-help-text: Proveedores utilizados cuando el proveedor principal no esté disponible.
+    select-fallback-providers: Seleccionar proveedores de respaldo
+    advanced-settings: Configuración avanzada
+    traffic-aware-eta: ETA con tráfico en tiempo real
+    traffic-aware-eta-help-text: Usar datos de tráfico del proveedor cuando sean compatibles.
+    traffic-aware-eta-admin-help-text: Usar cálculos del proveedor con reconocimiento de tráfico cuando sean compatibles.
+    summary-cache-ttl: TTL de caché de resumen
+    summary-cache-ttl-help-text: Segundos para almacenar en caché el resumen final de seguimiento.
+    route-cache-ttl: TTL de caché de ruta
+    route-cache-ttl-help-text: Segundos para almacenar en caché las respuestas de ruta del proveedor.
+    stale-location-threshold: Umbral de ubicación inactiva
+    stale-location-threshold-help-text: Segundos antes de que la ubicación del conductor se considere obsoleta.
+    fallback-speed: Velocidad de respaldo
+    fallback-speed-help-text: Kilómetros por hora utilizados por el proveedor calculado.
+    operational-alerts: Alertas operativas
+    late-departures: Salidas demoradas
+    late-departures-help-text: Notificar cuando un pedido no haya salido después de la ventana de recolección programada más el período de gracia configurado.
+    late-departure-grace-period: Período de gracia de salida demorada
+    late-departure-grace-period-help-text: Minutos después de la recolección programada antes de considerar el pedido como retrasado para salir.
+    route-deviations: Desviaciones de ruta
+    route-deviations-help-text: Notificar cuando la ubicación del vehículo rastreado se desvíe más allá de la distancia configurada respecto a la ruta activa.
+    route-deviation-threshold: Umbral de desviación de ruta
+    route-deviation-threshold-help-text: Metros de distancia desde la ruta activa antes de que una alerta de desviación sea aplicable.
+    prolonged-stoppages: Detenciones prolongadas
+    prolonged-stoppages-help-text: Notificar cuando un vehículo permanezca detenido más del tiempo configurado durante un viaje activo.
+    prolonged-stoppage-duration: Duración de detención prolongada
+    prolonged-stoppage-duration-help-text: Minutos detenido antes de que una alerta de detención sea aplicable.
+    unit-km: Kilómetros
+    unit-mi: Millas
+    provider-calculated: Calculado
+    settings-saved: Configuración de enrutamiento y seguimiento guardada.
+    admin-routing-info: Configure aquí los valores predeterminados del motor de enrutamiento para todo el sistema. Las organizaciones pueden opcionalmente anular estos valores desde su propia configuración de enrutamiento.
+    tracking-defaults: Valores predeterminados de seguimiento
+    default-tracking-provider: Proveedor de seguimiento predeterminado
+    default-tracking-provider-help-text: Proveedor predeterminado para el seguimiento a nivel de organización, a menos que la organización lo anule.
+    select-default-tracking-provider: Seleccionar proveedor de seguimiento predeterminado
+    default-fallback-providers: Proveedores de respaldo predeterminados
+    default-fallback-providers-help-text: Proveedores utilizados cuando el proveedor de seguimiento seleccionado no esté disponible.
+    select-default-fallback-providers: Seleccionar proveedores de respaldo predeterminados
+    tracking-defaults-saved: Valores predeterminados de seguimiento guardados.
+  map:
+    fleet-ops-map-settings: Configuración de mapa de Fleet-Ops
+    fleet-ops-map: Mapa de Fleet-Ops
+    configure-map: Configurar mapa
+    map-provider: Proveedor de mapa
+    map-provider-help-text: Elija el motor de mapas utilizado para renderizar el mapa de operaciones en vivo. Leaflet utiliza mosaicos de OpenStreetMap y no requiere clave API. Google Maps requiere una clave API válida de Google Maps JavaScript.
+    select-map-provider: Seleccionar proveedor de mapa
+    leaflet-tile-url: URL del proveedor de mosaicos de Leaflet
+    leaflet-tile-url-help-text: Plantilla de URL XYZ de mosaicos personalizada opcional para Leaflet. Dejar en blanco para usar OpenStreetMap por defecto sin clave API.
+    leaflet-dark-tile-url: URL de mosaicos para modo oscuro de Leaflet
+    leaflet-dark-tile-url-help-text: URL de mosaicos opcional utilizada cuando la consola está en modo oscuro. Dejar en blanco para usar la URL anterior o los mosaicos de OpenStreetMap.
+    google-maps-map-type: Tipo de mapa
+    google-maps-map-type-help-text: El estilo de mapa predeterminado a mostrar cuando Google Maps está activo.
+    select-map-type: Seleccionar tipo de mapa
+    show-traffic-layer: Mostrar capa de tráfico
+    show-traffic-layer-help-text: Superponer condiciones de tráfico en tiempo real sobre la vista de Google Maps.
+    show-transit-layer: Mostrar capa de transporte público
+    show-transit-layer-help-text: Superponer rutas de transporte público sobre la vista de Google Maps.
+    settings-saved: Configuración de mapa guardada con éxito.
+    settings-save-failed: Error al guardar la configuración de mapa. Inténtelo de nuevo.
+    default-map-provider: Proveedor de mapa predeterminado
+    default-map-provider-help-text: Establece el proveedor de mapa predeterminado para todas las organizaciones a menos que lo anulen en su propia configuración de mapa.
+    select-default-map-provider: Seleccionar proveedor de mapa predeterminado
+    google-map-id: ID de Google Map
+    google-map-id-help-text: Requerido para marcadores avanzados de Google y estilos de mapa basados en la nube.
+    map-type-roadmap: Mapa de carreteras
+    map-type-satellite: Satélite
+    map-type-hybrid: Híbrido
+    map-type-terrain: Relieve
   navigator-app:
     navigator-app-settings: Configuración de App Navigator
   payments:
     payments: Pagos
     payment-settings: Configuración de pago
     account-not-setup-for-payments: Su cuenta aún no está configurada para aceptar pagos.
-    to-accept-payments: Para aceptar y procesar pagos, debe completar el proceso a bordo a través de Stripe.
+    to-accept-payments: Para aceptar y procesar pagos, debe completar el proceso de incorporación a través de Stripe.
     system-stripe-not-setup: Este sistema no puede aceptar ni procesar pagos en este momento; comuníquese con el administrador del sistema para configurar los pagos.
     loading-settings: Cargando configuración de pago...
+    start-payments-onboard: Iniciar incorporación de pagos
+    no-transactions-yet: Aún no hay transacciones de pago
+    no-transactions-description: Los pagos completados de clientes aparecerán aquí una vez que Stripe comience a enviar registros de transacciones.
+    no-payments-match: Ningún pago coincide con los filtros
+    adjust-filters: Ajuste los filtros o actualice la página para revisar otras transacciones de pago.
+    payments-guide: Guía de pagos
+    columns:
+      purchase-rate-id: ID de tarifa de compra
+      service-quote: Cotización de servicio
     onboard:
-      header-title: Pagos a bordo
+      header-title: Incorporación de pagos
       title-completed: ¡La incorporación se completó con éxito!
-      title-incomplete: Complete este proceso a bordo para aceptar pagos.
+      title-incomplete: Complete el proceso de incorporación para aceptar pagos.
       subtitle-completed: Su incorporación fue exitosa y ahora puede aceptar y recibir pagos de clientes y terceros.
-      subtitle-incomplete: Este proceso a bordo debe completarse para que se acepten pagos de pedidos.
+      subtitle-incomplete: Este proceso de incorporación debe completarse para que se puedan recibir pagos de pedidos.
       button-continue: Continuar
-      button-start: Empiece a bordo ahora
-      button-in-progress: A bordo en progreso
+      button-start: Iniciar incorporación ahora
+      button-in-progress: Incorporación en curso
   scheduling:
     scheduling-settings: Configuración de programación
     materialisation: Generación de turnos
@@ -3678,6 +3881,7 @@ orchestrator:
   standard-fields: Campos estándar
   standard-fields-description: Estos campos aparecen en cada tarjeta de pedido independientemente del tipo de pedido.
   config-fields-description: Campos personalizados para pedidos de {name}.
+  custom-fields-by-config: 'Campos personalizados: {name}'
   meta-fields: Campos de metadatos
   meta-fields-description: Claves de metadatos libres enviadas por integraciones.
   no-custom-fields: No hay campos personalizados definidos para esta configuración de pedido.
@@ -4473,3 +4677,219 @@ priority:
   medium: Media
   high: Alta
   critical: Crítica
+
+connectivity:
+  title: Conectividad
+  telematics: Telemática
+  fuel-providers: Integración de combustible
+  devices: Dispositivos
+  sensors: Sensores
+  events: Eventos
+  hub-title: Centro de Conectividad
+  hub-description: Conecte proveedores telemáticos, sincronice dispositivos, asócielos a vehículos y supervise el estado de la telemetría en un único flujo de trabajo.
+  empty-text: No se encontraron registros de conectividad.
+
+telematic:
+  hub-title: Centro de Conectividad
+  hub-description: Conecte proveedores telemáticos, sincronice dispositivos, asócielos a vehículos y supervise el estado de la telemetría en un único flujo de trabajo.
+  warnings: '{count} advertencias'
+  connect-provider: Conectar proveedor
+  provider-connections: Conexiones de proveedores
+  provider-connections-desc: Administre cuentas de proveedores conectadas, revise el estado de sincronización y abra una conexión para sincronizar dispositivos o actualizar ajustes.
+  no-connections-title: Sin conexiones de proveedores
+  no-connections-desc: Conecte un proveedor telemático para sincronizar dispositivos, eventos y asignaciones a vehículos.
+  available-providers: Proveedores disponibles
+  available-providers-desc: Seleccione un proveedor telemático admitido para iniciar la integración.
+  connected: Conectado
+  connect: Conectar
+  view-connection: Ver conexión
+  kpi:
+    provider-count: Cantidad de proveedores
+    provider-count-help: Cuentas de proveedores conectadas
+    connect-action: Conectar un proveedor
+    synced-devices: Dispositivos sincronizados
+    synced-devices-help: Detectados desde proveedores
+    review-devices: Revisar dispositivos sincronizados
+    unattached-devices: Dispositivos sin asignar
+    unattached-need-vehicles: Dispositivos requieren vehículos
+    no-unattached: Sin dispositivos pendientes
+    attach-action: Asignar a vehículos
+    health-warnings: Advertencias de estado
+    warnings-need-review: Advertencias requieren revisión
+    no-warnings: Sin advertencias
+    review-health: Revisar estado
+  tab:
+    overview: Resumen
+    devices: Dispositivos
+    sensors: Sensores
+    events: Eventos
+    attachments: Asignaciones
+    logs: Registros
+    settings: Configuración
+  connection-details: Detalles de la conexión
+  sync-status: Estado de sincronización
+  last-sync: Última sincronización
+  last-test: Última prueba
+  sync-devices: Sincronizar dispositivos
+  syncing: Sincronizando…
+  test-connection: Probar conexión
+  testing: Probando…
+  diagnostics: Diagnósticos
+  health-state: Estado de salud
+  credentials: Credenciales
+  account-id: ID de cuenta
+  api-key: Clave API
+  client-id: ID de cliente
+  client-secret: Clave secreta de cliente
+  webhook-url: URL de webhook
+  edit-connection: Editar conexión
+  disconnect: Desconectar
+  disconnect-confirm: ¿Está seguro de desconectar este proveedor?
+  disconnect-warning: Esto detendrá la sincronización de telemetría y datos de ubicación de los dispositivos vinculados.
+  back-to-hub: Volver al Centro de Conectividad
+  form:
+    create-title: Conectar proveedor telemático
+    edit-title: Editar proveedor telemático
+    step-select-provider: 1. Seleccionar proveedor
+    step-credentials: 2. Credenciales y configuración
+    step-confirm: 3. Probar y activar
+    provider-label: Proveedor
+    select-provider-placeholder: Seleccionar un proveedor telemático
+    name-label: Nombre de la conexión
+    name-placeholder: p. ej. Samsara Principal, Geotab Flota Norte
+    status-label: Estado
+    auto-sync: Sincronización automática
+    sync-interval: Intervalo de sincronización
+    sync-interval-minutes: Minutos
+
+fuel-provider:
+  hub-title: Integraciones de combustible
+  hub-description: Conecte proveedores de tarjetas de combustible o sistemas de gestión de combustible, importe consumos como transacciones de combustible, asócielos a vehículos y viajes, y genere informes vinculados para operaciones.
+  sync-issues: '{count} problemas de sincronización'
+  connect-integration: Conectar integración
+  connections: Conexiones de combustible
+  connections-desc: Gestione integraciones de tarjetas de combustible, revise el estado de las importaciones y configure el emparejamiento automático con vehículos.
+  no-connections-title: Sin integraciones de combustible
+  no-connections-desc: Conecte un proveedor o tarjeta de combustible para importar transacciones automáticamente.
+  kpi:
+    connected-integrations: Integraciones conectadas
+    connected-help: Cuentas de tarjetas y gestión de combustible
+    connect-action: Conectar integración
+    last-sync: Última sincronización
+    last-sync-help: Importación completada más reciente
+    review-sync: Revisar sincronización
+    unmatched: Sin emparejar en últimas ejecuciones
+    unmatched-need-matching: Requieren asignación de vehículo o viaje
+    no-unmatched: Todas las transacciones emparejadas
+    review-matches: Revisar coincidencias
+    total-spend: Gasto total
+    total-spend-help: Monto acumulado de transacciones
+    total-liters: Litros totales
+    not-synced: No sincronizado
+  matching:
+    title: Cómo funciona el emparejamiento
+    description: Las transacciones de combustible llegan con identificadores del proveedor. El emparejamiento revisa esta lista de arriba a abajo y vincula la transacción al primer vehículo u orden encontrada.
+    priority-list: Lista de prioridades
+    active-count: '{count} activos'
+    priority-badge: 'Prioridad {priority}'
+    move-up: Mover arriba
+    move-down: Mover abajo
+    remove-field: Quitar del emparejamiento
+    no-identifiers: No hay identificadores automáticos seleccionados. Las transacciones importadas quedarán sin emparejar hasta su revisión manual.
+    available-identifiers: Identificadores disponibles
+    all-identifiers-active: Todos los identificadores están activos
+    fields:
+      plate-number: Número de placa
+      plate-number-source: Placa del proveedor
+      plate-number-target: Placa del vehículo
+      plate-number-desc: Mejor opción predeterminada para tarjetas de combustible. Coincide placas con espaciado normalizado.
+      internal-id: ID interno
+      internal-id-source: Número interno de flota del proveedor
+      internal-id-target: ID interno del vehículo
+      internal-id-desc: Úselo cuando el número de flota del proveedor coincida con el identificador asignado al vehículo.
+      vin: VIN
+      vin-source: VIN del proveedor
+      vin-target: VIN del vehículo
+      vin-desc: Empareja el número de chasis (VIN) cuando el proveedor lo incluye en la transacción.
+      serial-number: Número de serie
+      serial-number-source: Número de serie del proveedor
+      serial-number-target: Número de serie del vehículo
+      serial-number-desc: Empareja números de serie del fabricante o de flota registrados en el vehículo.
+      call-sign: Distintivo de llamada
+      call-sign-source: Distintivo del proveedor
+      call-sign-target: Distintivo del vehículo
+      call-sign-desc: Empareja el indicativo o distintivo operativo si se comparte con el proveedor.
+      fuel-card-number: Número de tarjeta de combustible
+      fuel-card-number-source: Número de tarjeta del proveedor
+      fuel-card-number-target: Número de tarjeta guardado en el vehículo
+      fuel-card-number-desc: Úselo cuando cada vehículo tiene asignada una tarjeta de combustible exclusiva.
+      trip-number: Número de viaje / referencia de orden
+      trip-number-source: Referencia de viaje u orden del proveedor
+      trip-number-target: ID público, ID interno o número de rastreo de la orden
+      trip-number-desc: Vincula la transacción a una orden. No identifica el vehículo por sí solo.
+      provider-vehicle-id: ID de vehículo del proveedor
+      provider-vehicle-id-source: ID de vehículo específico del proveedor
+      provider-vehicle-id-target: Metadatos del vehículo
+      provider-vehicle-id-desc: Alternativa avanzada. Úselo si se guardaron los identificadores del proveedor en los metadatos del vehículo.
+
+sensor:
+  fields:
+    title: Detalles del sensor
+    sensor-name: Nombre del sensor
+    sensor-name-placeholder: Ingrese el nombre del sensor
+    sensor-type: Tipo de sensor
+    sensor-type-placeholder: Seleccione el tipo de sensor
+    sensor-id: ID del sensor
+    sensor-id-placeholder: Ingrese el ID del sensor
+    device: Dispositivo anfitrión
+    device-placeholder: Seleccione el dispositivo conectado
+    telematic: Proveedor telemático
+    telematic-placeholder: Seleccionar telemática
+    serial-number: Número de serie
+    serial-number-placeholder: Número de serie del sensor
+    status: Estado
+    status-placeholder: Seleccione el estado
+    threshold: Umbral / Rango seguro
+    threshold-placeholder: p. ej. -20 a 5 °C o 0 a 100 psi
+    threshold-min: Mínimo
+    threshold-max: Máximo
+    unit: Unidad de medida
+    unit-placeholder: p. ej. °C, psi, %, V, RPM
+    data-frequency: Frecuencia de lectura
+    data-frequency-placeholder: Frecuencia en segundos
+    last-reading: Última lectura
+    last-reading-at: Fecha de última lectura
+    installation-date: Fecha de instalación
+    notes: Notas
+    notes-placeholder: Notas adicionales sobre el sensor
+  empty:
+    title: No hay sensores registrados
+    desc: Agregue sensores o sincronícelos desde sus dispositivos telemáticos para supervisar temperatura, presión de neumáticos, combustible y más.
+    button: Nuevo sensor
+
+device-event:
+  title: Eventos de dispositivos
+  drawer-title: Registro de eventos telemáticos
+  drawer-desc: Eventos informados por dispositivos y sensores en tiempo real.
+  empty-title: No se encontraron eventos de dispositivos
+  empty-desc: Los eventos aparecerán aquí a medida que los dispositivos conectados informen actividad.
+  severity:
+    info: Informativo
+    warning: Advertencia
+    error: Error
+    critical: Crítico
+    high: Alto
+  processed:
+    processed: Procesado
+    unprocessed: Sin procesar
+  details:
+    event-type: Tipo de evento
+    occurred-at: Ocurrido el
+    received-at: Recibido el
+    code: Código de evento
+    protocol: Protocolo
+    message: Mensaje
+    state: Estado del evento
+    raw-payload: Carga útil sin procesar
+    device-info: Información del dispositivo
+    location-at-event: Ubicación durante el evento

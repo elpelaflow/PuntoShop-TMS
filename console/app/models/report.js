@@ -246,9 +246,9 @@ export default class ReportModel extends Model {
 
     @computed('status') get statusDisplay() {
         const statusMap = {
-            draft: 'Draft',
-            active: 'Active',
-            archived: 'Archived',
+            draft: 'Borrador',
+            active: 'Activo',
+            archived: 'Archivado',
             error: 'Error',
         };
 
@@ -428,26 +428,26 @@ export default class ReportModel extends Model {
     getQuerySummary() {
         const parts = [];
 
-        parts.push(`${this.totalSelectedColumns} columns from ${this.tableLabel}`);
+        parts.push(`${this.totalSelectedColumns} columnas de ${this.tableLabel}`);
 
         if (this.hasJoins) {
-            parts.push(`${this.joinedTables.length} joins`);
+            parts.push(`${this.joinedTables.length} uniones`);
         }
 
         if (this.hasConditions) {
-            parts.push(`${this.conditionsCount} conditions`);
+            parts.push(`${this.conditionsCount} condiciones`);
         }
 
         if (this.hasGrouping) {
-            parts.push('grouped');
+            parts.push('agrupado');
         }
 
         if (this.hasSorting) {
-            parts.push('sorted');
+            parts.push('ordenado');
         }
 
         if (this.hasLimit) {
-            parts.push(`limited to ${this.query_config.limit} rows`);
+            parts.push(`limitado a ${this.query_config.limit} filas`);
         }
 
         return parts.join(', ');
