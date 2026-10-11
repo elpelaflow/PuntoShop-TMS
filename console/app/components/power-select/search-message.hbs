@@ -1,0 +1,9 @@
+<ul class="ember-power-select-options" role="listbox" ...attributes>
+    <li class="ember-power-select-option ember-power-select-option--search-message" role="option" aria-selected={{false}}>
+        {{#if (or (eq @searchMessage "Type to search") (not @searchMessage))}}
+            {{t "common.type-to-search" default="Escribe para buscar..."}}
+        {{else}}
+            {{@searchMessage}}
+        {{/if}}
+    </li>
+</ul>

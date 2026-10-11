@@ -1,0 +1,37 @@
+<div class="flex flex-row flex-1 items-center justify-end space-x-2">
+    {{yield}}
+    {{#if @saveTask}}
+        {{#if @pojoResource}}
+            <Button
+                @type="primary"
+                @icon={{if @resource.isNew "check" "save"}}
+                @text={{if @resource.isNew (concat (t "common.create") " " (or (t (concat "resource." (dasherize this.modelName))) this.modelName)) (t "common.save-changes")}}
+                @onClick={{perform @saveTask @resource @saveOptions}}
+                @disabled={{@saveDisabled}}
+                @isLoading={{@saveTask.isRunning}}
+            />
+        {{else}}
+            <Button
+                @type="primary"
+                @icon={{if @resource.isNew "check" "save"}}
+                @text={{if @resource.isNew (concat (t "common.create") " " (or (t (concat "resource." (dasherize this.modelName))) this.modelName)) (t "common.save-changes")}}
+                @onClick={{perform @saveTask @resource @saveOptions}}
+                @disabled={{or @saveDisabled (cannot-write @resource schema=@authSchema)}}
+                @isLoading={{@saveTask.isRunning}}
+            />
+        {{/if}}
+    {{/if}}
+    <Layout::Resource::ActionButtons @buttons={{@actionButtons}} @dropdownIcon="ellipsis" @dropdownSize="sm" @renderInPlace={{true}} />
+    {{#if @onPressCancel}}
+        <button
+            type="button"
+            class="next-content-overlay-panel-cancel-button {{@cancelButtonClass}}"
+            {{set-height @cancelButtonHeight}}
+            {{set-width @cancelButtonWidth}}
+            {{on "click" @onPressCancel}}
+        >
+            <FaIcon @icon={{or @cancelIcon "times"}} @size={{@iconSize}} @prefix={{or @iconPrefix "fas"}} class={{@iconClass}} />
+        </button>
+    {{/if}}
+    {{yield to="end"}}
+</div>
