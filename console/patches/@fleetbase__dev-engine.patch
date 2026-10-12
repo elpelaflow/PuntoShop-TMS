@@ -1,0 +1,749 @@
+diff --git a/addon/components/modals/api-key-form.hbs b/addon/components/modals/api-key-form.hbs
+index 49433a5..8bab10e 100644
+--- a/addon/components/modals/api-key-form.hbs
++++ b/addon/components/modals/api-key-form.hbs
+@@ -16,9 +16,15 @@
+                     {{t "developers.component.modals.api-key-form.select-expiration-date"}}
+                 </option>
+                 {{#each @options.expirationOptions as |opt|}}
+-                    <option value={{opt}}>
+-                        {{opt}}
+-                    </option>
++                    {{#if opt.value}}
++                        <option value={{opt.value}}>
++                            {{opt.label}}
++                        </option>
++                    {{else}}
++                        <option value={{opt}}>
++                            {{opt}}
++                        </option>
++                    {{/if}}
+                 {{/each}}
+             </select>
+             <p class="text-xs dark:text-gray-100">
+diff --git a/addon/components/modals/roll-api-key-form.hbs b/addon/components/modals/roll-api-key-form.hbs
+index 76ab83b..690c7d7 100644
+--- a/addon/components/modals/roll-api-key-form.hbs
++++ b/addon/components/modals/roll-api-key-form.hbs
+@@ -51,9 +51,15 @@
+                         {{t "developers.component.modals.roll-api-key-form.select-date"}}
+                     </option>
+                     {{#each @options.expirationOptions as |opt|}}
+-                        <option value={{opt}}>
+-                            {{opt}}
+-                        </option>
++                        {{#if opt.value}}
++                            <option value={{opt.value}}>
++                                {{opt.label}}
++                            </option>
++                        {{else}}
++                            <option value={{opt}}>
++                                {{opt}}
++                            </option>
++                        {{/if}}
+                     {{/each}}
+                 </select>
+                 <p class="dark:text-gray-100">
+diff --git a/addon/components/webhook/attempts.hbs b/addon/components/webhook/attempts.hbs
+index e656932..e41eac4 100644
+--- a/addon/components/webhook/attempts.hbs
++++ b/addon/components/webhook/attempts.hbs
+@@ -35,10 +35,10 @@
+                 </div>
+                 <div class="rounded-lg border borer-gray-300 dark:border-gray-700 shadow-sm">
+                     <div class="webhook-attempts-date-filter-container">
+-                        <div class="date-filter-label">Filter by date:</div>
+-                        <DatePicker @value={{this.date}} @onSelect={{this.filterByDate}} placeholder="Filter by date" class="form-input-sm" />
++                        <div class="date-filter-label">Filtrar por fecha:</div>
++                        <DatePicker @value={{this.date}} @onSelect={{this.filterByDate}} placeholder="Filtrar por fecha" class="form-input-sm" />
+                         {{#if this.date}}
+-                            <Button @type="link" @icon="times" @helpText="Clear date" @onClick={{this.clearDate}} />
++                            <Button @type="link" @icon="times" @helpText="Limpiar fecha" @onClick={{this.clearDate}} />
+                         {{/if}}
+                     </div>
+                 </div>
+diff --git a/addon/controllers/api-keys/index.js b/addon/controllers/api-keys/index.js
+index c8e6cf2..95486c9 100644
+--- a/addon/controllers/api-keys/index.js
++++ b/addon/controllers/api-keys/index.js
+@@ -36,7 +36,14 @@ export default class ApiKeysIndexController extends Controller {
+      *
+      * @var {Array}
+      */
+-    expirationOptions = ['never', 'immediately', 'in 1 hour', 'in 24 hours', 'in 3 days', 'in 7 days'];
++    expirationOptions = [
++        { value: 'never', label: 'Nunca' },
++        { value: 'immediately', label: 'Inmediatamente' },
++        { value: 'in 1 hour', label: 'En 1 hora' },
++        { value: 'in 24 hours', label: 'En 24 horas' },
++        { value: 'in 3 days', label: 'En 3 días' },
++        { value: 'in 7 days', label: 'En 7 días' },
++    ];
+ 
+     /**
+      * Tracks the current console environment mode
+@@ -229,7 +236,7 @@ export default class ApiKeysIndexController extends Controller {
+             ddButtonText: false,
+             ddButtonIcon: 'ellipsis-h',
+             ddButtonIconPrefix: 'fas',
+-            ddMenuLabel: 'API Key Actions',
++            ddMenuLabel: 'Acciones de llave de API',
+             cellClassNames: 'overflow-visible',
+             wrapperClass: 'flex items-center justify-end mx-2',
+             align: 'right',
+diff --git a/addon/controllers/application.js b/addon/controllers/application.js
+index b4a16cc..83ec6f2 100644
+--- a/addon/controllers/application.js
++++ b/addon/controllers/application.js
+@@ -11,14 +11,14 @@ export default class ApplicationController extends Controller {
+         return [
+             {
+                 label: this.intl.t('developers.application.sidebar.items.home'),
+-                description: 'Developer dashboard and API health overview.',
++                description: 'Resumen del panel de desarrolladores y estado de API.',
+                 icon: 'home',
+                 route: 'console.developers.home',
+                 keywords: ['dashboard', 'overview', 'metrics'],
+             },
+             {
+                 label: this.intl.t('developers.application.sidebar.items.api-keys'),
+-                description: 'Create and manage API credentials.',
++                description: 'Crea y gestiona credenciales de API.',
+                 icon: 'key',
+                 route: 'console.developers.api-keys',
+                 permission: 'developers list api-key',
+@@ -27,7 +27,7 @@ export default class ApplicationController extends Controller {
+             },
+             {
+                 label: this.intl.t('developers.application.sidebar.items.webhooks'),
+-                description: 'Configure webhook endpoints.',
++                description: 'Configura endpoints de webhook.',
+                 icon: 'globe-asia',
+                 route: 'console.developers.webhooks',
+                 permission: 'developers list webhook',
+@@ -36,7 +36,7 @@ export default class ApplicationController extends Controller {
+             },
+             {
+                 label: this.intl.t('developers.application.sidebar.items.websockets'),
+-                description: 'Inspect websocket channels.',
++                description: 'Inspecciona canales de WebSocket.',
+                 icon: 'plug',
+                 route: 'console.developers.sockets',
+                 permission: 'developers list socket',
+@@ -45,7 +45,7 @@ export default class ApplicationController extends Controller {
+             },
+             {
+                 label: this.intl.t('developers.application.sidebar.items.logs'),
+-                description: 'Review API request logs.',
++                description: 'Revisa registros de peticiones de API.',
+                 icon: 'file-lines',
+                 route: 'console.developers.logs',
+                 permission: 'developers list log',
+@@ -54,7 +54,7 @@ export default class ApplicationController extends Controller {
+             },
+             {
+                 label: this.intl.t('developers.application.sidebar.items.events'),
+-                description: 'Browse platform events.',
++                description: 'Explora eventos de la plataforma.',
+                 icon: 'calendar-day',
+                 route: 'console.developers.events',
+                 permission: 'developers list event',
+diff --git a/addon/controllers/webhooks/index.js b/addon/controllers/webhooks/index.js
+index 5814883..2a82804 100644
+--- a/addon/controllers/webhooks/index.js
++++ b/addon/controllers/webhooks/index.js
+@@ -148,7 +148,7 @@ export default class WebhooksIndexController extends BaseController {
+             ddButtonText: false,
+             ddButtonIcon: 'ellipsis-h',
+             ddButtonIconPrefix: 'fas',
+-            ddMenuLabel: 'API Key Actions',
++            ddMenuLabel: 'Acciones de webhook',
+             cellClassNames: 'overflow-visible',
+             wrapperClass: 'flex items-center justify-end mx-2',
+             width: '10%',
+diff --git a/addon/extension.js b/addon/extension.js
+index 86d852b..f2f5432 100644
+--- a/addon/extension.js
++++ b/addon/extension.js
+@@ -6,38 +6,38 @@ export default {
+         const widgetService = universe.getService('widget');
+ 
+         // Register in header menu
+-        menuService.registerHeaderMenuItem('Developers', 'console.developers', {
++        menuService.registerHeaderMenuItem('Desarrolladores', 'console.developers', {
+             icon: 'code',
+             priority: 2,
+-            description: 'API keys, webhooks, socket channels, event logs, and developer tooling.',
++            description: 'Llaves de API, webhooks, canales socket, registros de eventos y herramientas para desarrolladores.',
+             shortcuts: [
+                 {
+-                    title: 'API Keys',
+-                    description: 'Create and manage API keys for authenticating your integrations.',
++                    title: 'Llaves de API',
++                    description: 'Crea y gestiona llaves de API para autenticar tus integraciones.',
+                     icon: 'key',
+                     route: 'console.developers.api-keys',
+                 },
+                 {
+                     title: 'Webhooks',
+-                    description: 'Configure webhook endpoints to receive real-time event notifications.',
++                    description: 'Configura endpoints de webhook para recibir notificaciones de eventos en tiempo real.',
+                     icon: 'globe',
+                     route: 'console.developers.webhooks',
+                 },
+                 {
+                     title: 'Sockets',
+-                    description: 'Monitor active WebSocket channels and connected clients.',
++                    description: 'Monitorea canales de WebSocket activos y clientes conectados.',
+                     icon: 'plug',
+                     route: 'console.developers.sockets',
+                 },
+                 {
+-                    title: 'Events',
+-                    description: 'Browse the full history of platform events and payloads.',
++                    title: 'Eventos',
++                    description: 'Explora el historial completo de eventos y cargas útiles de la plataforma.',
+                     icon: 'bolt',
+                     route: 'console.developers.events',
+                 },
+                 {
+-                    title: 'Logs',
+-                    description: 'Inspect API request and response logs for debugging.',
++                    title: 'Registros',
++                    description: 'Inspecciona registros de peticiones y respuestas de API para depuración.',
+                     icon: 'terminal',
+                     route: 'console.developers.logs',
+                 },
+@@ -48,153 +48,153 @@ export default {
+         const widgets = [
+             new Widget({
+                 id: 'developers-kpi-api-requests',
+-                name: 'API Requests',
+-                description: 'Total API requests for the current period.',
++                name: 'Peticiones de API',
++                description: 'Total de peticiones de API en el período actual.',
+                 icon: 'code',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/kpi-api-requests'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas KPI',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-kpi-api-error-rate',
+-                name: 'API Error Rate',
+-                description: 'Percentage of API requests returning an error.',
++                name: 'Tasa de errores de API',
++                description: 'Porcentaje de peticiones de API que devolvieron un error.',
+                 icon: 'triangle-exclamation',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/kpi-api-error-rate'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas KPI',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-kpi-api-latency',
+-                name: 'Avg API Latency',
+-                description: 'Average API response duration for the current period.',
++                name: 'Latencia promedio de API',
++                description: 'Duración promedio de respuesta de la API en el período actual.',
+                 icon: 'gauge-high',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/kpi-api-latency'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas KPI',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-kpi-webhook-success',
+-                name: 'Webhook Success Rate',
+-                description: 'Percentage of webhook deliveries returning a 2xx response.',
++                name: 'Tasa de éxito de webhooks',
++                description: 'Porcentaje de entregas de webhook con respuesta exitosa 2xx.',
+                 icon: 'webhook',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/kpi-webhook-success'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas KPI',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-kpi-active-api-keys',
+-                name: 'Active API Keys',
+-                description: 'Active API credentials in this organization.',
++                name: 'Llaves de API activas',
++                description: 'Credenciales de API activas en esta organización.',
+                 icon: 'key',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/kpi-active-api-keys'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas KPI',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-kpi-active-webhooks',
+-                name: 'Active Webhooks',
+-                description: 'Enabled webhook endpoints in this organization.',
++                name: 'Webhooks activos',
++                description: 'Endpoints de webhook habilitados en esta organización.',
+                 icon: 'plug-circle-check',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/kpi-active-webhooks'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas KPI',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-kpi-webhook-failures',
+-                name: 'Webhook Failures',
+-                description: 'Failed webhook deliveries for the current period.',
++                name: 'Fallas de webhooks',
++                description: 'Entregas de webhook fallidas en el período actual.',
+                 icon: 'webhook',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/kpi-webhook-failures'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas KPI',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-kpi-events-emitted',
+-                name: 'Events Emitted',
+-                description: 'Platform events emitted in the current period.',
++                name: 'Eventos emitidos',
++                description: 'Eventos de la plataforma emitidos en el período actual.',
+                 icon: 'bolt',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/kpi-events-emitted'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas KPI',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-api-traffic',
+-                name: 'API Traffic',
+-                description: 'API request volume, successes, and errors over time.',
++                name: 'Tráfico de API',
++                description: 'Volumen de peticiones de API, éxitos y errores en el tiempo.',
+                 icon: 'chart-line',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/api-traffic'),
+                 grid_options: { w: 6, h: 8, minW: 5, minH: 7 },
+-                category: 'Analytics',
++                category: 'Analítica',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-webhook-delivery',
+-                name: 'Webhook Delivery Health',
+-                description: 'Webhook delivery volume, success, failure, and retry health.',
++                name: 'Estado de entrega de webhooks',
++                description: 'Volumen de entregas de webhook, éxitos, fallas y reintentos.',
+                 icon: 'chart-column',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/webhook-delivery'),
+                 grid_options: { w: 6, h: 8, minW: 5, minH: 7 },
+-                category: 'Analytics',
++                category: 'Analítica',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-endpoint-health',
+-                name: 'Endpoint Health',
+-                description: 'Webhook endpoint delivery health and recent failures.',
++                name: 'Salud de endpoints',
++                description: 'Salud de entrega de endpoints de webhook y fallas recientes.',
+                 icon: 'heart-pulse',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/endpoint-health'),
+                 grid_options: { w: 6, h: 8, minW: 5, minH: 7 },
+-                category: 'Operations',
++                category: 'Operaciones',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-event-stream',
+-                name: 'Event Stream',
+-                description: 'Top event types and event sources in the selected period.',
++                name: 'Flujo de eventos',
++                description: 'Principales tipos de eventos y orígenes en el período seleccionado.',
+                 icon: 'bolt',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/event-stream'),
+                 grid_options: { w: 6, h: 8, minW: 5, minH: 7 },
+-                category: 'Operations',
++                category: 'Operaciones',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-activity',
+-                name: 'Developer Activity',
+-                description: 'Recent API requests, webhook deliveries, and events.',
++                name: 'Actividad de desarrollo',
++                description: 'Peticiones de API recientes, entregas de webhook y eventos.',
+                 icon: 'timeline',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/developer-activity'),
+                 grid_options: { w: 6, h: 8, minW: 5, minH: 7 },
+-                category: 'Operations',
++                category: 'Operaciones',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'developers-quick-resources',
+-                name: 'Quick Resources',
+-                description: 'Shortcuts into API keys, webhooks, logs, events, and sockets.',
++                name: 'Accesos rápidos',
++                description: 'Accesos directos a llaves de API, webhooks, registros, eventos y sockets.',
+                 icon: 'link',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/quick-resources'),
+                 grid_options: { w: 6, h: 8, minW: 5, minH: 7 },
+-                category: 'Resources',
++                category: 'Recursos',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'dev-api-metrics-widget',
+-                name: 'Developer API Metrics (Legacy)',
+-                description: 'Legacy grouped monitoring widget. Replaced by individual developer dashboard widgets.',
++                name: 'Métricas de API para desarrolladores (Heredado)',
++                description: 'Widget de monitoreo agrupado heredado. Reemplazado por widgets individuales.',
+                 icon: 'code',
+                 component: new ExtensionComponent('@fleetbase/dev-engine', 'widget/api-metrics'),
+                 grid_options: { w: 12, h: 12, minW: 8, minH: 12 },
+                 options: { title: 'API Metrics' },
+-                category: 'Legacy',
++                category: 'Heredado',
+                 default: false,
+             }),
+         ];
+diff --git a/addon/services/api-key-actions.js b/addon/services/api-key-actions.js
+index 90f7cb6..81bacb6 100644
+--- a/addon/services/api-key-actions.js
++++ b/addon/services/api-key-actions.js
+@@ -5,7 +5,14 @@ import { action } from '@ember/object';
+  * API key actions shared by the Developers console and other engines (for example Fleetbase AI).
+  */
+ export default class ApiKeyActionsService extends ResourceActionService {
+-    expirationOptions = ['never', 'immediately', 'in 1 hour', 'in 24 hours', 'in 3 days', 'in 7 days'];
++    expirationOptions = [
++        { value: 'never', label: 'Nunca' },
++        { value: 'immediately', label: 'Inmediatamente' },
++        { value: 'in 1 hour', label: 'En 1 hora' },
++        { value: 'in 24 hours', label: 'En 24 horas' },
++        { value: 'in 3 days', label: 'En 3 días' },
++        { value: 'in 7 days', label: 'En 7 días' },
++    ];
+ 
+     constructor() {
+         super(...arguments);
+diff --git a/addon/templates/application.hbs b/addon/templates/application.hbs
+index c4cc71f..4e52854 100644
+--- a/addon/templates/application.hbs
++++ b/addon/templates/application.hbs
+@@ -1,5 +1,5 @@
+ <EmberWormhole @to="sidebar-menu-items">
+-    <Layout::Sidebar::Navigator @items={{this.navigationItems}} @searchPlaceholder="Search Dev..." @searchProvider={{this.searchNavigation}} />
++    <Layout::Sidebar::Navigator @items={{this.navigationItems}} @searchPlaceholder="Buscar en desarrolladores..." @searchProvider={{this.searchNavigation}} />
+ </EmberWormhole>
+ 
+ <Layout::Section::Container>
+diff --git a/addon/templates/sockets/view.hbs b/addon/templates/sockets/view.hbs
+index 86ebc5e..a4a187d 100644
+--- a/addon/templates/sockets/view.hbs
++++ b/addon/templates/sockets/view.hbs
+@@ -6,7 +6,7 @@
+     <div class="h-screen overflow-y-scroll pb-40">
+         <div class="py-6 max-w-4xl mx-auto">
+             <ContentPanel
+-                @titleStatusRight="Channel"
++                @titleStatusRight="Canal"
+                 @titleStatusRightClass="info-status-badge"
+                 @hideStatusDot={{true}}
+                 @title={{@model.name}}
+diff --git a/translations/es-mx.yaml b/translations/es-mx.yaml
+new file mode 100644
+index 0000000..149d6ac
+--- /dev/null
++++ b/translations/es-mx.yaml
+@@ -0,0 +1,284 @@
++developers:
++  extension-name: Desarrolladores
++  common:
++    all: Todos
++    attempt: Intento
++    back: Regresar
++    bulk-action: Acción masiva
++    clear: Limpiar
++    code: Código
++    created: Creado
++    date: Fecha
++    description: Descripción
++    email: Correo electrónico
++    event-id: ID del evento
++    event-type: Tipo de evento
++    event: Evento
++    export: Exportar
++    failed: Fallido
++    id: ID
++    key: Llave
++    mode: Modo
++    name: Nombre
++    new: Nuevo
++    password: Contraseña
++    result: Resultado
++    source: Origen
++    status: Estado
++    succeeded: Exitoso
++    time: Hora
++    url: URL
++    version: Versión
++    reload: Recargar
++    reload-data: Recargar datos
++  component:
++    api-event:
++      data:
++        title: Datos del evento
++        no-data: Sin datos del evento
++      details:
++        prefixTitle: Evento
++    api-request-log:
++      details:
++        prefixTitle: Petición
++        duration: Duración
++        ip-address: Dirección IP
++      query-params:
++        title: Parámetros de consulta de la petición
++        no-parameters: Sin parámetros de consulta
++      request-headers:
++        title: Encabezados de la petición
++        no-headers: Sin encabezados de la petición
++      request-body:
++        title: Cuerpo de la petición
++        title-second-part: cuerpo
++        no-request-body: Sin cuerpo de petición {method}
++      response-body:
++        title: Cuerpo de la respuesta
++        no-response-body: Sin cuerpo de respuesta
++    modals:
++      api-key-form:
++        api-name-aria-label: Nombre de la llave de API
++        api-expiration-aria-label: Fecha de expiración de la llave de API
++        name-placeholder: Ingresa un alias o nombre de entorno para la llave de API
++        expiration-label: Expiración
++        expiration-help-text: Opcionalmente, establece una fecha de expiración para esta llave de API.
++        select-expiration-date: Selecciona una fecha de expiración...
++        key-expires: Una vez que esta llave expire, no podrás realizar ninguna acción con ella.
++        enter-domain-placeholder: Ingresa el dominio
++        allowed-browser-label: Orígenes de navegador permitidos (CORS)
++        allowed-browser-help-text: Ingresa los dominios que dictarán la política CORS para las peticiones de navegador desde esta llave de API.
++        test-key: Llave de prueba
++        testing-environments: Estás creando una llave para entorno de pruebas, úsala únicamente para pruebas.
++        live-key: Llave en vivo
++        production-environments: Estás creando una llave para entorno en vivo, úsala para entornos de producción.
++      listen-custom-channel:
++        name: ID del canal de eventos
++        name-help-text: Ingresa el identificador del canal socket al que deseas escuchar
++      rename-api-key-form:
++        api-key-label: Nombre de la llave de API
++        api-key-placeholder: Ingresa un alias o nombre de entorno para la llave de API
++      roll-api-key-form:
++        view-button-text: Ver registros
++        last-used: Último uso
++        expiration: Expiración
++        api-key-expiration-label: Expiración de la llave de API
++        select-date: Selecciona una fecha de expiración...
++        key-expires: Una vez que esta llave expire, no podrás realizar ninguna acción con ella.
++        additional-required: Se requiere autenticación adicional
++        enter-password: Para continuar, por favor ingresa tu contraseña.
++        user-email: Correo electrónico del usuario
++        user-password: Contraseña del usuario
++        user-password-placeholder: Autentica la solicitud usando tu contraseña
++      webhook-form:
++        endpoint-url: URL del endpoint
++        endpoint-url-help-text: La URL a la que Fleetbase debe enviar los callbacks de eventos.
++        endpoint-url-placeholder: https://
++        description-label: Descripción
++        description-help-text: Opcionalmente, agrega una descripción para el endpoint del webhook.
++        description-aria-label: Descripción del webhook
++        description-placeholder: Descripción opcional sobre el propósito de este endpoint de webhook.
++        api-credential-label: Credencial de API
++        api-credential-help-text: Restringe el endpoint del webhook para recibir callbacks de una llave de API específica.
++        api-credential-message: Recibir de todas las credenciales de API...
++        api-credential-infoblock: Puedes seleccionar una credencial de API específica para activar callbacks a este endpoint de webhook, o seleccionar "Todas las credenciales de API" para que reciba callbacks de cualquier credencial.
++        version-help-text: Selecciona una versión específica de la API para recibir callbacks.
++        version-message: Selecciona una versión de la API...
++        events-send-label: Eventos a enviar
++        events-send-help-text: Establece explícitamente qué eventos enviarán callbacks.
++        select-events: Selecciona eventos...
++        event-search-label: Buscar evento
++        event-search-placeholder: Buscar...
++        no-selected: No hay eventos seleccionados
++        dropdown: Busca eventos en el menú desplegable superior, o
++        all-events: recibe todos los eventos
++    webhook:
++      attempts:
++        copy-event-id: Copiar ID del evento al portapapeles
++        view-event: Ver evento
++        info-message: ID del evento copiado al portapapeles.
++        webhook-header: Intentos de webhook
++        webhook-message: Intentos de envío de eventos a tu endpoint en los últimos 15 días
++        http-code: Código de estado HTTP
++        response-time: Tiempo de respuesta
++        request-endpoint: Petición a tu endpoint
++        no-request-body: Sin cuerpo de petición
++        response: Respuesta
++        no-response-body: Sin cuerpo de respuesta
++      details:
++        webhook-details: Detalles del webhook
++        update-details: Actualizar detalles...
++        event-types: Tipos de evento
++        help-text: Recibirás webhooks para nuevos tipos de eventos a medida que se agreguen, excepto aquellos que requieran selección explícita. Escuchar todos los tipos de eventos generalmente no es necesario y puede sobrecargar tus servidores.
++        all-events: Todos los eventos
++        api-credential: Credencial de API
++        help-text-event: Recibirás callbacks de webhooks independientemente de qué Credencial de API se use para activar el evento.
++        api-credentials: Recibiendo de todas las Credenciales de API
++      metrics:
++        date-created: Fecha de creación
++    widget:
++      dashboard:
++        name: Panel de Desarrolladores
++        period: 30d
++        empty: No hay datos disponibles
++        kpi:
++          api-requests: Peticiones de API
++          api-error-rate: Tasa de errores de API
++          api-latency: Latencia promedio de API
++          webhook-success: Éxito de webhooks
++          active-api-keys: Llaves de API activas
++          active-webhooks: Webhooks activos
++          webhook-failures: Fallas de webhooks
++          events-emitted: Eventos emitidos
++        api-traffic:
++          title: Tráfico de API
++          subtitle: Volumen de peticiones, éxitos y errores
++        webhook-delivery:
++          title: Estado de entrega de webhooks
++          subtitle: Volumen de entregas, reintentos y fallas
++        endpoint-health:
++          title: Salud de endpoints
++          subtitle: Confiabilidad reciente de endpoints de webhook
++        event-stream:
++          title: Flujo de eventos
++          subtitle: Principales tipos de eventos y fuentes
++          types: Tipos de eventos
++          sources: Fuentes
++        developer-activity:
++          title: Actividad de desarrollo
++          subtitle: Registros recientes, webhooks y eventos
++        quick-resources:
++          title: Accesos rápidos
++          subtitle: Ir a herramientas para desarrolladores
++      api-metrics:
++        title: Monitoreo
++        api-requests: Peticiones de API
++        api-error: Distribución de errores de API
++        webhooks: Webhooks
++        webhooks-response: Tiempo de respuesta de webhooks
++        success-label: éxito
++        error-label: error
++        get-error: Error GET
++        post-error: Error POST
++        put-error: Error PUT
++        delete-error: Error DELETE
++        duration-ms: Duración (ms)
++  api-keys:
++    index:
++      public-key: Llave pública
++      secret-key: Llave secreta
++      enviroment: Entorno
++      expiry: Expiración
++      last-used: Último uso
++      edit-key: Editar llave...
++      roll-key: Renovar llave...
++      view-logs: Ver registros de peticiones...
++      delete-key: Eliminar llave...
++      new-api-key-title: Nueva llave de API
++      new-api-key-message: Nuevas credenciales de API creadas.
++      edit-api-key-title: Editar llave de API
++      edit-api-key-message: Cambios en las credenciales de API guardados.
++      rename-api-key-title: Renombrar llave de API {apiKeyName}
++      untitled: Sin título
++      rename-api-key-success-message: Credencial de API renombrada a {apiKeyName}
++      delete-api-key-title: Eliminar llave de API {apiKeyName}
++      delete-api-key-body: ¿Estás seguro de que deseas eliminar esta llave de API? Todos los datos asociados con esta llave dejarán de estar accesibles. Esta acción no se puede deshacer.
++      delete-api-key-success-message: Credencial de API {apiKeyName} eliminada.
++      delete-accept-button-text: Eliminar credenciales de API
++      roll-api-key: Renovar llave de API {apiKeyName}
++      roll-api-key-button-text: Renovar llave de API
++      roll-api-key-success-message: Credencial de API {apiKeyName} renovada.
++      roll-api-key-error-message: No se pudieron renovar las credenciales de API.
++      export-api: Exportar credenciales de API
++      export-api-accept-button-text: Descargar
++      export-api-error-message: No se pudo descargar la exportación de credenciales de API.
++      title: Llaves de API
++      label: Ver datos de prueba
++      help-text: Alternar para ver datos de prueba permitirá que la consola muestre todos los datos de prueba de tu entorno sandbox
++      select-api-key-aria-label: Seleccionar llave de API
++      select-key: Seleccionar llave específica
++      test-data: Todos los datos de prueba...
++      delete-api: Eliminar credenciales de API
++  events:
++    index:
++      title: Eventos
++  logs:
++    index:
++      api-credential: Credencial de API
++      http-method: Método HTTP
++      title: Registros
++  sockets:
++    index:
++      link-text: Ver canal
++      channel: Canal
++      listen-channel-title: Escuchar en un canal personalizado
++      listen-channel-button-text: Escuchar
++      title: Canales que reciben eventos de tu cuenta
++      button-text: Escuchar en canal personalizado
++    view:
++      socket-connection-error: ¡Error de conexión de socket!
++      socket-connected: Socket conectado
++      socket-subscribed: Socket suscrito al canal {modelName}
++      output: Salida
++      awaiting-events: Esperando eventos...
++  webhooks:
++    index:
++      view-logs: Ver registros
++      edit-webhook: Editar webhook
++      delete-webhook: Eliminar webhook
++      add-webhook: Agregar un endpoint de webhook
++      add-webhook-button-text: Confirmar y crear
++      edit-webhook-endpoint: Editar endpoint de webhook
++      edit-webhook-endpoint-button-text: Guardar cambios
++      new-webhook-success-message: Nuevo webhook creado.
++      delete-webhook-endpoint: Eliminar este endpoint de webhook
++      delete-webhook-endpoint-body: ¿Estás seguro de que deseas eliminar este webhook? Todos los datos asociados dejarán de estar accesibles y este endpoint dejará de recibir eventos futuros. Esta acción no se puede deshacer.
++      delete-webhook-success-message: Endpoint de webhook eliminado.
++      title: Webhooks
++      button-text: Agregar nuevo endpoint
++    view:
++      webhook-deleted-success-message: Endpoint de webhook eliminado.
++      disable-webhook-title: Desactivar un endpoint de webhook
++      disable-webhook-body: Este endpoint de webhook puede desactivarse temporalmente para que no reciba notificaciones hasta que se vuelva a activar. Fleetbase no reintentará ninguna notificación generada mientras el endpoint permanezca desactivado.
++      disable-webhook-button-text: Desactivar endpoint de webhook
++      disable-webhook-success-message: Webhook desactivado.
++      enable-webhook-title: Activar un endpoint de webhook
++      enable-webhook-body: Este webhook está desactivado y ya no recibe notificaciones. Esto puede haberse realizado automáticamente si detectamos fallas consecutivas. Si corregiste el problema, puedes reactivarlo aquí. Fleetbase no reintentará notificaciones generadas en el período intermedio, y si persisten las fallas, se desactivará nuevamente.
++      enable-webhook-button-text: Activar endpoint de webhook
++      enable-webhook-success-message: Webhook activado.
++      update-endpoint-button-text: Actualizar endpoint
++      update-endpoint-success-message: Detalles del webhook actualizados.
++      send-button-text: Enviar webhook de prueba...
++      disable-button-text: Desactivar...
++      enable-button-text: Activar...
++      delete-button-text: Eliminar...
++  application:
++    sidebar:
++      title: Consola de Desarrolladores
++      items:
++        home: Panel de control
++        api-keys: Llaves de API
++        webhooks: Webhooks
++        websockets: WebSockets
++        logs: Registros
++        events: Eventos
