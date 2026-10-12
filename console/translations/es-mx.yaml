@@ -632,6 +632,14 @@ dashboard-widget-panel:
   widget-name: Widget {widgetName}
   select-widgets: Seleccionar Widgets
   close-and-save: Cerrar y Guardar
+  filter-widgets: Buscar widgets...
+  no-widgets-match: Ningún widget coincide con los filtros.
+  badge-default: Predeterminado
+  badge-added: Agregado
+  badge-added-count: Agregado ×{count}
+  tab-all: Todos
+  tab-default: Recomendados
+  tab-added: En el panel
 filters-picker:
   filters: Filtros
   filter-data: Filtrar Datos
@@ -695,6 +703,14 @@ component:
     widget-name: Widget {widgetName}
     select-widgets: Seleccionar widgets
     close-and-save: Cerrar y guardar
+    filter-widgets: Buscar widgets...
+    no-widgets-match: Ningún widget coincide con los filtros.
+    badge-default: Predeterminado
+    badge-added: Agregado
+    badge-added-count: Agregado ×{count}
+    tab-all: Todos
+    tab-default: Recomendados
+    tab-added: En el panel
 services:
   dashboard-service:
     create-dashboard-success-notification: Nuevo panel `{dashboardName}` creado con éxito.
@@ -2895,6 +2911,100 @@ modals:
     optionally: Opcionalmente, proporcione una descripción a la zona.
     description-zone: Descripción de la Zona
 widget:
+  refresh: Actualizar
+  categories:
+    analytics: Analítica
+    maps: Mapas
+    kpi-tiles: Mosaicos de KPI
+    legacy: Heredado
+  key-metrics-legacy:
+    title: Métricas de Fleet-Ops (Heredado)
+    description: "OBSOLETO: reemplazado por widgets individuales de mosaicos de KPI."
+  kpi-earnings:
+    title: Ganancias (30d)
+    description: Ganancias totales en los últimos 30 días con tendencia.
+  kpi-aov:
+    title: Valor prom. por pedido (30d)
+    description: Ingreso promedio por pedido completado con tendencia.
+  kpi-distance:
+    title: Distancia recorrida (30d)
+    description: Kilómetros totales entregados en los últimos 30 días.
+  kpi-active-orders:
+    title: Pedidos activos
+    description: Conteo en tiempo real de pedidos en curso.
+  kpi-drivers-online:
+    title: Conductores en línea
+    description: Conteo en tiempo real de conductores activos en servicio.
+  kpi-open-issues:
+    title: Problemas abiertos
+    description: Incidencias pendientes en la flota (menor es mejor).
+  operations-pulse:
+    title: Pulso de operaciones
+    description: Instantánea operativa en vivo con variaciones respecto al día anterior.
+    active-orders: Pedidos activos
+    completed-today: Completados hoy
+    drivers-online: Conductores en línea
+    vehicles-deployed: Vehículos desplegados
+    issues-open: Incidencias abiertas
+  live-fleet:
+    title: Mapa de flota en vivo
+    description: Posiciones de conductores y rutas activas en tiempo real.
+    drivers: Conductores
+    vehicles: Vehículos
+    active-orders: Pedidos activos
+    empty: No hay conductores o vehículos activos para mostrar.
+  revenue-trend:
+    title: Tendencia de ingresos
+    description: Ingresos a lo largo del tiempo con comparación de períodos.
+    revenue: Ingresos
+  orders-by-status:
+    title: Volumen de pedidos por estado
+    description: Barras apiladas diarias de conteo de pedidos por estado.
+    status-created: Creado
+    status-dispatched: Despachado
+    status-in-progress: En curso
+    status-completed: Completado
+    status-canceled: Cancelado
+  on-time-delivery:
+    title: Entregas a tiempo
+    description: Porcentaje de entregas completadas dentro del margen de SLA.
+  top-drivers:
+    title: Mejores conductores
+    description: Tabla de clasificación de conductores ordenable por pedidos, puntualidad o distancia.
+    sort-orders: Pedidos
+    sort-on-time: A tiempo
+    sort-distance: Distancia
+    orders: pedidos
+    empty: Sin actividad de conductores en este período.
+  fuel-efficiency:
+    title: Costo y eficiencia de combustible
+    description: Costo semanal de combustible y tendencia de costo por km.
+    avg: prom.
+  fuel-providers:
+    title: Integraciones de combustible
+    description: Gasto por proveedor, transacciones no vinculadas y estado de sincronización.
+  issues-insights:
+    title: Análisis de incidencias
+    description: Incidencias abiertas/resueltas, desglose por categoría y tiempo promedio de resolución.
+    open: Abiertas
+    resolved-30d: Resueltas (30d)
+    avg-resolve: Prom. resolución
+    empty: Sin incidencias aún.
+  maintenance-overview:
+    title: Resumen de mantenimiento
+    description: Mantenimiento vencido, programado y gasto acumulado en el año.
+    overdue: Vencido
+    next-7d: Próx. 7d
+    mtd: Mes a la fecha
+    maintenance: Mantenimiento
+    empty: Sin mantenimientos próximos.
+  geofence-violations:
+    title: Infracciones de geocercas
+    description: Tiempos de permanencia excesivos y zonas críticas de geocercas.
+    today: Hoy
+    last-7d: Últimos 7d
+    no-zone-activity: Sin actividad en zonas.
+    empty: Sin desvíos o tiempos excesivos.
   radar:
     title: Radar
     description: Qué requiere una decisión en la flota ahora mismo.
@@ -2906,14 +3016,14 @@ widget:
     message: Veamos qué puedes hacer para impulsar las operaciones...
     start-task: Iniciar tarea
   get-started:
-    title: Get Started with Fleet-Ops
-    subtitle: Set up the essentials and complete your first dispatch flow.
-    completed: completed
-    preview-title: First order workflow
+    title: Comience con Fleet-Ops
+    subtitle: Configure lo esencial y complete su primer flujo de despacho.
+    completed: completado
+    preview-title: Flujo del primer pedido
   recommended-features:
-    title: Recommended features for you
-    subtitle: Explore tools that help new operations teams get productive faster.
-    learn-more: Learn more
+    title: Funciones recomendadas para usted
+    subtitle: Explore herramientas que ayudan a los nuevos equipos de operaciones a ser más productivos rápidamente.
+    learn-more: Más información
   key-metrics:
     title: Métricas de operaciones de flota
     earnings: Ganancias
@@ -3189,8 +3299,46 @@ settings:
     fleet-ops-notification-settings: Configuración de notificaciones de operaciones de flota
     fleet-ops-notifications: Notificaciones de operaciones de flota
     configure-notifications: Configurar notificaciones
-    select-notifiables: Seleccionar notificables
+    select-notifiables: Seleccionar destinatarios
     settings-saved: Configuración de notificaciones guardada con éxito.
+    events:
+      order-assigned:
+        name: Pedido asignado
+        description: Notificar cuando un pedido ha sido asignado a un conductor.
+      order-canceled:
+        name: Pedido cancelado
+        description: Notificar cuando un pedido ha sido cancelado.
+      order-dispatched:
+        name: Pedido despachado
+        description: Notificar cuando un pedido ha sido despachado.
+      order-dispatch-failed:
+        name: Fallo al despachar pedido
+        description: Notificar cuando el despacho de un pedido ha fallado.
+      order-ping:
+        name: Ping de pedido
+        description: Notificar cuando se envía una actualización de cercanía a un pedido.
+      order-failed:
+        name: Pedido fallido
+        description: Notificar cuando un pedido no se ha podido completar.
+      order-completed:
+        name: Pedido completado
+        description: Notificar cuando un pedido ha sido entregado y completado con éxito.
+      late-departure:
+        name: Salida tardía
+        description: Notificar cuando un pedido no ha iniciado viaje tras el período de gracia establecido.
+      route-deviation:
+        name: Desviación de ruta
+        description: Notificar cuando la ubicación del vehículo se desvía de la ruta activa más allá del umbral establecido.
+      prolonged-stoppage:
+        name: Detención prolongada
+        description: Notificar cuando un vehículo permanece detenido durante un viaje activo más allá del tiempo establecido.
+    notifiables:
+      customer: Cliente
+      driver: Conductor
+      facilitator: Facilitador
+      vendor: Proveedor
+      user: Usuario
+      contact: Contacto
   routing:
     fleet-ops-routing-settings: Configuración de enrutamiento de operaciones de flota
     fleet-ops-routing: Enrutamiento de operaciones de flota
@@ -4688,6 +4836,130 @@ connectivity:
   hub-title: Centro de Conectividad
   hub-description: Conecte proveedores telemáticos, sincronice dispositivos, asócielos a vehículos y supervise el estado de la telemetría en un único flujo de trabajo.
   empty-text: No se encontraron registros de conectividad.
+  provider-types:
+    native: Integración nativa
+    custom: Personalizada
+    fuel-card-integration: Integración de tarjeta de combustible
+  capabilities:
+    vehicles: Vehículos
+    transactions: Transacciones
+    stations: Estaciones
+    trips: Viajes
+    tracking: Seguimiento
+    speed: Velocidad
+    heading: Rumbo
+    odometer: Odómetro
+    fuel_level: Nivel de combustible
+    ignition: Ignición
+  providers:
+    flespi:
+      label: Flespi
+      type: Integración nativa
+      description: Integración REST de concentrador telemático Flespi para detección de dispositivos, telemetría y transmisión en tiempo real.
+    geotab:
+      label: Geotab
+      type: Integración nativa
+      description: Geotab proporciona soluciones de gestión de flotas con rastreo por GPS, seguridad del conductor y funciones de cumplimiento normativo.
+      fields:
+        database:
+          label: Nombre de la base de datos
+          placeholder: Ingrese el nombre de la base de datos de Geotab
+        username:
+          label: Nombre de usuario
+          placeholder: Ingrese su usuario de Geotab
+        password:
+          label: Contraseña
+          placeholder: Ingrese su contraseña de Geotab
+    samsara:
+      label: Samsara
+      type: Integración nativa
+      description: Samsara ofrece soluciones de IoT para operaciones de flotas, incluyendo rastreo por GPS, cámaras de tablero y monitoreo de activos.
+      fields:
+        api_token:
+          label: Token de API
+          placeholder: Ingrese su token de API de Samsara
+        webhook_secret:
+          label: Secreto de webhook (Opcional)
+          placeholder: Ingrese el secreto de webhook para validación de firmas
+    afaqy:
+      label: AFAQY
+      type: Integración nativa
+      description: Integración REST AVL de AFAQY para detección de unidades, posición en vivo, velocidad, rumbo, odómetro, combustible y datos de señales.
+      fields:
+        base_url:
+          label: URL base
+          placeholder: https://api.afaqy.sa
+          help_text: Sobrescritura opcional. Dejar en blanco para usar el host por defecto de la API de AFAQY.
+        username:
+          label: Nombre de usuario
+          placeholder: Ingrese su usuario de AFAQY
+        password:
+          label: Contraseña
+          placeholder: Ingrese su contraseña de AFAQY
+        token:
+          label: Token
+          placeholder: Usar un token existente de AFAQY
+    safee:
+      label: Safee Tracking
+      type: Integración nativa
+      description: Integración REST de Safee Tracking para detección de vehículos, último estado, posiciones en vivo, odómetro, combustible y datos de sensores.
+      fields:
+        server_uri:
+          label: URI del servidor
+          placeholder: https://api.safee.com
+          help_text: Sobrescritura opcional. Dejar en blanco para usar el host por defecto de la API de Safee.
+        realm_id:
+          label: ID de Realm
+          placeholder: Ingrese el ID de Realm de Safee
+        client_id:
+          label: ID de cliente
+          placeholder: Ingrese el ID de cliente de Safee
+        client_secret:
+          label: Clave secreta de cliente
+          placeholder: Ingrese la clave secreta de cliente de Safee
+        username:
+          label: Nombre de usuario
+          placeholder: Ingrese su usuario de Safee
+        password:
+          label: Contraseña
+          placeholder: Ingrese su contraseña de Safee
+    petroapp:
+      label: PetroApp
+      category: Integración de tarjeta de combustible
+      description: Facturas de tarjetas de combustible, vehículos, viajes y ubicaciones de estaciones de PetroApp.
+      fields:
+        api_token:
+          label: Token de integración (WS-SK) o Token de API
+          help_text: Use el token de prueba para Sandbox o el token de su empresa para Producción. Seleccione el método de autenticación correspondiente.
+        auth_type:
+          label: Método de autenticación
+          help_text: Elija WS-SK para un token de integración, o Bearer para un token devuelto por get_apiKey.
+          options:
+            ws_sk_header: Token de integración (WS-SK)
+            bearer_token: Token de API Bearer
+        base_url:
+          label: Sobrescritura de URL base (opcional)
+          help_text: Dejar en blanco para usar el entorno seleccionado. Una URL personalizada sobrescribe la selección de entorno.
+      environments:
+        sandbox: Sandbox (Pruebas PetroApp)
+        production: Producción
+    sasco:
+      label: SASCO
+      category: Integración de tarjeta de combustible
+      description: Transacciones de combustible y vehículos de flotas B2B de SASCO.
+      fields:
+        username:
+          label: Usuario administrador B2B
+          help_text: Inicio de sesión de administrador corporativo B2B de SASCO, generalmente un correo electrónico.
+        password:
+          label: Contraseña de administrador B2B
+          help_text: Se utiliza para solicitar un token de acceso de corta duración de SASCO. Fleetbase se reautentica automáticamente cuando expira.
+        base_url:
+          label: Sobrescritura de URL base (opcional)
+          help_text: Dejar en blanco para usar el entorno seleccionado. Una URL personalizada sobrescribe la selección de entorno.
+      environments:
+        sandbox: Sandbox (SASCO QC)
+        production: Producción
 
 telematic:
   hub-title: Centro de Conectividad

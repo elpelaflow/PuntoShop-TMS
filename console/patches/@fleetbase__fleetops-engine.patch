@@ -1346,10 +1346,41 @@ index 87f764a..b33074d 100644
      </div>
  </div>
 diff --git a/addon/components/fuel-integration/form.js b/addon/components/fuel-integration/form.js
-index 09390a9..a910787 100644
+index 09390a9..9313b36 100644
 --- a/addon/components/fuel-integration/form.js
 +++ b/addon/components/fuel-integration/form.js
-@@ -27,11 +27,11 @@ export default class FuelIntegrationFormComponent extends Component {
+@@ -8,6 +8,7 @@ import copyToClipboard from '@fleetbase/ember-core/utils/copy-to-clipboard';
+ export default class FuelIntegrationFormComponent extends Component {
+     @service fetch;
+     @service notifications;
++    @service intl;
+ 
+     @tracked providers = [];
+     @tracked activeStep = 0;
+@@ -21,17 +22,34 @@ export default class FuelIntegrationFormComponent extends Component {
+         this.loadProviders.perform();
+     }
+ 
++    localizeCapability(cap) {
++        const defaultMap = {
++            vehicles: 'Vehículos',
++            transactions: 'Transacciones',
++            stations: 'Estaciones',
++            trips: 'Viajes',
++            tracking: 'Seguimiento',
++            speed: 'Velocidad',
++            heading: 'Rumbo',
++            odometer: 'Odómetro',
++            fuel_level: 'Nivel de combustible',
++            ignition: 'Ignición',
++        };
++        const fallback = defaultMap[cap] ?? cap;
++        return this.intl?.t ? this.intl.t(`connectivity.capabilities.${cap}`, { default: fallback }) : fallback;
++    }
++
+     get isEditing() {
+         return this.args.isEditing === true || this.args.resource?.isNew === false;
+     }
  
      get setupSteps() {
          return [
@@ -1366,25 +1397,112 @@ index 09390a9..a910787 100644
          ]
              .filter((step) => !this.isEditing || step.key !== 'provider')
              .map((step, index) => ({
-@@ -57,7 +57,7 @@ export default class FuelIntegrationFormComponent extends Component {
-         return this.providers.map((provider) => ({
-             ...provider,
-             selected: provider.key === this.args.resource?.provider,
--            categoryLabel: provider.category ?? provider.metadata?.category ?? 'Fuel card integration',
-+            categoryLabel: provider.category ?? provider.metadata?.category ?? 'Integración de tarjeta de combustible',
-         }));
+@@ -50,15 +68,40 @@ export default class FuelIntegrationFormComponent extends Component {
      }
  
-@@ -74,7 +74,7 @@ export default class FuelIntegrationFormComponent extends Component {
+     get selectedProvider() {
+-        return this.providers.find((provider) => provider.key === this.args.resource?.provider);
++        const raw = this.providers.find((provider) => provider.key === this.args.resource?.provider);
++        if (!raw) return null;
++        const key = raw.key;
++        const description = this.intl?.t
++            ? this.intl.t(`connectivity.providers.${key}.description`, { default: raw.description })
++            : raw.description;
++        const capabilities = (raw.capabilities ?? []).map((cap) => this.localizeCapability(cap));
++
++        return {
++            ...raw,
++            description,
++            capabilities,
++        };
+     }
+ 
+     get providerCards() {
+-        return this.providers.map((provider) => ({
+-            ...provider,
+-            selected: provider.key === this.args.resource?.provider,
+-            categoryLabel: provider.category ?? provider.metadata?.category ?? 'Fuel card integration',
+-        }));
++        return this.providers.map((provider) => {
++            const key = provider.key;
++            const description = this.intl?.t
++                ? this.intl.t(`connectivity.providers.${key}.description`, { default: provider.description })
++                : provider.description;
++            const categoryLabel = this.intl?.t
++                ? this.intl.t(`connectivity.providers.${key}.category`, { default: 'Integración de tarjeta de combustible' })
++                : 'Integración de tarjeta de combustible';
++            const capabilities = (provider.capabilities ?? []).map((cap) => this.localizeCapability(cap));
++
++            return {
++                ...provider,
++                description,
++                categoryLabel,
++                capabilities,
++                selected: provider.key === this.args.resource?.provider,
++            };
++        });
+     }
+ 
+     get credentials() {
+@@ -70,11 +113,15 @@ export default class FuelIntegrationFormComponent extends Component {
+     }
+ 
+     get sandboxLabel() {
+-        return this.selectedProvider?.metadata?.environment_labels?.sandbox ?? 'Sandbox';
++        const key = this.selectedProvider?.key;
++        const fallback = this.selectedProvider?.metadata?.environment_labels?.sandbox ?? 'Sandbox';
++        return this.intl?.t ? this.intl.t(`connectivity.providers.${key}.environments.sandbox`, { default: fallback }) : fallback;
      }
  
      get productionLabel() {
 -        return this.selectedProvider?.metadata?.environment_labels?.production ?? 'Production';
-+        return this.selectedProvider?.metadata?.environment_labels?.production ?? 'Producción';
++        const key = this.selectedProvider?.key;
++        const fallback = this.selectedProvider?.metadata?.environment_labels?.production ?? 'Producción';
++        return this.intl?.t ? this.intl.t(`connectivity.providers.${key}.environments.production`, { default: fallback }) : fallback;
      }
  
      get baseUrl() {
-@@ -123,23 +123,23 @@ export default class FuelIntegrationFormComponent extends Component {
+@@ -82,13 +129,32 @@ export default class FuelIntegrationFormComponent extends Component {
+     }
+ 
+     get credentialFields() {
+-        return (this.selectedProvider?.required_fields ?? []).map((field) => ({
+-            ...field,
+-            options: field.options?.map((option) => ({
+-                ...option,
+-                selected: option.value === (this.credentials[field.name] ?? (field.name === 'auth_type' ? 'bearer_token' : field.default)),
+-            })),
+-        }));
++        const providerKey = this.selectedProvider?.key;
++        return (this.selectedProvider?.required_fields ?? []).map((field) => {
++            const fieldName = field.name;
++            const labelKey = `connectivity.providers.${providerKey}.fields.${fieldName}.label`;
++            const helpKey = `connectivity.providers.${providerKey}.fields.${fieldName}.help_text`;
++
++            const label = this.intl?.t ? this.intl.t(labelKey, { default: field.label }) : field.label;
++            const help_text = this.intl?.t ? this.intl.t(helpKey, { default: field.help_text }) : field.help_text;
++
++            const options = field.options?.map((option) => {
++                const optKey = `connectivity.providers.${providerKey}.fields.${fieldName}.options.${option.value}`;
++                const optLabel = this.intl?.t ? this.intl.t(optKey, { default: option.label }) : option.label;
++                return {
++                    ...option,
++                    label: optLabel,
++                    selected: option.value === (this.credentials[field.name] ?? (field.name === 'auth_type' ? 'bearer_token' : field.default)),
++                };
++            });
++
++            return {
++                ...field,
++                label,
++                help_text,
++                options,
++            };
++        });
+     }
+ 
+     get syncSettings() {
+@@ -123,23 +189,23 @@ export default class FuelIntegrationFormComponent extends Component {
      get connectionStateTitle() {
          switch (this.connectionState) {
              case 'testing':
@@ -1414,7 +1532,7 @@ index 09390a9..a910787 100644
          }
  
          return this.connectionTestResult?.message;
-@@ -157,7 +157,7 @@ export default class FuelIntegrationFormComponent extends Component {
+@@ -157,7 +223,7 @@ export default class FuelIntegrationFormComponent extends Component {
              {
                  time: this.selectedAt,
                  tone: 'info',
@@ -1423,7 +1541,7 @@ index 09390a9..a910787 100644
              },
          ];
  
-@@ -165,7 +165,7 @@ export default class FuelIntegrationFormComponent extends Component {
+@@ -165,7 +231,7 @@ export default class FuelIntegrationFormComponent extends Component {
              entries.push({
                  time: this.testedAt,
                  tone: this.connectionTestResult.success ? 'success' : 'danger',
@@ -1432,7 +1550,7 @@ index 09390a9..a910787 100644
              });
          }
  
-@@ -194,12 +194,12 @@ export default class FuelIntegrationFormComponent extends Component {
+@@ -194,12 +260,12 @@ export default class FuelIntegrationFormComponent extends Component {
  
      @task *testConnection() {
          if (!this.selectedProvider) {
@@ -1447,7 +1565,7 @@ index 09390a9..a910787 100644
              return;
          }
  
-@@ -217,7 +217,7 @@ export default class FuelIntegrationFormComponent extends Component {
+@@ -217,7 +283,7 @@ export default class FuelIntegrationFormComponent extends Component {
          } catch (error) {
              this.connectionTestResult = {
                  success: false,
@@ -1456,7 +1574,7 @@ index 09390a9..a910787 100644
                  metadata: error.metadata ?? {},
              };
              this.notifications.serverError(error);
-@@ -299,7 +299,7 @@ export default class FuelIntegrationFormComponent extends Component {
+@@ -299,7 +365,7 @@ export default class FuelIntegrationFormComponent extends Component {
  
      @action copyDiagnostics() {
          copyToClipboard(this.diagnosticsText)
@@ -1560,19 +1678,63 @@ index 65ad636..7547cac 100644
                              </div>
                          </button>
 diff --git a/addon/components/fuel-integration/hub.js b/addon/components/fuel-integration/hub.js
-index 0a839a7..e7041a2 100644
+index 0a839a7..9836b86 100644
 --- a/addon/components/fuel-integration/hub.js
 +++ b/addon/components/fuel-integration/hub.js
-@@ -38,7 +38,7 @@ export default class FuelIntegrationHubComponent extends Component {
+@@ -10,9 +10,27 @@ const WARNING_STATUSES = ['error', 'disabled'];
+ export default class FuelIntegrationHubComponent extends Component {
+     @service fuelIntegrationActions;
+     @service currentUser;
++    @service intl;
+     @tracked table;
+     @tracked columns = this.args.columns ?? [];
+ 
++    localizeCapability(cap) {
++        const defaultMap = {
++            vehicles: 'Vehículos',
++            transactions: 'Transacciones',
++            stations: 'Estaciones',
++            trips: 'Viajes',
++            tracking: 'Seguimiento',
++            speed: 'Velocidad',
++            heading: 'Rumbo',
++            odometer: 'Odómetro',
++            fuel_level: 'Nivel de combustible',
++            ignition: 'Ignición',
++        };
++        const fallback = defaultMap[cap] ?? cap;
++        return this.intl?.t ? this.intl.t(`connectivity.capabilities.${cap}`, { default: fallback }) : fallback;
++    }
++
+     get connections() {
+         return Array.from(this.args.connections ?? []);
+     }
+@@ -32,13 +50,23 @@ export default class FuelIntegrationHubComponent extends Component {
+     get providerCards() {
+         return this.providers.map((provider) => {
+             const connection = this.connections.find((record) => record.provider === provider.key);
++            const key = provider.key;
++            const description = this.intl?.t
++                ? this.intl.t(`connectivity.providers.${key}.description`, { default: provider.description })
++                : provider.description;
++            const categoryLabel = this.intl?.t
++                ? this.intl.t(`connectivity.providers.${key}.category`, { default: 'Integración de tarjeta de combustible' })
++                : 'Integración de tarjeta de combustible';
++            const capabilities = (provider.capabilities ?? []).map((cap) => this.localizeCapability(cap));
+ 
+             return {
+                 ...provider,
++                description,
++                categoryLabel,
++                capabilities,
                  connection,
                  connected: Boolean(connection),
                  status: connection?.status ?? 'available',
 -                categoryLabel: provider.category ?? provider.metadata?.category ?? 'Fuel card integration',
-+                categoryLabel: provider.category ?? provider.metadata?.category ?? 'Integración de tarjeta de combustible',
              };
          });
      }
-@@ -69,44 +69,44 @@ export default class FuelIntegrationHubComponent extends Component {
+@@ -69,44 +97,44 @@ export default class FuelIntegrationHubComponent extends Component {
              .filter(Boolean)
              .map((value) => new Date(value).getTime())
              .filter(Number.isFinite);
@@ -1630,7 +1792,7 @@ index 0a839a7..e7041a2 100644
                  actionType: 'transactions',
                  accentClass: 'fleetops-connectivity-kpi-accent-rose',
              },
-@@ -119,7 +119,7 @@ export default class FuelIntegrationHubComponent extends Component {
+@@ -119,7 +147,7 @@ export default class FuelIntegrationHubComponent extends Component {
              const currency = connection.last_sync_state?.summary?.currency || (['petroapp', 'sasco'].includes(connection.provider) ? 'SAR' : null);
              if (currency) currencies.set(currency, (currencies.get(currency) || 0) + Number(connection.last_sync_state?.summary?.amount || 0));
          }
@@ -4192,10 +4354,18 @@ index 07c05e7..4b4898e 100644
                      @icon={{this.primaryFooterIcon}}
                      @text={{this.primaryFooterLabel}}
 diff --git a/addon/components/telematic/form.js b/addon/components/telematic/form.js
-index 3e24972..597fe42 100644
+index 3e24972..747295d 100644
 --- a/addon/components/telematic/form.js
 +++ b/addon/components/telematic/form.js
-@@ -23,19 +23,19 @@ export default class TelematicFormComponent extends Component {
+@@ -10,6 +10,7 @@ const SENSITIVE_METADATA_KEYS = ['password', 'secret', 'session', 'token'];
+ export default class TelematicFormComponent extends Component {
+     @service fetch;
+     @service notifications;
++    @service intl;
+     @tracked providers = [];
+     @tracked selectedProvider = this.args.resource?.provider_descriptor ?? null;
+     @tracked connectionTestResult;
+@@ -23,19 +24,19 @@ export default class TelematicFormComponent extends Component {
          return [
              {
                  icon: 'plug',
@@ -4218,7 +4388,7 @@ index 3e24972..597fe42 100644
                  complete: this.activeStep > 2 && this.isTestStepValid,
                  active: this.activeStep === 2,
              },
-@@ -47,7 +47,7 @@ export default class TelematicFormComponent extends Component {
+@@ -47,7 +48,7 @@ export default class TelematicFormComponent extends Component {
              },
              {
                  icon: 'clipboard-check',
@@ -4227,7 +4397,73 @@ index 3e24972..597fe42 100644
                  complete: false,
                  active: this.activeStep === 4,
              },
-@@ -124,7 +124,7 @@ export default class TelematicFormComponent extends Component {
+@@ -55,10 +56,22 @@ export default class TelematicFormComponent extends Component {
+     }
+ 
+     get providerCards() {
+-        return this.providers.map((provider) => ({
+-            ...provider,
+-            selected: this.selectedProvider?.key === provider.key,
+-        }));
++        return this.providers.map((provider) => {
++            const key = provider.key;
++            const description = this.intl?.t
++                ? this.intl.t(`connectivity.providers.${key}.description`, { default: provider.description })
++                : provider.description;
++            const type = provider.type === 'native'
++                ? (this.intl?.t ? this.intl.t('connectivity.provider-types.native', { default: 'Integración nativa' }) : 'Integración nativa')
++                : provider.type;
++
++            return {
++                ...provider,
++                description,
++                type,
++                selected: this.selectedProvider?.key === provider.key,
++            };
++        });
+     }
+ 
+     get hasCredentialValues() {
+@@ -71,11 +84,36 @@ export default class TelematicFormComponent extends Component {
+     }
+ 
+     get credentialFields() {
+-        return (this.selectedProvider?.required_fields ?? []).filter((field) => !field.advanced && !field.is_endpoint);
++        const fields = (this.selectedProvider?.required_fields ?? []).filter((field) => !field.advanced && !field.is_endpoint);
++        return this.localizeCredentialFields(fields);
+     }
+ 
+     get advancedCredentialFields() {
+-        return (this.selectedProvider?.required_fields ?? []).filter((field) => field.advanced || field.is_endpoint);
++        const fields = (this.selectedProvider?.required_fields ?? []).filter((field) => field.advanced || field.is_endpoint);
++        return this.localizeCredentialFields(fields);
++    }
++
++    localizeCredentialFields(fields) {
++        const providerKey = this.selectedProvider?.key;
++        if (!fields || !Array.isArray(fields)) return [];
++
++        return fields.map((field) => {
++            const fieldName = field.name;
++            const labelKey = `connectivity.providers.${providerKey}.fields.${fieldName}.label`;
++            const placeholderKey = `connectivity.providers.${providerKey}.fields.${fieldName}.placeholder`;
++            const helpKey = `connectivity.providers.${providerKey}.fields.${fieldName}.help_text`;
++
++            const label = this.intl?.t ? this.intl.t(labelKey, { default: field.label }) : field.label;
++            const placeholder = this.intl?.t ? this.intl.t(placeholderKey, { default: field.placeholder }) : field.placeholder;
++            const help_text = this.intl?.t ? this.intl.t(helpKey, { default: field.help_text }) : field.help_text;
++
++            return {
++                ...field,
++                label,
++                placeholder,
++                help_text,
++            };
++        });
+     }
+ 
+     get hasAdvancedCredentialFields() {
+@@ -124,7 +162,7 @@ export default class TelematicFormComponent extends Component {
              return this.args.isSaving ? this.args.savingLabel : this.args.saveLabel;
          }
  
@@ -4236,7 +4472,7 @@ index 3e24972..597fe42 100644
      }
  
      get primaryFooterIcon() {
-@@ -170,27 +170,27 @@ export default class TelematicFormComponent extends Component {
+@@ -170,27 +208,27 @@ export default class TelematicFormComponent extends Component {
  
      get connectionStateTitle() {
          if (this.connectionState === 'testing') {
@@ -4270,7 +4506,7 @@ index 3e24972..597fe42 100644
          }
  
          if (this.isDuplicateConnectionMessage) {
-@@ -233,7 +233,7 @@ export default class TelematicFormComponent extends Component {
+@@ -233,7 +271,7 @@ export default class TelematicFormComponent extends Component {
  
      get connectionDiagnosticEntries() {
          const entries = [];
@@ -4279,7 +4515,7 @@ index 3e24972..597fe42 100644
          const providerKey = this.selectedProvider?.key;
          const startedAt = this.lastConnectionTestStartedAt;
          const completedAt = this.lastConnectionTestCompletedAt;
-@@ -241,20 +241,20 @@ export default class TelematicFormComponent extends Component {
+@@ -241,20 +279,20 @@ export default class TelematicFormComponent extends Component {
          entries.push({
              time: this.formatDiagnosticTime(startedAt),
              tone: 'muted',
@@ -4303,7 +4539,7 @@ index 3e24972..597fe42 100644
              });
          }
  
-@@ -262,7 +262,7 @@ export default class TelematicFormComponent extends Component {
+@@ -262,7 +300,7 @@ export default class TelematicFormComponent extends Component {
              entries.push({
                  time: this.formatDiagnosticTime(),
                  tone: 'muted',
@@ -4312,7 +4548,7 @@ index 3e24972..597fe42 100644
              });
              return entries;
          }
-@@ -270,14 +270,14 @@ export default class TelematicFormComponent extends Component {
+@@ -270,14 +308,14 @@ export default class TelematicFormComponent extends Component {
          entries.push({
              time: this.formatDiagnosticTime(startedAt),
              tone: 'info',
@@ -4329,7 +4565,7 @@ index 3e24972..597fe42 100644
              });
              return entries;
          }
-@@ -285,14 +285,14 @@ export default class TelematicFormComponent extends Component {
+@@ -285,14 +323,14 @@ export default class TelematicFormComponent extends Component {
          entries.push({
              time: this.formatDiagnosticTime(completedAt),
              tone: 'info',
@@ -4346,7 +4582,7 @@ index 3e24972..597fe42 100644
              });
          }
  
-@@ -300,7 +300,7 @@ export default class TelematicFormComponent extends Component {
+@@ -300,7 +338,7 @@ export default class TelematicFormComponent extends Component {
              entries.push({
                  time: this.formatDiagnosticTime(completedAt),
                  tone: 'success',
@@ -4355,7 +4591,7 @@ index 3e24972..597fe42 100644
              });
              return entries;
          }
-@@ -308,7 +308,7 @@ export default class TelematicFormComponent extends Component {
+@@ -308,7 +346,7 @@ export default class TelematicFormComponent extends Component {
          entries.push({
              time: this.formatDiagnosticTime(completedAt),
              tone: 'danger',
@@ -4364,7 +4600,7 @@ index 3e24972..597fe42 100644
          });
  
          return entries;
-@@ -383,7 +383,7 @@ export default class TelematicFormComponent extends Component {
+@@ -383,7 +421,7 @@ export default class TelematicFormComponent extends Component {
              {
                  size: 'xs',
                  icon: 'plug',
@@ -4373,7 +4609,20 @@ index 3e24972..597fe42 100644
                  onClick: () => this.testConnection.perform(),
                  isLoading: this.testConnection.isRunning,
              },
-@@ -505,22 +505,22 @@ export default class TelematicFormComponent extends Component {
+@@ -466,10 +504,10 @@ export default class TelematicFormComponent extends Component {
+     @action copyConnectionDiagnostics() {
+         copyToClipboard(this.connectionDiagnosticText)
+             .then(() => {
+-                this.notifications.success('Connection diagnostics copied.');
++                this.notifications.success(this.intl?.t ? this.intl.t('telematic.diagnostics-copied', { default: 'Diagnósticos de conexión copiados.' }) : 'Diagnósticos de conexión copiados.');
+             })
+             .catch(() => {
+-                this.notifications.error('Unable to copy connection diagnostics.');
++                this.notifications.error(this.intl?.t ? this.intl.t('telematic.diagnostics-copy-error', { default: 'No se pudieron copiar los diagnósticos de conexión.' }) : 'No se pudieron copiar los diagnósticos de conexión.');
+             });
+     }
+ 
+@@ -505,22 +543,22 @@ export default class TelematicFormComponent extends Component {
  
      validateStep(index) {
          if (index === 0 && !this.isProviderStepValid) {
@@ -4400,7 +4649,7 @@ index 3e24972..597fe42 100644
              return false;
          }
  
-@@ -564,7 +564,7 @@ export default class TelematicFormComponent extends Component {
+@@ -564,7 +602,7 @@ export default class TelematicFormComponent extends Component {
              this.updateResourceConnectionTestMeta(result);
  
              if (result.success) {
@@ -4409,7 +4658,7 @@ index 3e24972..597fe42 100644
              } else {
                  this.notifications.error(result.message);
              }
-@@ -572,10 +572,10 @@ export default class TelematicFormComponent extends Component {
+@@ -572,10 +610,10 @@ export default class TelematicFormComponent extends Component {
              this.lastConnectionTestCompletedAt = new Date();
              this.connectionTestResult = {
                  success: false,
@@ -4516,10 +4765,37 @@ index a567a6c..b6f6788 100644
                              </div>
                          </button>
 diff --git a/addon/components/telematic/hub.js b/addon/components/telematic/hub.js
-index fd39899..509c7f2 100644
+index fd39899..234f7b0 100644
 --- a/addon/components/telematic/hub.js
 +++ b/addon/components/telematic/hub.js
-@@ -61,40 +61,40 @@ export default class TelematicHubComponent extends Component {
+@@ -8,6 +8,7 @@ const WARNING_STATUSES = ['error', 'degraded', 'disconnected'];
+ export default class TelematicHubComponent extends Component {
+     @service telematicActions;
+     @service hostRouter;
++    @service intl;
+     @tracked table;
+     @tracked columns = this.args.columns ?? [];
+ 
+@@ -32,9 +33,18 @@ export default class TelematicHubComponent extends Component {
+ 
+         return this.providers.map((provider) => {
+             const integration = this.integrations.find((record) => record.provider === provider.key);
++            const key = provider.key;
++            const description = this.intl?.t
++                ? this.intl.t(`connectivity.providers.${key}.description`, { default: provider.description })
++                : provider.description;
++            const type = provider.type === 'native'
++                ? (this.intl?.t ? this.intl.t('connectivity.provider-types.native', { default: 'Integración nativa' }) : 'Integración nativa')
++                : provider.type;
+ 
+             return {
+                 ...provider,
++                description,
++                type,
+                 connected: connected.has(provider.key),
+                 integration,
+             };
+@@ -61,40 +71,40 @@ export default class TelematicHubComponent extends Component {
          return [
              {
                  icon: 'plug',
@@ -4696,6 +4972,72 @@ index 4967b09..a26133e 100644
                  <Button @icon="save" @text={{if @isSaving @savingLabel @saveLabel}} @type="primary" @size="sm" @isLoading={{@isSaving}} @onClick={{@onSave}} />
              </div>
          </div>
+diff --git a/addon/components/telematic/settings.js b/addon/components/telematic/settings.js
+index 17fa47f..d90bbfa 100644
+--- a/addon/components/telematic/settings.js
++++ b/addon/components/telematic/settings.js
+@@ -1,17 +1,58 @@
+ import Component from '@glimmer/component';
+ import { action } from '@ember/object';
++import { inject as service } from '@ember/service';
+ 
+ export default class TelematicSettingsComponent extends Component {
++    @service intl;
++
+     get provider() {
+-        return this.args.resource?.provider_descriptor ?? {};
++        const raw = this.args.resource?.provider_descriptor ?? {};
++        const key = raw.key;
++        const description = this.intl?.t
++            ? this.intl.t(`connectivity.providers.${key}.description`, { default: raw.description })
++            : raw.description;
++        const type = raw.type === 'native'
++            ? (this.intl?.t ? this.intl.t('connectivity.provider-types.native', { default: 'Integración nativa' }) : 'Integración nativa')
++            : raw.type;
++
++        return {
++            ...raw,
++            description,
++            type,
++        };
+     }
+ 
+     get credentialFields() {
+-        return (this.provider.required_fields ?? []).filter((field) => !field.advanced && !field.is_endpoint);
++        const fields = (this.provider.required_fields ?? []).filter((field) => !field.advanced && !field.is_endpoint);
++        return this.localizeCredentialFields(fields);
+     }
+ 
+     get advancedCredentialFields() {
+-        return (this.provider.required_fields ?? []).filter((field) => field.advanced || field.is_endpoint);
++        const fields = (this.provider.required_fields ?? []).filter((field) => field.advanced || field.is_endpoint);
++        return this.localizeCredentialFields(fields);
++    }
++
++    localizeCredentialFields(fields) {
++        const providerKey = this.provider?.key;
++        if (!fields || !Array.isArray(fields)) return [];
++
++        return fields.map((field) => {
++            const fieldName = field.name;
++            const labelKey = `connectivity.providers.${providerKey}.fields.${fieldName}.label`;
++            const placeholderKey = `connectivity.providers.${providerKey}.fields.${fieldName}.placeholder`;
++            const helpKey = `connectivity.providers.${providerKey}.fields.${fieldName}.help_text`;
++
++            const label = this.intl?.t ? this.intl.t(labelKey, { default: field.label }) : field.label;
++            const placeholder = this.intl?.t ? this.intl.t(placeholderKey, { default: field.placeholder }) : field.placeholder;
++            const help_text = this.intl?.t ? this.intl.t(helpKey, { default: field.help_text }) : field.help_text;
++
++            return {
++                ...field,
++                label,
++                placeholder,
++                help_text,
++            };
++        });
+     }
+ 
+     get hasAdvancedCredentialFields() {
 diff --git a/addon/components/telematic/telemetry-status.hbs b/addon/components/telematic/telemetry-status.hbs
 index 27604f0..804ee6e 100644
 --- a/addon/components/telematic/telemetry-status.hbs
@@ -4819,6 +5161,19 @@ index 27604f0..804ee6e 100644
                                  {{/if}}
                              </li>
                          {{/each}}
+diff --git a/addon/components/widget/fuel-efficiency.hbs b/addon/components/widget/fuel-efficiency.hbs
+index 38bafe9..5932993 100644
+--- a/addon/components/widget/fuel-efficiency.hbs
++++ b/addon/components/widget/fuel-efficiency.hbs
+@@ -15,7 +15,7 @@
+                     {{format-currency this.data.summary.total_cost this.data.summary.currency}}
+                 </span>
+                 <span class="text-[10px] text-gray-500 dark:text-gray-400">
+-                    {{format-currency this.data.summary.avg_cost_per_km this.data.summary.currency}}/km avg
++                    {{format-currency this.data.summary.avg_cost_per_km this.data.summary.currency}}/km {{t "widget.fuel-efficiency.avg"}}
+                 </span>
+             </div>
+             <div class="flex-1 min-h-0">
 diff --git a/addon/components/widget/fuel-providers.hbs b/addon/components/widget/fuel-providers.hbs
 index f2352fa..1f77de6 100644
 --- a/addon/components/widget/fuel-providers.hbs
@@ -4881,6 +5236,314 @@ index 62a18ba..36a351b 100644
          }
      }
  }
+diff --git a/addon/components/widget/geofence-violations.hbs b/addon/components/widget/geofence-violations.hbs
+index 80d3ef8..2388228 100644
+--- a/addon/components/widget/geofence-violations.hbs
++++ b/addon/components/widget/geofence-violations.hbs
+@@ -12,11 +12,11 @@
+         {{else if this.data}}
+             <div class="grid grid-cols-2 gap-1.5 mb-2">
+                 <div class="rounded-md border dark:border-gray-700 border-gray-200 p-1.5 text-center">
+-                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">Today</div>
++                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">{{t "widget.geofence-violations.today"}}</div>
+                     <div class="text-lg font-bold leading-tight mt-0.5 {{if this.data.violations_today 'text-amber-500' 'text-gray-400'}}">{{this.data.violations_today}}</div>
+                 </div>
+                 <div class="rounded-md border dark:border-gray-700 border-gray-200 p-1.5 text-center">
+-                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">Last 7d</div>
++                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">{{t "widget.geofence-violations.last-7d"}}</div>
+                     <div class="text-lg font-bold text-black dark:text-gray-100 leading-tight mt-0.5">{{this.data.violations_period}}</div>
+                 </div>
+             </div>
+@@ -25,17 +25,17 @@
+                     {{#if this.zoneDatasets}}
+                         <Chart @type="bar" @labels={{this.zoneLabels}} @datasets={{this.zoneDatasets}} @options={{this.zoneOptions}} />
+                     {{else}}
+-                        <div class="flex items-center justify-center h-full text-[10px] text-gray-500">No zone activity.</div>
++                        <div class="flex items-center justify-center h-full text-[10px] text-gray-500">{{t "widget.geofence-violations.no-zone-activity"}}</div>
+                     {{/if}}
+                 </div>
+                 <div class="min-h-0 overflow-auto divide-y dark:divide-gray-700">
+                     {{#each this.data.top_dwells as |dwell|}}
+                         <div class="py-1">
+-                            <div class="text-[11px] font-medium text-black dark:text-gray-100 truncate">{{or dwell.driver_name "Driver"}}</div>
+-                            <div class="text-[10px] text-gray-500 dark:text-gray-400 truncate">{{or dwell.zone_name "Zone"}} &middot; {{dwell.duration_minutes}}m</div>
++                            <div class="text-[11px] font-medium text-black dark:text-gray-100 truncate">{{or dwell.driver_name (t "common.driver")}}</div>
++                            <div class="text-[10px] text-gray-500 dark:text-gray-400 truncate">{{or dwell.zone_name (t "common.zone")}} &middot; {{dwell.duration_minutes}}m</div>
+                         </div>
+                     {{else}}
+-                        <div class="text-center text-[10px] text-gray-500 py-3">No dwell outliers.</div>
++                        <div class="text-center text-[10px] text-gray-500 py-3">{{t "widget.geofence-violations.empty"}}</div>
+                     {{/each}}
+                 </div>
+             </div>
+diff --git a/addon/components/widget/issues-insights.hbs b/addon/components/widget/issues-insights.hbs
+index 71e7401..7c7c64f 100644
+--- a/addon/components/widget/issues-insights.hbs
++++ b/addon/components/widget/issues-insights.hbs
+@@ -15,20 +15,20 @@
+                     {{#if this.categoryDatasets}}
+                         <Chart @type="doughnut" @labels={{this.categoryLabels}} @datasets={{this.categoryDatasets}} @options={{this.categoryOptions}} />
+                     {{else}}
+-                        <div class="flex items-center justify-center h-full text-[10px] text-gray-500">No issues yet.</div>
++                        <div class="flex items-center justify-center h-full text-[10px] text-gray-500">{{t "widget.issues-insights.empty"}}</div>
+                     {{/if}}
+                 </div>
+                 <div class="flex flex-col justify-around gap-1.5">
+                     <div>
+-                        <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">Open</div>
++                        <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">{{t "widget.issues-insights.open"}}</div>
+                         <div class="text-lg font-bold text-amber-500 leading-tight">{{this.data.open}}</div>
+                     </div>
+                     <div>
+-                        <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">Resolved (30d)</div>
++                        <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">{{t "widget.issues-insights.resolved-30d"}}</div>
+                         <div class="text-lg font-bold text-green-500 leading-tight">{{this.data.resolved_this_period}}</div>
+                     </div>
+                     <div>
+-                        <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">Avg Resolve</div>
++                        <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">{{t "widget.issues-insights.avg-resolve"}}</div>
+                         <div class="text-sm font-bold text-black dark:text-gray-100 leading-tight">{{this.resolutionDisplay}}</div>
+                     </div>
+                     <div class="flex flex-wrap gap-1">
+diff --git a/addon/components/widget/live-fleet.hbs b/addon/components/widget/live-fleet.hbs
+index 01ef597..131a5df 100644
+--- a/addon/components/widget/live-fleet.hbs
++++ b/addon/components/widget/live-fleet.hbs
+@@ -2,9 +2,9 @@
+     <div class="flex items-center justify-between px-3 py-1.5 border dark:border-gray-700 border-gray-200 dark:bg-gray-800 bg-gray-50 rounded-t-md shadow-sm">
+         <span class="text-xs font-bold text-black dark:text-gray-100">{{t "widget.live-fleet.title"}}</span>
+         <div class="flex items-center gap-3 text-[10px] text-gray-500 dark:text-gray-400">
+-            <span class="flex items-center" title="Drivers"><FaIcon @icon="id-card" class="mr-1" />{{this.drivers.length}}</span>
+-            <span class="flex items-center" title="Vehicles"><FaIcon @icon="truck" class="mr-1" />{{this.vehicles.length}}</span>
+-            <span class="flex items-center" title="Active orders"><FaIcon @icon="bolt" class="mr-1" />{{this.activeOrderCount}}</span>
++            <span class="flex items-center" title={{t "widget.live-fleet.drivers"}}><FaIcon @icon="id-card" class="mr-1" />{{this.drivers.length}}</span>
++            <span class="flex items-center" title={{t "widget.live-fleet.vehicles"}}><FaIcon @icon="truck" class="mr-1" />{{this.vehicles.length}}</span>
++            <span class="flex items-center" title={{t "widget.live-fleet.active-orders"}}><FaIcon @icon="bolt" class="mr-1" />{{this.activeOrderCount}}</span>
+             <button type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" {{on "click" this.refresh}}>
+                 <FaIcon @icon="rotate" class={{if this.load.isRunning "animate-spin"}} />
+             </button>
+@@ -83,7 +83,7 @@
+             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                 <div class="text-center text-[11px] text-gray-500 dark:text-gray-400 bg-white/90 dark:bg-gray-900/90 rounded-md px-3 py-2 shadow-sm">
+                     <FaIcon @icon="map-location-dot" class="text-xl block mb-1 opacity-50" />
+-                    No active drivers or vehicles to display.
++                    {{t "widget.live-fleet.empty"}}
+                 </div>
+             </div>
+         {{/if}}
+diff --git a/addon/components/widget/maintenance-overview.hbs b/addon/components/widget/maintenance-overview.hbs
+index 3246d48..068226a 100644
+--- a/addon/components/widget/maintenance-overview.hbs
++++ b/addon/components/widget/maintenance-overview.hbs
+@@ -12,15 +12,15 @@
+         {{else if this.data}}
+             <div class="grid grid-cols-3 gap-1.5 mb-2">
+                 <div class="rounded-md border dark:border-gray-700 border-gray-200 p-1.5 text-center">
+-                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">Overdue</div>
++                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">{{t "widget.maintenance-overview.overdue"}}</div>
+                     <div class="text-lg font-bold leading-tight mt-0.5 {{if this.data.overdue 'text-red-500' 'text-gray-400'}}">{{this.data.overdue}}</div>
+                 </div>
+                 <div class="rounded-md border dark:border-gray-700 border-gray-200 p-1.5 text-center">
+-                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">Next 7d</div>
++                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">{{t "widget.maintenance-overview.next-7d"}}</div>
+                     <div class="text-lg font-bold text-amber-500 leading-tight mt-0.5">{{this.data.scheduled_next_7d}}</div>
+                 </div>
+                 <div class="rounded-md border dark:border-gray-700 border-gray-200 p-1.5 text-center">
+-                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">MTD</div>
++                    <div class="text-[9px] uppercase text-gray-500 dark:text-gray-400 leading-none">{{t "widget.maintenance-overview.mtd"}}</div>
+                     <div class="text-sm font-bold text-black dark:text-gray-100 leading-tight mt-0.5 truncate">{{format-currency this.data.cost_this_month this.data.currency}}</div>
+                 </div>
+             </div>
+@@ -29,7 +29,7 @@
+                 {{#each this.data.upcoming as |item|}}
+                     <div class="flex items-center justify-between py-1 hover:bg-gray-50 dark:hover:bg-gray-800 px-1">
+                         <div class="min-w-0 flex-1">
+-                            <div class="text-[11px] font-medium text-black dark:text-gray-100 truncate">{{or item.type "Maintenance"}}</div>
++                            <div class="text-[11px] font-medium text-black dark:text-gray-100 truncate">{{or item.type (t "widget.maintenance-overview.maintenance")}}</div>
+                             <div class="text-[10px] text-gray-500 dark:text-gray-400">{{format-date-fns item.scheduled_at "MMM d"}}</div>
+                         </div>
+                         {{#if item.priority}}
+@@ -37,7 +37,7 @@
+                         {{/if}}
+                     </div>
+                 {{else}}
+-                    <div class="text-[10px] text-gray-500 text-center py-3">No upcoming maintenance.</div>
++                    <div class="text-[10px] text-gray-500 text-center py-3">{{t "widget.maintenance-overview.empty"}}</div>
+                 {{/each}}
+             </div>
+         {{/if}}
+diff --git a/addon/components/widget/operations-pulse.js b/addon/components/widget/operations-pulse.js
+index 126da38..9d6f9b0 100644
+--- a/addon/components/widget/operations-pulse.js
++++ b/addon/components/widget/operations-pulse.js
+@@ -36,6 +36,7 @@ export default class WidgetOperationsPulseComponent extends Component {
+     @service fetch;
+     @service socket;
+     @service currentUser;
++    @service intl;
+ 
+     @tracked data = null;
+     @tracked error = null;
+@@ -68,10 +69,17 @@ export default class WidgetOperationsPulseComponent extends Component {
+     }
+ 
+     titleFor(key) {
+-        return key
++        const dasherized = key.replace(/_/g, '-');
++        const defaultTitle = key
+             .split('_')
+             .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+             .join(' ');
++
++        if (this.intl?.t) {
++            return this.intl.t(`widget.operations-pulse.${dasherized}`, { default: defaultTitle });
++        }
++
++        return defaultTitle;
+     }
+ 
+     deltaStatus(tile) {
+diff --git a/addon/components/widget/orders-by-status.js b/addon/components/widget/orders-by-status.js
+index d39eb52..20b0e28 100644
+--- a/addon/components/widget/orders-by-status.js
++++ b/addon/components/widget/orders-by-status.js
+@@ -10,6 +10,7 @@ export default class WidgetOrdersByStatusComponent extends Component {
+     static widgetId = 'fleet-ops-orders-by-status-widget';
+ 
+     @service fetch;
++    @service intl;
+ 
+     @tracked period = '14d';
+     @tracked data = null;
+@@ -22,6 +23,20 @@ export default class WidgetOrdersByStatusComponent extends Component {
+         this.load.perform();
+     }
+ 
++    statusLabel(raw) {
++        if (!raw) return '';
++        const key = raw.toLowerCase().replace(/[\s_]+/g, '-');
++        const defaultMap = {
++            created: 'Creado',
++            dispatched: 'Despachado',
++            'in-progress': 'En curso',
++            completed: 'Completado',
++            canceled: 'Cancelado',
++        };
++        const fallback = defaultMap[key] ?? raw;
++        return this.intl?.t ? this.intl.t(`widget.orders-by-status.status-${key}`, { default: fallback }) : fallback;
++    }
++
+     get chartOptions() {
+         return {
+             responsive: true,
+@@ -39,7 +54,14 @@ export default class WidgetOrdersByStatusComponent extends Component {
+ 
+     @task *load() {
+         try {
+-            this.data = yield this.fetch.get('fleet-ops/analytics/orders-by-status', { period: this.period });
++            const res = yield this.fetch.get('fleet-ops/analytics/orders-by-status', { period: this.period });
++            if (res && Array.isArray(res.datasets)) {
++                res.datasets = res.datasets.map((dataset) => ({
++                    ...dataset,
++                    label: this.statusLabel(dataset.label),
++                }));
++            }
++            this.data = res;
+             this.error = null;
+         } catch (e) {
+             this.error = e?.message ?? 'Failed to load orders breakdown';
+diff --git a/addon/components/widget/revenue-trend.js b/addon/components/widget/revenue-trend.js
+index c9890cf..37f5390 100644
+--- a/addon/components/widget/revenue-trend.js
++++ b/addon/components/widget/revenue-trend.js
+@@ -12,6 +12,7 @@ export default class WidgetRevenueTrendComponent extends Component {
+     static widgetId = 'fleet-ops-revenue-trend-widget';
+ 
+     @service fetch;
++    @service intl;
+ 
+     @tracked period = '30d';
+     @tracked data = null;
+@@ -39,14 +40,20 @@ export default class WidgetRevenueTrendComponent extends Component {
+     }
+ 
+     get chartDatasets() {
++        const revenueLabel = this.intl?.t ? this.intl.t('widget.revenue-trend.revenue', { default: 'Ingresos' }) : 'Ingresos';
++
+         return (
+             this.data?.datasets?.map((dataset) => {
+-                if (!this.isRevenueDataset(dataset)) {
+-                    return dataset;
++                const isRev = this.isRevenueDataset(dataset);
++                const label = isRev ? revenueLabel : dataset?.label;
++
++                if (!isRev) {
++                    return { ...dataset, label };
+                 }
+ 
+                 return {
+                     ...dataset,
++                    label,
+                     data: dataset.data?.map((value) => this.normalizeRevenueValue(value)) ?? [],
+                 };
+             }) ?? []
+diff --git a/addon/components/widget/top-drivers.hbs b/addon/components/widget/top-drivers.hbs
+index 0b11af9..627c508 100644
+--- a/addon/components/widget/top-drivers.hbs
++++ b/addon/components/widget/top-drivers.hbs
+@@ -28,7 +28,7 @@
+                         <div class="flex-1 min-w-0">
+                             <div class="text-[11px] font-medium text-black dark:text-gray-100 truncate leading-tight">{{row.name}}</div>
+                             <div class="text-[10px] text-gray-500 dark:text-gray-400 truncate leading-tight">
+-                                {{row.orders_completed}} orders &middot; {{format-meters row.distance_m}}
++                                {{row.orders_completed}} {{t "widget.top-drivers.orders"}} &middot; {{format-meters row.distance_m}}
+                             </div>
+                         </div>
+                         {{#if row.on_time_pct}}
+@@ -38,7 +38,7 @@
+                 {{/each}}
+             </div>
+         {{else}}
+-            <div class="flex items-center justify-center h-full text-[10px] text-gray-500">No driver activity in this period.</div>
++            <div class="flex items-center justify-center h-full text-[10px] text-gray-500">{{t "widget.top-drivers.empty"}}</div>
+         {{/if}}
+     </div>
+ </div>
+diff --git a/addon/components/widget/top-drivers.js b/addon/components/widget/top-drivers.js
+index 86ab36d..a1f8013 100644
+--- a/addon/components/widget/top-drivers.js
++++ b/addon/components/widget/top-drivers.js
+@@ -4,22 +4,23 @@ import { action } from '@ember/object';
+ import { inject as service } from '@ember/service';
+ import { task } from 'ember-concurrency';
+ 
+-const SORTS = [
+-    { key: 'orders_completed', label: 'Orders' },
+-    { key: 'on_time', label: 'On-time' },
+-    { key: 'distance', label: 'Distance' },
+-];
+-
+ export default class WidgetTopDriversComponent extends Component {
+     static widgetId = 'fleet-ops-top-drivers-widget';
+ 
+     @service fetch;
++    @service intl;
+ 
+     @tracked sortBy = 'orders_completed';
+     @tracked data = null;
+     @tracked error = null;
+ 
+-    sorts = SORTS;
++    get sorts() {
++        return [
++            { key: 'orders_completed', label: this.intl?.t ? this.intl.t('widget.top-drivers.sort-orders', { default: 'Pedidos' }) : 'Pedidos' },
++            { key: 'on_time', label: this.intl?.t ? this.intl.t('widget.top-drivers.sort-on-time', { default: 'A tiempo' }) : 'A tiempo' },
++            { key: 'distance', label: this.intl?.t ? this.intl.t('widget.top-drivers.sort-distance', { default: 'Distancia' }) : 'Distancia' },
++        ];
++    }
+ 
+     constructor() {
+         super(...arguments);
 diff --git a/addon/components/work-order/details.hbs b/addon/components/work-order/details.hbs
 index 1ee3ecf..8edd2f3 100644
 --- a/addon/components/work-order/details.hbs
@@ -7271,10 +7934,10 @@ index 7639bdf..63684aa 100644
      /**
       * The currently-selected map provider key (e.g. 'leaflet' or 'google').
 diff --git a/addon/controllers/settings/notifications.js b/addon/controllers/settings/notifications.js
-index cf92a6b..69ebaad 100644
+index cf92a6b..b86cbb5 100644
 --- a/addon/controllers/settings/notifications.js
 +++ b/addon/controllers/settings/notifications.js
-@@ -20,6 +20,13 @@ export default class SettingsNotificationsController extends Controller {
+@@ -20,6 +20,29 @@ export default class SettingsNotificationsController extends Controller {
       */
      @service fetch;
  
@@ -7285,10 +7948,123 @@ index cf92a6b..69ebaad 100644
 +     */
 +    @service intl;
 +
++    /**
++     * The notification registry list from backend.
++     *
++     * @memberof ConsoleAdminNotificationsController
++     * @var {Array}
++     */
++    @tracked registry = [];
++
++    /**
++     * The notifiables list from backend.
++     *
++     * @memberof ConsoleAdminNotificationsController
++     * @var {Array}
++     */
++    @tracked notifiables = [];
++
      /**
       * The notification settings value JSON.
       *
-@@ -95,7 +102,7 @@ export default class SettingsNotificationsController extends Controller {
+@@ -45,6 +68,96 @@ export default class SettingsNotificationsController extends Controller {
+         this.getSettings.perform();
+     }
+ 
++    /**
++     * Localized registry items with translated name and description.
++     */
++    get localizedRegistry() {
++        return (this.registry ?? []).map((notification) => {
++            const slug = this.notificationSlug(notification);
++            const defaultName = notification.name;
++            const defaultDesc = notification.description;
++
++            const displayName = this.intl?.t
++                ? this.intl.t(`settings.notifications.events.${slug}.name`, { default: defaultName })
++                : defaultName;
++
++            const displayDescription = this.intl?.t
++                ? this.intl.t(`settings.notifications.events.${slug}.description`, { default: defaultDesc })
++                : defaultDesc;
++
++            return {
++                ...notification,
++                displayName,
++                displayDescription,
++            };
++        });
++    }
++
++    /**
++     * Generates a dasherized slug from notification definition class name or name.
++     */
++    notificationSlug(notification) {
++        if (notification.definition) {
++            const parts = notification.definition.split('\\');
++            const className = parts[parts.length - 1];
++            return className.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
++        }
++        return (notification.name ?? '').toLowerCase().replace(/[\s_]+/g, '-');
++    }
++
++    /**
++     * Localized notifiables list with translated labels for dynamic and concrete types.
++     */
++    get localizedNotifiables() {
++        return (this.notifiables ?? []).map((notifiable) => {
++            let label = notifiable.label ?? '';
++            if (label.startsWith('Dynamic: ')) {
++                const type = label.replace('Dynamic: ', '').toLowerCase().trim();
++                const translatedType = this.intl?.t
++                    ? this.intl.t(`settings.notifications.notifiables.${type}`, { default: type })
++                    : type;
++                label = `Dinámico: ${translatedType}`;
++            } else if (label.startsWith('User: ')) {
++                label = label.replace('User: ', 'Usuario: ');
++            } else if (label.startsWith('Driver: ')) {
++                label = label.replace('Driver: ', 'Conductor: ');
++            } else if (label.startsWith('Contact: ')) {
++                label = label.replace('Contact: ', 'Contacto: ');
++            } else if (label.startsWith('Customer: ')) {
++                label = label.replace('Customer: ', 'Cliente: ');
++            }
++
++            return {
++                ...notifiable,
++                label,
++            };
++        });
++    }
++
++    /**
++     * Notification settings where notifiable objects are reconciled with localizedNotifiables.
++     */
++    get activeNotificationSettings() {
++        const settings = this.notificationSettings;
++        if (!settings || typeof settings !== 'object') return {};
++        const notifiables = this.localizedNotifiables;
++        const localized = {};
++        for (const [key, config] of Object.entries(settings)) {
++            if (config && Array.isArray(config.notifiables)) {
++                localized[key] = {
++                    ...config,
++                    notifiables: config.notifiables.map((item) => {
++                        const found = notifiables.find((n) => n.value === item.value || n.key === item.key);
++                        return found ?? item;
++                    }),
++                };
++            } else {
++                localized[key] = config;
++            }
++        }
++        return localized;
++    }
++
+     /**
+      * Selectes notifiables for settings.
+      *
+@@ -95,7 +208,7 @@ export default class SettingsNotificationsController extends Controller {
  
          try {
              yield this.fetch.post('fleet-ops/settings/notification-settings', { notificationSettings });
@@ -7464,6 +8240,292 @@ index 4a8a89f..3257c8b 100644
          return String(value ?? '')
              .replace(/[_-]+/g, ' ')
              .replace(/\s+/g, ' ')
+diff --git a/addon/extension.js b/addon/extension.js
+index 0427f7d..9a24bc5 100644
+--- a/addon/extension.js
++++ b/addon/extension.js
+@@ -158,7 +158,7 @@ export default {
+         );
+ 
+         // Register widgets
+-        this.registerWidgets(widgetService);
++        this.registerWidgets(widgetService, intlService);
+ 
+         // Create registries
+         this.createRegistries(registryService);
+@@ -208,7 +208,9 @@ export default {
+         }
+     },
+ 
+-    registerWidgets(widgetService) {
++    registerWidgets(widgetService, intl) {
++        const t = (key, fallback) => (intl?.t ? intl.t(key, { default: fallback }) : fallback);
++
+         // `order` places a default widget on the default dashboard, which mixes widgets from
+         // every extension; the grid fills rows first-fit, lowest order first (widgets without
+         // one follow). The default layout is:
+@@ -223,12 +225,12 @@ export default {
+             // below supersede it. Scheduled for removal in the next major.
+             new Widget({
+                 id: 'fleet-ops-key-metrics-widget',
+-                name: 'Fleet-Ops Metrics (Legacy)',
+-                description: 'DEPRECATED — replaced by individual KPI tile widgets. Will be removed in the next major release.',
++                name: t('widget.key-metrics-legacy.title', 'Métricas de Fleet-Ops (Heredado)'),
++                description: t('widget.key-metrics-legacy.description', 'DEPRECATED — replaced by individual KPI tile widgets. Will be removed in the next major release.'),
+                 icon: 'truck',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/fleet-ops-key-metrics'),
+                 grid_options: { w: 12, h: 8, minW: 8, minH: 6 },
+-                category: 'Legacy',
++                category: t('widget.categories.legacy', 'Heredado'),
+                 default: false,
+             }),
+ 
+@@ -236,191 +238,191 @@ export default {
+             // fixed slug pointing at GET /fleet-ops/metrics/{slug}.
+             new Widget({
+                 id: 'fleet-ops-kpi-earnings-widget',
+-                name: 'Earnings (30d)',
+-                description: 'Total earnings over the last 30 days with trend.',
++                name: t('widget.kpi-earnings.title', 'Ganancias (30d)'),
++                description: t('widget.kpi-earnings.description', 'Total earnings over the last 30 days with trend.'),
+                 icon: 'sack-dollar',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/kpi-earnings'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: t('widget.categories.kpi-tiles', 'Mosaicos de KPI'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-kpi-aov-widget',
+-                name: 'Avg Order Value (30d)',
+-                description: 'Average revenue per completed order with trend.',
++                name: t('widget.kpi-aov.title', 'Valor prom. por pedido (30d)'),
++                description: t('widget.kpi-aov.description', 'Average revenue per completed order with trend.'),
+                 icon: 'receipt',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/kpi-aov'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: t('widget.categories.kpi-tiles', 'Mosaicos de KPI'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-kpi-distance-widget',
+-                name: 'Distance Travelled (30d)',
+-                description: 'Total kilometres delivered over the last 30 days.',
++                name: t('widget.kpi-distance.title', 'Distancia recorrida (30d)'),
++                description: t('widget.kpi-distance.description', 'Total kilometres delivered over the last 30 days.'),
+                 icon: 'route',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/kpi-distance'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: t('widget.categories.kpi-tiles', 'Mosaicos de KPI'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-kpi-active-orders-widget',
+-                name: 'Active Orders',
+-                description: 'Live count of orders currently in flight.',
++                name: t('widget.kpi-active-orders.title', 'Pedidos activos'),
++                description: t('widget.kpi-active-orders.description', 'Live count of orders currently in flight.'),
+                 icon: 'bolt',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/kpi-active-orders'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: t('widget.categories.kpi-tiles', 'Mosaicos de KPI'),
+                 order: 30,
+                 default: true,
+             }),
+             new Widget({
+                 id: 'fleet-ops-kpi-drivers-online-widget',
+-                name: 'Drivers Online',
+-                description: 'Live count of drivers currently active on a job.',
++                name: t('widget.kpi-drivers-online.title', 'Conductores en línea'),
++                description: t('widget.kpi-drivers-online.description', 'Live count of drivers currently active on a job.'),
+                 icon: 'id-card',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/kpi-drivers-online'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: t('widget.categories.kpi-tiles', 'Mosaicos de KPI'),
+                 order: 40,
+                 default: true,
+             }),
+             new Widget({
+                 id: 'fleet-ops-radar-widget',
+-                name: 'Radar',
+-                description: 'What needs a decision across the fleet right now: open, overdue and snoozed items, linking to Radar.',
++                name: t('widget.radar.title', 'Radar'),
++                description: t('widget.radar.description', 'What needs a decision across the fleet right now: open, overdue and snoozed items, linking to Radar.'),
+                 icon: 'satellite-dish',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/radar'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: t('widget.categories.kpi-tiles', 'Mosaicos de KPI'),
+                 order: 10,
+                 default: true,
+             }),
+             new Widget({
+                 id: 'fleet-ops-kpi-open-issues-widget',
+-                name: 'Open Issues',
+-                description: 'Pending issues across the fleet (lower is better).',
++                name: t('widget.kpi-open-issues.title', 'Problemas abiertos'),
++                description: t('widget.kpi-open-issues.description', 'Pending issues across the fleet (lower is better).'),
+                 icon: 'triangle-exclamation',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/kpi-open-issues'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: t('widget.categories.kpi-tiles', 'Mosaicos de KPI'),
+                 default: false,
+             }),
+ 
+             // Analytics widgets — composed visualizations powered by /fleet-ops/analytics/*.
+             new Widget({
+                 id: 'fleet-ops-operations-pulse-widget',
+-                name: 'Operations Pulse',
+-                description: 'Live operational snapshot with day-over-day deltas.',
++                name: t('widget.operations-pulse.title', 'Pulso de operaciones'),
++                description: t('widget.operations-pulse.description', 'Live operational snapshot with day-over-day deltas.'),
+                 icon: 'wave-pulse',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/operations-pulse'),
+                 grid_options: { w: 6, h: 6, minW: 5, minH: 5 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-live-fleet-widget',
+-                name: 'Live Fleet Map',
+-                description: 'Real-time driver positions and active routes.',
++                name: t('widget.live-fleet.title', 'Mapa de flota en vivo'),
++                description: t('widget.live-fleet.description', 'Real-time driver positions and active routes.'),
+                 icon: 'map-location-dot',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/live-fleet'),
+                 grid_options: { w: 12, h: 12, minW: 8, minH: 8 },
+-                category: 'Maps',
++                category: t('widget.categories.maps', 'Mapas'),
+                 order: 50,
+                 default: true,
+             }),
+             new Widget({
+                 id: 'fleet-ops-revenue-trend-widget',
+-                name: 'Revenue Trend',
+-                description: 'Revenue over time with period comparison.',
++                name: t('widget.revenue-trend.title', 'Tendencia de ingresos'),
++                description: t('widget.revenue-trend.description', 'Revenue over time with period comparison.'),
+                 icon: 'chart-line',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/revenue-trend'),
+                 grid_options: { w: 4, h: 9, minW: 4, minH: 7 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 order: 60,
+                 default: true,
+             }),
+             new Widget({
+                 id: 'fleet-ops-orders-by-status-widget',
+-                name: 'Order Volume by Status',
+-                description: 'Daily stacked bars of order counts by status.',
++                name: t('widget.orders-by-status.title', 'Volumen de pedidos por estado'),
++                description: t('widget.orders-by-status.description', 'Daily stacked bars of order counts by status.'),
+                 icon: 'chart-column',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/orders-by-status'),
+                 grid_options: { w: 6, h: 6, minW: 5, minH: 5 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-on-time-delivery-widget',
+-                name: 'On-Time Delivery',
+-                description: 'Percentage of deliveries completed within the SLA window.',
++                name: t('widget.on-time-delivery.title', 'Entregas a tiempo'),
++                description: t('widget.on-time-delivery.description', 'Percentage of deliveries completed within the SLA window.'),
+                 icon: 'clock',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/on-time-delivery'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-top-drivers-widget',
+-                name: 'Top Drivers',
+-                description: 'Driver leaderboard sortable by orders, on-time %, or distance.',
++                name: t('widget.top-drivers.title', 'Mejores conductores'),
++                description: t('widget.top-drivers.description', 'Driver leaderboard sortable by orders, on-time %, or distance.'),
+                 icon: 'medal',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/top-drivers'),
+                 grid_options: { w: 4, h: 9, minW: 4, minH: 6 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 order: 70,
+                 default: true,
+             }),
+             new Widget({
+                 id: 'fleet-ops-fuel-efficiency-widget',
+-                name: 'Fuel Cost & Efficiency',
+-                description: 'Weekly fuel cost and cost-per-km trend.',
++                name: t('widget.fuel-efficiency.title', 'Costo y eficiencia de combustible'),
++                description: t('widget.fuel-efficiency.description', 'Weekly fuel cost and cost-per-km trend.'),
+                 icon: 'gas-pump',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/fuel-efficiency'),
+                 grid_options: { w: 6, h: 6, minW: 5, minH: 5 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-fuel-providers-widget',
+-                name: 'Fuel Integrations',
+-                description: 'Provider spend, unmatched transactions, and sync health.',
++                name: t('widget.fuel-providers.title', 'Integraciones de combustible'),
++                description: t('widget.fuel-providers.description', 'Provider spend, unmatched transactions, and sync health.'),
+                 icon: 'gas-pump',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/fuel-providers'),
+                 grid_options: { w: 4, h: 5, minW: 4, minH: 5 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-issues-insights-widget',
+-                name: 'Issues Insights',
+-                description: 'Open/resolved issues, category breakdown, and average resolution time.',
++                name: t('widget.issues-insights.title', 'Análisis de incidencias'),
++                description: t('widget.issues-insights.description', 'Open/resolved issues, category breakdown, and average resolution time.'),
+                 icon: 'triangle-exclamation',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/issues-insights'),
+                 grid_options: { w: 6, h: 6, minW: 5, minH: 5 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 default: false,
+             }),
+             new Widget({
+                 id: 'fleet-ops-maintenance-overview-widget',
+-                name: 'Maintenance Overview',
+-                description: 'Overdue, scheduled, and YTD maintenance spend.',
++                name: t('widget.maintenance-overview.title', 'Resumen de mantenimiento'),
++                description: t('widget.maintenance-overview.description', 'Overdue, scheduled, and YTD maintenance spend.'),
+                 icon: 'wrench',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/maintenance-overview'),
+                 grid_options: { w: 4, h: 9, minW: 4, minH: 6 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 order: 80,
+                 default: true,
+             }),
+             new Widget({
+                 id: 'fleet-ops-geofence-violations-widget',
+-                name: 'Geofence Violations',
+-                description: 'Dwell-time outliers and geofence event hotspots.',
++                name: t('widget.geofence-violations.title', 'Infracciones de geocercas'),
++                description: t('widget.geofence-violations.description', 'Dwell-time outliers and geofence event hotspots.'),
+                 icon: 'location-crosshairs',
+                 component: new ExtensionComponent('@fleetbase/fleetops-engine', 'widget/geofence-violations'),
+                 grid_options: { w: 6, h: 6, minW: 5, minH: 5 },
+-                category: 'Analytics',
++                category: t('widget.categories.analytics', 'Analítica'),
+                 default: false,
+             }),
+         ];
 diff --git a/addon/services/device-event-actions.js b/addon/services/device-event-actions.js
 index 67f4307..4278c82 100644
 --- a/addon/services/device-event-actions.js
@@ -9024,6 +10086,29 @@ index 165d43f..b35f167 100644
                                      <small>{{doc.description}}</small>
                                  </span>
                              </button>
+diff --git a/addon/templates/settings/notifications.hbs b/addon/templates/settings/notifications.hbs
+index b8d8173..d5850dd 100644
+--- a/addon/templates/settings/notifications.hbs
++++ b/addon/templates/settings/notifications.hbs
+@@ -14,14 +14,14 @@
+     <div class="container mx-auto h-screen">
+         <div class="max-w-3xl my-10 mx-auto space-y-6">
+             <ContentPanel @title={{t "settings.notifications.configure-notifications"}} @open={{true}} @wrapperClass="bordered-classic">
+-                {{#each this.registry as |notification|}}
+-                    <InputGroup @name={{titleize notification.name}} @helpText={{notification.description}}>
++                {{#each this.localizedRegistry as |notification|}}
++                    <InputGroup @name={{notification.displayName}} @helpText={{notification.displayDescription}}>
+                         <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                             <PowerSelectMultiple
+                                 @searchEnabled={{true}}
+                                 @searchField="label"
+-                                @options={{this.notifiables}}
+-                                @selected={{get this.notificationSettings (concat (get-notification-key notification.definition notification.name) ".notifiables")}}
++                                @options={{this.localizedNotifiables}}
++                                @selected={{get this.activeNotificationSettings (concat (get-notification-key notification.definition notification.name) ".notifiables")}}
+                                 @onChange={{fn this.onSelectNotifiable notification}}
+                                 @placeholder={{t "settings.notifications.select-notifiables"}}
+                                 @triggerClass="form-select form-input form-input-sm flex-1"
 diff --git a/addon/templates/settings/payments/index.hbs b/addon/templates/settings/payments/index.hbs
 index fbc626f..929367c 100644
 --- a/addon/templates/settings/payments/index.hbs

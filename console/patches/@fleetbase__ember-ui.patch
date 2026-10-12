@@ -93,6 +93,37 @@ index cb72971..00b4e72 100644
              confirm: async (modal) => {
                  modal.startLoading();
  
+diff --git a/addon/components/dashboard/widget-card.js b/addon/components/dashboard/widget-card.js
+index a89811c..1602300 100644
+--- a/addon/components/dashboard/widget-card.js
++++ b/addon/components/dashboard/widget-card.js
+@@ -1,4 +1,5 @@
+ import Component from '@glimmer/component';
++import { inject as service } from '@ember/service';
+ 
+ /**
+  * Single card in the widget picker.
+@@ -8,6 +9,8 @@ import Component from '@glimmer/component';
+  *                          @onHover={{fn}} @onUnhover={{fn}} />
+  */
+ export default class DashboardWidgetCardComponent extends Component {
++    @service intl;
++
+     get isAdded() {
+         return (this.args.addedCount ?? 0) > 0;
+     }
+@@ -33,7 +36,10 @@ export default class DashboardWidgetCardComponent extends Component {
+      */
+     get addedShortBadge() {
+         const n = this.args.addedCount;
+-        return n > 1 ? `Added ×${n}` : 'Added';
++        if (n > 1) {
++            return this.intl?.t ? this.intl.t('dashboard-widget-panel.badge-added-count', { count: n, default: `Agregado ×${n}` }) : `Agregado ×${n}`;
++        }
++        return this.intl?.t ? this.intl.t('dashboard-widget-panel.badge-added', { default: 'Agregado' }) : 'Agregado';
+     }
+ 
+     /** Subtle Tailwind chip colour driven by the registry `category`. */
 diff --git a/addon/components/report-builder.hbs b/addon/components/report-builder.hbs
 index 423ac1b..40afd25 100644
 --- a/addon/components/report-builder.hbs
