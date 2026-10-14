@@ -4,42 +4,81 @@
  */
 
 :root {
-    /* Tipografía: Familias */
-    --font-sans: 'Inter', system-ui, -apple-system, 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
-    --font-mono: ui-monospace, 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    /* --- Sistema Tipográfico Unificado (Single Source of Truth) --- */
+    --font-family-sans: 'Outfit', -apple-system, 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+    --font-family-mono: 'Courier New', 'Courier', monospace;
+    --font-main: var(--font-family-sans);
+    --font-title: var(--font-family-sans);
+    --font-body: var(--font-family-sans);
 
-    /* Tipografía: Escala de Tamaños */
-    --text-2xs: 0.625rem;
-    --text-xs: 0.75rem;
-    --text-sm: 0.875rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --text-3xl: 1.875rem;
+    /* Mapeo de compatibilidad con Tailwind y componentes existentes */
+    --font-sans: var(--font-family-sans);
+    --font-mono: var(--font-family-mono);
 
-    /* Tipografía: Altura de Línea (Line Heights) */
-    --leading-none: 1;
-    --leading-tight: 1.25;
-    --leading-snug: 1.375;
-    --leading-normal: 1.5;
-    --leading-relaxed: 1.625;
-    --leading-loose: 2;
+    /* Escala de Tamaños Armónica (Design Tokens) */
+    --text-2xs: 10px; /* Micro etiquetas, badges secundarios */
+    --text-xs: 11px; /* Metadatos, fechas, notas al pie */
+    --text-sm: 12px; /* Tablas densas, campos secundarios */
+    --text-body-sm: 13px; /* Textos compactos, inputs densos */
+    --text-base: 14px; /* Lectura base, inputs estándar, párrafos */
+    --text-md: 15px; /* Subtítulos compactos, botones secundarios */
+    --text-lg: 16px; /* Subtítulos destacados, botones principales */
+    --text-xl: 18px; /* Títulos de tarjetas, precios destacados */
+    --text-2xl: 22px; /* Títulos de secciones */
+    --text-3xl: 28px; /* Encabezados medianos / destacados */
+    --text-4xl: 34px; /* Títulos display */
+    --text-hero: clamp(2rem, 5vw, 3.5rem); /* Títulos hero fluidos */
 
-    /* Tipografía: Pesos */
-    --font-weight-normal: 400;
+    /* Pesos Tipográficos Semánticos */
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
-    --font-weight-extrabold: 800;
+    --font-weight-black: 900;
+    --font-weight-normal: var(--font-weight-regular);
+    --font-weight-extrabold: var(--font-weight-black);
 
-    /* Tipografía: Tracking (Letter Spacing) */
+    /* Alturas de Línea (Line Heights) */
+    --leading-none: 1;
+    --leading-tight: 1.25;
+    --leading-normal: 1.4;
+    --leading-relaxed: 1.6;
+    --leading-snug: 1.35;
+    --leading-loose: 1.75;
+
+    /* Tracking (Letter Spacing) */
     --tracking-tighter: -0.02em;
     --tracking-tight: -0.01em;
     --tracking-normal: 0em;
     --tracking-wide: 0.025em;
     --tracking-wider: 0.05em;
     --tracking-widest: 0.1em;
+
+    /* Escala Tipográfica del Panel Admin mapeada a la Fuente Única de Verdad */
+    --admin-text-micro: var(--text-2xs, 10px);
+    --admin-text-xs: var(--text-xs, 11px);
+    --admin-text-sm: var(--text-sm, 12px);
+    --admin-text-md: var(--text-body-sm, 13px);
+    --admin-text-lg: var(--text-md, 15px);
+    --admin-text-xl: var(--text-xl, 18px);
+
+    /* Pesos Tipográficos Semánticos del Admin */
+    --admin-weight-regular: var(--font-weight-regular, 400);
+    --admin-weight-medium: var(--font-weight-medium, 500);
+    --admin-weight-semibold: var(--font-weight-semibold, 600);
+    --admin-weight-bold: var(--font-weight-bold, 700);
+
+    /* Alturas de Línea Compactas del Admin */
+    --admin-leading-tight: var(--leading-tight, 1.25);
+    --admin-leading-normal: var(--leading-normal, 1.4);
+    --admin-leading-relaxed: var(--leading-relaxed, 1.5);
+}
+
+/* Selector opcional para alternar a Inter desde el HTML: <html data-font="inter"> */
+[data-font='inter'],
+[data-font='inter'] body {
+    --font-family-sans: 'Inter', system-ui, -apple-system, 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
 }
 
 :root,
@@ -140,22 +179,22 @@
    ========================================================== */
 
 /* PuntoShop - Modo Claro */
-:root[data-palette='puntoshop'],
 [data-palette='puntoshop'],
+:root[data-palette='puntoshop'],
 [data-palette='puntoshop'][data-theme='light'],
-[data-palette='puntoshop'] body:not([data-theme='dark']):not(.dark),
-body[data-palette='puntoshop']:not([data-theme='dark']):not(.dark) {
+[data-palette='puntoshop'] body:not([data-theme='dark'], .dark),
+body[data-palette='puntoshop']:not([data-theme='dark'], .dark) {
     /* Superficies y Fondos */
     --bg-canvas: #fafafa;
-    --bg-surface: #ffffff;
+    --bg-surface: #fff;
     --bg-surface-subtle: #f0f0f0;
-    --bg-overlay: #ffffff;
+    --bg-overlay: #fff;
 
     /* Textos */
     --text-primary: #0f0f0f;
-    --text-secondary: #555555;
+    --text-secondary: #555;
     --text-muted: #8c8c8c;
-    --text-inverse: #ffffff;
+    --text-inverse: #fff;
 
     /* Bordes */
     --border-default: #e5e5e5;
@@ -166,7 +205,7 @@ body[data-palette='puntoshop']:not([data-theme='dark']):not(.dark) {
     --brand-default: #d61c22;
     --brand-hover: #b21419;
     --brand-subtle: rgb(214 28 34 / 8%);
-    --brand-text: #ffffff;
+    --brand-text: #fff;
 
     /* Estados y Retroalimentación: Éxito */
     --state-success-bg: #ecfdf5;
@@ -190,13 +229,13 @@ body[data-palette='puntoshop']:not([data-theme='dark']):not(.dark) {
 }
 
 /* PuntoShop - Modo Oscuro */
-:root[data-palette='puntoshop'][data-theme='dark'],
-:root[data-palette='puntoshop'] [data-theme='dark'],
-:root[data-palette='puntoshop'] .dark,
 [data-palette='puntoshop'][data-theme='dark'],
 [data-palette='puntoshop'].dark,
 [data-palette='puntoshop'] [data-theme='dark'],
 [data-palette='puntoshop'] .dark,
+:root[data-palette='puntoshop'][data-theme='dark'],
+:root[data-palette='puntoshop'] [data-theme='dark'],
+:root[data-palette='puntoshop'] .dark,
 body[data-palette='puntoshop'][data-theme='dark'],
 body[data-palette='puntoshop'].dark {
     /* Superficies y Fondos */
@@ -220,7 +259,7 @@ body[data-palette='puntoshop'].dark {
     --brand-default: #d61c22;
     --brand-hover: #e53935;
     --brand-subtle: rgb(214 28 34 / 20%);
-    --brand-text: #ffffff;
+    --brand-text: #fff;
 
     /* Estados y Retroalimentación: Éxito */
     --state-success-bg: rgb(6 78 59 / 40%);
@@ -242,4 +281,3 @@ body[data-palette='puntoshop'].dark {
     --state-info-text: #7dd3fc;
     --state-info-border: #0c4a6e;
 }
-
