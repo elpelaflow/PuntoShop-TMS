@@ -256,3 +256,107 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
     width: 14px;
     height: 14px;
 }
+
+/* ==========================================================
+   BRAND THEME EXTENSIONS (PuntoShop Corporate Identity)
+   Mapeo de componentes base al token semántico --brand-*
+   ========================================================== */
+
+/* 1. Botones Primarios */
+.btn.btn-primary,
+button.btn.btn-primary,
+a.btn.btn-primary,
+.fc-button.btn-primary,
+.fc-button.fb-button-primary,
+.btn.fb-button-primary {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: var(--brand-text, #ffffff) !important;
+}
+
+.btn.btn-primary:hover:not(:disabled),
+button.btn.btn-primary:hover:not(:disabled),
+a.btn.btn-primary:hover:not(:disabled),
+.fc-button.btn-primary:hover:not(:disabled),
+.fc-button.fb-button-primary:hover:not(:disabled),
+.btn.fb-button-primary:hover:not(:disabled) {
+    background-color: var(--brand-hover) !important;
+    border-color: var(--brand-hover) !important;
+    color: var(--brand-text, #ffffff) !important;
+}
+
+.btn.btn-primary:focus,
+button.btn.btn-primary:focus,
+a.btn.btn-primary:focus,
+.fc-button.btn-primary:focus,
+.btn.btn-primary:active,
+button.btn.btn-primary:active,
+a.btn.btn-primary:active {
+    background-color: var(--brand-hover) !important;
+    border-color: var(--brand-hover) !important;
+    color: var(--brand-text, #ffffff) !important;
+    box-shadow: 0 0 0 3px var(--brand-subtle) !important;
+}
+
+body[data-theme='dark'] .btn.btn-primary,
+body[data-theme='dark'] button.btn.btn-primary,
+body[data-theme='dark'] a.btn.btn-primary {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: var(--brand-text, #ffffff) !important;
+}
+
+body[data-theme='dark'] .btn.btn-primary:hover:not(:disabled),
+body[data-theme='dark'] button.btn.btn-primary:hover:not(:disabled),
+body[data-theme='dark'] a.btn.btn-primary:hover:not(:disabled) {
+    background-color: var(--brand-hover) !important;
+    border-color: var(--brand-hover) !important;
+}
+
+/* 2. Botón de Acción Principal del Menú Lateral (Sidebar) */
+.next-sidebar-navigator-primary-action,
+a.next-sidebar-navigator-primary-action,
+button.next-sidebar-navigator-primary-action {
+    background-color: var(--brand-default) !important;
+    color: var(--brand-text, #ffffff) !important;
+}
+
+.next-sidebar-navigator-primary-action:hover,
+a.next-sidebar-navigator-primary-action:hover,
+button.next-sidebar-navigator-primary-action:hover {
+    background-color: var(--brand-hover) !important;
+}
+
+/* 3. Badges Primarios */
+.badge.badge-primary,
+.badge-primary,
+span.badge-primary {
+    background-color: var(--brand-default) !important;
+    color: var(--brand-text, #ffffff) !important;
+}
+
+/* 4. Indicadores de Pestañas Activas (Tab Navigation) */
+:root,
+body {
+    --tab-active-indicator: var(--brand-default);
+    --tab-focus-ring: var(--brand-default);
+}
+
+body[data-theme='dark'] {
+    --tab-active-indicator: var(--brand-default);
+    --tab-focus-ring: var(--brand-default);
+}
+
+/* 5. Controles de Formulario (Checkboxes y Radios Activos) */
+input[type='checkbox']:checked,
+input[type='radio']:checked {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+}
+
+input[type='checkbox']:focus,
+input[type='radio']:focus {
+    --tw-ring-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+}
+
