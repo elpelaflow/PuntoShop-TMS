@@ -108,6 +108,19 @@ index cc534e9..303fe4e 100644
      </div>
      <div class="iam-row-list mt-3">
          {{#each data.buckets as |bucket|}}
+diff --git a/addon/components/widget/iam-kpi-tile.js b/addon/components/widget/iam-kpi-tile.js
+index 3bcc4d6..6f9493f 100644
+--- a/addon/components/widget/iam-kpi-tile.js
++++ b/addon/components/widget/iam-kpi-tile.js
+@@ -47,7 +47,7 @@ export default class WidgetIamKpiTileComponent extends Component {
+             this.data = yield this.fetch.get('metrics/iam/kpis');
+             this.error = null;
+         } catch (error) {
+-            this.error = error?.message ?? 'Unable to load KPI';
++            this.error = error?.message ?? 'No se pudo cargar el indicador KPI';
+         }
+     }
+ }
 diff --git a/addon/components/widget/identity-health.hbs b/addon/components/widget/identity-health.hbs
 index 8218c11..17b4cc9 100644
 --- a/addon/components/widget/identity-health.hbs
@@ -158,6 +171,62 @@ index 8218c11..17b4cc9 100644
          </div>
      </div>
  </Widget::IamDashboardWidget>
+diff --git a/addon/components/widget/kpi-active-users.hbs b/addon/components/widget/kpi-active-users.hbs
+index 2511e62..c05aa35 100644
+--- a/addon/components/widget/kpi-active-users.hbs
++++ b/addon/components/widget/kpi-active-users.hbs
+@@ -1 +1 @@
+-<Widget::IamKpiTile @metric="active_users" @title="Active Users" @icon="user-check" @accent="green" @footnote="Current access" ...attributes />
++<Widget::IamKpiTile @metric="active_users" @title={{t "iam.components.widget.kpi-active-users.title"}} @icon="user-check" @accent="green" @footnote={{t "iam.components.widget.kpi-active-users.footnote"}} ...attributes />
+diff --git a/addon/components/widget/kpi-dormant-users.hbs b/addon/components/widget/kpi-dormant-users.hbs
+index 2774117..b3172bc 100644
+--- a/addon/components/widget/kpi-dormant-users.hbs
++++ b/addon/components/widget/kpi-dormant-users.hbs
+@@ -1 +1 @@
+-<Widget::IamKpiTile @metric="dormant_users" @title="Dormant Users" @icon="bed" @accent="rose" @footnote="No recent login" ...attributes />
++<Widget::IamKpiTile @metric="dormant_users" @title={{t "iam.components.widget.kpi-dormant-users.title"}} @icon="bed" @accent="rose" @footnote={{t "iam.components.widget.kpi-dormant-users.footnote"}} ...attributes />
+diff --git a/addon/components/widget/kpi-inactive-users.hbs b/addon/components/widget/kpi-inactive-users.hbs
+index 05cf8aa..c49cff5 100644
+--- a/addon/components/widget/kpi-inactive-users.hbs
++++ b/addon/components/widget/kpi-inactive-users.hbs
+@@ -1 +1 @@
+-<Widget::IamKpiTile @metric="inactive_users" @title="Inactive Users" @icon="user-slash" @accent="slate" @footnote="Disabled access" ...attributes />
++<Widget::IamKpiTile @metric="inactive_users" @title={{t "iam.components.widget.kpi-inactive-users.title"}} @icon="user-slash" @accent="slate" @footnote={{t "iam.components.widget.kpi-inactive-users.footnote"}} ...attributes />
+diff --git a/addon/components/widget/kpi-mfa-coverage.hbs b/addon/components/widget/kpi-mfa-coverage.hbs
+index 06c2d0b..b0062df 100644
+--- a/addon/components/widget/kpi-mfa-coverage.hbs
++++ b/addon/components/widget/kpi-mfa-coverage.hbs
+@@ -1 +1 @@
+-<Widget::IamKpiTile @metric="mfa_coverage" @title="MFA Coverage" @icon="lock" @accent="violet" @unavailableText="Org enforcement shown" ...attributes />
++<Widget::IamKpiTile @metric="mfa_coverage" @title={{t "iam.components.widget.kpi-mfa-coverage.title"}} @icon="lock" @accent="violet" @unavailableText={{t "iam.components.widget.kpi-mfa-coverage.unavailable-text"}} ...attributes />
+diff --git a/addon/components/widget/kpi-pending-invites.hbs b/addon/components/widget/kpi-pending-invites.hbs
+index 7706f2a..b44e352 100644
+--- a/addon/components/widget/kpi-pending-invites.hbs
++++ b/addon/components/widget/kpi-pending-invites.hbs
+@@ -1 +1 @@
+-<Widget::IamKpiTile @metric="pending_invites" @title="Pending Invites" @icon="envelope-open-text" @accent="amber" @footnote="Awaiting access" ...attributes />
++<Widget::IamKpiTile @metric="pending_invites" @title={{t "iam.components.widget.kpi-pending-invites.title"}} @icon="envelope-open-text" @accent="amber" @footnote={{t "iam.components.widget.kpi-pending-invites.footnote"}} ...attributes />
+diff --git a/addon/components/widget/kpi-policies.hbs b/addon/components/widget/kpi-policies.hbs
+index 4de6884..0670b6b 100644
+--- a/addon/components/widget/kpi-policies.hbs
++++ b/addon/components/widget/kpi-policies.hbs
+@@ -1 +1 @@
+-<Widget::IamKpiTile @metric="policies" @title="Policies" @icon="file-shield" @accent="green" @footnote="Organization managed" ...attributes />
++<Widget::IamKpiTile @metric="policies" @title={{t "iam.components.widget.kpi-policies.title"}} @icon="file-shield" @accent="green" @footnote={{t "iam.components.widget.kpi-policies.footnote"}} ...attributes />
+diff --git a/addon/components/widget/kpi-roles.hbs b/addon/components/widget/kpi-roles.hbs
+index a4b5d75..351fff2 100644
+--- a/addon/components/widget/kpi-roles.hbs
++++ b/addon/components/widget/kpi-roles.hbs
+@@ -1 +1 @@
+-<Widget::IamKpiTile @metric="roles" @title="Roles" @icon="user-tag" @accent="blue" @footnote="Organization managed" ...attributes />
++<Widget::IamKpiTile @metric="roles" @title={{t "iam.components.widget.kpi-roles.title"}} @icon="user-tag" @accent="blue" @footnote={{t "iam.components.widget.kpi-roles.footnote"}} ...attributes />
+diff --git a/addon/components/widget/kpi-verified-users.hbs b/addon/components/widget/kpi-verified-users.hbs
+index 8a5b0e8..5e793c1 100644
+--- a/addon/components/widget/kpi-verified-users.hbs
++++ b/addon/components/widget/kpi-verified-users.hbs
+@@ -1 +1 @@
+-<Widget::IamKpiTile @metric="verified_users" @title="Verified Users" @icon="circle-check" @accent="blue" @footnote="Identity verified" ...attributes />
++<Widget::IamKpiTile @metric="verified_users" @title={{t "iam.components.widget.kpi-verified-users.title"}} @icon="circle-check" @accent="blue" @footnote={{t "iam.components.widget.kpi-verified-users.footnote"}} ...attributes />
 diff --git a/addon/components/widget/policy-surface.hbs b/addon/components/widget/policy-surface.hbs
 index 4abb7b8..e700340 100644
 --- a/addon/components/widget/policy-surface.hbs
@@ -256,6 +325,30 @@ index 44330de..77c3448 100644
          {{/each}}
      </div>
  </Widget::IamDashboardWidget>
+diff --git a/addon/components/widget/user-lifecycle-trend.hbs b/addon/components/widget/user-lifecycle-trend.hbs
+index be93744..178193b 100644
+--- a/addon/components/widget/user-lifecycle-trend.hbs
++++ b/addon/components/widget/user-lifecycle-trend.hbs
+@@ -1,4 +1,4 @@
+-<Widget::IamDashboardWidget @endpoint="user-lifecycle" @title="User Lifecycle Trend" @subtitle="Created, pending, and inactive users" @icon="chart-line" as |data|>
++<Widget::IamDashboardWidget @endpoint="user-lifecycle" @title={{t "iam.components.widget.user-lifecycle-trend.title"}} @subtitle={{t "iam.components.widget.user-lifecycle-trend.subtitle"}} @icon="chart-line" as |data|>
+     <div class="iam-chart-frame">
+         <Chart
+             @type="line"
+diff --git a/addon/components/widget/user-type-creation-trend.hbs b/addon/components/widget/user-type-creation-trend.hbs
+index d8ba7d6..dc394bc 100644
+--- a/addon/components/widget/user-type-creation-trend.hbs
++++ b/addon/components/widget/user-type-creation-trend.hbs
+@@ -1,7 +1,7 @@
+ <Widget::IamDashboardWidget
+     @endpoint="users-by-type-created"
+-    @title="Users by Type Created Over Time"
+-    @subtitle="New identities grouped by user type"
++    @title={{t "iam.components.widget.user-type-creation-trend.title"}}
++    @subtitle={{t "iam.components.widget.user-type-creation-trend.subtitle"}}
+     @icon="chart-column"
+     as |data|
+ >
 diff --git a/addon/controllers/application.js b/addon/controllers/application.js
 index 361216b..b46915d 100644
 --- a/addon/controllers/application.js
@@ -666,10 +759,10 @@ index ed0c565..a421974 100644
          @rightHeaderWrapperClass="iam-dashboard-actions"
 diff --git a/translations/es-mx.yaml b/translations/es-mx.yaml
 new file mode 100644
-index 0000000..754f413
+index 0000000..b0320c6
 --- /dev/null
 +++ b/translations/es-mx.yaml
-@@ -0,0 +1,485 @@
+@@ -0,0 +1,515 @@
 +iam:
 +  extension-name: Gestión de Acceso (IAM)
 +  common:
@@ -716,6 +809,36 @@ index 0000000..754f413
 +    widget:
 +      metrics:
 +        title: Monitoreo de IAM
++      kpi-active-users:
++        title: Usuarios activos
++        footnote: Acceso vigente
++      kpi-pending-invites:
++        title: Invitaciones pendientes
++        footnote: En espera de acceso
++      kpi-inactive-users:
++        title: Usuarios inactivos
++        footnote: Acceso deshabilitado
++      kpi-dormant-users:
++        title: Usuarios sin actividad
++        footnote: Sin accesos recientes
++      kpi-mfa-coverage:
++        title: Cobertura de MFA
++        unavailable-text: Aplicación requerida por organización
++      kpi-roles:
++        title: Roles
++        footnote: Administrados por organización
++      kpi-policies:
++        title: Políticas
++        footnote: Administradas por organización
++      kpi-verified-users:
++        title: Usuarios verificados
++        footnote: Identidad verificada
++      user-type-creation-trend:
++        title: Usuarios por tipo a lo largo del tiempo
++        subtitle: Nuevas identidades agrupadas por tipo de usuario
++      user-lifecycle-trend:
++        title: Tendencia del ciclo de vida de usuarios
++        subtitle: Usuarios creados, pendientes e inactivos
 +    modals:
 +      group-details:
 +        group-name: Nombre del grupo

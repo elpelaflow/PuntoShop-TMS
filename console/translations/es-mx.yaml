@@ -5500,6 +5500,36 @@ iam:
     widget:
       metrics:
         title: Monitoreo de IAM
+      kpi-active-users:
+        title: Usuarios activos
+        footnote: Acceso vigente
+      kpi-pending-invites:
+        title: Invitaciones pendientes
+        footnote: En espera de acceso
+      kpi-inactive-users:
+        title: Usuarios inactivos
+        footnote: Acceso deshabilitado
+      kpi-dormant-users:
+        title: Usuarios sin actividad
+        footnote: Sin accesos recientes
+      kpi-mfa-coverage:
+        title: Cobertura de MFA
+        unavailable-text: Aplicación requerida por organización
+      kpi-roles:
+        title: Roles
+        footnote: Administrados por organización
+      kpi-policies:
+        title: Políticas
+        footnote: Administradas por organización
+      kpi-verified-users:
+        title: Usuarios verificados
+        footnote: Identidad verificada
+      user-type-creation-trend:
+        title: Usuarios por tipo a lo largo del tiempo
+        subtitle: Nuevas identidades agrupadas por tipo de usuario
+      user-lifecycle-trend:
+        title: Tendencia del ciclo de vida de usuarios
+        subtitle: Usuarios creados, pendientes e inactivos
     modals:
       group-details:
         group-name: Nombre del grupo
