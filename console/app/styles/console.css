@@ -258,105 +258,199 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
 }
 
 /* ==========================================================
-   BRAND THEME EXTENSIONS (PuntoShop Corporate Identity)
-   Mapeo de componentes base al token semántico --brand-*
+   PALETA PUNTOSHOP - MAPEO GLOBAL DE MARCA (SCOPED OVERRIDES)
+   Estas reglas SOLO se activan cuando el HTML tiene [data-palette="puntoshop"].
+   Si se quita el atributo o se pone "default", el sistema vuelve 100% al azul.
    ========================================================== */
 
-/* 1. Botones Primarios */
-.btn.btn-primary,
-button.btn.btn-primary,
-a.btn.btn-primary,
-.fc-button.btn-primary,
-.fc-button.fb-button-primary,
-.btn.fb-button-primary {
+/* 1. Botones Primarios y Wrappers (Elimina contornos azules residuales) */
+[data-palette='puntoshop'] .btn-wrapper {
+    --tw-ring-color: transparent !important;
+    --tw-ring-shadow: none !important;
+    --tw-shadow: none !important;
+    box-shadow: none !important;
+}
+
+[data-palette='puntoshop'] .btn.btn-primary,
+[data-palette='puntoshop'] button.btn.btn-primary,
+[data-palette='puntoshop'] a.btn.btn-primary,
+[data-palette='puntoshop'] .fc-button.btn-primary,
+[data-palette='puntoshop'] .fc-button.fb-button-primary,
+[data-palette='puntoshop'] .btn.fb-button-primary,
+[data-palette='puntoshop'] .snm-btn-primary {
     background-color: var(--brand-default) !important;
     border-color: var(--brand-default) !important;
     color: var(--brand-text, #ffffff) !important;
+    --tw-ring-color: transparent !important;
+    --tw-ring-offset-color: transparent !important;
+    outline: none !important;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
 }
 
-.btn.btn-primary:hover:not(:disabled),
-button.btn.btn-primary:hover:not(:disabled),
-a.btn.btn-primary:hover:not(:disabled),
-.fc-button.btn-primary:hover:not(:disabled),
-.fc-button.fb-button-primary:hover:not(:disabled),
-.btn.fb-button-primary:hover:not(:disabled) {
+[data-palette='puntoshop'] .btn.btn-primary:hover:not(:disabled),
+[data-palette='puntoshop'] button.btn.btn-primary:hover:not(:disabled),
+[data-palette='puntoshop'] a.btn.btn-primary:hover:not(:disabled),
+[data-palette='puntoshop'] .fc-button.btn-primary:hover:not(:disabled),
+[data-palette='puntoshop'] .fc-button.fb-button-primary:hover:not(:disabled),
+[data-palette='puntoshop'] .btn.fb-button-primary:hover:not(:disabled),
+[data-palette='puntoshop'] .snm-btn-primary:hover {
     background-color: var(--brand-hover) !important;
     border-color: var(--brand-hover) !important;
     color: var(--brand-text, #ffffff) !important;
 }
 
-.btn.btn-primary:focus,
-button.btn.btn-primary:focus,
-a.btn.btn-primary:focus,
-.fc-button.btn-primary:focus,
-.btn.btn-primary:active,
-button.btn.btn-primary:active,
-a.btn.btn-primary:active {
+[data-palette='puntoshop'] .btn.btn-primary:focus,
+[data-palette='puntoshop'] button.btn.btn-primary:focus,
+[data-palette='puntoshop'] a.btn.btn-primary:focus,
+[data-palette='puntoshop'] .fc-button.btn-primary:focus,
+[data-palette='puntoshop'] .btn.btn-primary:active,
+[data-palette='puntoshop'] button.btn.btn-primary:active,
+[data-palette='puntoshop'] a.btn.btn-primary:active {
     background-color: var(--brand-hover) !important;
     border-color: var(--brand-hover) !important;
     color: var(--brand-text, #ffffff) !important;
-    box-shadow: 0 0 0 3px var(--brand-subtle) !important;
+    box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 4px var(--brand-default) !important;
+    outline: none !important;
 }
 
-body[data-theme='dark'] .btn.btn-primary,
-body[data-theme='dark'] button.btn.btn-primary,
-body[data-theme='dark'] a.btn.btn-primary {
+[data-palette='puntoshop'][data-theme='dark'] .btn.btn-primary,
+[data-palette='puntoshop'] .dark .btn.btn-primary,
+[data-palette='puntoshop'] body[data-theme='dark'] .btn.btn-primary {
     background-color: var(--brand-default) !important;
     border-color: var(--brand-default) !important;
     color: var(--brand-text, #ffffff) !important;
 }
 
-body[data-theme='dark'] .btn.btn-primary:hover:not(:disabled),
-body[data-theme='dark'] button.btn.btn-primary:hover:not(:disabled),
-body[data-theme='dark'] a.btn.btn-primary:hover:not(:disabled) {
+[data-palette='puntoshop'][data-theme='dark'] .btn.btn-primary:hover:not(:disabled),
+[data-palette='puntoshop'] .dark .btn.btn-primary:hover:not(:disabled),
+[data-palette='puntoshop'] body[data-theme='dark'] .btn.btn-primary:hover:not(:disabled) {
     background-color: var(--brand-hover) !important;
     border-color: var(--brand-hover) !important;
 }
 
-/* 2. Botón de Acción Principal del Menú Lateral (Sidebar) */
-.next-sidebar-navigator-primary-action,
-a.next-sidebar-navigator-primary-action,
-button.next-sidebar-navigator-primary-action {
+/* 2. Redirección de Utilidades Azules y Sky de Tailwind (FleetOps, IAM, Developers, Navbar) */
+/* Fondos sólidos */
+[data-palette='puntoshop'] .bg-blue-600,
+[data-palette='puntoshop'] .bg-blue-500,
+[data-palette='puntoshop'] .bg-blue-700,
+[data-palette='puntoshop'] .bg-sky-500,
+[data-palette='puntoshop'] .bg-sky-600 {
     background-color: var(--brand-default) !important;
-    color: var(--brand-text, #ffffff) !important;
 }
 
-.next-sidebar-navigator-primary-action:hover,
-a.next-sidebar-navigator-primary-action:hover,
-button.next-sidebar-navigator-primary-action:hover {
+[data-palette='puntoshop'] .hover\:bg-blue-700:hover,
+[data-palette='puntoshop'] .hover\:bg-blue-600:hover,
+[data-palette='puntoshop'] .hover\:bg-sky-600:hover,
+[data-palette='puntoshop'] .hover\:bg-sky-400:hover {
     background-color: var(--brand-hover) !important;
 }
 
-/* 3. Badges Primarios */
-.badge.badge-primary,
-.badge-primary,
-span.badge-primary {
-    background-color: var(--brand-default) !important;
-    color: var(--brand-text, #ffffff) !important;
+/* Fondos sutiles (badges, chips suaves, selecciones) */
+[data-palette='puntoshop'] .bg-blue-50,
+[data-palette='puntoshop'] .bg-blue-100,
+[data-palette='puntoshop'] .bg-blue-200,
+[data-palette='puntoshop'] .bg-sky-50,
+[data-palette='puntoshop'] .bg-sky-100 {
+    background-color: var(--brand-subtle) !important;
 }
 
-/* 4. Indicadores de Pestañas Activas (Tab Navigation) */
-:root,
-body {
-    --tab-active-indicator: var(--brand-default);
-    --tab-focus-ring: var(--brand-default);
+/* Textos de acento */
+[data-palette='puntoshop'] .text-blue-600,
+[data-palette='puntoshop'] .text-blue-500,
+[data-palette='puntoshop'] .text-blue-700,
+[data-palette='puntoshop'] .text-sky-500,
+[data-palette='puntoshop'] .text-sky-600,
+[data-palette='puntoshop'] .text-sky-400 {
+    color: var(--brand-default) !important;
 }
 
-body[data-theme='dark'] {
-    --tab-active-indicator: var(--brand-default);
-    --tab-focus-ring: var(--brand-default);
+[data-palette='puntoshop'] .hover\:text-blue-700:hover,
+[data-palette='puntoshop'] .hover\:text-blue-600:hover,
+[data-palette='puntoshop'] .hover\:text-sky-600:hover {
+    color: var(--brand-hover) !important;
 }
 
-/* 5. Controles de Formulario (Checkboxes y Radios Activos) */
-input[type='checkbox']:checked,
-input[type='radio']:checked {
-    background-color: var(--brand-default) !important;
+/* Bordes */
+[data-palette='puntoshop'] .border-blue-600,
+[data-palette='puntoshop'] .border-blue-500,
+[data-palette='puntoshop'] .border-blue-700,
+[data-palette='puntoshop'] .border-sky-500,
+[data-palette='puntoshop'] .border-sky-600 {
     border-color: var(--brand-default) !important;
 }
 
-input[type='checkbox']:focus,
-input[type='radio']:focus {
+[data-palette='puntoshop'] .border-blue-200,
+[data-palette='puntoshop'] .border-blue-300,
+[data-palette='puntoshop'] .border-sky-200,
+[data-palette='puntoshop'] .border-sky-300 {
+    border-color: var(--brand-subtle) !important;
+}
+
+/* Anillos y Foco */
+[data-palette='puntoshop'] .ring-blue-500,
+[data-palette='puntoshop'] .ring-blue-600,
+[data-palette='puntoshop'] .ring-sky-500,
+[data-palette='puntoshop'] .focus\:ring-blue-500:focus,
+[data-palette='puntoshop'] .focus\:ring-sky-500:focus {
     --tw-ring-color: var(--brand-default) !important;
+}
+
+/* 3. Acciones de Navegación, Sidebar y Pestañas */
+[data-palette='puntoshop'] .next-sidebar-navigator-primary-action,
+[data-palette='puntoshop'] a.next-sidebar-navigator-primary-action,
+[data-palette='puntoshop'] button.next-sidebar-navigator-primary-action {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .next-sidebar-navigator-primary-action:hover,
+[data-palette='puntoshop'] a.next-sidebar-navigator-primary-action:hover,
+[data-palette='puntoshop'] button.next-sidebar-navigator-primary-action:hover {
+    background-color: var(--brand-hover) !important;
+}
+
+[data-palette='puntoshop'] {
+    --tab-active-indicator: var(--brand-default);
+    --tab-focus-ring: var(--brand-default);
+}
+
+[data-palette='puntoshop'] .tab-navigation .tab-item.is-active,
+[data-palette='puntoshop'] .tab-navigation[data-style='github'] .tab-item.is-active,
+[data-palette='puntoshop'] .tab-navigation[data-style='obsidian'] .tab-item.is-active {
     border-color: var(--brand-default) !important;
+    color: var(--brand-default) !important;
+}
+
+/* 4. Badges, Pills y Controles de Formulario */
+[data-palette='puntoshop'] .badge.badge-primary,
+[data-palette='puntoshop'] .badge-primary,
+[data-palette='puntoshop'] span.badge-primary,
+[data-palette='puntoshop'] .pill.pill-primary {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+    border-color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] input[type='checkbox']:checked,
+[data-palette='puntoshop'] input[type='radio']:checked {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] input[type='checkbox']:focus,
+[data-palette='puntoshop'] input[type='radio']:focus,
+[data-palette='puntoshop'] .form-input:focus,
+[data-palette='puntoshop'] .form-select:focus,
+[data-palette='puntoshop'] textarea:focus {
+    --tw-ring-color: var(--brand-subtle) !important;
+    border-color: var(--brand-default) !important;
+}
+
+/* Spinners y elementos de carga */
+[data-palette='puntoshop'] .fa-spin.text-sky-500,
+[data-palette='puntoshop'] .fa-spin.text-blue-500,
+[data-palette='puntoshop'] .fa-spin.text-blue-600 {
+    color: var(--brand-default) !important;
 }
 
