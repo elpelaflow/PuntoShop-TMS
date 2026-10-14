@@ -1,3 +1,167 @@
+diff --git a/addon/components/gateway/catalog-card.hbs b/addon/components/gateway/catalog-card.hbs
+index c05d09a..c62a258 100644
+--- a/addon/components/gateway/catalog-card.hbs
++++ b/addon/components/gateway/catalog-card.hbs
+@@ -14,7 +14,7 @@
+                 <div class="truncate text-[10px] uppercase text-gray-400 dark:text-gray-500">{{@driver.type}}</div>
+             </div>
+         </div>
+-        <Badge @status={{if @driver.connected "success" "info"}} @hideStatusDot={{true}}>{{if @driver.connected "Connected" "Available"}}</Badge>
++        <Badge @status={{if @driver.connected "success" "info"}} @hideStatusDot={{true}}>{{if @driver.connected (t "ledger.payments.gateways.hub.connected" fallback="Conectada") (t "ledger.payments.gateways.hub.available" fallback="Disponible")}}</Badge>
+     </div>
+ 
+     <p class="mt-3 line-clamp-2 text-xs leading-5 text-gray-500 dark:text-gray-300">{{@driver.description}}</p>
+@@ -23,12 +23,12 @@
+         {{#each @driver.capabilities as |capability|}}
+             <Badge @color="blue">{{capability}}</Badge>
+         {{else}}
+-            <Badge @color="gray">Manual</Badge>
++            <Badge @color="gray">{{t "ledger.payments.gateways.hub.manual" fallback="Manual"}}</Badge>
+         {{/each}}
+     </div>
+ 
+     <div class="mt-auto flex items-center justify-between pt-3 text-xs font-semibold text-blue-600 dark:text-blue-300">
+-        <span>{{if @driver.connected "Manage gateway" "Connect gateway"}}</span>
++        <span>{{if @driver.connected (t "ledger.payments.gateways.hub.manage-gateway" fallback="Administrar pasarela") (t "ledger.payments.gateways.hub.connect-gateway" fallback="Conectar pasarela")}}</span>
+         <FaIcon @icon="arrow-right" class="transition group-hover:translate-x-0.5" />
+     </div>
+ </button>
+diff --git a/addon/components/gateway/hub.hbs b/addon/components/gateway/hub.hbs
+index 9ac2251..eed26b0 100644
+--- a/addon/components/gateway/hub.hbs
++++ b/addon/components/gateway/hub.hbs
+@@ -4,16 +4,16 @@
+             <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                 <div class="min-w-0">
+                     <div class="flex flex-wrap items-center gap-2">
+-                        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Payment Gateways</h1>
+-                        <Badge @status={{if this.warningCount "warning" "success"}} @hideStatusDot={{true}}>{{this.warningCount}} warnings</Badge>
++                        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{t "ledger.payments.gateways.hub.title" fallback="Pasarelas de pago"}}</h1>
++                        <Badge @status={{if this.warningCount "warning" "success"}} @hideStatusDot={{true}}>{{this.warningCount}} {{if (eq this.warningCount 1) "advertencia" "advertencias"}}</Badge>
+                     </div>
+                     <p class="mt-1 max-w-3xl text-sm leading-5 text-gray-500 dark:text-gray-300">
+-                        Configure checkout providers, manual methods, webhooks, refunds, and settlement readiness from one workflow.
++                        {{t "ledger.payments.gateways.hub.subtitle" fallback="Configure proveedores de pago, métodos manuales, webhooks, reembolsos y liquidaciones desde un solo flujo."}}
+                     </p>
+                 </div>
+                 <div class="flex flex-shrink-0 items-center gap-2 whitespace-nowrap">
+                     <Button @icon={{if @summaryLoading "spinner" "refresh"}} @iconSpin={{@summaryLoading}} @size="sm" @helpText={{t "common.reload"}} @onClick={{this.refresh}} />
+-                    <Button @icon="plus" @text="Add Gateway" @type="primary" @size="sm" @onClick={{this.gatewayActions.transition.create}} />
++                    <Button @icon="plus" @text={{t "ledger.payments.gateways.hub.add-gateway" fallback="Agregar pasarela"}} @type="primary" @size="sm" @onClick={{this.gatewayActions.transition.create}} />
+                 </div>
+             </div>
+         </section>
+@@ -29,13 +29,13 @@
+                 <section class="ledger-gateway-connections-panel min-w-0 overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                     <div class="ledger-gateway-connections-header border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+                         <div class="min-w-0 max-w-md">
+-                            <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100">Connected Gateways</h2>
+-                            <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-300">Review configured providers, checkout availability, environments, and operational status.</p>
++                            <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100">{{t "ledger.payments.gateways.hub.connected-gateways" fallback="Pasarelas conectadas"}}</h2>
++                            <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-300">{{t "ledger.payments.gateways.hub.connected-gateways-desc" fallback="Revise los proveedores configurados, disponibilidad de cobro, entornos y estado operativo."}}</p>
+                         </div>
+                         <div class="ledger-gateway-connections-actions flex min-w-0 flex-wrap items-center gap-2 lg:ml-auto lg:flex-nowrap lg:justify-end">
+                             <Layout::Resource::TabularActions
+                                 @registry={{@registry}}
+-                                @title="Connected Gateways"
++                                @title={{t "ledger.payments.gateways.hub.connected-gateways" fallback="Pasarelas conectadas"}}
+                                 @searchQuery={{@searchQuery}}
+                                 @onSearch={{@onSearch}}
+                                 @columns={{@columns}}
+@@ -68,11 +68,11 @@
+             <section class="rounded-md border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                 <div class="mb-3 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+                     <div>
+-                        <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100">Supported Gateways</h2>
+-                        <p class="text-xs leading-5 text-gray-500 dark:text-gray-300">Connect supported gateway drivers or manage existing configured accounts.</p>
++                        <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100">{{t "ledger.payments.gateways.hub.supported-gateways" fallback="Pasarelas compatibles"}}</h2>
++                        <p class="text-xs leading-5 text-gray-500 dark:text-gray-300">{{t "ledger.payments.gateways.hub.supported-gateways-desc" fallback="Conecte controladores compatibles o administre cuentas configuradas existentes."}}</p>
+                     </div>
+                     {{#if @summaryLoading}}
+-                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-300"><Spinner /> Loading gateway status</div>
++                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-300"><Spinner /> {{t "ledger.payments.gateways.hub.loading-status" fallback="Cargando estado de pasarelas"}}</div>
+                     {{/if}}
+                 </div>
+ 
+diff --git a/addon/components/gateway/hub.js b/addon/components/gateway/hub.js
+index d507267..d6cd577 100644
+--- a/addon/components/gateway/hub.js
++++ b/addon/components/gateway/hub.js
+@@ -7,26 +7,26 @@ const DRIVER_COPY = {
+     taler: {
+         name: 'GNU Taler',
+         icon: 'wallet',
+-        type: 'Wallet payment',
+-        description: 'Privacy-preserving wallet payments, QR checkout, webhook confirmation, refunds, and settlement verification.',
++        type: 'Pago con billetera',
++        description: 'Pagos con billetera que preservan la privacidad, cobro mediante QR, confirmación por webhook, reembolsos y verificación de liquidación.',
+     },
+     stripe: {
+         name: 'Stripe',
+         icon: 'credit-card',
+-        type: 'Cards and wallets',
+-        description: 'Card and digital wallet processing with webhook confirmation and refund support.',
++        type: 'Tarjetas y billeteras',
++        description: 'Procesamiento de tarjetas y billeteras digitales con confirmación por webhook y soporte para reembolsos.',
+     },
+     cash: {
+-        name: 'Cash',
++        name: 'Efectivo',
+         icon: 'money-bill-wave',
+-        type: 'Manual payment',
+-        description: 'Record offline or in-person payments without external webhook provisioning.',
++        type: 'Pago manual / Efectivo',
++        description: 'Registro de cobros fuera de línea o en persona sin aprovisionamiento de webhooks externos.',
+     },
+     qpay: {
+         name: 'QPay',
+         icon: 'qrcode',
+-        type: 'Regional payment',
+-        description: 'Regional gateway support for QR and local payment collection flows.',
++        type: 'Pago regional',
++        description: 'Soporte para pasarelas regionales mediante flujos de cobro con código QR y pagos locales.',
+     },
+ };
+ 
+@@ -87,30 +87,30 @@ export default class GatewayHubComponent extends Component {
+     get statusTiles() {
+         return [
+             {
+-                label: 'Active gateways',
++                label: 'Pasarelas activas',
+                 value: this.summary.active_gateways ?? 0,
+-                caption: 'Ready to collect payments',
++                caption: 'Listas para recibir cobros',
+                 icon: 'plug',
+                 accentClass: Number(this.summary.active_gateways ?? 0) > 0 ? 'ledger-gateway-kpi-accent-green' : 'ledger-gateway-kpi-accent-blue',
+             },
+             {
+-                label: 'Live ready',
++                label: 'Listas para producción',
+                 value: this.summary.live_gateways ?? 0,
+-                caption: 'Production connections',
++                caption: 'Conexiones en modo productivo',
+                 icon: 'bolt',
+                 accentClass: Number(this.summary.live_gateways ?? 0) > 0 ? 'ledger-gateway-kpi-accent-blue' : 'ledger-gateway-kpi-accent-slate',
+             },
+             {
+-                label: 'Webhook issues',
++                label: 'Advertencias de webhook',
+                 value: this.warningCount,
+-                caption: this.warningCount > 0 ? 'Need provisioning review' : 'No open warnings',
++                caption: this.warningCount > 0 ? 'Requieren revisión' : 'Sin advertencias pendientes',
+                 icon: 'link',
+                 accentClass: this.warningCount > 0 ? 'ledger-gateway-kpi-accent-amber' : 'ledger-gateway-kpi-accent-green',
+             },
+             {
+-                label: 'Sandbox',
++                label: 'Modo pruebas (Sandbox)',
+                 value: this.summary.sandbox_gateways ?? 0,
+-                caption: 'Testing connections',
++                caption: 'Conexiones de prueba',
+                 icon: 'flask',
+                 accentClass: Number(this.summary.sandbox_gateways ?? 0) > 0 ? 'ledger-gateway-kpi-accent-amber' : 'ledger-gateway-kpi-accent-slate',
+             },
 diff --git a/addon/components/gateway/webhook-events.hbs b/addon/components/gateway/webhook-events.hbs
 index 21229d6..61c32c5 100644
 --- a/addon/components/gateway/webhook-events.hbs
@@ -523,13 +687,105 @@ index 3fa50e6..02e6143 100644
          {{/if}}
      </div>
  </div>
+diff --git a/addon/controllers/accounting/accounts/index.js b/addon/controllers/accounting/accounts/index.js
+index 04f886f..99cdea9 100644
+--- a/addon/controllers/accounting/accounts/index.js
++++ b/addon/controllers/accounting/accounts/index.js
+@@ -53,7 +53,7 @@ export default class AccountingAccountsIndexController extends Controller {
+                 id: 'name',
+                 sticky: true,
+                 label: this.intl.t('column.name'),
+-                valuePath: 'name',
++                valuePath: 'displayName',
+                 cellComponent: 'table/cell/anchor',
+                 action: this.accountActions.transition.view,
+                 resizable: true,
+@@ -77,8 +77,7 @@ export default class AccountingAccountsIndexController extends Controller {
+             {
+                 id: 'type',
+                 label: this.intl.t('column.type'),
+-                valuePath: 'type',
+-                humanize: true,
++                valuePath: 'displayType',
+                 resizable: true,
+                 sortable: true,
+                 filterable: true,
+@@ -87,11 +86,11 @@ export default class AccountingAccountsIndexController extends Controller {
+                 filterOptionLabel: 'label',
+                 filterOptionValue: 'value',
+                 filterOptions: [
+-                    { label: 'Asset', value: 'asset' },
+-                    { label: 'Liability', value: 'liability' },
+-                    { label: 'Equity', value: 'equity' },
+-                    { label: 'Revenue', value: 'revenue' },
+-                    { label: 'Expense', value: 'expense' },
++                    { label: this.intl.t('ledger.accounting.chart-of-accounts.filter.types.asset', { fallback: 'Activo' }), value: 'asset' },
++                    { label: this.intl.t('ledger.accounting.chart-of-accounts.filter.types.liability', { fallback: 'Pasivo' }), value: 'liability' },
++                    { label: this.intl.t('ledger.accounting.chart-of-accounts.filter.types.equity', { fallback: 'Capital / Patrimonio' }), value: 'equity' },
++                    { label: this.intl.t('ledger.accounting.chart-of-accounts.filter.types.revenue', { fallback: 'Ingresos' }), value: 'revenue' },
++                    { label: this.intl.t('ledger.accounting.chart-of-accounts.filter.types.expense', { fallback: 'Gastos' }), value: 'expense' },
+                 ],
+             },
+             {
+@@ -115,16 +114,18 @@ export default class AccountingAccountsIndexController extends Controller {
+             {
+                 id: 'status',
+                 label: this.intl.t('column.status'),
+-                valuePath: 'status',
++                valuePath: 'displayStatus',
+                 cellComponent: 'table/cell/status',
+                 resizable: true,
+                 sortable: true,
+                 filterable: true,
+                 filterParam: 'status',
+                 filterComponent: 'filter/select',
++                filterOptionLabel: 'label',
++                filterOptionValue: 'value',
+                 filterOptions: [
+-                    { label: 'Active', value: 'active' },
+-                    { label: 'Inactive', value: 'inactive' },
++                    { label: this.intl.t('ledger.accounting.chart-of-accounts.filter.statuses.active', { fallback: 'Activa' }), value: 'active' },
++                    { label: this.intl.t('ledger.accounting.chart-of-accounts.filter.statuses.inactive', { fallback: 'Inactiva' }), value: 'inactive' },
+                 ],
+             },
+         ];
 diff --git a/addon/controllers/accounting/general-ledger.js b/addon/controllers/accounting/general-ledger.js
-index 8607e44..a585763 100644
+index 8607e44..0d6c9cd 100644
 --- a/addon/controllers/accounting/general-ledger.js
 +++ b/addon/controllers/accounting/general-ledger.js
-@@ -6,12 +6,12 @@ import { isArray } from '@ember/array';
+@@ -5,13 +5,42 @@ import { inject as service } from '@ember/service';
+ import { isArray } from '@ember/array';
  import { task } from 'ember-concurrency';
  
++const STANDARD_ACCOUNT_NAMES = {
++    'Cash on Hand': 'Caja / Efectivo',
++    'Accounts Receivable': 'Cuentas por cobrar',
++    'Undeposited Funds': 'Fondos por depositar',
++    'Inventory': 'Inventario',
++    'Prepaid Expenses': 'Gastos pagados por anticipado',
++    'Accounts Payable': 'Cuentas por pagar',
++    'Accrued Liabilities': 'Pasivos acumulados',
++    'Sales Tax Payable': 'Impuestos por pagar (IVA)',
++    "Owner's Equity": 'Capital social',
++    'Retained Earnings': 'Utilidades retenidas',
++    'Sales Revenue': 'Ingresos por ventas',
++    'Service Revenue': 'Ingresos por servicios',
++    'Cost of Goods Sold': 'Costo de ventas',
++    'Operating Expenses': 'Gastos de operación',
++    'Payroll Expenses': 'Gastos de nómina',
++    'Rent Expense': 'Gastos de arrendamiento',
++    'Utilities Expense': 'Servicios públicos',
++    'Depreciation Expense': 'Gastos de depreciación',
++};
++
++const ACCOUNT_TYPE_LABELS = {
++    asset: 'Activo',
++    liability: 'Pasivo',
++    equity: 'Capital / Patrimonio',
++    revenue: 'Ingresos',
++    expense: 'Gastos',
++};
++
  const ACCOUNT_TYPES = [
 -    { label: 'All Types', value: null },
 -    { label: 'Asset', value: 'asset' },
@@ -546,6 +802,61 @@ index 8607e44..a585763 100644
  ];
  
  export default class AccountingGeneralLedgerController extends Controller {
+@@ -49,7 +78,15 @@ export default class AccountingGeneralLedgerController extends Controller {
+             if (this.type) params.type = this.type;
+ 
+             const result = yield this.fetch.get('reports/general-ledger', params, { namespace: 'ledger/int/v1' });
+-            this.accounts = result?.data?.accounts ?? [];
++            const list = result?.data?.accounts ?? [];
++            this.accounts = list.map((row) => ({
++                ...row,
++                account: {
++                    ...row.account,
++                    displayName: STANDARD_ACCOUNT_NAMES[row.account?.name] ?? row.account?.name,
++                    displayType: ACCOUNT_TYPE_LABELS[row.account?.type] ?? row.account?.type,
++                },
++            }));
+         } catch {
+             this.accounts = [];
+         }
+diff --git a/addon/controllers/accounting/journal/index.js b/addon/controllers/accounting/journal/index.js
+index b426d30..ec05f59 100644
+--- a/addon/controllers/accounting/journal/index.js
++++ b/addon/controllers/accounting/journal/index.js
+@@ -80,13 +80,13 @@ export default class AccountingJournalIndexController extends Controller {
+                 filterOptionLabel: 'label',
+                 filterOptionValue: 'value',
+                 filterOptions: [
+-                    { label: 'General', value: 'general' },
+-                    { label: 'Payment', value: 'payment' },
+-                    { label: 'Refund', value: 'refund' },
+-                    { label: 'Adjustment', value: 'adjustment' },
+-                    { label: 'Deposit', value: 'deposit' },
+-                    { label: 'Withdrawal', value: 'withdrawal' },
+-                    { label: 'Transfer', value: 'transfer' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.types.general', { fallback: 'Póliza general' }), value: 'general' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.types.payment', { fallback: 'Pago' }), value: 'payment' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.types.refund', { fallback: 'Reembolso' }), value: 'refund' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.types.adjustment', { fallback: 'Ajuste' }), value: 'adjustment' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.types.deposit', { fallback: 'Depósito' }), value: 'deposit' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.types.withdrawal', { fallback: 'Retiro' }), value: 'withdrawal' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.types.transfer', { fallback: 'Transferencia' }), value: 'transfer' },
+                 ],
+             },
+             {
+@@ -102,9 +102,9 @@ export default class AccountingJournalIndexController extends Controller {
+                 filterOptionLabel: 'label',
+                 filterOptionValue: 'value',
+                 filterOptions: [
+-                    { label: 'Posted', value: 'posted' },
+-                    { label: 'Draft', value: 'draft' },
+-                    { label: 'Voided', value: 'voided' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.statuses.posted', { fallback: 'Aplicada' }), value: 'posted' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.statuses.draft', { fallback: 'Borrador' }), value: 'draft' },
++                    { label: this.intl.t('ledger.accounting.journal.filter.statuses.voided', { fallback: 'Anulada' }), value: 'voided' },
+                 ],
+             },
+             {
 diff --git a/addon/controllers/application.js b/addon/controllers/application.js
 index 4192a6c..bd140ce 100644
 --- a/addon/controllers/application.js
@@ -762,6 +1073,502 @@ index 4192a6c..bd140ce 100644
                          icon: 'calculator',
                          route: 'console.ledger.settings.accounting',
                          keywords: ['journal automation', 'posting', 'accounts'],
+diff --git a/addon/controllers/billing/invoices/index.js b/addon/controllers/billing/invoices/index.js
+index a8abef3..d3a114d 100644
+--- a/addon/controllers/billing/invoices/index.js
++++ b/addon/controllers/billing/invoices/index.js
+@@ -77,12 +77,12 @@ export default class BillingInvoicesIndexController extends Controller {
+                 filterable: true,
+                 filterParam: 'customer',
+                 filterComponent: 'filter/model',
+-                filterComponentPlaceholder: 'Select customer',
++                filterComponentPlaceholder: this.intl.t('ledger.billing.invoices.filter.select-customer', { fallback: 'Seleccionar cliente' }),
+                 model: 'customer',
+             },
+             {
+                 id: 'order-tracking-label',
+-                label: 'Order',
++                label: this.intl.t('column.order', { fallback: 'Pedido' }),
+                 valuePath: 'orderTrackingLabel',
+                 cellComponent: 'table/cell/anchor',
+                 action: this.viewOrder,
+@@ -91,7 +91,7 @@ export default class BillingInvoicesIndexController extends Controller {
+                 filterable: true,
+                 filterParam: 'order',
+                 filterComponent: 'filter/model',
+-                filterComponentPlaceholder: 'Select order',
++                filterComponentPlaceholder: this.intl.t('ledger.billing.invoices.filter.select-order', { fallback: 'Seleccionar pedido' }),
+                 model: 'order',
+                 modelNamePath: 'tracking',
+             },
+@@ -106,17 +106,17 @@ export default class BillingInvoicesIndexController extends Controller {
+                 filterParam: 'status',
+                 filterComponent: 'filter/select',
+                 filterOptions: [
+-                    { label: 'Draft', value: 'draft' },
+-                    { label: 'Sent', value: 'sent' },
+-                    { label: 'Viewed', value: 'viewed' },
+-                    { label: 'Partial', value: 'partial' },
+-                    { label: 'Paid', value: 'paid' },
+-                    { label: 'Partial Refund Pending', value: 'partial_refund_pending' },
+-                    { label: 'Refund Pending', value: 'refund_pending' },
+-                    { label: 'Refunded', value: 'refunded' },
+-                    { label: 'Overdue', value: 'overdue' },
+-                    { label: 'Void', value: 'void' },
+-                    { label: 'Cancelled', value: 'cancelled' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.draft', { fallback: 'Borrador' }), value: 'draft' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.sent', { fallback: 'Enviada' }), value: 'sent' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.viewed', { fallback: 'Vista' }), value: 'viewed' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.partial', { fallback: 'Parcial' }), value: 'partial' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.paid', { fallback: 'Pagada' }), value: 'paid' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.partial_refund_pending', { fallback: 'Reembolso parcial pendiente' }), value: 'partial_refund_pending' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.refund_pending', { fallback: 'Reembolso pendiente' }), value: 'refund_pending' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.refunded', { fallback: 'Reembolsada' }), value: 'refunded' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.overdue', { fallback: 'Vencida' }), value: 'overdue' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.void', { fallback: 'Anulada' }), value: 'void' },
++                    { label: this.intl.t('ledger.billing.invoices.filter.statuses.cancelled', { fallback: 'Cancelada' }), value: 'cancelled' },
+                 ],
+             },
+             {
+@@ -133,8 +133,8 @@ export default class BillingInvoicesIndexController extends Controller {
+                 min: 0,
+                 max: 10000000,
+                 step: 100,
+-                minLabel: 'Min',
+-                maxLabel: 'Max',
++                minLabel: this.intl.t('ledger.billing.invoices.filter.min', { fallback: 'Mín' }),
++                maxLabel: this.intl.t('ledger.billing.invoices.filter.max', { fallback: 'Máx' }),
+             },
+             {
+                 id: 'currency',
+@@ -164,6 +164,7 @@ export default class BillingInvoicesIndexController extends Controller {
+                 filterable: true,
+                 filterParam: 'due_date',
+                 filterComponent: 'filter/date',
++                filterComponentPlaceholder: this.intl.t('column.due-date', { fallback: 'Fecha de vencimiento' }),
+             },
+             {
+                 id: 'invoice-date',
+@@ -181,6 +182,7 @@ export default class BillingInvoicesIndexController extends Controller {
+                 filterable: true,
+                 filterParam: 'created_at',
+                 filterComponent: 'filter/date',
++                filterComponentPlaceholder: this.intl.t('column.created-at', { fallback: 'Fecha de creación' }),
+             },
+             {
+                 id: 'row-actions',
+diff --git a/addon/controllers/payments/transactions/index.js b/addon/controllers/payments/transactions/index.js
+index 0deff15..634f64e 100644
+--- a/addon/controllers/payments/transactions/index.js
++++ b/addon/controllers/payments/transactions/index.js
+@@ -91,6 +91,7 @@ export default class PaymentsTransactionsIndexController extends Controller {
+                 sortable: true,
+                 filterable: true,
+                 filterComponent: 'filter/date',
++                filterComponentPlaceholder: this.intl.t('ledger.payments.transactions.filter.date-placeholder', { fallback: 'Seleccionar fecha o rango' }),
+             },
+             {
+                 id: 'description',
+@@ -111,7 +112,19 @@ export default class PaymentsTransactionsIndexController extends Controller {
+                 filterable: true,
+                 filterParam: 'type',
+                 filterComponent: 'filter/multi-option',
+-                filterOptions: ['wallet_deposit', 'wallet_withdrawal', 'wallet_transfer', 'gateway_charge', 'gateway_refund', 'gateway_payout', 'adjustment', 'earning', 'fee'],
++                filterOptionLabel: 'label',
++                filterOptionValue: 'value',
++                filterOptions: [
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.wallet_deposit', { fallback: 'Abono a billetera' }), value: 'wallet_deposit' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.wallet_withdrawal', { fallback: 'Retiro de billetera' }), value: 'wallet_withdrawal' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.wallet_transfer', { fallback: 'Transferencia entre billeteras' }), value: 'wallet_transfer' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.gateway_charge', { fallback: 'Cobro por pasarela' }), value: 'gateway_charge' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.gateway_refund', { fallback: 'Reembolso de pasarela' }), value: 'gateway_refund' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.gateway_payout', { fallback: 'Liquidación de pasarela' }), value: 'gateway_payout' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.adjustment', { fallback: 'Ajuste contable' }), value: 'adjustment' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.earning', { fallback: 'Ganancia' }), value: 'earning' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.types.fee', { fallback: 'Comisión' }), value: 'fee' },
++                ],
+             },
+             {
+                 id: 'direction',
+@@ -127,8 +140,8 @@ export default class PaymentsTransactionsIndexController extends Controller {
+                 filterOptionLabel: 'label',
+                 filterOptionValue: 'value',
+                 filterOptions: [
+-                    { label: 'Credit', value: 'credit' },
+-                    { label: 'Debit', value: 'debit' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.direction.credit', { fallback: 'Abono (Crédito)' }), value: 'credit' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.direction.debit', { fallback: 'Cargo (Débito)' }), value: 'debit' },
+                 ],
+             },
+             {
+@@ -151,11 +164,21 @@ export default class PaymentsTransactionsIndexController extends Controller {
+                 filterable: true,
+                 filterParam: 'status',
+                 filterComponent: 'filter/multi-option',
+-                filterOptions: ['pending', 'success', 'failed', 'cancelled', 'voided', 'reversed', 'expired'],
++                filterOptionLabel: 'label',
++                filterOptionValue: 'value',
++                filterOptions: [
++                    { label: this.intl.t('ledger.payments.transactions.filter.statuses.pending', { fallback: 'Pendiente' }), value: 'pending' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.statuses.success', { fallback: 'Exitosa' }), value: 'success' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.statuses.failed', { fallback: 'Fallida' }), value: 'failed' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.statuses.cancelled', { fallback: 'Cancelada' }), value: 'cancelled' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.statuses.voided', { fallback: 'Anulada' }), value: 'voided' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.statuses.reversed', { fallback: 'Revertida' }), value: 'reversed' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.statuses.expired', { fallback: 'Expirada' }), value: 'expired' },
++                ],
+             },
+             {
+                 id: 'settlement-status',
+-                label: 'Settlement',
++                label: this.intl.t('column.settlement', { fallback: 'Liquidación' }),
+                 valuePath: 'settlement_status',
+                 cellComponent: 'table/cell/status',
+                 hidden: true,
+@@ -164,7 +187,15 @@ export default class PaymentsTransactionsIndexController extends Controller {
+                 filterable: true,
+                 filterParam: 'settlement_status',
+                 filterComponent: 'filter/multi-option',
+-                filterOptions: ['unpaid', 'partially_paid', 'paid', 'partially_refunded', 'refunded'],
++                filterOptionLabel: 'label',
++                filterOptionValue: 'value',
++                filterOptions: [
++                    { label: this.intl.t('ledger.payments.transactions.filter.settlement-statuses.unpaid', { fallback: 'No liquidada' }), value: 'unpaid' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.settlement-statuses.partially_paid', { fallback: 'Parcialmente liquidada' }), value: 'partially_paid' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.settlement-statuses.paid', { fallback: 'Liquidada' }), value: 'paid' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.settlement-statuses.partially_refunded', { fallback: 'Parcialmente reembolsada' }), value: 'partially_refunded' },
++                    { label: this.intl.t('ledger.payments.transactions.filter.settlement-statuses.refunded', { fallback: 'Reembolsada' }), value: 'refunded' },
++                ],
+             },
+             // ── Hidden / toggleable columns ──────────────────────────────────
+             {
+diff --git a/addon/controllers/reports/ar-aging.js b/addon/controllers/reports/ar-aging.js
+index 47739fc..b902c2c 100644
+--- a/addon/controllers/reports/ar-aging.js
++++ b/addon/controllers/reports/ar-aging.js
+@@ -5,6 +5,31 @@ import { inject as service } from '@ember/service';
+ import { isArray } from '@ember/array';
+ import { task } from 'ember-concurrency';
+ 
++const BUCKET_LABELS = {
++    Current: 'Al corriente',
++    current: 'Al corriente',
++    '1-30 Days': '1 a 30 días',
++    '1-30 days': '1 a 30 días',
++    '1-30': '1 a 30 días',
++    '31-60 Days': '31 a 60 días',
++    '31-60 days': '31 a 60 días',
++    '31-60': '31 a 60 días',
++    '61-90 Days': '61 a 90 días',
++    '61-90 days': '61 a 90 días',
++    '61-90': '61 a 90 días',
++    '90+ Days': 'Más de 90 días',
++    '90+ days': 'Más de 90 días',
++    'Over 90 Days': 'Más de 90 días',
++    over_90: 'Más de 90 días',
++    '90+': 'Más de 90 días',
++    Overdue: 'Vencido',
++};
++
++const translateBucket = (label) => {
++    if (!label) return '';
++    return BUCKET_LABELS[label] || label.replace(/Days?/i, 'días').replace(/Current/i, 'Al corriente').replace(/Over/i, 'Más de');
++};
++
+ export default class ReportsArAgingController extends Controller {
+     @service fetch;
+     @service currentUser;
+@@ -18,20 +43,30 @@ export default class ReportsArAgingController extends Controller {
+ 
+     get bucketList() {
+         if (!this.data?.buckets) return [];
+-        return Object.values(this.data.buckets);
++        return Object.values(this.data.buckets).map((b) => ({
++            ...b,
++            label: translateBucket(b.label),
++        }));
+     }
+ 
+     get bucketSummary() {
+         if (!this.data?.buckets) return [];
+         return Object.values(this.data.buckets).map((b) => ({
+-            label: b.label,
++            ...b,
++            label: translateBucket(b.label),
+             total: b.total ?? 0,
+         }));
+     }
+ 
+     get allInvoices() {
+         if (!this.data?.buckets) return [];
+-        return Object.values(this.data.buckets).flatMap((b) => (b.invoices ?? []).map((inv) => ({ ...inv, bucketLabel: b.label, daysRange: b.days_range })));
++        return Object.values(this.data.buckets).flatMap((b) =>
++            (b.invoices ?? []).map((inv) => ({
++                ...inv,
++                bucketLabel: translateBucket(b.label),
++                daysRange: b.days_range,
++            }))
++        );
+     }
+ 
+     @task *loadReport() {
+diff --git a/addon/controllers/reports/balance-sheet.js b/addon/controllers/reports/balance-sheet.js
+index b3cb3ea..099a6d3 100644
+--- a/addon/controllers/reports/balance-sheet.js
++++ b/addon/controllers/reports/balance-sheet.js
+@@ -5,6 +5,27 @@ import { inject as service } from '@ember/service';
+ import { isArray } from '@ember/array';
+ import { task } from 'ember-concurrency';
+ 
++const STANDARD_ACCOUNT_NAMES = {
++    'Cash on Hand': 'Caja / Efectivo',
++    'Accounts Receivable': 'Cuentas por cobrar',
++    'Undeposited Funds': 'Fondos por depositar',
++    'Inventory': 'Inventario',
++    'Prepaid Expenses': 'Gastos pagados por anticipado',
++    'Accounts Payable': 'Cuentas por pagar',
++    'Accrued Liabilities': 'Pasivos acumulados',
++    'Sales Tax Payable': 'Impuestos por pagar (IVA)',
++    "Owner's Equity": 'Capital social',
++    'Retained Earnings': 'Utilidades retenidas',
++    'Sales Revenue': 'Ingresos por ventas',
++    'Service Revenue': 'Ingresos por servicios',
++    'Cost of Goods Sold': 'Costo de ventas',
++    'Operating Expenses': 'Gastos de operación',
++    'Payroll Expenses': 'Gastos de nómina',
++    'Rent Expense': 'Gastos de arrendamiento',
++    'Utilities Expense': 'Servicios públicos',
++    'Depreciation Expense': 'Gastos de depreciación',
++};
++
+ export default class ReportsBalanceSheetController extends Controller {
+     @service fetch;
+     @service currentUser;
+@@ -22,7 +43,22 @@ export default class ReportsBalanceSheetController extends Controller {
+             const params = {};
+             if (this.as_of) params.as_of_date = this.as_of;
+             const result = yield this.fetch.get('reports/balance-sheet', params, { namespace: 'ledger/int/v1' });
+-            this.data = result?.data ?? null;
++            const raw = result?.data ?? null;
++            if (raw) {
++                const mapItems = (items) =>
++                    (items ?? []).map((item) => ({
++                        ...item,
++                        name: STANDARD_ACCOUNT_NAMES[item.name] ?? item.name,
++                    }));
++                this.data = {
++                    ...raw,
++                    assets: mapItems(raw.assets),
++                    liabilities: mapItems(raw.liabilities),
++                    equity: mapItems(raw.equity),
++                };
++            } else {
++                this.data = null;
++            }
+         } catch {
+             this.data = null;
+         }
+diff --git a/addon/controllers/reports/cash-flow.js b/addon/controllers/reports/cash-flow.js
+index 6d10c25..a3c1634 100644
+--- a/addon/controllers/reports/cash-flow.js
++++ b/addon/controllers/reports/cash-flow.js
+@@ -5,6 +5,20 @@ import { inject as service } from '@ember/service';
+ import { isArray } from '@ember/array';
+ import { task } from 'ember-concurrency';
+ 
++const FLOW_ITEM_TYPES = {
++    payment: 'Pago',
++    refund: 'Reembolso',
++    invoice_payment: 'Cobro de factura',
++    transfer: 'Transferencia',
++    top_up: 'Recarga de billetera',
++    deposit: 'Depósito',
++    withdrawal: 'Retiro',
++    fee: 'Comisión / Cargo',
++    adjustment: 'Ajuste',
++    dispute: 'Disputa',
++    payout: 'Liquidación',
++};
++
+ export default class ReportsCashFlowController extends Controller {
+     @service fetch;
+     @service currentUser;
+@@ -36,6 +50,7 @@ export default class ReportsCashFlowController extends Controller {
+             const mapFlowItems = (items) =>
+                 (items ?? []).map((item) => ({
+                     ...item,
++                    type: FLOW_ITEM_TYPES[item.type] ?? item.type,
+                     net: item.direction === 'credit' ? item.total : -item.total,
+                 }));
+             this.data = {
+diff --git a/addon/controllers/reports/trial-balance.js b/addon/controllers/reports/trial-balance.js
+index 099bce3..2749eb4 100644
+--- a/addon/controllers/reports/trial-balance.js
++++ b/addon/controllers/reports/trial-balance.js
+@@ -5,6 +5,35 @@ import { inject as service } from '@ember/service';
+ import { isArray } from '@ember/array';
+ import { task } from 'ember-concurrency';
+ 
++const STANDARD_ACCOUNT_NAMES = {
++    'Cash on Hand': 'Caja / Efectivo',
++    'Accounts Receivable': 'Cuentas por cobrar',
++    'Undeposited Funds': 'Fondos por depositar',
++    'Inventory': 'Inventario',
++    'Prepaid Expenses': 'Gastos pagados por anticipado',
++    'Accounts Payable': 'Cuentas por pagar',
++    'Accrued Liabilities': 'Pasivos acumulados',
++    'Sales Tax Payable': 'Impuestos por pagar (IVA)',
++    "Owner's Equity": 'Capital social',
++    'Retained Earnings': 'Utilidades retenidas',
++    'Sales Revenue': 'Ingresos por ventas',
++    'Service Revenue': 'Ingresos por servicios',
++    'Cost of Goods Sold': 'Costo de ventas',
++    'Operating Expenses': 'Gastos de operación',
++    'Payroll Expenses': 'Gastos de nómina',
++    'Rent Expense': 'Gastos de arrendamiento',
++    'Utilities Expense': 'Servicios públicos',
++    'Depreciation Expense': 'Gastos de depreciación',
++};
++
++const ACCOUNT_TYPE_LABELS = {
++    asset: 'Activo',
++    liability: 'Pasivo',
++    equity: 'Capital',
++    revenue: 'Ingreso',
++    expense: 'Gasto',
++};
++
+ export default class ReportsTrialBalanceController extends Controller {
+     @service fetch;
+     @service currentUser;
+@@ -33,13 +62,17 @@ export default class ReportsTrialBalanceController extends Controller {
+                 balanced: raw.balanced,
+                 total_debits: raw.debit_total,
+                 total_credits: raw.credit_total,
+-                accounts: (raw.accounts ?? []).map((row) => ({
+-                    code: row.account?.code ?? row.code ?? '',
+-                    name: row.account?.name ?? row.name ?? '',
+-                    type: row.account?.type ?? row.type ?? '',
+-                    debit: row.debit_total ?? (row.balance > 0 && row.account?.is_debit_normal ? row.balance : 0),
+-                    credit: row.credit_total ?? (row.balance > 0 && !row.account?.is_debit_normal ? row.balance : 0),
+-                })),
++                accounts: (raw.accounts ?? []).map((row) => {
++                    const rawName = row.account?.name ?? row.name ?? '';
++                    const rawType = row.account?.type ?? row.type ?? '';
++                    return {
++                        code: row.account?.code ?? row.code ?? '',
++                        name: STANDARD_ACCOUNT_NAMES[rawName] ?? rawName,
++                        type: ACCOUNT_TYPE_LABELS[rawType] ?? rawType,
++                        debit: row.debit_total ?? (row.balance > 0 && row.account?.is_debit_normal ? row.balance : 0),
++                        credit: row.credit_total ?? (row.balance > 0 && !row.account?.is_debit_normal ? row.balance : 0),
++                    };
++                }),
+             };
+         } catch {
+             this.data = null;
+diff --git a/addon/controllers/reports/wallet-summary.js b/addon/controllers/reports/wallet-summary.js
+index 90734ff..8ea3311 100644
+--- a/addon/controllers/reports/wallet-summary.js
++++ b/addon/controllers/reports/wallet-summary.js
+@@ -5,6 +5,22 @@ import { inject as service } from '@ember/service';
+ import { isArray } from '@ember/array';
+ import { task } from 'ember-concurrency';
+ 
++const OWNER_TYPE_LABELS = {
++    driver: 'Conductor',
++    customer: 'Cliente',
++    vendor: 'Proveedor',
++    user: 'Usuario',
++    company: 'Empresa',
++    fleet: 'Flota',
++    wallet: 'Billetera',
++    unknown: 'Desconocido',
++};
++
++const translateOwnerType = (type) => {
++    if (!type) return 'Billetera';
++    return OWNER_TYPE_LABELS[type.toLowerCase()] || type;
++};
++
+ export default class ReportsWalletSummaryController extends Controller {
+     @service fetch;
+     @service currentUser;
+@@ -32,7 +48,22 @@ export default class ReportsWalletSummaryController extends Controller {
+             if (this.date_from) params.date_from = this.date_from;
+             if (this.date_to) params.date_to = this.date_to;
+             const result = yield this.fetch.get('reports/wallet-summary', params, { namespace: 'ledger/int/v1' });
+-            this.data = result?.data ?? null;
++            const raw = result?.data ?? null;
++            if (raw) {
++                this.data = {
++                    ...raw,
++                    wallet_counts: (raw.wallet_counts ?? []).map((row) => ({
++                        ...row,
++                        displayType: translateOwnerType(row.type),
++                    })),
++                    top_wallets: (raw.top_wallets ?? []).map((w) => ({
++                        ...w,
++                        displayType: translateOwnerType(w.type),
++                    })),
++                };
++            } else {
++                this.data = null;
++            }
+         } catch {
+             this.data = null;
+         }
+diff --git a/addon/controllers/settings/accounting.js b/addon/controllers/settings/accounting.js
+index 00f05df..6833e20 100644
+--- a/addon/controllers/settings/accounting.js
++++ b/addon/controllers/settings/accounting.js
+@@ -10,6 +10,7 @@ export default class SettingsAccountingController extends Controller {
+     @service notifications;
+     @service store;
+     @service currentUser;
++    @service intl;
+ 
+     // ── Tracked settings fields ───────────────────────────────────────────────
+     @tracked base_currency = null; // null = "use company default"
+@@ -30,18 +31,18 @@ export default class SettingsAccountingController extends Controller {
+     currencies = getCurrency();
+ 
+     fiscalYearMonthOptions = [
+-        { label: 'January', value: 1 },
+-        { label: 'February', value: 2 },
+-        { label: 'March', value: 3 },
+-        { label: 'April', value: 4 },
+-        { label: 'May', value: 5 },
+-        { label: 'June', value: 6 },
+-        { label: 'July', value: 7 },
+-        { label: 'August', value: 8 },
+-        { label: 'September', value: 9 },
+-        { label: 'October', value: 10 },
+-        { label: 'November', value: 11 },
+-        { label: 'December', value: 12 },
++        { label: 'Enero', value: 1 },
++        { label: 'Febrero', value: 2 },
++        { label: 'Marzo', value: 3 },
++        { label: 'Abril', value: 4 },
++        { label: 'Mayo', value: 5 },
++        { label: 'Junio', value: 6 },
++        { label: 'Julio', value: 7 },
++        { label: 'Agosto', value: 8 },
++        { label: 'Septiembre', value: 9 },
++        { label: 'Octubre', value: 10 },
++        { label: 'Noviembre', value: 11 },
++        { label: 'Diciembre', value: 12 },
+     ];
+ 
+     constructor() {
+@@ -133,7 +134,7 @@ export default class SettingsAccountingController extends Controller {
+                 },
+                 { namespace: 'ledger/int/v1' }
+             );
+-            this.notifications.success('Accounting settings saved.');
++            this.notifications.success(this.intl?.t('ledger.settings.accounting.success') ?? 'Configuración contable guardada.');
+         } catch (error) {
+             this.notifications.serverError(error);
+         }
 diff --git a/addon/extension.js b/addon/extension.js
 index 82f992c..8e8f7cd 100644
 --- a/addon/extension.js
@@ -1071,8 +1878,73 @@ index 82f992c..8e8f7cd 100644
                  default: false,
              }),
          ];
+diff --git a/addon/models/ledger-account.js b/addon/models/ledger-account.js
+index 30bc55e..5093018 100644
+--- a/addon/models/ledger-account.js
++++ b/addon/models/ledger-account.js
+@@ -2,6 +2,41 @@ import Model, { attr } from '@ember-data/model';
+ import { computed } from '@ember/object';
+ import { format as formatDate, formatDistanceToNow, isValid as isValidDate } from 'date-fns';
+ 
++const STANDARD_ACCOUNT_NAMES = {
++    'Cash on Hand': 'Caja / Efectivo',
++    'Accounts Receivable': 'Cuentas por cobrar',
++    'Undeposited Funds': 'Fondos por depositar',
++    'Inventory': 'Inventario',
++    'Prepaid Expenses': 'Gastos pagados por anticipado',
++    'Accounts Payable': 'Cuentas por pagar',
++    'Accrued Liabilities': 'Pasivos acumulados',
++    'Sales Tax Payable': 'Impuestos por pagar (IVA)',
++    "Owner's Equity": 'Capital social',
++    'Retained Earnings': 'Utilidades retenidas',
++    'Sales Revenue': 'Ingresos por ventas',
++    'Service Revenue': 'Ingresos por servicios',
++    'Cost of Goods Sold': 'Costo de ventas',
++    'Operating Expenses': 'Gastos de operación',
++    'Payroll Expenses': 'Gastos de nómina',
++    'Rent Expense': 'Gastos de arrendamiento',
++    'Utilities Expense': 'Servicios públicos',
++    'Depreciation Expense': 'Gastos de depreciación',
++};
++
++const ACCOUNT_TYPE_LABELS = {
++    asset: 'Activo',
++    liability: 'Pasivo',
++    equity: 'Capital / Patrimonio',
++    revenue: 'Ingresos',
++    expense: 'Gastos',
++};
++
++const ACCOUNT_STATUS_LABELS = {
++    active: 'Activa',
++    inactive: 'Inactiva',
++    archived: 'Archivada',
++};
++
+ export default class LedgerAccountModel extends Model {
+     @attr('string') public_id;
+     @attr('string') company_uuid;
+@@ -16,6 +51,18 @@ export default class LedgerAccountModel extends Model {
+     @attr('date') created_at;
+     @attr('date') updated_at;
+ 
++    @computed('name') get displayName() {
++        return STANDARD_ACCOUNT_NAMES[this.name] ?? this.name;
++    }
++
++    @computed('type') get displayType() {
++        return ACCOUNT_TYPE_LABELS[this.type] ?? this.type;
++    }
++
++    @computed('status') get displayStatus() {
++        return ACCOUNT_STATUS_LABELS[this.status] ?? this.status;
++    }
++
+     @computed('created_at') get createdAtAgo() {
+         if (!isValidDate(this.created_at)) {
+             return null;
 diff --git a/addon/templates/accounting/general-ledger.hbs b/addon/templates/accounting/general-ledger.hbs
-index f2393c1..7d46f7f 100644
+index f2393c1..ca93451 100644
 --- a/addon/templates/accounting/general-ledger.hbs
 +++ b/addon/templates/accounting/general-ledger.hbs
 @@ -1,4 +1,4 @@
@@ -1099,6 +1971,22 @@ index f2393c1..7d46f7f 100644
              {{on "click" this.toggleExpandAll}}
          />
      </div>
+@@ -53,12 +53,12 @@
+                             <div class="flex items-center gap-3">
+                                 <FaIcon @icon={{if (get this.expandedMap acct.id) "chevron-down" "chevron-right"}} class="text-gray-400 w-3 h-3" />
+                                 <span class="text-xs font-mono text-gray-500 dark:text-gray-400">{{acct.code}}</span>
+-                                <span class="text-sm font-semibold text-gray-900 dark:text-white">{{acct.name}}</span>
+-                                <Badge class="capitalize text-xs">{{acct.type}}</Badge>
++                                <span class="text-sm font-semibold text-gray-900 dark:text-white">{{or acct.displayName acct.name}}</span>
++                                <Badge class="capitalize text-xs">{{or acct.displayType acct.type}}</Badge>
+                             </div>
+                             <div class="flex items-center gap-6 text-right">
+                                 {{#if row.summary.entry_count}}
+-                                    <span class="text-xs text-gray-400">{{row.summary.entry_count}} entries</span>
++                                    <span class="text-xs text-gray-400">{{row.summary.entry_count}} {{if (eq row.summary.entry_count 1) (t "ledger.accounting.general-ledger.entry-singular" fallback="póliza") (t "ledger.accounting.general-ledger.entry-plural" fallback="pólizas")}}</span>
+                                 {{/if}}
+                                 <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                                     {{format-currency row.summary.net_balance acct.currency}}
 @@ -73,12 +73,12 @@
                                      <table class="w-full text-sm">
                                          <thead>
@@ -1172,7 +2060,7 @@ index 2c8c8e4..6dfbe47 100644
          @leftHeaderWrapperClass="ledger-dashboard-title"
          @rightHeaderWrapperClass="ledger-dashboard-actions"
 diff --git a/addon/templates/reports/ar-aging.hbs b/addon/templates/reports/ar-aging.hbs
-index c269b72..5d21c7d 100644
+index c269b72..675da8c 100644
 --- a/addon/templates/reports/ar-aging.hbs
 +++ b/addon/templates/reports/ar-aging.hbs
 @@ -1,7 +1,7 @@
@@ -1193,7 +2081,8 @@ index c269b72..5d21c7d 100644
 -                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Accounts Receivable Aging</h2>
 +                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.ar-aging.title"}}</h2>
                      {{#if this.data.as_of_date}}
-                         <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
+-                        <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
++                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.ar-aging.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy") fallback=(concat "Al corte del " (format-date-fns this.data.as_of_date "MMMM d, yyyy"))}}</p>
                      {{/if}}
                  </div>
                  {{#if this.data.grand_total}}
@@ -1226,8 +2115,25 @@ index c269b72..5d21c7d 100644
                          </tr>
                      </thead>
                      <tbody>
+@@ -64,14 +64,14 @@
+                                 </td>
+                             </tr>
+                         {{else}}
+-                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">No outstanding receivables</td></tr>
++                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.ar-aging.no-receivables" fallback="No hay cuentas por cobrar vencidas"}}</td></tr>
+                         {{/each}}
+                     </tbody>
+                 </table>
+             </div>
+         {{else}}
+             <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+-                <p class="text-sm">No report data available. Select a date and refresh.</p>
++                <p class="text-sm">{{t "ledger.reports.ar-aging.no-data" fallback="No hay datos disponibles para el reporte. Seleccione una fecha y actualice."}}</p>
+             </div>
+         {{/if}}
+     </div>
 diff --git a/addon/templates/reports/balance-sheet.hbs b/addon/templates/reports/balance-sheet.hbs
-index 55f1676..fa742f3 100644
+index 55f1676..9871fd9 100644
 --- a/addon/templates/reports/balance-sheet.hbs
 +++ b/addon/templates/reports/balance-sheet.hbs
 @@ -1,7 +1,7 @@
@@ -1241,14 +2147,15 @@ index 55f1676..fa742f3 100644
      </div>
  </Layout::Section::Header>
  <Layout::Section::Body class="overflow-y-auto h-full">
-@@ -11,12 +11,12 @@
+@@ -11,18 +11,18 @@
          {{else if this.data}}
              <div class="flex items-center justify-between mb-6">
                  <div>
 -                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Balance Sheet</h2>
 +                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.balance-sheet.title"}}</h2>
                      {{#if this.data.as_of_date}}
-                         <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
+-                        <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
++                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.balance-sheet.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy") fallback=(concat "Al corte del " (format-date-fns this.data.as_of_date "MMMM d, yyyy"))}}</p>
                      {{/if}}
                  </div>
 -                <Badge @color={{if this.data.balanced "green" "red"}}>{{if this.data.balanced "Balanced" "Unbalanced"}}</Badge>
@@ -1256,7 +2163,31 @@ index 55f1676..fa742f3 100644
              </div>
              {{#each
                  (array
-@@ -53,7 +53,7 @@
+-                    (hash label="Assets" items=this.data.assets total=this.data.total_assets)
+-                    (hash label="Liabilities" items=this.data.liabilities total=this.data.total_liabilities)
+-                    (hash label="Equity" items=this.data.equity total=this.data.total_equity)
++                    (hash label=(t "ledger.reports.balance-sheet.assets" fallback="Activos") items=this.data.assets total=this.data.total_assets)
++                    (hash label=(t "ledger.reports.balance-sheet.liabilities" fallback="Pasivos") items=this.data.liabilities total=this.data.total_liabilities)
++                    (hash label=(t "ledger.reports.balance-sheet.equity" fallback="Capital contable") items=this.data.equity total=this.data.total_equity)
+                 )
+                 as |section|
+             }}
+@@ -39,12 +39,12 @@
+                                     <td class="px-4 py-2 text-right font-medium text-gray-900 dark:text-white">{{format-currency item.balance this.companyCurrency}}</td>
+                                 </tr>
+                             {{else}}
+-                                <tr><td colspan="3" class="px-4 py-3 text-center text-gray-400 text-xs">No {{section.label}} accounts</td></tr>
++                                <tr><td colspan="3" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.balance-sheet.no-accounts" section=section.label fallback=(concat "No hay cuentas de " section.label)}}</td></tr>
+                             {{/each}}
+                         </tbody>
+                         <tfoot>
+                             <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
+-                                <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Total {{section.label}}</td>
++                                <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.balance-sheet.total-section" section=section.label fallback=(concat "Total " section.label)}}</td>
+                                 <td class="px-4 py-2.5 text-right font-bold text-gray-900 dark:text-white">{{format-currency section.total this.companyCurrency}}</td>
+                             </tr>
+                         </tfoot>
+@@ -53,13 +53,13 @@
              {{/each}}
              <div class="border-t-2 border-gray-400 dark:border-gray-700 pt-4">
                  <div class="flex justify-between items-center py-1">
@@ -1265,8 +2196,15 @@ index 55f1676..fa742f3 100644
                      <span class="text-sm font-bold text-gray-900 dark:text-white">{{format-currency this.data.total_liabilities_and_equity this.companyCurrency}}</span>
                  </div>
              </div>
+         {{else}}
+             <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+-                <p class="text-sm">No report data available. Select a date and refresh.</p>
++                <p class="text-sm">{{t "ledger.reports.balance-sheet.no-data" fallback="No hay datos disponibles para el reporte. Seleccione una fecha y actualice."}}</p>
+             </div>
+         {{/if}}
+     </div>
 diff --git a/addon/templates/reports/cash-flow.hbs b/addon/templates/reports/cash-flow.hbs
-index cfc7abe..85e06dc 100644
+index cfc7abe..a40774f 100644
 --- a/addon/templates/reports/cash-flow.hbs
 +++ b/addon/templates/reports/cash-flow.hbs
 @@ -1,4 +1,4 @@
@@ -1306,6 +2244,21 @@ index cfc7abe..85e06dc 100644
                  </div>
                  <table class="w-full text-sm overflow-hidden">
                      <tbody>
+@@ -41,12 +41,12 @@
+                                 </td>
+                             </tr>
+                         {{else}}
+-                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">No operating activity data</td></tr>
++                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.cash-flow.no-operating-data" fallback="Sin datos de actividades de operación"}}</td></tr>
+                         {{/each}}
+                     </tbody>
+                     <tfoot>
+                         <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
+-                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Net Operating Cash Flow</td>
++                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-operating" fallback="Flujo neto de efectivo de operación"}}</td>
+                             <td class="px-4 py-2.5 text-right font-bold {{if (gt this.data.net_operating 0) 'text-green-600 dark:text-green-400' 'text-red-600 dark:text-red-400'}}">
+                                 {{format-currency this.data.net_operating this.companyCurrency}}
+                             </td>
 @@ -58,7 +58,7 @@
              {{! Financing Activities }}
              <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
@@ -1315,6 +2268,39 @@ index cfc7abe..85e06dc 100644
                  </div>
                  <table class="w-full text-sm overflow-hidden">
                      <tbody>
+@@ -70,12 +70,12 @@
+                                 </td>
+                             </tr>
+                         {{else}}
+-                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">No financing activity data</td></tr>
++                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.cash-flow.no-financing-data" fallback="Sin datos de actividades de financiamiento"}}</td></tr>
+                         {{/each}}
+                     </tbody>
+                     <tfoot>
+                         <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
+-                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Net Financing Cash Flow</td>
++                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-financing" fallback="Flujo neto de efectivo de financiamiento"}}</td>
+                             <td class="px-4 py-2.5 text-right font-bold {{if (gt this.data.net_financing 0) 'text-green-600 dark:text-green-400' 'text-red-600 dark:text-red-400'}}">
+                                 {{format-currency this.data.net_financing this.companyCurrency}}
+                             </td>
+@@ -87,7 +87,7 @@
+             {{! Net Change in Cash }}
+             <div class="border-t-2 border-gray-400 dark:border-gray-700 pt-4">
+                 <div class="flex justify-between items-center py-1">
+-                    <span class="text-base font-bold text-gray-900 dark:text-white">Net Change in Cash</span>
++                    <span class="text-base font-bold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-change" fallback="Variación neta en efectivo"}}</span>
+                     <span class="text-base font-bold {{if (gt this.data.net_change 0) 'text-green-600 dark:text-green-400' 'text-red-600 dark:text-red-400'}}">
+                         {{format-currency this.data.net_change this.companyCurrency}}
+                     </span>
+@@ -95,7 +95,7 @@
+             </div>
+         {{else}}
+             <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+-                <p class="text-sm">No report data available. Select a period and refresh.</p>
++                <p class="text-sm">{{t "ledger.reports.cash-flow.no-data" fallback="No hay datos disponibles para el reporte. Seleccione un período y actualice."}}</p>
+             </div>
+         {{/if}}
+     </div>
 diff --git a/addon/templates/reports/income-statement.hbs b/addon/templates/reports/income-statement.hbs
 index 7367443..81f9660 100644
 --- a/addon/templates/reports/income-statement.hbs
@@ -1397,7 +2383,7 @@ index 7367443..81f9660 100644
                          {{format-currency this.data.net_income this.companyCurrency}}
                      </span>
 diff --git a/addon/templates/reports/trial-balance.hbs b/addon/templates/reports/trial-balance.hbs
-index ff62cb9..b7bb25f 100644
+index ff62cb9..9b4e705 100644
 --- a/addon/templates/reports/trial-balance.hbs
 +++ b/addon/templates/reports/trial-balance.hbs
 @@ -1,7 +1,7 @@
@@ -1418,7 +2404,8 @@ index ff62cb9..b7bb25f 100644
 -                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Trial Balance</h2>
 +                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.trial-balance.title"}}</h2>
                      {{#if this.data.as_of_date}}
-                         <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
+-                        <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
++                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.trial-balance.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy") fallback=(concat "Al corte del " (format-date-fns this.data.as_of_date "MMMM d, yyyy"))}}</p>
                      {{/if}}
                  </div>
 -                <Badge @color={{if this.data.balanced "green" "red"}}>{{if this.data.balanced "Balanced" "Unbalanced"}}</Badge>
@@ -1457,8 +2444,17 @@ index ff62cb9..b7bb25f 100644
                              <td class="px-4 py-2.5 text-right font-bold text-gray-900 dark:text-white">{{format-currency this.data.total_debits this.companyCurrency}}</td>
                              <td class="px-4 py-2.5 text-right font-bold text-gray-900 dark:text-white">{{format-currency this.data.total_credits this.companyCurrency}}</td>
                          </tr>
+@@ -60,7 +60,7 @@
+             </div>
+         {{else}}
+             <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+-                <p class="text-sm">No report data available. Select a date and refresh.</p>
++                <p class="text-sm">{{t "ledger.reports.trial-balance.no-data" fallback="No hay datos disponibles para el reporte. Seleccione una fecha y actualice."}}</p>
+             </div>
+         {{/if}}
+     </div>
 diff --git a/addon/templates/reports/wallet-summary.hbs b/addon/templates/reports/wallet-summary.hbs
-index 2f053e9..f905c16 100644
+index 2f053e9..9392ec5 100644
 --- a/addon/templates/reports/wallet-summary.hbs
 +++ b/addon/templates/reports/wallet-summary.hbs
 @@ -1,4 +1,4 @@
@@ -1489,12 +2485,12 @@ index 2f053e9..f905c16 100644
                      {{#if this.data.period}}
                          <p class="text-sm text-gray-500 mt-0.5">
                              {{this.data.period.from}}
-@@ -33,15 +33,15 @@
+@@ -33,22 +33,22 @@
              {{! Wallet counts by owner type }}
              <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                  <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
 -                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallets by Owner Type</h3>
-+                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Billeteras por tipo de titular</h3>
++                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.wallet-counts-by-type" fallback="Billeteras por tipo de titular"}}</h3>
                  </div>
                  <table class="w-full text-sm overflow-hidden">
                      <thead>
@@ -1504,12 +2500,20 @@ index 2f053e9..f905c16 100644
 -                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Balance</th>
 -                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Currency</th>
 +                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.owner"}}</th>
-+                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cantidad</th>
++                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.count" fallback="Cantidad"}}</th>
 +                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.balance"}}</th>
 +                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.currency"}}</th>
                          </tr>
                      </thead>
                      <tbody>
+                         {{#each this.data.wallet_counts as |row|}}
+                             <tr class="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                 <td class="px-4 py-2">
+-                                    <Badge @color="blue">{{or row.type "unknown"}}</Badge>
++                                    <Badge @color="blue">{{or row.displayType row.type "Desconocido"}}</Badge>
+                                 </td>
+                                 <td class="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{{row.count}}</td>
+                                 <td class="px-4 py-2 text-right font-medium text-gray-900 dark:text-white">
 @@ -57,7 +57,7 @@
                                  <td class="px-4 py-2 text-gray-500 font-mono text-xs">{{or row.currency "—"}}</td>
                              </tr>
@@ -1519,8 +2523,87 @@ index 2f053e9..f905c16 100644
                          {{/each}}
                      </tbody>
                  </table>
+@@ -67,16 +67,16 @@
+             {{#if this.periodStats.length}}
+                 <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                     <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Period Transaction Activity</h3>
++                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.period-activity" fallback="Actividad de transacciones del período"}}</h3>
+                     </div>
+                     <table class="w-full text-sm overflow-hidden">
+                         <thead>
+                             <tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+-                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Currency</th>
+-                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Credits</th>
+-                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Credit Count</th>
+-                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Debits</th>
+-                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Debit Count</th>
++                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.currency"}}</th>
++                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.accounting.journal.credit"}}</th>
++                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.credit-count" fallback="Cant. Abonos"}}</th>
++                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.accounting.journal.debit"}}</th>
++                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.debit-count" fallback="Cant. Cargos"}}</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+@@ -93,7 +93,7 @@
+                                     <td class="px-4 py-2 text-right text-gray-500">{{stat.debit_count}}</td>
+                                 </tr>
+                             {{else}}
+-                                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">No transactions in this period</td></tr>
++                                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.wallet-summary.no-period-transactions" fallback="Sin transacciones en este período"}}</td></tr>
+                             {{/each}}
+                         </tbody>
+                     </table>
+@@ -104,15 +104,15 @@
+             {{#if this.data.top_wallets}}
+                 <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                     <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Top Wallets by Balance</h3>
++                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.top-wallets" fallback="Billeteras con mayor saldo"}}</h3>
+                     </div>
+                     <table class="w-full text-sm overflow-hidden">
+                         <thead>
+                             <tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+-                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallet</th>
+-                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Owner</th>
+-                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+-                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Balance</th>
++                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "resource.wallet" fallback="Billetera"}}</th>
++                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.owner" fallback="Titular"}}</th>
++                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.type" fallback="Tipo"}}</th>
++                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.balance" fallback="Saldo"}}</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+@@ -121,14 +121,14 @@
+                                     <td class="px-4 py-2 font-mono text-xs text-gray-400">{{or wallet.wallet_public_id wallet.name "—"}}</td>
+                                     <td class="px-4 py-2 text-gray-700 dark:text-gray-300">{{or wallet.subject.name "—"}}</td>
+                                     <td class="px-4 py-2">
+-                                        <Badge @color="blue">{{or wallet.type "wallet"}}</Badge>
++                                        <Badge @color="blue">{{or wallet.displayType wallet.type "Billetera"}}</Badge>
+                                     </td>
+                                     <td class="px-4 py-2 text-right font-medium text-gray-900 dark:text-white">
+                                         {{format-currency wallet.balance (or wallet.currency this.companyCurrency)}}
+                                     </td>
+                                 </tr>
+                             {{else}}
+-                                <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-sm">No wallets found</td></tr>
++                                <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.wallet-summary.no-wallets" fallback="No se encontraron billeteras"}}</td></tr>
+                             {{/each}}
+                         </tbody>
+                     </table>
+@@ -136,7 +136,7 @@
+             {{/if}}
+         {{else}}
+             <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+-                <p class="text-sm">No report data available. Select a period and refresh.</p>
++                <p class="text-sm">{{t "ledger.reports.wallet-summary.no-data" fallback="No hay datos disponibles para el reporte. Seleccione un período y actualice."}}</p>
+             </div>
+         {{/if}}
+     </div>
 diff --git a/addon/templates/settings/accounting.hbs b/addon/templates/settings/accounting.hbs
-index dfb0c21..d8264fe 100644
+index dfb0c21..45897a6 100644
 --- a/addon/templates/settings/accounting.hbs
 +++ b/addon/templates/settings/accounting.hbs
 @@ -1,9 +1,9 @@
@@ -1535,50 +2618,157 @@ index dfb0c21..d8264fe 100644
          @onClick={{perform this.saveSettings}}
          @disabled={{this.saveSettings.isRunning}}
          @isLoading={{or this.saveSettings.isRunning this.getSettings.isRunning}}
-@@ -15,8 +15,8 @@
+@@ -15,28 +15,28 @@
          <div class="max-w-3xl my-10 mx-auto space-y-6">
  
              {{! ── Base Currency & Fiscal Year ────────────────────────────────────── }}
 -            <ContentPanel @title="Currency & Fiscal Year" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Base Currency" @helpText="The reporting currency for all financial statements and the chart of accounts.">
-+            <ContentPanel @title="Divisa base y año fiscal" @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name="Divisa base" @helpText="The reporting currency for all financial statements and the chart of accounts.">
++            <ContentPanel @title={{t "ledger.settings.accounting.currency-fiscal-title" fallback="Divisa base y año fiscal"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.accounting.base-currency" fallback="Divisa base"}} @helpText={{t "ledger.settings.accounting.base-currency-help" fallback="Divisa de reporte para todos los estados financieros y el catálogo de cuentas."}}>
                      <CurrencySelect
                          @currency={{this.effectiveCurrency}}
                          @currencyData={{this.selectedCurrency}}
-@@ -30,13 +30,13 @@
+                         @onCurrencyChange={{this.onSelectCurrency}}
+                         @triggerClass="form-select form-input"
+-                        @placeholder={{concat "Default: " this.companyCurrency}}
++                        @placeholder={{concat (t "common.default" fallback="Predeterminado") ": " this.companyCurrency}}
+                         @allowClear={{true}}
+                     />
+                     {{#unless this.base_currency}}
+-                        <p class="text-xs text-gray-400 mt-1">Using organisation default ({{this.companyCurrency}}). Select a currency above to override.</p>
++                        <p class="text-xs text-gray-400 mt-1">{{t "ledger.settings.accounting.using-org-currency" currency=this.companyCurrency fallback=(concat "Usando la divisa predeterminada de la organización (" this.companyCurrency "). Seleccione una divisa arriba para anularla.")}}</p>
                      {{/unless}}
                  </InputGroup>
  
 -                <InputGroup @name="Fiscal Year Start Month" @helpText="The month in which your organisation's fiscal year begins. Affects period-based financial reports.">
-+                <InputGroup @name="Mes de inicio del año fiscal" @helpText="The month in which your organisation's fiscal year begins. Affects period-based financial reports.">
++                <InputGroup @name={{t "ledger.settings.accounting.fiscal-year-start" fallback="Mes de inicio del año fiscal"}} @helpText={{t "ledger.settings.accounting.fiscal-year-start-help" fallback="Mes en que inicia el año fiscal de su organización. Afecta los reportes financieros periódicos."}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.fiscalYearMonthOptions}}
                              @selected={{find-by "value" this.fiscal_year_start_month this.fiscalYearMonthOptions}}
                              @onChange={{this.onSelectFiscalYearMonth}}
 -                            @placeholder="Select start month"
-+                            @placeholder="Seleccionar mes de inicio"
++                            @placeholder={{t "ledger.settings.accounting.select-start-month" fallback="Seleccionar mes de inicio"}}
                              @triggerClass="form-select form-input"
                              as |opt|
                          >
-@@ -47,12 +47,12 @@
+@@ -47,24 +47,24 @@
              </ContentPanel>
  
              {{! ── Default Accounts ────────────────────────────────────────────────── }}
 -            <ContentPanel @title="Default Accounts" @open={{true}} @wrapperClass="bordered-classic">
-+            <ContentPanel @title="Cuentas predeterminadas" @open={{true}} @wrapperClass="bordered-classic">
++            <ContentPanel @title={{t "ledger.settings.accounting.default-accounts-title" fallback="Cuentas predeterminadas"}} @open={{true}} @wrapperClass="bordered-classic">
                  <div class="text-xs text-gray-500 mb-3">
-                     These accounts are used automatically when posting transactions unless a specific account is selected on the transaction itself.
+-                    These accounts are used automatically when posting transactions unless a specific account is selected on the transaction itself.
++                    {{t "ledger.settings.accounting.default-accounts-desc" fallback="Estas cuentas se utilizan automáticamente al asentar pólizas a menos que se seleccione una cuenta específica en la transacción."}}
                  </div>
  
 -                <InputGroup @name="Default Revenue Account" @helpText="Applied to income line items on invoices and sales transactions.">
-+                <InputGroup @name={{t "ledger.settings.accounting.revenue-account"}} @helpText="Applied to income line items on invoices and sales transactions.">
++                <InputGroup @name={{t "ledger.settings.accounting.revenue-account"}} @helpText={{t "ledger.settings.accounting.revenue-account-help" fallback="Aplicada a partidas de ingresos en facturas y transacciones de venta."}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.revenueAccounts}}
+                             @selected={{this.selectedRevenueAccount}}
+                             @onChange={{this.onSelectRevenueAccount}}
+-                            @placeholder="Select revenue account"
++                            @placeholder={{t "ledger.settings.accounting.select-revenue-account" fallback="Seleccionar cuenta de ingresos"}}
+                             @triggerClass="form-select form-input"
+                             @allowClear={{true}}
+                             as |account|
+                         >
+                             <div class="flex items-center justify-between text-sm">
+-                                <span class="font-medium">{{account.name}}</span>
++                                <span class="font-medium">{{or account.displayName account.name}}</span>
+                                 {{#if account.code}}
+                                     <span class="text-gray-400 text-xs ml-2 font-mono">{{account.code}}</span>
+                                 {{/if}}
+@@ -73,19 +73,19 @@
+                     </div>
+                 </InputGroup>
+ 
+-                <InputGroup @name="Default Expense Account" @helpText="Applied to cost and expense line items on bills and purchase transactions.">
++                <InputGroup @name={{t "ledger.settings.accounting.expense-account-title" fallback="Cuenta de gastos predeterminada"}} @helpText={{t "ledger.settings.accounting.expense-account-help" fallback="Aplicada a partidas de costos y gastos en cuentas por pagar y transacciones de compra."}}>
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{this.expenseAccounts}}
+                             @selected={{this.selectedExpenseAccount}}
+                             @onChange={{this.onSelectExpenseAccount}}
+-                            @placeholder="Select expense account"
++                            @placeholder={{t "ledger.settings.accounting.select-expense-account" fallback="Seleccionar cuenta de gastos"}}
+                             @triggerClass="form-select form-input"
+                             @allowClear={{true}}
+                             as |account|
+                         >
+                             <div class="flex items-center justify-between text-sm">
+-                                <span class="font-medium">{{account.name}}</span>
++                                <span class="font-medium">{{or account.displayName account.name}}</span>
+                                 {{#if account.code}}
+                                     <span class="text-gray-400 text-xs ml-2 font-mono">{{account.code}}</span>
+                                 {{/if}}
+@@ -94,19 +94,19 @@
+                     </div>
+                 </InputGroup>
+ 
+-                <InputGroup @name="Default Accounts Receivable (AR) Account" @helpText="The asset account that tracks money owed to your organisation from customers.">
++                <InputGroup @name={{t "ledger.settings.accounting.ar-account-title" fallback="Cuenta de cuentas por cobrar (CxC) predeterminada"}} @helpText={{t "ledger.settings.accounting.ar-account-help" fallback="Cuenta de activo que registra los montos adeudados por los clientes a la organización."}}>
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{this.arAccounts}}
+                             @selected={{this.selectedArAccount}}
+                             @onChange={{this.onSelectArAccount}}
+-                            @placeholder="Select AR account"
++                            @placeholder={{t "ledger.settings.accounting.select-ar-account" fallback="Seleccionar cuenta de CxC"}}
+                             @triggerClass="form-select form-input"
+                             @allowClear={{true}}
+                             as |account|
+                         >
+                             <div class="flex items-center justify-between text-sm">
+-                                <span class="font-medium">{{account.name}}</span>
++                                <span class="font-medium">{{or account.displayName account.name}}</span>
+                                 {{#if account.code}}
+                                     <span class="text-gray-400 text-xs ml-2 font-mono">{{account.code}}</span>
+                                 {{/if}}
+@@ -115,19 +115,19 @@
+                     </div>
+                 </InputGroup>
+ 
+-                <InputGroup @name="Default Accounts Payable (AP) Account" @helpText="The liability account that tracks money your organisation owes to vendors.">
++                <InputGroup @name={{t "ledger.settings.accounting.ap-account-title" fallback="Cuenta de cuentas por pagar (CxP) predeterminada"}} @helpText={{t "ledger.settings.accounting.ap-account-help" fallback="Cuenta de pasivo que registra los montos que la organización adeuda a proveedores."}}>
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{this.apAccounts}}
+                             @selected={{this.selectedApAccount}}
+                             @onChange={{this.onSelectApAccount}}
+-                            @placeholder="Select AP account"
++                            @placeholder={{t "ledger.settings.accounting.select-ap-account" fallback="Seleccionar cuenta de CxP"}}
+                             @triggerClass="form-select form-input"
+                             @allowClear={{true}}
+                             as |account|
+                         >
+                             <div class="flex items-center justify-between text-sm">
+-                                <span class="font-medium">{{account.name}}</span>
++                                <span class="font-medium">{{or account.displayName account.name}}</span>
+                                 {{#if account.code}}
+                                     <span class="text-gray-400 text-xs ml-2 font-mono">{{account.code}}</span>
+                                 {{/if}}
+@@ -138,11 +138,11 @@
+             </ContentPanel>
+ 
+             {{! ── Journal Entry Behaviour ────────────────────────────────────────────── }}
+-            <ContentPanel @title="Journal Entry Behaviour" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Auto-Post Journal Entries">
++            <ContentPanel @title={{t "ledger.settings.accounting.journal-behaviour-title" fallback="Comportamiento de pólizas contables"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.accounting.auto-post-title" fallback="Afectación contable automática de pólizas"}}>
+                     <Toggle
+                         @isToggled={{this.auto_post_journal_entries}}
+-                        @label="Automatically post journal entries to the general ledger when created, without requiring manual approval."
++                        @label={{t "ledger.settings.accounting.auto-post-label" fallback="Afectar automáticamente las pólizas al libro mayor al crearse, sin requerir aprobación manual."}}
+                         @onToggle={{fn (mut this.auto_post_journal_entries)}}
+                     />
+                 </InputGroup>
 diff --git a/addon/templates/settings/invoice.hbs b/addon/templates/settings/invoice.hbs
-index 0725577..5e64ee7 100644
+index 0725577..ad4eb72 100644
 --- a/addon/templates/settings/invoice.hbs
 +++ b/addon/templates/settings/invoice.hbs
 @@ -1,9 +1,9 @@
@@ -1593,55 +2783,125 @@ index 0725577..5e64ee7 100644
          @onClick={{perform this.saveSettings}}
          @disabled={{this.saveSettings.isRunning}}
          @isLoading={{or this.saveSettings.isRunning this.getSettings.isRunning}}
-@@ -15,15 +15,15 @@
+@@ -15,35 +15,35 @@
          <div class="max-w-3xl my-10 mx-auto space-y-6">
  
              {{! ── Numbering ──────────────────────────────────────────────────── }}
 -            <ContentPanel @title="Invoice Numbering" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Invoice Number Prefix" @helpText="This prefix is prepended to every new invoice number, e.g. 'INV-000001'.">
-+            <ContentPanel @title="Numeración de facturas" @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.invoice.prefix"}} @helpText="This prefix is prepended to every new invoice number, e.g. 'INV-000001'.">
-                     <Input @value={{this.invoice_prefix}} @type="text" class="w-full form-input" placeholder="INV" />
+-                    <Input @value={{this.invoice_prefix}} @type="text" class="w-full form-input" placeholder="INV" />
++            <ContentPanel @title={{t "ledger.settings.invoice.numbering-title" fallback="Numeración de facturas"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.prefix"}} @helpText={{t "ledger.settings.invoice.prefix-help" fallback="Este prefijo se antepone al número de cada nueva factura, ej. 'FAC-000001'."}}>
++                    <Input @value={{this.invoice_prefix}} @type="text" class="w-full form-input" placeholder="FAC" />
                  </InputGroup>
              </ContentPanel>
  
              {{! ── Currency & Payment Terms ────────────────────────────────────── }}
 -            <ContentPanel @title="Currency & Payment Terms" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Default Currency" @helpText="The currency applied to new invoices unless overridden on the invoice itself.">
-+            <ContentPanel @title="Divisa y términos de pago" @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name="Divisa predeterminada" @helpText="The currency applied to new invoices unless overridden on the invoice itself.">
++            <ContentPanel @title={{t "ledger.settings.invoice.currency-terms-title" fallback="Divisa y términos de pago"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.default-currency" fallback="Divisa predeterminada"}} @helpText={{t "ledger.settings.invoice.currency-help" fallback="Divisa aplicada a nuevas facturas a menos que se anule en la propia factura."}}>
                      <CurrencySelect
                          @currency={{this.effectiveCurrency}}
                          @currencyData={{this.selectedCurrency}}
-@@ -37,13 +37,13 @@
+                         @onCurrencyChange={{this.onSelectCurrency}}
+                         @triggerClass="form-select form-input"
+-                        @placeholder={{concat "Default: " this.companyCurrency}}
++                        @placeholder={{concat (t "common.default" fallback="Predeterminado") ": " this.companyCurrency}}
+                         @allowClear={{true}}
+                     />
+                     {{#unless this.default_currency}}
+-                        <p class="text-xs text-gray-400 mt-1">Using organisation default ({{this.companyCurrency}}). Select a currency above to override.</p>
++                        <p class="text-xs text-gray-400 mt-1">{{t "ledger.settings.invoice.default-currency-org" currency=this.companyCurrency fallback=(concat "Usando la divisa predeterminada de la organización (" this.companyCurrency "). Seleccione una divisa arriba para anularla.")}}</p>
                      {{/unless}}
                  </InputGroup>
  
 -                <InputGroup @name="Default Payment Terms" @helpText="Number of days after the invoice date that payment is due.">
-+                <InputGroup @name={{t "ledger.settings.invoice.default-due-days"}} @helpText="Number of days after the invoice date that payment is due.">
++                <InputGroup @name={{t "ledger.settings.invoice.default-due-days"}} @helpText={{t "ledger.settings.invoice.due-days-help" fallback="Número de días naturales tras la fecha de emisión en que vence el pago."}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.paymentTermsOptions}}
                              @selected={{find-by "value" this.payment_terms_days this.paymentTermsOptions}}
                              @onChange={{this.onSelectPaymentTerms}}
 -                            @placeholder="Select payment terms"
-+                            @placeholder="Seleccionar días de crédito"
++                            @placeholder={{t "ledger.settings.invoice.select-credit-days" fallback="Seleccionar días de crédito"}}
                              @triggerClass="form-select form-input"
                              as |opt|
                          >
-@@ -54,8 +54,8 @@
+@@ -54,28 +54,28 @@
              </ContentPanel>
  
              {{! ── Default Text ─────────────────────────────────────────────────── }}
 -            <ContentPanel @title="Default Invoice Text" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Default Notes" @helpText="These notes appear at the bottom of every new invoice. You can override them per invoice.">
-+            <ContentPanel @title="Textos predeterminados" @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.invoice.default-notes"}} @helpText="These notes appear at the bottom of every new invoice. You can override them per invoice.">
-                     <Textarea @value={{this.default_notes}} class="w-full form-input" rows="3" placeholder="e.g. Thank you for your business!" />
+-                    <Textarea @value={{this.default_notes}} class="w-full form-input" rows="3" placeholder="e.g. Thank you for your business!" />
++            <ContentPanel @title={{t "ledger.settings.invoice.default-text-title" fallback="Textos predeterminados"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.default-notes"}} @helpText={{t "ledger.settings.invoice.default-notes-help" fallback="Estas notas aparecen al pie de cada factura nueva. Puede modificarlas en cada factura."}}>
++                    <Textarea @value={{this.default_notes}} class="w-full form-input" rows="3" placeholder={{t "ledger.settings.invoice.default-notes-placeholder" fallback="ej. ¡Gracias por su preferencia!"}} />
                  </InputGroup>
  
+-                <InputGroup @name="Default Terms & Conditions" @helpText="Standard terms pre-filled on every new invoice.">
+-                    <Textarea @value={{this.default_terms}} class="w-full form-input" rows="3" placeholder="e.g. Payment is due within 30 days of the invoice date." />
++                <InputGroup @name={{t "ledger.settings.invoice.default-terms-title" fallback="Términos y condiciones predeterminados"}} @helpText={{t "ledger.settings.invoice.default-terms-help" fallback="Términos estándar prellenados en cada nueva factura."}}>
++                    <Textarea @value={{this.default_terms}} class="w-full form-input" rows="3" placeholder={{t "ledger.settings.invoice.default-terms-placeholder" fallback="ej. El pago debe liquidarse dentro de los 30 días naturales posteriores a la fecha de emisión."}} />
+                 </InputGroup>
+             </ContentPanel>
+ 
+             {{! ── Default Template ─────────────────────────────────────────────── }}
+-            <ContentPanel @title="Default Invoice Template" @open={{true}} @wrapperClass="bordered-classic">
++            <ContentPanel @title={{t "ledger.settings.invoice.default-template-title" fallback="Plantilla de factura predeterminada"}} @open={{true}} @wrapperClass="bordered-classic">
+                 <InputGroup
+-                    @name="Default Template"
+-                    @helpText="The invoice template applied to all new invoices, including those auto-generated from Fleet-Ops orders. Leave blank to use the system default."
++                    @name={{t "ledger.settings.invoice.default-template-name" fallback="Plantilla predeterminada"}}
++                    @helpText={{t "ledger.settings.invoice.default-template-help" fallback="Plantilla aplicada a todas las facturas nuevas, incluidas las generadas desde pedidos de Fleet-Ops. Deje en blanco para usar la del sistema."}}
+                 >
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{this.availableTemplates}}
+                             @selected={{this.selectedTemplate}}
+                             @onChange={{this.onSelectDefaultTemplate}}
+-                            @placeholder="Select an invoice template"
++                            @placeholder={{t "ledger.settings.invoice.select-template-placeholder" fallback="Seleccionar una plantilla de factura"}}
+                             @triggerClass="form-select form-input"
+                             @allowClear={{true}}
+                             as |template|
+@@ -85,26 +85,26 @@
+                     </div>
+                     {{#if this.selectedTemplate}}
+                         <div class="mt-1 text-[11px] text-gray-500">
+-                            Selected:
++                            {{t "ledger.settings.invoice.template-selected" fallback="Seleccionada:"}}
+                             <span class="font-medium">{{this.selectedTemplate.name}}</span>
+                         </div>
+                     {{/if}}
+                     {{#unless this.availableTemplates.length}}
+                         <div class="mt-1 text-[11px] text-amber-600">
+-                            No invoice templates found.
+-                            <LinkTo @route="billing.invoice-templates.index.new" class="underline">Create a template</LinkTo>
+-                            to enable custom invoice branding.
++                            {{t "ledger.settings.invoice.no-templates-found" fallback="No se encontraron plantillas de factura."}}
++                            <LinkTo @route="billing.invoice-templates.index.new" class="underline">{{t "ledger.settings.invoice.create-template" fallback="Crear una plantilla"}}</LinkTo>
++                            {{t "ledger.settings.invoice.enable-branding-text" fallback="para habilitar la personalización de imagen de sus facturas."}}
+                         </div>
+                     {{/unless}}
+                 </InputGroup>
+             </ContentPanel>
+ 
+             {{! ── Automation ───────────────────────────────────────────────────── }}
+-            <ContentPanel @title="Automation" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Auto-Send on Creation">
++            <ContentPanel @title={{t "ledger.settings.invoice.automation-title" fallback="Automatización"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.auto-send-title" fallback="Envío automático al emitir"}}>
+                     <Toggle
+                         @isToggled={{this.auto_send_on_creation}}
+-                        @label="Automatically email the invoice to the customer when it is created."
++                        @label={{t "ledger.settings.invoice.auto-send-label" fallback="Enviar automáticamente la factura por correo electrónico al cliente cuando se emita."}}
+                         @onToggle={{fn (mut this.auto_send_on_creation)}}
+                     />
+                 </InputGroup>
 diff --git a/addon/templates/settings/payment.hbs b/addon/templates/settings/payment.hbs
-index da21581..cdcf305 100644
+index da21581..3eb0582 100644
 --- a/addon/templates/settings/payment.hbs
 +++ b/addon/templates/settings/payment.hbs
 @@ -1,9 +1,9 @@
@@ -1662,35 +2922,84 @@ index da21581..cdcf305 100644
              {{! ── Default Gateway ─────────────────────────────────────────────── }}
 -            <ContentPanel @title="Default Payment Gateway" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Default Gateway" @helpText="The gateway used for all invoice payments unless overridden on the individual invoice. Only active gateways are listed.">
-+            <ContentPanel @title="Pasarela de pago predeterminada" @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.payment.default-gateway"}} @helpText="The gateway used for all invoice payments unless overridden on the individual invoice. Only active gateways are listed.">
++            <ContentPanel @title={{t "ledger.settings.payment.default-gateway-title" fallback="Pasarela de pago predeterminada"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.payment.default-gateway"}} @helpText={{t "ledger.settings.payment.default-gateway-help" fallback="Pasarela utilizada para todos los cobros de facturas salvo anulación en la factura. Solo se listan pasarelas activas."}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.availableGateways}}
                              @selected={{this.selectedGateway}}
                              @onChange={{this.onSelectDefaultGateway}}
 -                            @placeholder="Select a payment gateway"
-+                            @placeholder="Seleccionar pasarela de pago"
++                            @placeholder={{t "ledger.settings.payment.select-gateway-placeholder" fallback="Seleccionar pasarela de pago"}}
                              @triggerClass="form-select form-input"
                              @allowClear={{true}}
                              as |gateway|
-@@ -52,8 +52,8 @@
+@@ -35,7 +35,7 @@
+                     </div>
+                     {{#if this.selectedGateway}}
+                         <div class="mt-1 text-[11px] text-gray-500">
+-                            Selected:
++                            {{t "ledger.settings.payment.gateway-selected" fallback="Seleccionada:"}}
+                             <span class="font-medium">{{this.selectedGateway.name}}</span>
+                             &mdash;
+                             <span class="capitalize">{{this.selectedGateway.environment}}</span>
+@@ -43,39 +43,39 @@
+                     {{/if}}
+                     {{#unless this.availableGateways.length}}
+                         <div class="mt-1 text-[11px] text-amber-600">
+-                            No active gateways found.
+-                            <LinkTo @route="payments.gateways.new" class="underline">Add a gateway</LinkTo>
+-                            to enable online payments.
++                            {{t "ledger.settings.payment.no-gateways-found" fallback="No se encontraron pasarelas activas."}}
++                            <LinkTo @route="payments.gateways.new" class="underline">{{t "ledger.settings.payment.add-gateway" fallback="Agregar una pasarela"}}</LinkTo>
++                            {{t "ledger.settings.payment.enable-online-text" fallback="para habilitar cobros en línea."}}
+                         </div>
+                     {{/unless}}
+                 </InputGroup>
              </ContentPanel>
  
              {{! ── Payment Behaviour ───────────────────────────────────────────── }}
 -            <ContentPanel @title="Payment Behaviour" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Allow Partial Payments">
-+            <ContentPanel @title="Comportamiento de cobro" @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name="Permitir pagos parciales">
++            <ContentPanel @title={{t "ledger.settings.payment.behaviour-title" fallback="Comportamiento de cobro"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.payment.allow-partial-payments" fallback="Permitir pagos parciales"}}>
                      <Toggle
                          @isToggled={{this.allow_partial_payments}}
-                         @label="Allow customers to pay a portion of the invoice amount rather than the full balance."
+-                        @label="Allow customers to pay a portion of the invoice amount rather than the full balance."
++                        @label={{t "ledger.settings.payment.allow-partial-payments-label" fallback="Permitir a los clientes abonar una parte del monto de la factura en lugar del saldo total."}}
+                         @onToggle={{fn (mut this.allow_partial_payments)}}
+                     />
+                 </InputGroup>
+ 
+-                <InputGroup @name="Auto-Apply Wallet Credit">
++                <InputGroup @name={{t "ledger.settings.payment.auto-apply-wallet" fallback="Aplicar crédito de billetera automáticamente"}}>
+                     <Toggle
+                         @isToggled={{this.auto_apply_wallet_credit}}
+-                        @label="Automatically apply available wallet balance toward invoice payments before charging the gateway."
++                        @label={{t "ledger.settings.payment.auto-apply-wallet-label" fallback="Aplicar automáticamente el saldo disponible en la billetera al pago de facturas antes de cobrar en la pasarela."}}
+                         @onToggle={{fn (mut this.auto_apply_wallet_credit)}}
+                     />
+                 </InputGroup>
+             </ContentPanel>
+ 
+             {{! ── Notifications ───────────────────────────────────────────────── }}
+-            <ContentPanel @title="Payment Notifications" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Send Payment Receipt">
++            <ContentPanel @title={{t "ledger.settings.payment.notifications-title" fallback="Notificaciones de pago"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.payment.send-receipt-title" fallback="Enviar comprobante de pago"}}>
+                     <Toggle
+                         @isToggled={{this.send_payment_receipt}}
+-                        @label="Email a payment receipt to the customer automatically after a successful payment."
++                        @label={{t "ledger.settings.payment.send-receipt-label" fallback="Enviar un comprobante de pago por correo al cliente automáticamente tras un cobro exitoso."}}
+                         @onToggle={{fn (mut this.send_payment_receipt)}}
+                     />
+                 </InputGroup>
 diff --git a/translations/es-mx.yaml b/translations/es-mx.yaml
 new file mode 100644
-index 0000000..df0aaa0
+index 0000000..448c58a
 --- /dev/null
 +++ b/translations/es-mx.yaml
-@@ -0,0 +1,626 @@
+@@ -0,0 +1,853 @@
 +ledger:
 +  extension-name: Ledger
 +  extension-description: Facturación, pagos, contabilidad e informes financieros en tiempo real.
@@ -1944,6 +3253,7 @@ index 0000000..df0aaa0
 +    balance-sheet:
 +      title: Balance general
 +      subtitle: Situación financiera de la entidad (Activo, Pasivo y Capital)
++      as-of: Al corte del {date}
 +      assets: Activos
 +      current-assets: Activo circulante
 +      non-current-assets: Activo no circulante
@@ -1955,37 +3265,82 @@ index 0000000..df0aaa0
 +      equity: Capital contable
 +      total-equity: Total capital contable
 +      total-liabilities-and-equity: Total pasivo y capital
++      total-section: Total {section}
++      no-accounts: No hay cuentas registradas en {section}
++      no-data: No hay datos disponibles para el reporte. Seleccione una fecha y actualice.
 +    trial-balance:
 +      title: Balanza de comprobación
 +      subtitle: Sumas y saldos deudor y acreedor por cuenta
++      as-of: Al corte del {date}
 +      account-code: Código de cuenta
 +      account-name: Nombre de la cuenta
 +      debit-balance: Saldo deudor
 +      credit-balance: Saldo acreedor
 +      total: Sumas iguales
++      no-accounts: No hay datos de cuentas disponibles
++      no-data: No hay datos disponibles para el reporte. Seleccione una fecha y actualice.
 +    cash-flow:
 +      title: Flujo de efectivo
 +      subtitle: Entradas y salidas de efectivo por tipo de actividad
 +      operating-activities: Actividades de operación
 +      investing-activities: Actividades de inversión
 +      financing-activities: Actividades de financiamiento
++      net-operating: Flujo neto de efectivo de actividades de operación
++      net-financing: Flujo neto de efectivo de actividades de financiamiento
++      net-change: Variación neta en efectivo y equivalentes
 +      net-cash-change: Variación neta en efectivo
 +      beginning-cash: Efectivo al inicio del período
 +      ending-cash: Efectivo al final del período
++      no-operating: No hay datos de actividades de operación en este período
++      no-financing: No hay datos de actividades de financiamiento en este período
++      no-data: No hay datos disponibles para el reporte. Seleccione un período y actualice.
 +    ar-aging:
 +      title: Antigüedad de saldos
 +      subtitle: Cuentas por cobrar clasificadas por días de vencimiento
++      as-of: Al corte del {date}
 +      current: Al corriente
 +      days-1-30: 1 a 30 días
 +      days-31-60: 31 a 60 días
 +      days-61-90: 61 a 90 días
 +      days-over-90: Más de 90 días
++      buckets:
++        current: Al corriente
++        1-30: 1 a 30 días
++        31-60: 31 a 60 días
++        61-90: 61 a 90 días
++        over-90: Más de 90 días
 +      total-receivables: Total cuentas por cobrar
++      no-receivables: No hay cuentas por cobrar pendientes
++      no-data: No hay datos disponibles para el reporte. Seleccione una fecha y actualice.
 +    wallet-summary:
 +      title: Resumen de billeteras
 +      subtitle: Consolidado de saldos y movimientos por billetera
 +      total-wallets: Total de billeteras
 +      active-balances: Saldos activos totales
++      wallet-counts-by-type: Billeteras por tipo de titular
++      count: Cantidad
++      owner-types:
++        wallet: Billetera
++        customer: Cliente
++        driver: Conductor
++        user: Usuario
++        vendor: Proveedor
++        unknown: Desconocido
++      period-activity: Actividad de transacciones del período
++      top-wallets: Billeteras con mayor saldo
++      table:
++        currency: Moneda
++        credits: Abonos
++        credit-count: Cantidad de abonos
++        debits: Cargos
++        debit-count: Cantidad de cargos
++        wallet: Billetera
++        owner: Titular
++        type: Tipo
++        balance: Saldo
++      no-transactions: No hay transacciones registradas en este período
++      no-wallets: No se encontraron billeteras registradas
++      no-data: No hay datos disponibles para el reporte. Seleccione un período y actualice.
 +  accounting:
 +    chart-of-accounts:
 +      title: Catálogo de cuentas
@@ -2003,6 +3358,35 @@ index 0000000..df0aaa0
 +        equity: Capital / Patrimonio
 +        revenue: Ingresos
 +        expense: Gastos
++      filter:
++        types:
++          asset: Activo
++          liability: Pasivo
++          equity: Capital / Patrimonio
++          revenue: Ingresos
++          expense: Gastos
++        statuses:
++          active: Activa
++          inactive: Inactiva
++      standard-names:
++        cash-on-hand: Caja / Efectivo
++        accounts-receivable: Cuentas por cobrar
++        undeposited-funds: Fondos por depositar
++        inventory: Inventario
++        prepaid-expenses: Gastos pagados por anticipado
++        accounts-payable: Cuentas por pagar
++        accrued-liabilities: Pasivos acumulados
++        sales-tax-payable: Impuestos por pagar (IVA)
++        owners-equity: Capital social
++        retained-earnings: Utilidades retenidas
++        sales-revenue: Ingresos por ventas
++        service-revenue: Ingresos por servicios
++        cost-of-goods-sold: Costo de ventas
++        operating-expenses: Gastos de operación
++        payroll-expenses: Gastos de nómina
++        rent-expense: Gastos de arrendamiento
++        utilities-expense: Servicios públicos
++        depreciation-expense: Gastos de depreciación
 +    journal:
 +      title: Pólizas contables
 +      new: Nueva póliza contable
@@ -2021,6 +3405,19 @@ index 0000000..df0aaa0
 +      out-of-balance: La póliza no está cuadrada. Los cargos deben ser iguales a los abonos.
 +      balanced: Póliza cuadrada
 +      account: Cuenta contable
++      filter:
++        types:
++          general: Póliza general
++          payment: Pago
++          refund: Reembolso
++          adjustment: Ajuste
++          deposit: Depósito
++          withdrawal: Retiro
++          transfer: Transferencia
++        statuses:
++          posted: Aplicada
++          draft: Borrador
++          voided: Anulada
 +    general-ledger:
 +      title: Libro mayor
 +      description: Movimientos y saldos acumulados de todas las cuentas contables.
@@ -2033,6 +3430,9 @@ index 0000000..df0aaa0
 +      closing-balance: Saldo final
 +      no-entries: No hay movimientos contables registrados para este período.
 +      period: Período contable
++      entries-count: "{count, plural, =1 {# póliza} other {# pólizas}}"
++      no-accounts: No se encontraron cuentas contables.
++      create-accounts-help: Cree cuentas en el Catálogo de cuentas para ver pólizas aquí.
 +  payments:
 +    transactions:
 +      title: Transacciones
@@ -2047,6 +3447,35 @@ index 0000000..df0aaa0
 +        successful: Exitosa
 +        failed: Fallida
 +        canceled: Cancelada
++      filter:
++        direction:
++          credit: Abono (Crédito)
++          debit: Cargo (Débito)
++        types:
++          wallet_deposit: Abono a billetera
++          wallet_withdrawal: Retiro de billetera
++          wallet_transfer: Transferencia entre billeteras
++          gateway_charge: Cobro por pasarela
++          gateway_refund: Reembolso de pasarela
++          gateway_payout: Liquidación de pasarela
++          adjustment: Ajuste contable
++          earning: Ganancia
++          fee: Comisión
++        statuses:
++          pending: Pendiente
++          success: Exitosa
++          failed: Fallida
++          cancelled: Cancelada
++          voided: Anulada
++          reversed: Revertida
++          expired: Expirada
++        settlement-statuses:
++          unpaid: No liquidada
++          partially_paid: Parcialmente liquidada
++          paid: Liquidada
++          partially_refunded: Parcialmente reembolsada
++          refunded: Reembolsada
++        date-placeholder: Seleccionar fecha o rango
 +    wallets:
 +      title: Billeteras
 +      new: Nueva billetera
@@ -2092,6 +3521,42 @@ index 0000000..df0aaa0
 +        no-events: No se han registrado eventos de webhook.
 +        status: Estado de entrega
 +        received-at: Recibido el
++      hub:
++        title: Pasarelas de pago
++        subtitle: Configure proveedores de pago, métodos manuales, webhooks, reembolsos y liquidaciones desde un solo flujo.
++        warnings: "{count, plural, =1 {# advertencia} other {# advertencias}}"
++        add-gateway: Agregar pasarela
++        active-gateways: Pasarelas activas
++        active-gateways-caption: Listas para recibir cobros
++        live-ready: Listas para producción
++        live-ready-caption: Conexiones en modo productivo
++        webhook-warnings: Advertencias de webhook
++        webhook-warnings-caption: Pasarelas sin secreto configurado
++        settlement-ready: Listas para liquidación
++        settlement-ready-caption: En vivo con cuentas bancarias
++        connected-gateways: Pasarelas conectadas
++        connected-gateways-desc: Revise los proveedores configurados, disponibilidad de cobro, entornos y estado operativo.
++        supported-gateways: Pasarelas compatibles
++        supported-gateways-desc: Conecte controladores compatibles o administre cuentas configuradas existentes.
++        loading-status: Cargando estado de pasarelas
++        connected: Conectada
++        available: Disponible
++        manual: Manual
++        manage-gateway: Administrar pasarela
++        connect-gateway: Conectar pasarela
++        drivers:
++          taler:
++            type: Pago con billetera
++            description: Pagos con billetera que preservan la privacidad, cobro mediante QR, confirmación por webhook, reembolsos y verificación de liquidación.
++          stripe:
++            type: Tarjetas y billeteras
++            description: Procesamiento de tarjetas y billeteras digitales con confirmación por webhook y soporte para reembolsos.
++          cash:
++            type: Pago manual / Efectivo
++            description: Registro de cobros fuera de línea o en persona sin aprovisionamiento de webhooks externos.
++          qpay:
++            type: Pago regional
++            description: Soporte para pasarelas regionales mediante flujos de cobro con código QR y pagos locales.
 +  billing:
 +    invoices:
 +      title: Facturas
@@ -2122,6 +3587,23 @@ index 0000000..df0aaa0
 +        void: Anulada
 +        overdue: Vencida
 +        unpaid: Sin pagar
++      filter:
++        select-customer: Seleccionar cliente
++        select-order: Seleccionar pedido
++        min: Mín
++        max: Máx
++        statuses:
++          draft: Borrador
++          sent: Enviada
++          viewed: Vista
++          partial: Parcial
++          paid: Pagada
++          partial_refund_pending: Reembolso parcial pendiente
++          refund_pending: Reembolso pendiente
++          refunded: Reembolsada
++          overdue: Vencida
++          void: Anulada
++          cancelled: Cancelada
 +    invoice-templates:
 +      title: Plantillas de facturación
 +      new: Nueva plantilla de factura
@@ -2131,20 +3613,51 @@ index 0000000..df0aaa0
 +    title: Configuración de Ledger
 +    invoice:
 +      title: Configuración de facturación
-+      description: Defina serie, foliación, vencimientos y valores por defecto para
-+        facturación.
++      description: Defina serie, foliación, vencimientos y valores por defecto para facturación.
 +      prefix: Serie / Prefijo
-+      prefix-help: Prefijo que antecederá al número de cada factura (ej. FAC-).
++      prefix-help: Este prefijo se antepone al número de cada nueva factura, ej. 'FAC-000001'.
 +      next-number: Siguiente número de folio
 +      default-due-days: Días de crédito predeterminados
++      due-days-help: Número de días naturales tras la fecha de emisión en que vence el pago.
++      select-credit-days: Seleccionar días de crédito
++      currency-help: Divisa aplicada a nuevas facturas a menos que se anule en la propia factura.
++      default-currency-org: Usando la divisa predeterminada de la organización ({currency}). Seleccione una divisa arriba para anularla.
 +      default-notes: Notas predeterminadas en facturas
++      default-notes-help: Estas notas aparecen al pie de cada factura nueva. Puede modificarlas en cada factura.
++      default-notes-placeholder: ej. ¡Gracias por su preferencia!
 +      default-terms: Términos y condiciones predeterminados
++      default-terms-title: Términos y condiciones predeterminados
++      default-terms-help: Términos estándar prellenados en cada nueva factura.
++      default-terms-placeholder: ej. El pago debe liquidarse dentro de los 30 días naturales posteriores a la fecha de emisión.
++      default-template-title: Plantilla de factura predeterminada
++      default-template-name: Plantilla predeterminada
++      default-template-help: Plantilla aplicada a todas las facturas nuevas, incluidas las generadas desde pedidos de Fleet-Ops. Deje en blanco para usar la del sistema.
++      select-template-placeholder: Seleccionar una plantilla de factura
++      template-selected: "Seleccionada:"
++      no-templates-found: No se encontraron plantillas de factura.
++      create-template: Crear una plantilla
++      enable-branding-text: para habilitar la personalización de imagen de sus facturas.
++      automation-title: Automatización
++      auto-send-title: Envío automático al emitir
++      auto-send-label: Enviar automáticamente la factura por correo electrónico al cliente cuando se emita.
 +      save-button: Guardar configuración de facturación
 +      success: Configuración de facturación guardada.
 +    payment:
 +      title: Configuración de pagos
 +      description: Configure la pasarela de cobro principal y políticas de reintento.
 +      default-gateway: Pasarela predeterminada
++      default-gateway-help: Pasarela utilizada para todos los cobros de facturas salvo anulación en la factura. Solo se listan pasarelas activas.
++      gateway-selected: "Seleccionada:"
++      no-gateways-found: No se encontraron pasarelas activas.
++      add-gateway: Agregar una pasarela
++      enable-online-text: para habilitar cobros en línea.
++      allow-partial-payments: Permitir pagos parciales
++      allow-partial-payments-label: Permitir a los clientes abonar una parte del monto de la factura en lugar del saldo total.
++      auto-apply-wallet: Aplicar crédito de billetera automáticamente
++      auto-apply-wallet-label: Aplicar automáticamente el saldo disponible en la billetera al pago de facturas antes de cobrar en la pasarela.
++      notifications-title: Notificaciones de pago
++      send-receipt-title: Enviar comprobante de pago
++      send-receipt-label: Enviar un comprobante de pago por correo al cliente automáticamente tras un cobro exitoso.
 +      auto-retry: Reintentar cobros fallidos automáticamente
 +      currencies: Divisas aceptadas
 +      save-button: Guardar configuración de pagos
@@ -2152,6 +3665,27 @@ index 0000000..df0aaa0
 +    accounting:
 +      title: Configuración contable
 +      description: Cuentas contables para asientos automáticos y cierre de ejercicio.
++      base-currency-help: Divisa de reporte para todos los estados financieros y el catálogo de cuentas.
++      using-org-currency: Usando la divisa predeterminada de la organización ({currency}). Seleccione una divisa arriba para anularla.
++      fiscal-year-start: Mes de inicio del año fiscal
++      fiscal-year-start-help: Mes en que inicia el año fiscal de su organización. Afecta los reportes financieros periódicos.
++      select-start-month: Seleccionar mes de inicio
++      default-accounts-title: Cuentas predeterminadas
++      default-accounts-desc: Estas cuentas se utilizan automáticamente al asentar pólizas a menos que se seleccione una cuenta específica en la transacción.
++      revenue-account-help: Aplicada a partidas de ingresos en facturas y transacciones de venta.
++      select-revenue-account: Seleccionar cuenta de ingresos
++      expense-account-title: Cuenta de gastos predeterminada
++      expense-account-help: Aplicada a partidas de costos y gastos en cuentas por pagar y transacciones de compra.
++      select-expense-account: Seleccionar cuenta de gastos
++      ar-account-title: Cuenta de cuentas por cobrar (CxC) predeterminada
++      ar-account-help: Cuenta de activo que registra los montos adeudados por los clientes a la organización.
++      select-ar-account: Seleccionar cuenta de CxC
++      ap-account-title: Cuenta de cuentas por pagar (CxP) predeterminada
++      ap-account-help: Cuenta de pasivo que registra los montos que la organización adeuda a proveedores.
++      select-ap-account: Seleccionar cuenta de CxP
++      journal-behaviour-title: Comportamiento de pólizas contables
++      auto-post-title: Afectación contable automática de pólizas
++      auto-post-label: Afectar automáticamente las pólizas al libro mayor al crearse, sin requerir aprobación manual.
 +      auto-post-invoices: Generar póliza contable automática al emitir factura
 +      auto-post-payments: Generar póliza contable automática al registrar pago
 +      ar-account: Cuenta de cuentas por cobrar (Clientes)
@@ -2278,6 +3812,8 @@ index 0000000..df0aaa0
 +  payee: Beneficiario
 +  frozen: Congelada
 +  orientation: Orientación
++  order: Pedido
++  settlement: Liquidación
 +menu:
 +  dashboard: Panel de control
 +  billing: Facturación

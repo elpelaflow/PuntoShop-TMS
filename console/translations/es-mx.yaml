@@ -1220,6 +1220,16 @@ column:
   telematic-provider: Proveedor telemático
   telematic-device: Dispositivo telemático
   data-frequency: Frecuencia de datos
+  number: Número
+  balance: Saldo
+  total: Total
+  currency: Divisa
+  gateway: Pasarela
+  memo: Concepto
+  reference: Referencia
+  due-date: Fecha de vencimiento
+  order: Pedido
+  settlement: Liquidación
 map:
   visibility-controls:
     title: Controles de visibilidad
@@ -4088,6 +4098,7 @@ ledger:
     balance-sheet:
       title: Balance general
       subtitle: Situación financiera de la entidad (Activo, Pasivo y Capital)
+      as-of: Al corte del {date}
       assets: Activos
       current-assets: Activo circulante
       non-current-assets: Activo no circulante
@@ -4099,37 +4110,82 @@ ledger:
       equity: Capital contable
       total-equity: Total capital contable
       total-liabilities-and-equity: Total pasivo y capital
+      total-section: Total {section}
+      no-accounts: No hay cuentas registradas en {section}
+      no-data: No hay datos disponibles para el reporte. Seleccione una fecha y actualice.
     trial-balance:
       title: Balanza de comprobación
       subtitle: Sumas y saldos deudor y acreedor por cuenta
+      as-of: Al corte del {date}
       account-code: Código de cuenta
       account-name: Nombre de la cuenta
       debit-balance: Saldo deudor
       credit-balance: Saldo acreedor
       total: Sumas iguales
+      no-accounts: No hay datos de cuentas disponibles
+      no-data: No hay datos disponibles para el reporte. Seleccione una fecha y actualice.
     cash-flow:
       title: Flujo de efectivo
       subtitle: Entradas y salidas de efectivo por tipo de actividad
       operating-activities: Actividades de operación
       investing-activities: Actividades de inversión
       financing-activities: Actividades de financiamiento
+      net-operating: Flujo neto de efectivo de actividades de operación
+      net-financing: Flujo neto de efectivo de actividades de financiamiento
+      net-change: Variación neta en efectivo y equivalentes
       net-cash-change: Variación neta en efectivo
       beginning-cash: Efectivo al inicio del período
       ending-cash: Efectivo al final del período
+      no-operating: No hay datos de actividades de operación en este período
+      no-financing: No hay datos de actividades de financiamiento en este período
+      no-data: No hay datos disponibles para el reporte. Seleccione un período y actualice.
     ar-aging:
       title: Antigüedad de saldos
       subtitle: Cuentas por cobrar clasificadas por días de vencimiento
+      as-of: Al corte del {date}
       current: Al corriente
       days-1-30: 1 a 30 días
       days-31-60: 31 a 60 días
       days-61-90: 61 a 90 días
       days-over-90: Más de 90 días
+      buckets:
+        current: Al corriente
+        1-30: 1 a 30 días
+        31-60: 31 a 60 días
+        61-90: 61 a 90 días
+        over-90: Más de 90 días
       total-receivables: Total cuentas por cobrar
+      no-receivables: No hay cuentas por cobrar pendientes
+      no-data: No hay datos disponibles para el reporte. Seleccione una fecha y actualice.
     wallet-summary:
       title: Resumen de billeteras
       subtitle: Consolidado de saldos y movimientos por billetera
       total-wallets: Total de billeteras
       active-balances: Saldos activos totales
+      wallet-counts-by-type: Billeteras por tipo de titular
+      count: Cantidad
+      owner-types:
+        wallet: Billetera
+        customer: Cliente
+        driver: Conductor
+        user: Usuario
+        vendor: Proveedor
+        unknown: Desconocido
+      period-activity: Actividad de transacciones del período
+      top-wallets: Billeteras con mayor saldo
+      table:
+        currency: Moneda
+        credits: Abonos
+        credit-count: Cantidad de abonos
+        debits: Cargos
+        debit-count: Cantidad de cargos
+        wallet: Billetera
+        owner: Titular
+        type: Tipo
+        balance: Saldo
+      no-transactions: No hay transacciones registradas en este período
+      no-wallets: No se encontraron billeteras registradas
+      no-data: No hay datos disponibles para el reporte. Seleccione un período y actualice.
   accounting:
     chart-of-accounts:
       title: Catálogo de cuentas
@@ -4147,6 +4203,35 @@ ledger:
         equity: Capital / Patrimonio
         revenue: Ingresos
         expense: Gastos
+      filter:
+        types:
+          asset: Activo
+          liability: Pasivo
+          equity: Capital / Patrimonio
+          revenue: Ingresos
+          expense: Gastos
+        statuses:
+          active: Activa
+          inactive: Inactiva
+      standard-names:
+        cash-on-hand: Caja / Efectivo
+        accounts-receivable: Cuentas por cobrar
+        undeposited-funds: Fondos por depositar
+        inventory: Inventario
+        prepaid-expenses: Gastos pagados por anticipado
+        accounts-payable: Cuentas por pagar
+        accrued-liabilities: Pasivos acumulados
+        sales-tax-payable: Impuestos por pagar (IVA)
+        owners-equity: Capital social
+        retained-earnings: Utilidades retenidas
+        sales-revenue: Ingresos por ventas
+        service-revenue: Ingresos por servicios
+        cost-of-goods-sold: Costo de ventas
+        operating-expenses: Gastos de operación
+        payroll-expenses: Gastos de nómina
+        rent-expense: Gastos de arrendamiento
+        utilities-expense: Servicios públicos
+        depreciation-expense: Gastos de depreciación
     journal:
       title: Pólizas contables
       new: Nueva póliza contable
@@ -4165,6 +4250,19 @@ ledger:
       out-of-balance: La póliza no está cuadrada. Los cargos deben ser iguales a los abonos.
       balanced: Póliza cuadrada
       account: Cuenta contable
+      filter:
+        types:
+          general: Póliza general
+          payment: Pago
+          refund: Reembolso
+          adjustment: Ajuste
+          deposit: Depósito
+          withdrawal: Retiro
+          transfer: Transferencia
+        statuses:
+          posted: Aplicada
+          draft: Borrador
+          voided: Anulada
     general-ledger:
       title: Libro mayor
       description: Movimientos y saldos acumulados de todas las cuentas contables.
@@ -4177,6 +4275,9 @@ ledger:
       closing-balance: Saldo final
       no-entries: No hay movimientos contables registrados para este período.
       period: Período contable
+      entries-count: "{count, plural, =1 {# póliza} other {# pólizas}}"
+      no-accounts: No se encontraron cuentas contables.
+      create-accounts-help: Cree cuentas en el Catálogo de cuentas para ver pólizas aquí.
   payments:
     transactions:
       title: Transacciones
@@ -4191,6 +4292,35 @@ ledger:
         successful: Exitosa
         failed: Fallida
         canceled: Cancelada
+      filter:
+        direction:
+          credit: Abono (Crédito)
+          debit: Cargo (Débito)
+        types:
+          wallet_deposit: Abono a billetera
+          wallet_withdrawal: Retiro de billetera
+          wallet_transfer: Transferencia entre billeteras
+          gateway_charge: Cobro por pasarela
+          gateway_refund: Reembolso de pasarela
+          gateway_payout: Liquidación de pasarela
+          adjustment: Ajuste contable
+          earning: Ganancia
+          fee: Comisión
+        statuses:
+          pending: Pendiente
+          success: Exitosa
+          failed: Fallida
+          cancelled: Cancelada
+          voided: Anulada
+          reversed: Revertida
+          expired: Expirada
+        settlement-statuses:
+          unpaid: No liquidada
+          partially_paid: Parcialmente liquidada
+          paid: Liquidada
+          partially_refunded: Parcialmente reembolsada
+          refunded: Reembolsada
+        date-placeholder: Seleccionar fecha o rango
     wallets:
       title: Billeteras
       new: Nueva billetera
@@ -4236,6 +4366,42 @@ ledger:
         no-events: No se han registrado eventos de webhook.
         status: Estado de entrega
         received-at: Recibido el
+      hub:
+        title: Pasarelas de pago
+        subtitle: Configure proveedores de pago, métodos manuales, webhooks, reembolsos y liquidaciones desde un solo flujo.
+        warnings: "{count, plural, =1 {# advertencia} other {# advertencias}}"
+        add-gateway: Agregar pasarela
+        active-gateways: Pasarelas activas
+        active-gateways-caption: Listas para recibir cobros
+        live-ready: Listas para producción
+        live-ready-caption: Conexiones en modo productivo
+        webhook-warnings: Advertencias de webhook
+        webhook-warnings-caption: Pasarelas sin secreto configurado
+        settlement-ready: Listas para liquidación
+        settlement-ready-caption: En vivo con cuentas bancarias
+        connected-gateways: Pasarelas conectadas
+        connected-gateways-desc: Revise los proveedores configurados, disponibilidad de cobro, entornos y estado operativo.
+        supported-gateways: Pasarelas compatibles
+        supported-gateways-desc: Conecte controladores compatibles o administre cuentas configuradas existentes.
+        loading-status: Cargando estado de pasarelas
+        connected: Conectada
+        available: Disponible
+        manual: Manual
+        manage-gateway: Administrar pasarela
+        connect-gateway: Conectar pasarela
+        drivers:
+          taler:
+            type: Pago con billetera
+            description: Pagos con billetera que preservan la privacidad, cobro mediante QR, confirmación por webhook, reembolsos y verificación de liquidación.
+          stripe:
+            type: Tarjetas y billeteras
+            description: Procesamiento de tarjetas y billeteras digitales con confirmación por webhook y soporte para reembolsos.
+          cash:
+            type: Pago manual / Efectivo
+            description: Registro de cobros fuera de línea o en persona sin aprovisionamiento de webhooks externos.
+          qpay:
+            type: Pago regional
+            description: Soporte para pasarelas regionales mediante flujos de cobro con código QR y pagos locales.
   billing:
     invoices:
       title: Facturas
@@ -4266,6 +4432,23 @@ ledger:
         void: Anulada
         overdue: Vencida
         unpaid: Sin pagar
+      filter:
+        select-customer: Seleccionar cliente
+        select-order: Seleccionar pedido
+        min: Mín
+        max: Máx
+        statuses:
+          draft: Borrador
+          sent: Enviada
+          viewed: Vista
+          partial: Parcial
+          paid: Pagada
+          partial_refund_pending: Reembolso parcial pendiente
+          refund_pending: Reembolso pendiente
+          refunded: Reembolsada
+          overdue: Vencida
+          void: Anulada
+          cancelled: Cancelada
     invoice-templates:
       title: Plantillas de facturación
       new: Nueva plantilla de factura
@@ -4275,20 +4458,51 @@ ledger:
     title: Configuración de Ledger
     invoice:
       title: Configuración de facturación
-      description: Defina serie, foliación, vencimientos y valores por defecto para
-        facturación.
+      description: Defina serie, foliación, vencimientos y valores por defecto para facturación.
       prefix: Serie / Prefijo
-      prefix-help: Prefijo que antecederá al número de cada factura (ej. FAC-).
+      prefix-help: Este prefijo se antepone al número de cada nueva factura, ej. 'FAC-000001'.
       next-number: Siguiente número de folio
       default-due-days: Días de crédito predeterminados
+      due-days-help: Número de días naturales tras la fecha de emisión en que vence el pago.
+      select-credit-days: Seleccionar días de crédito
+      currency-help: Divisa aplicada a nuevas facturas a menos que se anule en la propia factura.
+      default-currency-org: Usando la divisa predeterminada de la organización ({currency}). Seleccione una divisa arriba para anularla.
       default-notes: Notas predeterminadas en facturas
+      default-notes-help: Estas notas aparecen al pie de cada factura nueva. Puede modificarlas en cada factura.
+      default-notes-placeholder: ej. ¡Gracias por su preferencia!
       default-terms: Términos y condiciones predeterminados
+      default-terms-title: Términos y condiciones predeterminados
+      default-terms-help: Términos estándar prellenados en cada nueva factura.
+      default-terms-placeholder: ej. El pago debe liquidarse dentro de los 30 días naturales posteriores a la fecha de emisión.
+      default-template-title: Plantilla de factura predeterminada
+      default-template-name: Plantilla predeterminada
+      default-template-help: Plantilla aplicada a todas las facturas nuevas, incluidas las generadas desde pedidos de Fleet-Ops. Deje en blanco para usar la del sistema.
+      select-template-placeholder: Seleccionar una plantilla de factura
+      template-selected: "Seleccionada:"
+      no-templates-found: No se encontraron plantillas de factura.
+      create-template: Crear una plantilla
+      enable-branding-text: para habilitar la personalización de imagen de sus facturas.
+      automation-title: Automatización
+      auto-send-title: Envío automático al emitir
+      auto-send-label: Enviar automáticamente la factura por correo electrónico al cliente cuando se emita.
       save-button: Guardar configuración de facturación
       success: Configuración de facturación guardada.
     payment:
       title: Configuración de pagos
       description: Configure la pasarela de cobro principal y políticas de reintento.
       default-gateway: Pasarela predeterminada
+      default-gateway-help: Pasarela utilizada para todos los cobros de facturas salvo anulación en la factura. Solo se listan pasarelas activas.
+      gateway-selected: "Seleccionada:"
+      no-gateways-found: No se encontraron pasarelas activas.
+      add-gateway: Agregar una pasarela
+      enable-online-text: para habilitar cobros en línea.
+      allow-partial-payments: Permitir pagos parciales
+      allow-partial-payments-label: Permitir a los clientes abonar una parte del monto de la factura en lugar del saldo total.
+      auto-apply-wallet: Aplicar crédito de billetera automáticamente
+      auto-apply-wallet-label: Aplicar automáticamente el saldo disponible en la billetera al pago de facturas antes de cobrar en la pasarela.
+      notifications-title: Notificaciones de pago
+      send-receipt-title: Enviar comprobante de pago
+      send-receipt-label: Enviar un comprobante de pago por correo al cliente automáticamente tras un cobro exitoso.
       auto-retry: Reintentar cobros fallidos automáticamente
       currencies: Divisas aceptadas
       save-button: Guardar configuración de pagos
@@ -4296,6 +4510,27 @@ ledger:
     accounting:
       title: Configuración contable
       description: Cuentas contables para asientos automáticos y cierre de ejercicio.
+      base-currency-help: Divisa de reporte para todos los estados financieros y el catálogo de cuentas.
+      using-org-currency: Usando la divisa predeterminada de la organización ({currency}). Seleccione una divisa arriba para anularla.
+      fiscal-year-start: Mes de inicio del año fiscal
+      fiscal-year-start-help: Mes en que inicia el año fiscal de su organización. Afecta los reportes financieros periódicos.
+      select-start-month: Seleccionar mes de inicio
+      default-accounts-title: Cuentas predeterminadas
+      default-accounts-desc: Estas cuentas se utilizan automáticamente al asentar pólizas a menos que se seleccione una cuenta específica en la transacción.
+      revenue-account-help: Aplicada a partidas de ingresos en facturas y transacciones de venta.
+      select-revenue-account: Seleccionar cuenta de ingresos
+      expense-account-title: Cuenta de gastos predeterminada
+      expense-account-help: Aplicada a partidas de costos y gastos en cuentas por pagar y transacciones de compra.
+      select-expense-account: Seleccionar cuenta de gastos
+      ar-account-title: Cuenta de cuentas por cobrar (CxC) predeterminada
+      ar-account-help: Cuenta de activo que registra los montos adeudados por los clientes a la organización.
+      select-ar-account: Seleccionar cuenta de CxC
+      ap-account-title: Cuenta de cuentas por pagar (CxP) predeterminada
+      ap-account-help: Cuenta de pasivo que registra los montos que la organización adeuda a proveedores.
+      select-ap-account: Seleccionar cuenta de CxP
+      journal-behaviour-title: Comportamiento de pólizas contables
+      auto-post-title: Afectación contable automática de pólizas
+      auto-post-label: Afectar automáticamente las pólizas al libro mayor al crearse, sin requerir aprobación manual.
       auto-post-invoices: Generar póliza contable automática al emitir factura
       auto-post-payments: Generar póliza contable automática al registrar pago
       ar-account: Cuenta de cuentas por cobrar (Clientes)
