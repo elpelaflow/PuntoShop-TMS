@@ -36,7 +36,7 @@
                 </div>
             </:actions>
         </Overlay::Header>
-        <Overlay::Body class="no-padding" @wrapperClass="fleetbase-docs-panel-body overflow-y-auto">
+        <Overlay::Body class="no-padding" @wrapperClass="fleetbase-docs-panel-body">
             {{#if this.docsPanel.isLoading}}
                 <div class="flex h-64 flex-col items-center justify-center gap-3 p-6 text-center">
                     <Spinner @iconClass="text-sky-500 fa-spin-800ms text-2xl" />
@@ -59,7 +59,7 @@
                 </div>
             {{else}}
                 <div
-                    class="docs-content p-6 max-w-none text-gray-800 dark:text-gray-200"
+                    class="docs-content p-6 pb-24 max-w-none text-gray-800 dark:text-gray-200"
                     {{on "click" this.handleContentClick}}
                 >
                     {{this.renderedHtml}}

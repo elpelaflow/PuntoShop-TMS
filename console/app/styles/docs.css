@@ -1,7 +1,40 @@
 /* Native documentation reader styles for PuntoShop TMS */
+.fleetbase-docs-panel-overlay .next-content-overlay-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+.fleetbase-docs-panel-overlay .next-content-overlay-panel-header {
+    flex-shrink: 0 !important;
+    height: 57px !important;
+    box-sizing: border-box !important;
+}
+
+.fleetbase-docs-panel-overlay .next-content-overlay-panel-body {
+    flex: 1 1 0% !important;
+    height: calc(100vh - 57px) !important;
+    max-height: calc(100vh - 57px) !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.fleetbase-docs-panel-overlay .fleetbase-docs-panel-body {
+    min-height: 100% !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+}
+
 .docs-content {
     font-size: 0.9375rem;
     line-height: 1.625;
+    padding-bottom: 6rem !important;
+    box-sizing: border-box !important;
 }
 
 .docs-content h1 {
