@@ -1,0 +1,102 @@
+---
+title: "Users"
+url: https://fleetbase.io/docs/platform/identity-and-access/users
+module: platform
+---
+
+# Users
+
+Invite, create, and manage users in your Fleetbase organization — roles, statuses, permissions, and lifecycle actions.
+
+# Users
+
+Every person with access to Fleetbase has a user account. Users belong to an organization, carry a role, and can have additional policies and permissions attached directly. Navigate to
+**IAM → Users**
+to manage them.
+
+![IAM Users list — Name, Email, Phone, Role, Status, Last Login columns](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fiam-users-list.e84c182c.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## User Types
+
+The Users section has three tabs, each scoped to a different account type:
+
+| Tab | Description |
+| --- | --- |
+| **Users** | Internal team members — operations staff, dispatchers, administrators |
+| **Customers** | Customer and shipper accounts created via Fleet-Ops or the API |
+| **Drivers** | Driver accounts linked to the Navigator mobile app |
+
+## User Status
+
+| Status | Description |
+| --- | --- |
+| **Pending** | Invited but hasn't accepted yet. Appears in the list but cannot log in until the invite is accepted and a password is set. |
+| **Active** | Full access. The user can log in and use the console. |
+| **Inactive** | Deactivated. Cannot log in. Account and data are preserved and can be re-activated at any time. |
+
+## Inviting a User
+
+Click
+**Invite User**
+to send an email invitation. The invite flow handles two cases transparently:
+
+* **New email**
+  — A Pending user record is created immediately and an invite email is sent. The user sets their password when they accept.
+* **Existing email (another organization)**
+  — A cross-organization invite is issued. The user keeps their existing password and joins your organization on acceptance.
+
+![Invite User modal — Email, Name, and Role fields](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fiam-user-invite.0098bd0d.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+| Field | Description |
+| --- | --- |
+| **Email** | The recipient's email address — required |
+| **Name** | Optional display name pre-filled for the invitee |
+| **Role** | Optional role assigned automatically on acceptance |
+
+## Creating a User Directly
+
+Click
+**New**
+to create a user account without sending an invite email — useful when you're setting up accounts in advance or distributing credentials through a separate channel.
+
+![New User modal — photo upload, Name, Email, Phone, Country, Role, Policies, Permissions](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fiam-user-create.78e6e096.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+| Field | Description |
+| --- | --- |
+| **Photo** | Upload an avatar image |
+| **Name** | Full display name |
+| **Email** | Login email address |
+| **Phone** | Phone number — used for SMS notifications and SMS-based 2FA |
+| **Country** | User's country |
+| **Role** | Assign a role from your organization's role list |
+| **Attach Policies** | Attach one or more policies directly to this user, supplementing the role |
+| **Select Permissions** | Grant individual permissions beyond what the assigned role provides |
+
+## Per-User Actions
+
+Click the
+**⋯**
+menu on any row to access lifecycle actions for that user:
+
+| Action | Description |
+| --- | --- |
+| **Edit** | Open the user form to update any field |
+| **View Permissions** | See the full resolved permission set for this user (role + direct policies + individual permissions) |
+| **Resend Invitation** | Re-send the invite email — visible on Pending users only |
+| **Deactivate** | Block login access without deleting the account |
+| **Activate** | Restore access for a deactivated user |
+| **Verify** | Manually mark a user's email address as verified |
+| **Change Password** | Set a new password for the user directly from the admin panel |
+| **Delete** | Remove the user from the organization |
+
+You cannot delete your own account from this panel.
+
+## Bulk Actions
+
+Select multiple users with the row checkboxes, then use the
+**Bulk Action**
+dropdown to delete the selected users in a single operation.
+
+## Search and Filtering
+
+Use the search bar to find users by name, email, or phone. The filter picker lets you narrow results by role or status.

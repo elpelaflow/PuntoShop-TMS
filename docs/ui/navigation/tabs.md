@@ -1,0 +1,130 @@
+---
+title: "Tabs"
+url: https://fleetbase.io/docs/ui/navigation/tabs
+module: ui
+---
+
+# Tabs
+
+<Tabs> is the lightweight tab container that yields a curried <Tab> subcomponent. Each <Tab> takes a @title and renders its body via Ember Wormhole into the shared content area.
+
+# <Tabs>
+
+`<Tabs>`
+is the lightweight tab container in
+`@fleetbase/ember-ui`
+. It yields a curried
+`<Tab>`
+subcomponent — each Tab has a
+`@title`
+and yields its body content into the shared tab-content area.
+
+For a richer, route-aware tab strip with icons, badges, closable tabs, and an Add-tab button, use
+[`<TabNavigation>`](https://fleetbase.io/docs/ui/navigation/tab-navigation)
+.
+
+## Basic Usage
+
+```
+<Tabs as |Tab|>
+  <Tab @title="Profile">
+    <p>Profile content</p>
+  </Tab>
+  <Tab @title="Security">
+    <p>Security content</p>
+  </Tab>
+  <Tab @title="Notifications">
+    <p>Notifications content</p>
+  </Tab>
+</Tabs>
+```
+
+The first Tab is automatically activated. Click any tab to switch.
+
+## Arguments
+
+### <Tabs> Container
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@onClick` | `(tabName)` | Called when the user clicks a tab |
+| `@onTabClick` | `(tabName)` | Alias of `@onClick` |
+| `@onTabCreated` | `(tabName)` | Called when each Tab is registered (once per tab on first render) |
+| `@tagContentClass` | string | Extra classes on the shared content container |
+
+### <Tab> Yielded Subcomponent
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@title` | string | The tab label (also used as the internal tab name — dasherized) |
+| `@tabClass` | string | Extra classes on the tab `<a>` |
+| `@tabListItemClass` | string | Extra classes on the tab `<li>` |
+| `@tagPaneClass` | string | Extra classes on the tab pane |
+
+Any additional
+`...attributes`
+on a
+`<Tab>`
+are forwarded to the tab pane element.
+
+## How It Works
+
+`<Tabs>`
+renders a
+`<ul>`
+of tab links plus an empty
+`<div>`
+content area. Each
+`<Tab>`
+registers itself with the parent on creation and (when active) uses
+`<EmberWormhole>`
+to render its body into the shared content area.
+
+The active tab is tracked on the parent. Clicking a tab updates the active state and re-portals the body.
+
+## Real-World Examples
+
+```
+{{!-- Settings panel with three tabs --}}
+<Tabs as |Tab|>
+  <Tab @title="General">
+    <InputGroup @name="Display name" @value={{this.user.display_name}} />
+    <InputGroup @name="Email" @value={{this.user.email}} />
+  </Tab>
+  <Tab @title="Security">
+    <InputGroup @name="Current password" @type="password" />
+    <InputGroup @name="New password" @type="password" />
+  </Tab>
+  <Tab @title="API">
+    <ClickToReveal @value={{this.user.api_token}} @clickToCopy={{true}} />
+  </Tab>
+</Tabs>
+
+{{!-- With a callback when the user switches tabs --}}
+<Tabs @onTabClick={{this.recordTabSwitch}} as |Tab|>
+  <Tab @title="Overview"><OverviewPanel /></Tab>
+  <Tab @title="Activity"><ActivityLog @subjectId={{this.id}} /></Tab>
+</Tabs>
+```
+
+## When to Use What
+
+| Need | Use |
+| --- | --- |
+| Simple, inline tabs in a panel | `<Tabs>` |
+| Route-driven tabs ( `LinkTo` ) | [`<TabNavigation>`](https://fleetbase.io/docs/ui/navigation/tab-navigation) with `route` on each tab |
+| Tabs with icons / badges / closable / Add button | [`<TabNavigation>`](https://fleetbase.io/docs/ui/navigation/tab-navigation) |
+
+## See Also
+
+* [`<TabNavigation>`](https://fleetbase.io/docs/ui/navigation/tab-navigation)
+  — the richer tab strip
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/tabs.hbs` | Container template |
+| `addon/components/tabs.js` | Container class |
+| `addon/components/tabs/tab.hbs` | Tab subcomponent template |
+| `addon/components/tabs/tab.js` | Tab subcomponent class |

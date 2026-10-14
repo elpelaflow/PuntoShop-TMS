@@ -1,0 +1,195 @@
+---
+title: "Service Rates"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview
+module: fleet-ops
+---
+
+Service Rates
+
+# Service Rates
+
+Define pricing rules and rate structures used to calculate order costs — flat fees, distance-based, weight-based, zone pricing, and surcharges.
+
+# Service Rates
+
+**Service Rates**
+define the pricing rules Fleet-Ops uses to calculate the cost of an order. Rates can be flat fees, distance-based, weight-based, or zone-based. They support surcharges for COD (cash on delivery), peak hours, and parcel size. When an order matches a service rate, Fleet-Ops generates a
+**Service Quote**
+with the calculated amount.
+
+![Service rates list — rate name, service type, base fee, and scope columns](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-list.c371ff1f.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Rate Calculation Methods
+
+The
+`rate_calculation_method`
+field on a service rate accepts one of six values. Each has its own deep-dive page covering formula, configuration fields, worked examples, and limitations:
+
+| Value | Method | How it works |
+| --- | --- | --- |
+| `per_meter` | [Per Meter](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-meter) | A flat rate per unit of distance — kilometers, miles, meters, feet, or yards |
+| `fixed_meter` | [Fixed Rate](https://fleetbase.io/docs/fleet-ops/operations/service-rates/fixed-rate) | Banded distance pricing — a flat fee per 1-unit distance band, generated up to your maximum supported distance. `fixed_rate` is accepted as a legacy alias. |
+| `per_drop` | [Per Drop-off](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-drop) | Tiered by the number of stops on the order — define ranges of drop-offs, each with a flat fee |
+| `multi_zone_distance` | [Multi-zone Distance](https://fleetbase.io/docs/fleet-ops/operations/service-rates/multi-zone-distance) | Different per-distance rates per Zone or Service Area, with an optional fallback for distance outside any of them |
+| `parcel` | [Parcel Rate](https://fleetbase.io/docs/fleet-ops/operations/service-rates/parcel) | Per-parcel pricing — size tiers matched against each parcel's dimensions and weight |
+| `algo` (alias: `algorithm` ) | [Algorithm Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates) | A custom math expression resolved at quote time, combining distance, time, stops, parcels, and other variables |
+
+Zone-based and order-config-based pricing are
+**scopes**
+that apply to
+*any*
+method — see
+[Rate Scoping](#rate-scoping)
+below. (Note: this is distinct from
+`multi_zone_distance`
+, which uses zones as a pricing input rather than as a scope.)
+
+## Rate Components
+
+Each service rate has the following configurable fields:
+
+### Base Fee
+
+The starting charge applied before any distance or weight calculation.
+
+### Distance Component
+
+* **Per-meter rate**
+  — charge per unit of distance
+* **Per-meter unit**
+  — km, mile, meter, or feet
+* **Max distance**
+  — cap beyond which no additional distance charge is added
+
+### Cash on Delivery (COD) Fee
+
+Applied when the order has a COD amount to collect from the recipient:
+
+* **Flat COD fee**
+  — fixed fee per COD order
+* **COD percentage**
+  — percentage of the COD amount
+
+### Peak Hours Surcharge
+
+Additional charge during high-demand periods:
+
+* **Start/end time**
+  — when peak hours apply
+* **Flat peak fee**
+  or
+  **peak percentage**
+  — the surcharge amount
+
+### Banded Distance Fees (Fixed Rate)
+
+For
+[Fixed Rate](https://fleetbase.io/docs/fleet-ops/operations/service-rates/fixed-rate)
+rates, Fleet-Ops generates one row per unit of distance up to your maximum supported distance. Each row has its own flat fee, and the order is charged the fee of the band its distance falls into.
+
+### Per-Drop Tiered Fees (Per Drop-off)
+
+For
+[Per Drop-off](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-drop)
+rates, you define a tier table with min/max stop-count ranges. Each row's fee is charged when the order's stop count falls into that range.
+
+### Geographic Rules (Multi-zone Distance)
+
+For
+[Multi-zone Distance](https://fleetbase.io/docs/fleet-ops/operations/service-rates/multi-zone-distance)
+rates, you define a list of rules where each rule applies to a Zone or Service Area and has its own per-distance rate. Rules can be assigned a priority (for overlap resolution) and one rule can be marked as the fallback (for distance outside any of the defined geographies).
+
+### Parcel Fees (Parcel Rate)
+
+For
+[Parcel Rate](https://fleetbase.io/docs/fleet-ops/operations/service-rates/parcel)
+rates, you define size tiers — each with a maximum length, width, height, and weight, plus a fee. Every parcel on the order is matched to the smallest tier it fits inside and charged that tier's fee.
+
+## Creating a Service Rate
+
+Navigate to
+**Fleet-Ops → Operations → Service Rates**
+.
+
+Click
+**+ New Rate**
+.
+
+Set the
+**Service Name**
+(free-text label, e.g.
+*Same-Day Express*
+) and
+**Service Type**
+(free-text grouping, e.g.
+*delivery*
+,
+*transport*
+,
+*parcel*
+). Service type is not an enum — use whatever taxonomy fits your operation.
+
+Select the
+**Rate Calculation Method**
+from the options above.
+
+Set the
+**Base Fee**
+and configure the distance/weight/volume components as needed.
+
+Set the
+**Currency**
+for this rate.
+
+Configure optional surcharges: COD fee, peak hours, parcel fees.
+
+Set the rate
+**Scope**
+:
+
+* **Service Area**
+  — applies only to orders within a specific service area
+* **Zone**
+  — applies only to orders within a specific zone
+* **Order Config**
+  — applies only to a specific order type
+
+Click
+**Save**
+. The rate is now active and will be matched to new orders.
+
+![Service rate details — name, service type, calculation method, and fee components](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-details.ca897ee3.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Rate Scoping
+
+Rates are matched to orders based on their scope. Multiple rates can exist for the same service type — the most specific match wins:
+
+1. Zone-scoped rate (most specific)
+2. Service area-scoped rate
+3. Order config-scoped rate
+4. Global rate (no scope)
+
+If multiple rates match, the customer can choose which to apply, or the first match is used automatically depending on your settings.
+
+## Duration Terms
+
+Rates can include
+**Duration Terms**
+— the expected delivery timeframe for this service type (e.g., "Same Day", "Next Business Day", "2–3 Days"). This is shown on service quotes as the estimated delivery window.
+
+## Via the API
+
+Service rates can be read via the public API:
+
+```
+GET /v1/service-rates
+```
+
+Filtered by service area, zone, or order config to retrieve applicable rates for a given origin/destination pair.
+
+## Related Pages
+
+* [Service Quotes](https://fleetbase.io/docs/fleet-ops/operations/service-quotes/overview)
+  — how quotes are generated from service rates
+* [Service Areas & Zones](https://fleetbase.io/docs/fleet-ops/resources/places/overview)
+  — scoping rates geographically

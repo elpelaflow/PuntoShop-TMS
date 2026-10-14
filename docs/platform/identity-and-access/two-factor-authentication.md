@@ -1,0 +1,105 @@
+---
+title: "Two-Factor Authentication"
+url: https://fleetbase.io/docs/platform/identity-and-access/two-factor-authentication
+module: platform
+---
+
+# Two-Factor Authentication
+
+Enable 2FA on your personal account, enforce it for your organization, or configure it system-wide for all users.
+
+# Two-Factor Authentication
+
+Two-factor authentication (2FA) adds a second verification step to login. After entering a password, users must confirm a one-time code before gaining access. There are three levels where 2FA can be configured:
+
+| Level | Where | Who controls it |
+| --- | --- | --- |
+| **User** | Your profile → Auth | Each user for their own account |
+| **Organization** | Organization settings → Two Factor | Organization admins for their org's users |
+| **System-wide** | Admin → Auth Config → Two-Factor Auth | Instance admins for all organizations |
+
+2FA applies however you sign in. If you
+[sign in with a provider](https://fleetbase.io/docs/platform/identity-and-access/oauth-sign-in)
+, you are still asked for your one-time code afterwards.
+
+---
+
+## User-Level 2FA
+
+Individual users can enable 2FA on their own account. The 2FA settings section is only visible when the instance admin has enabled 2FA system-wide.
+
+### Open Your Profile
+
+Click your avatar in the top-right corner of the console and select
+**Your profile**
+. This opens your personal profile and account settings.
+
+### Find the Auth Section
+
+Click the
+**Auth**
+tab on your profile page.
+
+![Profile Auth tab — 2FA method selector and enable toggle below the Change Password panel](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-user-two-factor.2f462755.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+### Choose a Method
+
+Select how you want to receive your one-time codes:
+
+| Method | Description |
+| --- | --- |
+| **Email** | A code is sent to your registered email address at login |
+| **SMS** | A code is sent to your registered phone number — requires Twilio to be configured on the instance |
+
+### Enable and Save
+
+Toggle 2FA on and click
+**Save 2FA Settings**
+. From your next login, you'll be prompted for a code after entering your password.
+
+### Logging In with 2FA Enabled
+
+1. Enter your email and password as usual
+2. A one-time code is dispatched to your email or phone
+3. Enter the code to complete sign-in
+
+Codes expire after a short window. If you don't receive a code, check your spam folder (for email) or confirm your phone number is on your profile (for SMS), then request a new code.
+
+### Disabling User-Level 2FA
+
+Return to
+**Your profile → Auth**
+and toggle 2FA off. You will not be prompted for a code on future logins unless your organization or the system enforces it.
+
+---
+
+## Organization-Level 2FA
+
+Organization administrators can require all users within their organization to set up 2FA. Navigate to
+**Organization settings → Two Factor**
+to configure this.
+
+![Organization Two Factor settings — the Enable Two-Factor Authentication toggle and Save 2FA Settings](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-organization-two-factor.bd1d51c0.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+| Setting | Description |
+| --- | --- |
+| **Enable Two-Factor Authentication** | Makes 2FA available as an option for users in this organization |
+| **Require Users to Set-Up 2FA** | Forces all users in the organization to configure 2FA on their next login — they cannot access the console until setup is complete |
+
+Click
+**Save 2FA Settings**
+to apply. The enforcement toggle only appears when 2FA is enabled.
+
+Organization-level 2FA enforcement only controls access within your organization. The available delivery methods (Email or SMS) are determined by the system-wide configuration set by the instance administrator.
+
+---
+
+## System-Wide 2FA
+
+Instance administrators can enable and enforce 2FA across the entire Fleetbase instance — for all users in all organizations. This is configured from
+**Admin → Auth Config → Two-Factor Auth**
+.
+
+See
+[System Setup → Two-Factor Authentication](https://fleetbase.io/docs/platform/system-setup/two-factor-authentication)
+for details.

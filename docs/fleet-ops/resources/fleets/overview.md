@@ -1,0 +1,141 @@
+---
+title: "Fleets"
+url: https://fleetbase.io/docs/fleet-ops/resources/fleets/overview
+module: fleet-ops
+---
+
+Fleets
+
+# Fleets
+
+Organize drivers and vehicles into named fleets — group by zone, service type, or shift for structured dispatch and Orchestrator scoping.
+
+# Fleets
+
+A
+**Fleet**
+is a logical grouping of drivers and vehicles. Fleets let you organize your operation by route, service area, service type, shift time, or any other dimension that makes sense for your business. The Orchestrator uses fleet membership to scope which drivers and vehicles are considered when allocating orders.
+
+![Fleets list — fleet name, color indicator, driver count, vehicle count, and status badges](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-fleets-list.43a99ddb.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Fleet Attributes
+
+| Field | Description |
+| --- | --- |
+| **Name** | Fleet display name (e.g., "Metro North", "Express Delivery") |
+| **Color** | Color coding for map visualization |
+| **Task** | Optional label describing the fleet's purpose (e.g., "Same-day delivery") |
+| **Service Area** | Geographic zone this fleet operates in |
+| **Zone** | Sub-zone within the service area |
+| **Vendor** | Carrier/vendor that owns this fleet (optional) |
+| **Parent Fleet** | Parent fleet for hierarchical organization |
+| **Status** | active or inactive |
+
+## Live Metrics
+
+Each fleet card shows live counts:
+
+* **Drivers**
+  — total drivers in the fleet
+* **Drivers Online**
+  — drivers currently active in Navigator
+* **Vehicles**
+  — total vehicles in the fleet
+* **Vehicles Online**
+  — vehicles currently reporting location
+
+## Creating a Fleet
+
+Navigate to
+**Fleet-Ops → Resources → Fleets**
+.
+
+Click
+**+ New Fleet**
+.
+
+Set the fleet
+**Name**
+,
+**Color**
+, and optionally the
+**Task**
+label.
+
+Set the
+**Service Area**
+and
+**Zone**
+to scope the fleet geographically.
+
+Click
+**Save**
+. The fleet is created empty — add drivers and vehicles next.
+
+## Adding Drivers to a Fleet
+
+1. Open the fleet record and click the
+   **Drivers**
+   tab
+2. Click
+   **Add Driver**
+   and select from the drivers list
+3. Drivers can belong to multiple fleets
+
+Or from the driver record:
+
+1. Open
+   **Fleet-Ops → Resources → Drivers → [Driver]**
+2. Click the
+   **Fleets**
+   tab →
+   **Add to Fleet**
+
+## Adding Vehicles to a Fleet
+
+1. Open the fleet record and click the
+   **Vehicles**
+   tab
+2. Click
+   **Add Vehicle**
+   and select from the vehicles list
+3. Vehicles can belong to multiple fleets
+
+## Hierarchical Fleets
+
+Fleets support a parent-child hierarchy. For example:
+
+```
+Metropolitan Fleet
+  ├─ Metro North
+  ├─ Metro Central
+  └─ Metro South
+```
+
+Set the
+**Parent Fleet**
+field when creating a sub-fleet. The parent fleet shows aggregated counts (drivers, vehicles) across all child fleets.
+
+## How Fleets Are Used in Dispatch
+
+### Orchestrator Scoping
+
+When running the Orchestrator, you can filter by fleet. Only drivers and vehicles in the selected fleet are included in the optimization run. This lets you run separate passes for different operational zones.
+
+### Orders List Filtering
+
+In the orders list, filter by fleet to see only orders assigned to drivers in that fleet.
+
+### Scheduler Calendar
+
+The Scheduler can be filtered by fleet to show only the drivers in a specific fleet's shift calendar.
+
+## Use Cases
+
+| Fleet Type | Example |
+| --- | --- |
+| **Geographic** | "Northside Fleet", "CBD Fleet" |
+| **Service Type** | "Same-Day Fleet", "Scheduled Fleet", "Express" |
+| **Shift-Based** | "Morning Shift", "Evening Shift" |
+| **Vehicle Type** | "Motorcycle Fleet", "Refrigerated Fleet" |
+| **Vendor** | "Partner Carrier A", "Subcontractor B" |

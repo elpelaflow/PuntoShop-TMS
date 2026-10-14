@@ -1,0 +1,391 @@
+---
+title: "Reports"
+url: https://fleetbase.io/docs/fleet-ops/analytics/reports/overview
+module: fleet-ops
+---
+
+Reports
+
+# Reports
+
+Build, run, save, and export custom reports against your Fleet-Ops data using a visual report builder — no SQL required.
+
+# Reports
+
+The Reports section is where you build custom data exports of your Fleet-Ops operation. Pick a starting table (orders, drivers, vehicles, etc.), choose which fields you want, layer in filters and sorting, optionally pull in fields from related tables, and run the report to see the result. Save it, re-run it whenever you want, and export to CSV or XLSX.
+
+Reports are
+**table-based today**
+— every report produces rows in a table. Charts, summary cards, and pre-built dashboards are on the roadmap but not yet available.
+
+Navigate to
+**Fleet-Ops → Analytics → Reports**
+.
+
+## The Reports List
+
+When you open Reports you land on the list of every saved report in your organisation, with columns for
+**Title**
+and
+**ID**
+. From here you can:
+
+* Click any report row to
+  **view and re-run**
+  it
+* Click
+  **+ New**
+  to start a new report
+* Use the search field to find a report by title
+* Use the
+  **⋯**
+  action menu on each row to edit, duplicate, or delete
+
+Reports are scoped to your organisation — every operator with the right
+[IAM permissions](https://fleetbase.io/docs/platform/identity-and-access/users)
+sees the same list.
+
+## Building a Report
+
+Click
+**+ New**
+. The Report Builder opens with two main tabs:
+**Configuration**
+(where you compose the query) and
+**Preview**
+(where the results appear once you click Execute).
+
+![Fleet-Ops Report Builder — Configuration tab with Primary Table picker, columns, computed columns, group, sort, limit, joins, and conditions](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-report-builder.b598ad5b.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+### Step 1 — Give the report a title
+
+At the top of the page, fill in:
+
+* **Title**
+  — what you'll see in the reports list (required)
+* **Description**
+  — optional one-liner explaining what the report shows
+* **Tags**
+  — optional labels for grouping reports together (e.g.
+  *finance*
+  ,
+  *daily*
+  ,
+  *driver-perf*
+  )
+
+### Step 2 — Pick a Primary Table
+
+The
+**Primary Table**
+is the kind of data the report is
+*about*
+. One row in the result = one of these:
+
+| Pick this... | ...if you want a report where each row is | Examples |
+| --- | --- | --- |
+| **Orders** | One delivery / service order | "All completed orders this month with their driver and distance" |
+| **Drivers** | One driver | "Total orders per driver, per week" |
+| **Vehicles** | One vehicle | "Vehicle utilisation by plate" |
+| **Places** | One saved location | "Pickup volume per warehouse" |
+| **Contacts** | One customer / supplier / facilitator | "Orders per customer, total spend" |
+| **Vendors** | One third-party carrier | "Vendor orders dispatched this week" |
+| **Fuel Reports** | One fuel transaction | "Fuel cost per vehicle per month" |
+
+The picker shows a short description under each option to help you choose. Picking the primary table also unlocks the
+**column picker**
+and
+**available joins**
+for the next steps.
+
+### Step 3 — Pick the columns you want
+
+In the
+**Select Columns**
+dropdown, pick the fields that should appear as columns in your report. Search by name, tick the checkboxes next to the fields you want.
+
+Columns are grouped by table. If you've added joins (Step 6 below), the joined tables' columns also appear here so you can mix and match — e.g. show order ID + driver name + vehicle plate in one row even though those come from three different tables.
+
+### Step 4 — Add computed columns (optional)
+
+When you want
+**counts, sums, averages, minimums, or maximums**
+rather than raw rows, add them in the
+**Computed Columns**
+section. Each table in the schema ships with predefined computed columns — for example the
+*Orders*
+table has
+*Total Orders*
+,
+*Total Distance*
+,
+*Average Distance*
+, and
+*Total Time*
+built-in.
+
+You can also build your own computed column by picking any aggregatable field on the table and choosing one of:
+
+* **COUNT**
+  — how many rows
+* **SUM**
+  — total value across rows
+* **AVG**
+  — average value across rows
+* **MIN**
+  — smallest value
+* **MAX**
+  — largest value
+
+Computed columns are most useful when paired with
+**Group**
+(next step) — that's how you get
+*Total Orders per Driver*
+,
+*Total Distance per Day*
+, etc.
+
+### Step 5 — Group, sort, limit
+
+Three small but important controls:
+
+| Control | Purpose | Example |
+| --- | --- | --- |
+| **Group** | Roll rows up by one or more columns. Computed columns are calculated *per group* . | Group by `driver` to get one row per driver instead of one per order |
+| **Sort** | Order the result rows. Add multiple sorts in priority order. | Sort by *Total Orders* descending to see your top-performing drivers first |
+| **Limit** | Cap the number of rows returned. Defaults to 100; the maximum varies per table. | Set to 10 for "top 10 drivers by order count" |
+
+### Step 6 — Joins (optional)
+
+Joins let you pull in fields from
+**related tables**
+. The schema knows about common relationships out of the box — a driver has a current vehicle, an order has a customer, a place can have a parent contact — so when you add a join, the relationship's join condition is filled in automatically.
+
+You only need joins when you want to show fields from a
+*different*
+table than your primary one. If you're reporting on orders and only want order fields, skip this step.
+
+To add a join:
+
+1. Click
+   **+ Add Join**
+   under Joins
+2. Pick the relationship from the dropdown (e.g.
+   *Driver*
+   on the orders table)
+3. Pick the join type:
+   * **Left**
+     — every row from the primary table, plus matched joined rows where they exist (most common)
+   * **Inner**
+     — only rows where both sides match
+   * **Right**
+     — every row from the joined table, plus matched primary rows
+   * **Full**
+     — every row from both tables, matched where possible
+4. The join condition fills in automatically from the relationship; you can override it if you need to
+
+Once a join is added, the joined table's columns become available in the Select Columns picker.
+
+### Step 7 — Conditions (filters)
+
+The
+**Conditions**
+section is how you filter which rows the report includes. Each condition has three parts:
+
+* **Column**
+  — which field to test
+* **Operator**
+  — how to compare it
+* **Value**
+  — what to compare against
+
+Available operators:
+
+| Operator | Meaning | Example |
+| --- | --- | --- |
+| `=` , `!=` | Equal / not equal | `status = "completed"` |
+| `>` , `>=` , `<` , `<=` | Numeric or date comparison | `created_at >= "2026-01-01"` |
+| `LIKE` , `NOT LIKE` | Text pattern match | `customer_name LIKE "Acme%"` |
+| `IN` , `NOT IN` | Value is in a list | `status IN ("dispatched","started")` |
+| `IS NULL` , `IS NOT NULL` | Field is empty / not empty | `driver_assigned IS NOT NULL` |
+
+Add multiple conditions and combine them with
+**AND**
+or
+**OR**
+via the logic dropdown beside each row. The value input changes type based on the column you pick — strings get a text input, dates get a date picker, booleans get a toggle, numbers get a numeric input.
+
+### Step 8 — Execute and review
+
+Click
+**Execute Query**
+(in the toolbar or the page header). The Builder switches to the
+**Preview**
+tab and renders your result as a paginated table.
+
+If the query has problems, you'll see them inline above the configuration as red error blocks (must-fix) or yellow warning blocks (worth checking). Common issues:
+
+* *"No primary table selected"*
+  — pick something for Step 2
+* *"No columns selected"*
+  — pick at least one field in Select Columns
+* *"Join missing condition"*
+  — finish configuring a join before executing
+
+### Step 9 — Save the report
+
+Click
+**Save Report**
+in the toolbar. The report appears in the list immediately and can be re-opened, re-run, edited, or exported anytime. Saved reports keep their full configuration — primary table, columns, joins, conditions, sort, limit, even title and tags — so re-running gives a fresh result against the latest data without re-configuring anything.
+
+## Re-running a Saved Report
+
+Click any report in the list to open it. You'll land on the same Builder you used to create it, with the saved configuration applied. Click
+**Execute Query**
+to run again — the result reflects the
+*current*
+state of your Fleet-Ops data, so a report you saved last month will pick up new orders, drivers, etc. on each run.
+
+You can also tweak the configuration and re-save (which updates the report) or
+**Save as New**
+(which creates a copy).
+
+## Exporting Results
+
+After executing a report, use the
+**Export**
+action to download the result. Common formats are
+**CSV**
+and
+**XLSX**
+; the available formats depend on the platform's installed exporters. Exports include exactly the columns shown in the Preview tab — no extras, no missing fields — so what you see is what you get.
+
+CSV exports work cleanly with Excel, Google Sheets, Numbers, and any BI tool (Power BI, Tableau, Looker, Metabase). Just open the file or import it directly.
+
+## Tips
+
+* **Start small.**
+  Pick a primary table, add 3–4 columns, and execute. Then build up from there. It's much easier to add complexity than debug a 20-column report that won't run.
+* **Use Limit while you're iterating.**
+  Drop the limit to 10–20 rows during configuration so executions are fast. Bump it to your real target right before saving.
+* **Tags help a lot when you have many reports.**
+  Tagging by team, cadence, or purpose (
+  `daily`
+  ,
+  `compliance`
+  ,
+  `dispatch-perf`
+  ) makes the list manageable.
+* **Computed columns + Group is where the value is.**
+  "Show me one row per driver, with their total orders and average distance, sorted by total orders descending" is a 30-second config that previously meant exporting and pivoting in Excel.
+
+## Worked Examples
+
+A few common reports operations build, with the controls used:
+
+### Top 10 drivers by completed orders this month
+
+* **Primary Table:**
+  Drivers
+* **Joins:**
+  Add a join to
+  **Orders**
+  (the schema's relationship from drivers to orders)
+* **Columns:**
+  Driver name
+* **Computed Columns:**
+  *COUNT*
+  of order ID — call it "Completed Orders"
+* **Conditions:**
+  `orders.status = "completed"`
+  ,
+  `orders.created_at >= "2026-05-01"`
+* **Group:**
+  Driver name
+* **Sort:**
+  Completed Orders descending
+* **Limit:**
+  10
+
+### Monthly fuel spend per vehicle
+
+* **Primary Table:**
+  Fuel Reports
+* **Joins:**
+  Vehicle (relationship)
+* **Columns:**
+  Vehicle plate, vehicle make/model
+* **Computed Columns:**
+  *SUM*
+  of amount → "Total Fuel Spend"
+* **Conditions:**
+  `created_at >= "2026-05-01"`
+  ,
+  `created_at < "2026-06-01"`
+* **Group:**
+  Vehicle plate
+* **Sort:**
+  Total Fuel Spend descending
+
+### Customers with no orders in the last 90 days
+
+* **Primary Table:**
+  Contacts
+* **Joins:**
+  Orders (left join, so customers with zero orders still appear)
+* **Columns:**
+  Customer name, email, phone
+* **Computed Columns:**
+  *COUNT*
+  of order ID → "Orders in Period"
+* **Conditions:**
+  `orders.created_at >= "<90 days ago>"`
+  *with logic OR*
+  `orders.id IS NULL`
+* **Group:**
+  Customer name, email, phone
+* **Sort:**
+  Orders in Period ascending
+* **Limit:**
+  100
+
+### Open orders awaiting dispatch
+
+* **Primary Table:**
+  Orders
+* **Columns:**
+  Order ID, customer, pickup, dropoff, scheduled at
+* **Conditions:**
+  `status = "created"`
+  ,
+  `scheduled_at <= "<now>"`
+* **Sort:**
+  Scheduled at ascending
+
+## Permissions
+
+Report access is gated by your IAM role:
+
+* **Run / view / export**
+  — operators with read access to a table can run reports against it
+* **Create / save / edit**
+  — operators with write access on the Reports resource
+* **Delete**
+  — operators with delete access on the Reports resource
+
+The table picker only shows tables your role has read access to — if a colleague can see a table you can't, that's an IAM permission difference, not a missing feature. See
+[Identity & Access](https://fleetbase.io/docs/platform/identity-and-access/users)
+for the role and policy model.
+
+## What's Coming
+
+The Report Builder is going to grow over the next releases:
+
+* **Charts**
+  — bar, line, pie visualisations on top of report results
+* **Summary cards**
+  — single-number KPI cards (total orders today, on-time rate, etc.)
+* **Dashboards**
+  — multi-report layouts pinned to landing pages, refreshing on a schedule
+
+Until those land, you can produce equivalent visualisations by exporting reports to CSV / XLSX and charting in Excel, Sheets, or any BI tool.

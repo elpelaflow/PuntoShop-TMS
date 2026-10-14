@@ -1,0 +1,195 @@
+---
+title: "Registering a Report Schema"
+url: https://fleetbase.io/docs/extension-development/recipes/registering-a-report-schema
+module: extension-development
+---
+
+# Registering a Report Schema
+
+Expose your extension's tables in the platform's report builder by registering a ReportSchema. Users can then build custom reports against your data through the standard reporting UI.
+
+# Registering a Report Schema
+
+The platform ships a generic report builder that lets users build CSV/XLSX reports from any data source registered as a
+**report schema**
+. Fleet-Ops registers schemas for orders, drivers, vehicles, and others — your extension can register schemas for its own tables the same way.
+
+## What a Report Schema Provides
+
+For each table, the schema declares:
+
+* The
+  **columns**
+  users can pick — with labels, descriptions, types, and per-column flags (
+  `searchable`
+  ,
+  `filterable`
+  ,
+  `sortable`
+  ,
+  `aggregatable`
+  )
+* **Relationships**
+  — joins to related tables that the report builder can offer as expansions
+* **Transformers**
+  — functions that turn raw column values into display-friendly text
+* **Permissions**
+  — extension and category metadata used for filtering the report-builder UI
+
+The platform then generates SQL, applies user-selected filters/columns, paginates, and exports.
+
+## 1. Implement ReportSchema
+
+Create a class that implements
+`Fleetbase\Support\Reporting\Contracts\ReportSchema`
+:
+
+```
+<?php
+// server/src/Support/Reporting/MyExtensionReportSchema.php
+
+namespace MyOrg\MyExtension\Support\Reporting;
+
+use Fleetbase\Support\Reporting\Contracts\ReportSchema;
+use Fleetbase\Support\Reporting\ReportSchemaRegistry;
+use Fleetbase\Support\Reporting\Schema\Column;
+use Fleetbase\Support\Reporting\Schema\Relationship;
+use Fleetbase\Support\Reporting\Schema\Table;
+
+class MyExtensionReportSchema implements ReportSchema
+{
+    public function registerReportSchema(ReportSchemaRegistry $registry): void
+    {
+        $registry->registerTable($this->createWidgetsTable());
+    }
+
+    protected function createWidgetsTable(): Table
+    {
+        return Table::make('my_extension_widgets')
+            ->label('Widgets')
+            ->description('Custom widgets created by My Extension')
+            ->category('My Extension')
+            ->extension('my-extension')
+            ->excludeColumns(['uuid', 'deleted_at'])
+            ->maxRows(50000)
+            ->cacheTtl(3600)
+            ->columns([
+                Column::make('public_id', 'string')
+                    ->label('Widget ID')
+                    ->description('User-facing widget identifier')
+                    ->searchable()
+                    ->filterable()
+                    ->sortable(),
+
+                Column::make('name', 'string')
+                    ->label('Name')
+                    ->searchable()
+                    ->filterable()
+                    ->sortable(),
+
+                Column::make('status', 'string')
+                    ->label('Status')
+                    ->filterable()
+                    ->sortable()
+                    ->aggregatable()
+                    ->transformer(fn ($value) => ucfirst($value)),
+
+                Column::make('created_at', 'datetime')
+                    ->label('Created')
+                    ->filterable()
+                    ->sortable(),
+            ])
+            ->relationships([
+                Relationship::belongsTo('company', 'companies', 'company_uuid', 'uuid')
+                    ->label('Organization'),
+                Relationship::belongsTo('createdBy', 'users', 'created_by_uuid', 'uuid')
+                    ->label('Created By'),
+            ]);
+    }
+}
+```
+
+### Column Types
+
+| Type | Use for |
+| --- | --- |
+| `'string'` | Text fields, IDs, statuses |
+| `'integer'` / `'decimal'` | Numbers — gets sum/avg aggregation |
+| `'boolean'` | Yes/no — gets count aggregation |
+| `'datetime'` / `'date'` | Time fields — gets date filters and grouping |
+| `'currency'` | Monetary values — formatted with the org's currency |
+| `'json'` | Structured fields — flattens to dot-notation paths |
+
+### Column Flags
+
+| Flag | Effect |
+| --- | --- |
+| `searchable()` | Text search hits this column |
+| `filterable()` | Surfaced in the filter UI |
+| `sortable()` | User can sort the report by this column |
+| `aggregatable()` | Available for COUNT/SUM/AVG/MIN/MAX |
+| `transformer($fn)` | Apply a callback to each value before output |
+
+## 2. Register a ReportSchemaServiceProvider
+
+Mirror the Fleet-Ops pattern: a tiny service provider that calls
+`ReportSchemaRegistry::registerTable(...)`
+once the registry is resolved:
+
+```
+<?php
+// server/src/Providers/ReportSchemaServiceProvider.php
+
+namespace MyOrg\MyExtension\Providers;
+
+use Fleetbase\Support\Reporting\ReportSchemaRegistry;
+use Illuminate\Support\ServiceProvider;
+use MyOrg\MyExtension\Support\Reporting\MyExtensionReportSchema;
+
+class ReportSchemaServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->callAfterResolving(ReportSchemaRegistry::class, function (ReportSchemaRegistry $registry) {
+            (new MyExtensionReportSchema())->registerReportSchema($registry);
+        });
+    }
+}
+```
+
+## 3. Wire It in Your Main Service Provider
+
+```
+// server/src/Providers/MyExtensionServiceProvider.php
+
+public function register()
+{
+    $this->app->register(CoreServiceProvider::class);
+    $this->app->register(ReportSchemaServiceProvider::class);
+}
+```
+
+That's it on the backend —
+`callAfterResolving`
+defers registration until something actually asks for the registry, avoiding boot-order issues.
+
+## 4. Verify in the UI
+
+Restart the API and open the platform's report builder. Your table appears under whatever
+`category`
+you set, with the columns you declared as picker options. Build a report, run it, export it.
+
+## Reference
+
+* `fleetops/server/src/Support/Reporting/FleetOpsReportSchema.php`
+  — full reference implementation, including 7 tables with relationships and transformers
+* `fleetops/server/src/Providers/ReportSchemaServiceProvider.php`
+  — minimal provider
+* `core-api/src/Support/Reporting/`
+  —
+  `Table`
+  ,
+  `Column`
+  ,
+  `Relationship`
+  classes and the registry itself

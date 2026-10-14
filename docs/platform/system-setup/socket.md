@@ -1,0 +1,97 @@
+---
+title: "Socket"
+url: https://fleetbase.io/docs/platform/system-setup/socket
+module: platform
+---
+
+# Socket
+
+Monitor the SocketCluster connection that powers real-time driver tracking, order status updates, and live console events.
+
+# Socket
+
+Fleetbase uses
+[SocketCluster](https://socketcluster.io/)
+for real-time bidirectional communication — live driver location updates on the map, order status changes pushed to the console without polling, and real-time events delivered to the Navigator app. Navigate to
+**Admin → System Settings → Socket**
+to monitor the connection.
+
+For WebSocket ingress requirements, SocketCluster replica guidance, and network planning, see
+[Infrastructure Sizing](https://fleetbase.io/docs/platform/quickstart/infrastructure-sizing)
+.
+
+## Connection Monitor
+
+The Socket page displays a live event log from the SocketCluster server. Events appear as they are received, with timestamps and color-coded output. This view is read-only — SocketCluster configuration is managed at the infrastructure level and cannot be changed from this page.
+
+![Socket Connection Monitor — live event log with timestamps and color-coded output](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fadmin-socket-settings.7dde4929.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Configuration
+
+SocketCluster is configured via environment variables set in
+`docker-compose.override.yml`
+under the
+`socket`
+service:
+
+```
+services:
+  socket:
+    environment:
+      SOCKETCLUSTER_OPTIONS: '{"origins":"https://console.yourdomain.com"}'
+```
+
+The
+`origins`
+value is a comma-separated list of allowed WebSocket origins. In production, restrict this to your exact console domain to prevent connections from unauthorized origins.
+
+The API container connects to SocketCluster using these variables (set under the
+`application`
+service):
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `SOCKETCLUSTER_HOST` | `socket` | Hostname of the SocketCluster container |
+| `SOCKETCLUSTER_PORT` | `38000` | Port SocketCluster listens on |
+| `SOCKETCLUSTER_SECURE` | `false` | Set to `true` when connecting over WSS |
+| `SOCKETCLUSTER_PATH` | `/socketcluster/` | WebSocket path prefix |
+
+## Testing
+
+Click
+**Test Socket Connection**
+to publish a test message through SocketCluster from the API container. A success response confirms the API can reach the SocketCluster server and publish events. If the test fails, check that:
+
+* The
+  `socket`
+  container is running (
+  `docker compose ps socket`
+  )
+* `SOCKETCLUSTER_HOST`
+  and
+  `SOCKETCLUSTER_PORT`
+  in the
+  `application`
+  container match the socket container's actual hostname and port
+* No internal firewall rule is blocking container-to-container traffic on port
+  `38000`
+
+## Troubleshooting
+
+**WebSocket connections refused in the browser**
+The
+`origins`
+list in
+`SOCKETCLUSTER_OPTIONS`
+must exactly match the
+`Origin`
+header sent by the browser, including the protocol —
+`https://console.yourdomain.com`
+, not just
+`yourdomain.com`
+. A mismatch causes the SocketCluster server to reject the upgrade request.
+
+**Events not appearing in real time**
+If the event log is empty but the connection test passes, the issue is likely an origins mismatch on the browser side. Check the browser console for WebSocket errors and compare the reported origin against your
+`SOCKETCLUSTER_OPTIONS`
+value.

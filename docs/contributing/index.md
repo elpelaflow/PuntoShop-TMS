@@ -1,0 +1,56 @@
+---
+title: "Contributing to Fleetbase"
+url: https://fleetbase.io/docs/contributing
+module: contributing
+---
+
+# Contributing to Fleetbase
+
+Fleetbase is open-source under AGPL-3.0 and shaped by the people who use it. Every contribution — a typo fix, a translation, a bug report, an extension — helps the platform grow.
+
+This section walks through every way to contribute, broken down by area so you can find the path that fits.
+
+## Ways to contribute
+
+| Area | What it covers | Start here |
+| --- | --- | --- |
+| **Translations** | Translating the Console and extensions into your language | [Translations →](https://fleetbase.io/docs/contributing/translations) |
+| **Code** | Bug fixes, features, refactors across the core and extensions | [Code →](https://fleetbase.io/docs/contributing/code) |
+| **Documentation** | Improving these docs — clarity, examples, screenshots, accuracy | [Documentation →](https://fleetbase.io/docs/contributing/documentation) |
+| **Extensions** | Building new extensions for the marketplace | [Extensions →](https://fleetbase.io/docs/contributing/extensions) |
+| **Reporting issues** | Filing bug reports and feature requests on the right repo | [Reporting issues →](https://fleetbase.io/docs/contributing/reporting-issues) |
+
+## Before you start
+
+A few principles that apply to every contribution area:
+
+* **Open a discussion first**
+  for anything beyond a small fix. Saves your time and ours if the direction doesn't fit the roadmap.
+* **One change per pull request.**
+  Small, focused PRs are easier to review and merge.
+* **Stay close to the existing style.**
+  Match the conventions of the file you're editing — formatting, naming, structure.
+* **By submitting**
+  , you agree your contribution is licensed under
+  [AGPL-3.0](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/LICENSE.md)
+  . If you have questions, see
+  [Licensing](https://fleetbase.io/docs/community/licensing)
+  or ask in
+  [Discord](https://fleetbase.io/docs/community/discord)
+  .
+
+## Where contributions live
+
+Fleetbase is split across many repositories — the core platform, individual extensions, mobile apps, and tooling. Most contributions target one specific repo. The full repo map and which one to use lives in each contribution area's guide.
+
+## Recognition
+
+Every merged contribution is credited in the repo's contributors list. Significant contributions are also called out in the
+[changelog](https://fleetbase.io/docs/community/changelog)
+and on the relevant release notes.
+
+## Questions?
+
+If you're unsure where to start or whether something is in scope, jump into
+[Discord](https://fleetbase.io/docs/community/discord)
+— the maintainers and other contributors hang out there and respond fast.

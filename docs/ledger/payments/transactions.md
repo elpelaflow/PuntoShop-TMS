@@ -1,0 +1,141 @@
+---
+title: "Transactions"
+url: https://fleetbase.io/docs/ledger/payments/transactions
+module: ledger
+---
+
+# Transactions
+
+View the immutable audit trail of every wallet movement — filter by type, status, direction, and date range.
+
+# Transactions
+
+A
+**Transaction**
+is the immutable record of money moving relative to a wallet. Transactions are never edited or deleted — they are the audit trail for every financial event in your system.
+
+Navigate to
+**Ledger → Payments → Transactions**
+.
+
+## Transaction Attributes
+
+| Field | Description |
+| --- | --- |
+| **Type** | What kind of financial event this is (see types below) |
+| **Direction** | `credit` (money in) or `debit` (money out) relative to the wallet |
+| **Status** | Current state of the transaction |
+| **Amount** | Transaction amount in minor currency units |
+| **Fee Amount** | Gateway or processing fee |
+| **Tax Amount** | Tax applied to the transaction |
+| **Net Amount** | `Amount − Fees − Tax` |
+| **Balance After** | Wallet balance immediately after this transaction |
+| **Currency** | Transaction currency |
+| **Subject** | The wallet (or other entity) the transaction is recorded against (polymorphic) |
+| **Payer** | Who paid (polymorphic) |
+| **Payee** | Who received (polymorphic) |
+| **Initiator** | Who triggered the transaction (polymorphic) |
+| **Context** | Optional polymorphic link to the source (invoice, order, etc.) |
+| **Gateway** | Gateway that processed this, if any |
+| **Reference** | Human-readable reference (invoice number, order ID) |
+| **Description** | What the transaction is for |
+| **Failure Reason** / **Failure Code** | Populated on failures |
+| **Settled / Voided / Reversed / Expires At** | Timestamps for state transitions when applicable |
+
+## Transaction Types
+
+These types are written by the system in code:
+
+| Type | Source |
+| --- | --- |
+| `deposit` | Manual credit or gateway top-up |
+| `withdrawal` | Direct debit (manual) |
+| `transfer_in` | Inbound side of a wallet-to-wallet transfer |
+| `transfer_out` | Outbound side of a wallet-to-wallet transfer |
+| `earning` | Credit for completed work (e.g., driver delivery earning) |
+| `payout` | Debit to send funds out (e.g., driver payout to bank) |
+| `invoice_payment` | Payment posted against an invoice |
+
+A wallet-to-wallet transfer produces
+**two**
+transactions:
+`transfer_out`
+on the source and
+`transfer_in`
+on the destination.
+
+## Transaction Statuses
+
+The model supports a wide range of statuses with corresponding timestamps (
+`settled_at`
+,
+`voided_at`
+,
+`reversed_at`
+,
+`expires_at`
+), but the system itself currently only writes
+`completed`
+. Custom integrations can produce other states.
+
+| Status | Meaning |
+| --- | --- |
+| `pending` | Initiated but not yet confirmed (custom integrations) |
+| `completed` | Successful; wallet balance updated |
+| `failed` | Could not complete |
+| `voided` | Invalidated before completion |
+| `reversed` | Cancelled after completion; balance restored |
+| `expired` | Expired before being confirmed |
+
+## Filtering Transactions
+
+Use the filter panel to narrow the list:
+
+* **Direction**
+  — credit or debit
+* **Type**
+  — filter by transaction type
+* **Status**
+  — filter by status
+* **Date range**
+  — start and end date
+
+The wallet-specific
+**Transactions**
+tab on a wallet detail panel scopes the list to that single wallet.
+
+## Transaction Detail
+
+Click any transaction to see its full detail panel, including:
+
+* Amount breakdown (fee, tax, net)
+* Settlement section (settled at, settled amount, settled currency, exchange rate)
+* All polymorphic parties (subject, payer, payee, initiator, context)
+* IP address (for gateway-originating transactions)
+* Linked journal entry
+* Gateway reference ID
+* Failure reason and failure code (for failed transactions)
+
+## Automated Transactions
+
+Most transactions are created automatically:
+
+* **Wallet top-up**
+  via gateway →
+  `deposit`
+* **Driver earning**
+  credited →
+  `earning`
+* **Wallet-to-wallet transfer**
+  → paired
+  `transfer_in`
+  and
+  `transfer_out`
+* **Invoice paid**
+  (manual or via public portal) →
+  `invoice_payment`
+* **Driver payout**
+  →
+  `payout`
+
+Manual transactions are produced by the wallet operations on the wallet detail (Credit, Top-Up, Transfer, Payout).

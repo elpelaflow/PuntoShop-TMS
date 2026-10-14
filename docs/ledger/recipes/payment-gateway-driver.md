@@ -1,0 +1,785 @@
+---
+title: "Building a Payment Gateway Driver"
+url: https://fleetbase.io/docs/ledger/recipes/payment-gateway-driver
+module: ledger
+---
+
+# Building a Payment Gateway Driver
+
+A complete walkthrough for adding a custom payment gateway to Ledger — interface, DTOs, webhook handling, registration, and testing.
+
+# Building a Payment Gateway Driver
+
+This recipe is a developer-facing walkthrough for adding a custom payment gateway to Ledger. By the end you'll have a driver that:
+
+* Renders its own configuration form in
+  **Ledger → Settings → Gateways**
+* Processes purchases and refunds through your gateway's API
+* Handles inbound webhooks with signature verification
+* Optionally tokenizes saved payment methods
+* Plugs in cleanly without modifying Ledger core
+
+> **Audience:**
+> PHP/Laravel developers extending Ledger. The rest of the Ledger docs are written for end users — this page is the exception.
+
+## Architecture in One Glance
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│  PaymentGatewayManager           (Laravel Manager)             │
+│  ├─ resolves drivers by code or Gateway model                  │
+│  ├─ exposes getDriverManifest() for the gateway picker UI      │
+│  └─ accepts third-party drivers via extend()                   │
+└────────────────────────────────────────────────────────────────┘
+                       │ resolves
+                       ▼
+┌────────────────────────────────────────────────────────────────┐
+│  GatewayDriverInterface          (the contract)                │
+│  └─ AbstractGatewayDriver        (base class with helpers)     │
+│      └─ YourCustomDriver         ← what you'll build           │
+└────────────────────────────────────────────────────────────────┘
+                       │ uses
+                       ▼
+┌────────────────────────────────────────────────────────────────┐
+│  PurchaseRequest │ RefundRequest │ GatewayResponse  (DTOs)     │
+└────────────────────────────────────────────────────────────────┘
+                       │ webhooks land at
+                       ▼
+┌────────────────────────────────────────────────────────────────┐
+│  POST /ledger/webhooks/{driver}  → WebhookController           │
+│  ├─ resolves the driver, calls handleWebhook()                 │
+│  ├─ persists a GatewayTransaction (idempotency key)            │
+│  └─ dispatches PaymentSucceeded / RefundProcessed events       │
+└────────────────────────────────────────────────────────────────┘
+```
+
+The contract you implement is
+`Fleetbase\Ledger\Contracts\GatewayDriverInterface`
+. Practically every driver extends
+`Fleetbase\Ledger\Gateways\AbstractGatewayDriver`
+instead, which provides config helpers, logging, and sensible defaults.
+
+## The Contract
+
+Every method on the interface, what it does, and when it's called:
+
+| Method | Purpose | Called by |
+| --- | --- | --- |
+| `getName()` | Human-readable name (e.g. `"PayPal"` ) | UI, logs |
+| `getCode()` | Machine-readable lowercase code (e.g. `"paypal"` ). Must be unique | Driver resolution, webhook URL |
+| `getCapabilities()` | Array of capability strings ( `purchase` , `refund` , `tokenization` , `webhooks` , `sandbox` , `setup_intent` , `recurring` ) | UI, capability checks |
+| `getConfigSchema()` | Defines fields rendered in the **New Gateway** form | UI |
+| `initialize(array $config, bool $sandbox)` | Receives decrypted config from the saved `Gateway` row | Manager |
+| `purchase(PurchaseRequest $request)` | Charge a customer. Returns a `GatewayResponse` | Checkout / invoice payment flows |
+| `refund(RefundRequest $request)` | Refund a previously captured transaction | Refund flows |
+| `handleWebhook(Request $request)` | Verify signature, parse event, return a normalized `GatewayResponse` | `WebhookController` |
+| `createPaymentMethod(array $data)` | Optional — tokenize a payment method without charging | Saved-card / setup flows |
+
+The DTOs are
+`Fleetbase\Ledger\DTO\PurchaseRequest`
+,
+`RefundRequest`
+, and
+`GatewayResponse`
+.
+
+## Step 1 — Create the Driver Class
+
+Create your driver inside your own extension package. Anywhere that's autoloaded works; the convention is
+`src/Gateways/`
+.
+
+```
+<?php
+
+namespace MyCompany\Ledger\Gateways;
+
+use Fleetbase\Ledger\DTO\GatewayResponse;
+use Fleetbase\Ledger\DTO\PurchaseRequest;
+use Fleetbase\Ledger\DTO\RefundRequest;
+use Fleetbase\Ledger\Exceptions\WebhookSignatureException;
+use Fleetbase\Ledger\Gateways\AbstractGatewayDriver;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+
+class PaypalDriver extends AbstractGatewayDriver
+{
+    private const HOST_PRODUCTION = 'https://api-m.paypal.com';
+    private const HOST_SANDBOX    = 'https://api-m.sandbox.paypal.com';
+
+    protected ?Client $client = null;
+
+    public function getName(): string
+    {
+        return 'PayPal';
+    }
+
+    public function getCode(): string
+    {
+        return 'paypal';
+    }
+
+    public function getCapabilities(): array
+    {
+        return ['purchase', 'refund', 'webhooks', 'sandbox'];
+    }
+
+    public function getConfigSchema(): array
+    {
+        return [
+            [
+                'key'      => 'client_id',
+                'label'    => 'Client ID',
+                'type'     => 'text',
+                'required' => true,
+                'hint'     => 'Your PayPal REST app client ID.',
+            ],
+            [
+                'key'      => 'client_secret',
+                'label'    => 'Client Secret',
+                'type'     => 'password',
+                'required' => true,
+                'hint'     => 'Your PayPal REST app secret. Never expose publicly.',
+            ],
+            [
+                'key'      => 'webhook_id',
+                'label'    => 'Webhook ID',
+                'type'     => 'text',
+                'required' => false,
+                'hint'     => 'PayPal Webhook ID, used to verify signatures.',
+            ],
+        ];
+    }
+
+    public function initialize(array $config, bool $sandbox = false): static
+    {
+        parent::initialize($config, $sandbox);
+
+        $this->client = new Client([
+            'base_uri'    => $sandbox ? self::HOST_SANDBOX : self::HOST_PRODUCTION,
+            'http_errors' => false,
+            'headers'     => ['Accept' => 'application/json'],
+        ]);
+
+        return $this;
+    }
+
+    // purchase(), refund(), handleWebhook() implemented below…
+}
+```
+
+A few notes:
+
+* **`getCode()`**
+  drives both the gateway picker dropdown
+  **and**
+  the webhook URL:
+  `/ledger/webhooks/paypal`
+  . Pick a code that's lowercase, URL-safe, and unique.
+* **`getConfigSchema()`**
+  returns the field definitions for the form in
+  **Ledger → Settings → Gateways → New Gateway**
+  . Supported
+  `type`
+  values:
+  `text`
+  ,
+  `password`
+  ,
+  `boolean`
+  ,
+  `select`
+  ,
+  `textarea`
+  . For
+  `select`
+  , include an
+  `options`
+  array of
+  `{ key, label }`
+  .
+* **`initialize()`**
+  is called after the manager loads and decrypts the
+  `Gateway`
+  row's stored config. The first thing it does in the parent class is set
+  `$this->config`
+  and
+  `$this->sandbox`
+  . Always call
+  `parent::initialize()`
+  first.
+* The decrypted config is stored encrypted at rest using Laravel's
+  `encrypted:array`
+  cast against your
+  `APP_KEY`
+  .
+
+## Step 2 — Implement purchase()
+
+`purchase()`
+receives a
+[`PurchaseRequest`](#purchaserequest-fields)
+and must return a
+[`GatewayResponse`](#gatewayresponse-anatomy)
+. All amounts are integer
+**minor currency units**
+(cents for USD, etc.).
+
+For an
+**immediate-capture**
+gateway (e.g. card-on-file flow):
+
+```
+public function purchase(PurchaseRequest $request): GatewayResponse
+{
+    try {
+        $token = $this->fetchAccessToken();
+
+        $response = $this->client->post('/v2/checkout/orders', [
+            'headers' => ['Authorization' => "Bearer {$token}"],
+            'json'    => [
+                'intent'         => 'CAPTURE',
+                'purchase_units' => [[
+                    'amount' => [
+                        'currency_code' => $request->currency,
+                        'value'         => number_format($request->amount / 100, 2, '.', ''),
+                    ],
+                    'description' => $request->description,
+                    'custom_id'   => $request->invoiceUuid,
+                ]],
+                'application_context' => [
+                    'return_url' => $request->returnUrl ?? url('/'),
+                    'cancel_url' => $request->cancelUrl ?? url('/'),
+                ],
+            ],
+        ]);
+
+        $body = json_decode((string) $response->getBody(), true);
+
+        if ($response->getStatusCode() >= 400) {
+            return GatewayResponse::failure(
+                eventType: GatewayResponse::EVENT_PAYMENT_FAILED,
+                message:   $body['message'] ?? 'PayPal order creation failed.',
+                errorCode: $body['name'] ?? null,
+                rawResponse: $body ?? [],
+            );
+        }
+
+        // For redirect flows, return pending and surface the approve URL on $data.
+        $approveUrl = collect($body['links'] ?? [])
+            ->firstWhere('rel', 'approve')['href'] ?? null;
+
+        $this->logInfo('PayPal order created', [
+            'id'     => $body['id'] ?? null,
+            'amount' => $request->amount,
+        ]);
+
+        return GatewayResponse::pending(
+            gatewayTransactionId: $body['id'],
+            eventType:   GatewayResponse::EVENT_PAYMENT_PENDING,
+            message:     'Order created. Awaiting customer approval.',
+            rawResponse: $body,
+            data: [
+                'order_id'    => $body['id'],
+                'approve_url' => $approveUrl,
+            ],
+        );
+    } catch (\Throwable $e) {
+        $this->logError('PayPal purchase failed', ['error' => $e->getMessage()]);
+
+        return GatewayResponse::failure(
+            eventType: GatewayResponse::EVENT_PAYMENT_FAILED,
+            message:   $e->getMessage(),
+        );
+    }
+}
+```
+
+Patterns to lean on:
+
+* **`GatewayResponse::pending()`**
+  for off-site / redirect flows where the customer hasn't paid yet. Surface the redirect URL in the
+  `data`
+  array — the calling code reads it.
+* **`GatewayResponse::success()`**
+  when the gateway captures synchronously.
+* **`GatewayResponse::failure()`**
+  with a normalized event constant and the gateway's error code.
+* Always populate
+  `gatewayTransactionId`
+  — it's the idempotency key the webhook controller uses to dedupe events.
+* Forward
+  `$request->invoiceUuid`
+  and
+  `$request->orderUuid`
+  as gateway-side metadata if the API supports it. That metadata round-trips back in the webhook so you can resolve the source record.
+* Use
+  `$this->logInfo()`
+  and
+  `$this->logError()`
+  (provided by
+  `AbstractGatewayDriver`
+  ) — they write to the
+  `ledger`
+  log channel with your driver code as a prefix.
+
+## Step 3 — Implement refund()
+
+```
+public function refund(RefundRequest $request): GatewayResponse
+{
+    try {
+        $token = $this->fetchAccessToken();
+
+        // PayPal refunds against a capture ID. The capture ID was stored as the
+        // gatewayTransactionId by handleWebhook() when the payment was completed.
+        $response = $this->client->post(
+            "/v2/payments/captures/{$request->gatewayTransactionId}/refund",
+            [
+                'headers' => ['Authorization' => "Bearer {$token}"],
+                'json'    => [
+                    'amount' => [
+                        'currency_code' => $request->currency,
+                        'value'         => number_format($request->amount / 100, 2, '.', ''),
+                    ],
+                    'note_to_payer' => $request->reason,
+                ],
+            ],
+        );
+
+        $body = json_decode((string) $response->getBody(), true);
+
+        if ($response->getStatusCode() >= 400) {
+            return GatewayResponse::failure(
+                eventType:   GatewayResponse::EVENT_REFUND_FAILED,
+                message:     $body['message'] ?? 'Refund failed.',
+                errorCode:   $body['name'] ?? null,
+                rawResponse: $body ?? [],
+            );
+        }
+
+        $this->logInfo('PayPal refund created', ['id' => $body['id'] ?? null]);
+
+        return new GatewayResponse(
+            successful:           true,
+            gatewayTransactionId: $body['id'],
+            status:               GatewayResponse::STATUS_REFUNDED,
+            eventType:            GatewayResponse::EVENT_REFUND_PROCESSED,
+            message:              'Refund processed successfully.',
+            amount:               $request->amount,
+            currency:             $request->currency,
+            rawResponse:          $body,
+        );
+    } catch (\Throwable $e) {
+        $this->logError('PayPal refund failed', ['error' => $e->getMessage()]);
+
+        return GatewayResponse::failure(
+            eventType: GatewayResponse::EVENT_REFUND_FAILED,
+            message:   $e->getMessage(),
+        );
+    }
+}
+```
+
+The
+`RefundRequest::$gatewayTransactionId`
+is the capture / charge ID returned by your earlier purchase or webhook — the one your driver wrote to
+`gatewayTransactionId`
+on the
+`GatewayTransaction`
+record.
+
+## Step 4 — Implement handleWebhook()
+
+This is the most important method to get right. The
+`WebhookController`
+route at
+`POST /ledger/webhooks/{driver}`
+resolves your driver, calls
+`handleWebhook()`
+, and:
+
+1. **Trusts your signature verification**
+   — if you accept the request, it persists a
+   `GatewayTransaction`
+   row keyed by
+   `(gatewayTransactionId, event_type)`
+2. **Idempotency**
+   — duplicate webhook deliveries don't create duplicate journal entries because the
+   `firstOrCreate()`
+   finds the existing row
+3. **Dispatches events**
+   —
+   `PaymentSucceeded`
+   ,
+   `RefundProcessed`
+   , etc., based on
+   `GatewayResponse::eventType`
+
+Your job inside
+`handleWebhook()`
+:
+
+```
+public function handleWebhook(Request $request): GatewayResponse
+{
+    $payload = $request->getContent();
+    $headers = $request->headers->all();
+
+    // 1. Verify the signature.
+    if (!$this->verifyWebhookSignature($payload, $headers)) {
+        throw new WebhookSignatureException('paypal', 'Signature verification failed.');
+    }
+
+    $event = json_decode($payload, true);
+    $type  = $event['event_type'] ?? '';
+
+    // 2. Map the gateway's event types to Ledger's normalized event constants.
+    [$normalizedEvent, $status] = match ($type) {
+        'PAYMENT.CAPTURE.COMPLETED' => [
+            GatewayResponse::EVENT_PAYMENT_SUCCEEDED,
+            GatewayResponse::STATUS_SUCCEEDED,
+        ],
+        'PAYMENT.CAPTURE.DENIED', 'PAYMENT.CAPTURE.DECLINED' => [
+            GatewayResponse::EVENT_PAYMENT_FAILED,
+            GatewayResponse::STATUS_FAILED,
+        ],
+        'PAYMENT.CAPTURE.REFUNDED' => [
+            GatewayResponse::EVENT_REFUND_PROCESSED,
+            GatewayResponse::STATUS_REFUNDED,
+        ],
+        default => [
+            GatewayResponse::EVENT_UNKNOWN,
+            GatewayResponse::STATUS_PENDING,
+        ],
+    };
+
+    // 3. Pull the resource ID and amount from the event payload.
+    $resource     = $event['resource'] ?? [];
+    $referenceId  = $resource['id'] ?? $event['id'] ?? '';
+    $amountValue  = $resource['amount']['value']         ?? null;
+    $currency     = $resource['amount']['currency_code'] ?? null;
+    $amountMinor  = $amountValue !== null ? (int) round(((float) $amountValue) * 100) : null;
+
+    $this->logInfo('Webhook received', [
+        'paypal_event'     => $type,
+        'normalized_event' => $normalizedEvent,
+        'resource_id'      => $referenceId,
+    ]);
+
+    return new GatewayResponse(
+        successful:           in_array($normalizedEvent, [
+            GatewayResponse::EVENT_PAYMENT_SUCCEEDED,
+            GatewayResponse::EVENT_REFUND_PROCESSED,
+        ], true),
+        gatewayTransactionId: $referenceId,
+        status:               $status,
+        eventType:            $normalizedEvent,
+        message:              "PayPal event: {$type}",
+        amount:               $amountMinor,
+        currency:             $currency,
+        rawResponse:          $event,
+        data: [
+            // If you can resolve the invoice from the webhook, include it on $data
+            // so the listener can mark the invoice paid without a second lookup.
+            'invoice_uuid' => $resource['custom_id'] ?? null,
+        ],
+    );
+}
+```
+
+Three rules:
+
+1. **Always verify the signature first.**
+   If verification fails, throw
+   `WebhookSignatureException`
+   — the controller returns HTTP 400 so the gateway knows the delivery wasn't accepted.
+2. **Always normalize the event.**
+   Map the gateway's native event names onto Ledger's
+   `GatewayResponse::EVENT_*`
+   constants. The downstream listeners only know about the normalized names.
+3. **Always populate
+   `gatewayTransactionId`
+   .**
+   It is the idempotency key. Two deliveries with the same
+   `(gatewayTransactionId, eventType)`
+   produce one
+   `GatewayTransaction`
+   row and exactly one journal entry.
+
+If
+`'invoice_uuid'`
+is in
+`$data`
+, the
+`HandleSuccessfulPayment`
+listener uses it to mark the invoice paid without an extra lookup. If you can't resolve it from the webhook, the listener falls back to other strategies — but providing it speeds things up.
+
+## Step 5 — (Optional) Implement createPaymentMethod()
+
+Only implement if
+`'tokenization'`
+is in your capabilities array. The default in
+`AbstractGatewayDriver`
+throws a
+`RuntimeException`
+so callers know not to invoke it.
+
+```
+public function getCapabilities(): array
+{
+    return ['purchase', 'refund', 'webhooks', 'sandbox', 'tokenization'];
+}
+
+public function createPaymentMethod(array $data): GatewayResponse
+{
+    // Call the gateway's tokenization API and return a token reference in
+    // gatewayTransactionId. The token can be passed back in
+    // PurchaseRequest::$paymentMethodToken on a future purchase.
+    // …
+}
+```
+
+## Step 6 — Register the Driver
+
+Drivers register through Laravel's standard
+`Manager::extend()`
+API in any service provider's
+`boot()`
+method. This is what plugs your driver into the
+`PaymentGatewayManager`
+without modifying core.
+
+```
+<?php
+
+namespace MyCompany\Ledger;
+
+use Fleetbase\Ledger\PaymentGatewayManager;
+use Illuminate\Support\ServiceProvider;
+use MyCompany\Ledger\Gateways\PaypalDriver;
+
+class PaypalServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        $this->app->resolving(PaymentGatewayManager::class, function ($manager) {
+            $manager->extend('paypal', fn ($app) => $app->make(PaypalDriver::class));
+        });
+    }
+}
+```
+
+Two extra hookups your driver needs to be discoverable in the UI and resolvable for webhooks:
+
+1. **Add the driver code to the registered list.**
+   The
+   `getRegisteredDriverCodes()`
+   method on
+   `PaymentGatewayManager`
+   is what populates the gateway picker. Override it from your service provider, or contribute the code via your own manifest mechanism — Ledger's manifest builder (
+   `getDriverManifest()`
+   ) iterates over the registered codes to produce the form definition.
+2. **Register the service provider.**
+   In your extension's main service provider, register
+   `PaypalServiceProvider`
+   .
+
+In production setups it's common to also publish a config that lists all registered drivers, so the manifest can be assembled dynamically without a core change.
+
+## Step 7 — Webhook Endpoint
+
+You don't need to add a route. Webhooks land at the existing endpoint:
+
+```
+POST /ledger/webhooks/{driver}
+```
+
+For the example above, that's
+`POST /ledger/webhooks/paypal`
+. Configure this URL in your gateway's dashboard. The
+`WebhookController`
+:
+
+* Resolves the gateway by
+  `driver`
+  code + active status
+* Calls
+  `$driver->handleWebhook($request)`
+  (your method)
+* Persists the resulting
+  `GatewayTransaction`
+  row idempotently
+* Dispatches
+  `PaymentSucceeded`
+  /
+  `PaymentFailed`
+  /
+  `RefundProcessed`
+  events
+
+Because the gateway is resolved from the URL plus the active
+`Gateway`
+row,
+**only one active gateway per driver code per company**
+is supported by the default webhook routing.
+
+## Step 8 — Sandbox Mode
+
+`AbstractGatewayDriver::initialize()`
+sets
+`$this->sandbox`
+. Switch base URLs in your driver based on the flag:
+
+```
+public function initialize(array $config, bool $sandbox = false): static
+{
+    parent::initialize($config, $sandbox);
+
+    $this->client = new Client([
+        'base_uri' => $sandbox ? self::HOST_SANDBOX : self::HOST_PRODUCTION,
+        // …
+    ]);
+
+    return $this;
+}
+```
+
+Add
+`'sandbox'`
+to
+`getCapabilities()`
+so the UI shows the sandbox toggle on the gateway form.
+
+## Reference
+
+### PurchaseRequest Fields
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `amount` | `int` | Minor currency units |
+| `currency` | `string` | ISO 4217 code |
+| `description` | `string` | Human-readable |
+| `paymentMethodToken` | `?string` | For tokenized / saved-method purchases |
+| `customerId` | `?string` | Gateway-side customer ID (e.g., Stripe `cus_xxx` ) |
+| `customerEmail` | `?string` | Customer email for receipts |
+| `invoiceUuid` | `?string` | Originating Ledger invoice |
+| `orderUuid` | `?string` | Originating Fleet-Ops order |
+| `returnUrl` | `?string` | For off-site redirect flows |
+| `cancelUrl` | `?string` | For off-site redirect flows |
+| `metadata` | `array` | Arbitrary key/value forwarded to the gateway |
+
+### RefundRequest Fields
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `gatewayTransactionId` | `string` | The original capture/charge ID |
+| `amount` | `int` | Minor currency units |
+| `currency` | `string` | ISO 4217 code |
+| `reason` | `?string` | `'duplicate'` , `'fraudulent'` , `'requested_by_customer'` , etc. |
+| `invoiceUuid` | `?string` | Originating Ledger invoice |
+| `metadata` | `array` | Arbitrary key/value |
+
+### GatewayResponse Anatomy
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `successful` | `bool` | Did the operation succeed? |
+| `gatewayTransactionId` | `string` | Idempotency key — the gateway's reference ID |
+| `status` | `string` | One of `STATUS_PENDING` , `STATUS_SUCCEEDED` , `STATUS_FAILED` , `STATUS_REFUNDED` , `STATUS_CANCELLED` |
+| `eventType` | `string` | One of `EVENT_PAYMENT_SUCCEEDED` , `EVENT_PAYMENT_FAILED` , `EVENT_PAYMENT_PENDING` , `EVENT_REFUND_PROCESSED` , `EVENT_REFUND_FAILED` , `EVENT_SETUP_SUCCEEDED` , `EVENT_CHARGEBACK` , `EVENT_UNKNOWN` |
+| `message` | `?string` | Human-readable |
+| `errorCode` | `?string` | Gateway-specific code (debug aid) |
+| `amount` , `currency` | `?int` , `?string` | Echo when the gateway returns them |
+| `rawResponse` | `array` | Full gateway response (kept on `GatewayTransaction` ) |
+| `data` | `array` | Normalized extras — `client_secret` , `approve_url` , `invoice_uuid` , etc. |
+
+Use the static helpers:
+
+* `GatewayResponse::success(...)`
+  — captured synchronously
+* `GatewayResponse::pending(...)`
+  — awaiting webhook or customer action
+* `GatewayResponse::failure(...)`
+  — short-circuit on error
+
+### Logging
+
+`AbstractGatewayDriver`
+exposes:
+
+* `$this->logInfo(string $message, array $context = [])`
+* `$this->logError(string $message, array $context = [])`
+
+Both write to the
+`ledger`
+log channel with
+`[<driver-code>]`
+prefix.
+
+### Helpers on the Base Class
+
+* `$this->config('key', $default = null)`
+  — read a config value
+* `$this->isSandbox()`
+  — boolean
+* `$this->hasCapability('refund')`
+  — quick capability check
+
+## Testing Checklist
+
+Before shipping a driver, confirm each of these in sandbox mode:
+
+* The gateway picker shows your driver under
+  **Settings → Gateways → New Gateway**
+* The fields you defined in
+  `getConfigSchema()`
+  render correctly in the form
+* Saving the gateway encrypts credentials at rest (verify via the
+  `gateways`
+  table)
+* A
+  `purchase()`
+  call returns a
+  `GatewayResponse`
+  with the correct
+  `eventType`
+  and
+  `status`
+* For redirect flows, the
+  `data`
+  array contains the redirect URL
+* A webhook delivery from the gateway lands at
+  `POST /ledger/webhooks/{your-code}`
+  and creates a
+  `GatewayTransaction`
+* Replaying the same webhook does
+  **not**
+  create a second
+  `GatewayTransaction`
+  (idempotency)
+* An invalid signature returns HTTP 400
+* A
+  `refund()`
+  call against a captured transaction succeeds
+* If you implement
+  `createPaymentMethod()`
+  , a saved token can be used in a subsequent
+  `purchase()`
+  with
+  `paymentMethodToken`
+
+## Next Steps
+
+* Read the existing drivers -
+  `Fleetbase\Ledger\Gateways\TalerDriver`
+  ,
+  `StripeDriver`
+  ,
+  `QPayDriver`
+  , and
+  `CashDriver`
+  are the canonical references
+* Use
+  `Fleetbase\Ledger\PaymentGatewayManager`
+  if you need to invoke gateways programmatically from outside Ledger

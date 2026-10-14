@@ -1,0 +1,123 @@
+---
+title: "Capacity & Payload"
+url: https://fleetbase.io/docs/fleet-ops/resources/vehicles/capacity-and-payload
+module: fleet-ops
+---
+
+Vehicles
+
+# Capacity & Payload
+
+Configure vehicle load capacity — weight and volume limits used by the Orchestrator to prevent overloading during batch order assignment.
+
+# Vehicle Capacity & Payload
+
+Vehicle
+**capacity**
+settings define the maximum load a vehicle can carry. These values are used by the Orchestrator when allocating orders — it will not assign orders to a vehicle if doing so would exceed the vehicle's weight or volume capacity.
+
+## Capacity Fields
+
+| Field | Backing column | Type | Description |
+| --- | --- | --- | --- |
+| **Payload Capacity** | `payload_capacity` | decimal(2) | Maximum weight the vehicle can carry. Unit interpretation is up to your operation — populate it consistently with the entity weight units you use. |
+| **Payload Capacity Volume** | `payload_capacity_volume` | decimal(3) | Maximum cargo volume the vehicle can carry. Same convention — set entity dimensions in matching units. |
+
+Both fields are optional. If left blank, the Orchestrator treats the vehicle as having unlimited capacity.
+
+## Setting Vehicle Capacity
+
+Capacity is set on the vehicle record:
+
+1. Navigate to
+   **Fleet-Ops → Resources → Vehicles**
+2. Open a vehicle record and click
+   **Edit**
+3. Enter the
+   **Payload Capacity**
+   (weight) and/or
+   **Payload Capacity Volume**
+4. Click
+   **Save**
+
+![Vehicle edit form, Capacity & Dimensions section — fuel, payload and towing capacity, vehicle weight, dimensions, cargo volume, and pallet and parcel capacity](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-vehicle-edit-capacity.d7f61a0b.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## How Capacity Affects the Orchestrator
+
+When the Orchestrator runs a batch assignment, it calculates the cumulative payload for each proposed route:
+
+* It sums the weight of all entities across all orders assigned to a vehicle
+* It sums the volume of all entities (calculated from dimensions if not set directly)
+* If either sum would exceed the vehicle's capacity at any point on the route, the assignment is rejected
+
+Orders that cannot fit any available vehicle due to capacity constraints are returned to the unassigned pool.
+
+For vehicles with no capacity set, capacity constraints are ignored entirely.
+
+## Payload Data on Orders
+
+Capacity enforcement only works when the orders being assigned have payload data:
+
+* **Entity weight**
+  — set the
+  `weight_value`
+  and
+  `weight_unit`
+  on each entity in the order's payload
+* **Entity volume**
+  — set
+  `length_value`
+  ,
+  `width_value`
+  ,
+  `height_value`
+  and their units (Fleet-Ops calculates volume automatically from dimensions)
+
+To populate this data when creating orders: add entities and fill in the weight and dimension fields.
+
+Via the API, set:
+
+```
+{
+  "entities": [
+    {
+      "description": "Refrigerator",
+      "weight_value": 65,
+      "weight_unit": "kg",
+      "length_value": 60,
+      "width_value": 70,
+      "height_value": 180,
+      "length_unit": "cm"
+    }
+  ]
+}
+```
+
+## Multi-Stop Capacity Tracking
+
+For routes with multiple pickups and deliveries, the Orchestrator tracks cumulative load at each stop:
+
+* Load
+  **increases**
+  when the driver picks up items
+* Load
+  **decreases**
+  when the driver delivers items
+* The vehicle's capacity must not be exceeded at any point in the route
+
+This handles hub-and-spoke scenarios, consolidated pickups, and partial delivery routes correctly.
+
+## Capacity in the Workbench
+
+After running optimization in the Orchestrator Workbench, the results panel shows per-vehicle utilization:
+
+* Total weight assigned (vs. capacity) with percentage
+* Total volume assigned (vs. capacity) with percentage
+
+Vehicles near or at capacity are highlighted. You can manually drag orders to a different vehicle if you want to rebalance load before committing.
+
+## Related Pages
+
+* [Orchestrator — Payload & Capacity Allocation](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/payload-capacity-allocation)
+* [Settings → Orchestrator](https://fleetbase.io/docs/fleet-ops/settings/orchestrator)
+  — configure whether capacity enforcement is active

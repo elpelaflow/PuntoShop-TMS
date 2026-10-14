@@ -91,4 +91,4 @@ docker compose exec application bash -c "./deploy.sh"
 
 ---
 ## Need help?
-Join the discussion on [GitHub Discussions](https://github.com/fleetbase/fleetbase/discussions) or drop by [#fleetbase on Discord](https://discord.com/invite/HnTqQ6zAVn)
+Join the discussion on [GitHub Discussions](https://github.com/elpelaflow/PuntoShop-TMS/discussions) or drop by [#fleetbase on Discord](https://discord.com/invite/HnTqQ6zAVn)

@@ -1,0 +1,80 @@
+---
+title: "PhoneInput"
+url: https://fleetbase.io/docs/ui/inputs/phone-input
+module: ui
+---
+
+# PhoneInput
+
+<PhoneInput> wraps `intl-tel-input` for international phone numbers — auto-detects the user's country, formats as you type, and emits E.164.
+
+# <PhoneInput>
+
+International phone number input. Wraps the
+[`intl-tel-input`](https://github.com/jackocnr/intl-tel-input)
+library to provide a country selector, format-as-you-type, and emits the E.164 format on input.
+
+The user's country is auto-detected from their IP via Fleetbase's geolocation service (with US as the fallback).
+
+## Basic Usage
+
+```
+<PhoneInput @value={{this.driver.phone}} @onInput={{fn (mut this.driver.phone)}} />
+```
+
+The
+`@onInput`
+callback receives the E.164-formatted number (e.g.
+`+15551234567`
+) — that's the canonical form to store.
+
+## Inside an InputGroup
+
+```
+<InputGroup @name="Phone">
+  <PhoneInput @value={{this.driver.phone}} @onInput={{fn (mut this.driver.phone)}} />
+</InputGroup>
+```
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@value` | string | Initial value (any format — the library parses it) |
+| `@onInput` | `(e164, event)` | Called on every keystroke with the E.164 number |
+| `@onInit` | `(iti)` | Called once with the `intl-tel-input` instance after init — for advanced control |
+| `@onCountryChange` | function | Called when the user picks a different country |
+| `@wrapperClass` | string | Extra classes on the outer wrapper |
+
+## Geolocation
+
+Initial country is determined by:
+
+1. The current input value (if it includes a country code)
+2. The user's IP via
+   `lookupUserIp`
+   from
+   `@fleetbase/ember-core`
+3. Falls back to
+   `us`
+   if both above fail
+
+This means most users see their own country flag pre-selected with no manual work.
+
+## Format
+
+The component is configured with:
+
+* `separateDialCode: true`
+  — country code is shown as a flag/prefix outside the input
+* `formatAsYouType: true`
+  — input is formatted as the user types
+* `utilsScript: '/assets/libphonenumber/utils.js'`
+  — provides validation and formatting
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/phone-input.hbs` | Template |
+| `addon/components/phone-input.js` | Class — wraps [`intl-tel-input`](https://github.com/jackocnr/intl-tel-input) |

@@ -1,0 +1,195 @@
+---
+title: "Select"
+url: https://fleetbase.io/docs/ui/inputs/select
+module: ui
+---
+
+# Select
+
+<Select> is the standard HTML-native single-value dropdown. Accepts an options array or hash, supports custom labels, value paths, humanization, and yielded option rendering.
+
+# <Select>
+
+`<Select>`
+is the standard single-value dropdown. It wraps a native
+`<select>`
+element with Fleetbase's form styling, plus convenience for option labels, value paths, and humanization.
+
+For an autocomplete / typeahead, use
+[`<ComboBox>`](https://fleetbase.io/docs/ui/inputs/combo-box)
+. For selecting a Fleetbase model record, use
+[`<ModelSelect>`](https://fleetbase.io/docs/ui/inputs/model-select)
+.
+
+## Basic Usage
+
+```
+<Select
+  @value={{this.driver.status}}
+  @options={{this.statusOptions}}
+  @placeholder="Select a status"
+  @onSelect={{fn (mut this.driver.status)}}
+/>
+```
+
+```
+statusOptions = ['active', 'inactive', 'pending'];
+```
+
+## Object Options
+
+When options are objects, point at the label and value properties via
+`@optionLabel`
+and
+`@optionValue`
+:
+
+```
+<Select
+  @value={{this.driver.zone_id}}
+  @options={{this.zones}}
+  @optionLabel="name"
+  @optionValue="id"
+  @placeholder="Select a zone"
+  @onSelect={{fn (mut this.driver.zone_id)}}
+/>
+```
+
+```
+zones = [
+  { id: 'zn_a', name: 'North' },
+  { id: 'zn_b', name: 'South' },
+];
+```
+
+## Humanizing Raw Values
+
+If your options are slugs/snake-case, set
+`@humanize={{true}}`
+to display them human-readable (
+`pickup_ready`
+→
+`Pickup Ready`
+):
+
+```
+<Select
+  @value={{this.order.status}}
+  @options={{array "created" "dispatched" "pickup_ready" "completed"}}
+  @humanize={{true}}
+  @onSelect={{fn (mut this.order.status)}}
+/>
+```
+
+## Yielding Custom Option Markup
+
+If you need rich option content, yield a block. The yielded value is the label (or option), and the second positional yield is the option itself or the hash key:
+
+```
+<Select @value={{this.choice}} @options={{this.colors}} @optionLabel="name" @onSelect={{fn (mut this.choice)}} as |label color|>
+  <span style={{html-safe (concat "color:" color.hex)}}>{{label}}</span>
+</Select>
+```
+
+## Hash Options
+
+When
+`@options`
+is a plain object (key/value hash), pass
+`@fetched={{true}}`
+to enable hash iteration:
+
+```
+<Select
+  @options={{this.optionsHash}}
+  @fetched={{true}}
+  @optionLabel="label"
+  @onSelect={{fn (mut this.value)}}
+/>
+```
+
+## Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@value` | any | — | The current selection |
+| `@options` | array | object | — | The options to display. Array of primitives or objects, or a hash when `@fetched={{true}}` |
+| `@optionLabel` | string | — | Path on each option object for the display label |
+| `@optionValue` | string | — | Path on each option object for the value (otherwise the object itself) |
+| `@optionClass` | string | — | Class on each `<option>` |
+| `@placeholderOptionClass` | string | — | Class on the placeholder `<option>` |
+| `@placeholder` | string | — | Placeholder rendered as a disabled selected option |
+| `@humanize` | boolean | `false` | Humanize option labels via `safe-humanize` |
+| `@fetched` | boolean | `false` | Hash-iteration mode for `@options` as `{key: object}` |
+| `@disabled` | boolean | `false` | Disable the select |
+| `@unstyled` | boolean | `false` | Drop the `form-select` styling |
+| `@defaultStylingDisabled` | boolean | `false` | Like `@unstyled` but doesn't drop the `has--selection` / `disabled` modifiers |
+| `@onSelect` | `(value) => void` | — | Called with the new value on change |
+| `@onChange` | `(event, value) => void` | — | Called with the raw change event in addition to `@onSelect` |
+
+Any additional
+`...attributes`
+are forwarded to the
+`<select>`
+element.
+
+## Distinguishing @onSelect vs @onChange
+
+Both fire on every change:
+
+* `@onSelect(value)`
+  — gets just the value
+* `@onChange(event, value)`
+  — gets the raw DOM event plus value
+
+Use whichever fits your handler signature.
+
+## Real-World Examples
+
+```
+{{!-- Status dropdown --}}
+<Select
+  @value={{this.order.status}}
+  @options={{array "created" "preparing" "ready" "dispatched" "completed"}}
+  @humanize={{true}}
+  @placeholder="Status"
+  @onSelect={{fn (mut this.order.status)}}
+/>
+
+{{!-- Object options with custom label/value --}}
+<Select
+  @value={{this.gateway.driver}}
+  @options={{this.availableGateways}}
+  @optionLabel="name"
+  @optionValue="code"
+  @placeholder="Choose a gateway"
+  @onSelect={{this.onGatewayChange}}
+/>
+
+{{!-- Inside an InputGroup --}}
+<InputGroup @name="Default Currency">
+  <Select
+    @value={{this.settings.currency}}
+    @options={{this.currencies}}
+    @optionLabel="name"
+    @optionValue="code"
+    @onSelect={{fn (mut this.settings.currency)}}
+  />
+</InputGroup>
+```
+
+## See Also
+
+* [`<MultiSelect>`](https://fleetbase.io/docs/ui/inputs/multi-select)
+  — multi-value dropdown
+* [`<ComboBox>`](https://fleetbase.io/docs/ui/inputs/combo-box)
+  — typeahead select with search
+* [`<ModelSelect>`](https://fleetbase.io/docs/ui/inputs/model-select)
+  — select an Ember Data model record
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/select.hbs` | Template |
+| `addon/components/select.js` | Class |

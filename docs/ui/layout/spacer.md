@@ -1,0 +1,69 @@
+---
+title: "Spacer"
+url: https://fleetbase.io/docs/ui/layout/spacer
+module: ui
+---
+
+# Spacer
+
+<Spacer> inserts a fixed-size empty box between layout elements. Any CSS dimension property you pass (height, width, padding, margin, etc.) is applied directly.
+
+# <Spacer>
+
+A simple utility for adding a fixed amount of empty space between elements. Every argument you pass is applied directly to the element's inline style — so anything that's a valid CSS property name maps through.
+
+## Basic Usage
+
+```
+<Spacer @height="20px" />
+<Spacer @width="100%" @height="1px" />     {{!-- horizontal divider line --}}
+<Spacer @marginTop="2rem" />
+```
+
+## How It Works
+
+Internally, the component iterates over every
+`@`
+-arg and assigns it to the element's
+`style`
+after camelizing the key. So:
+
+| Arg | Result |
+| --- | --- |
+| `@height="40px"` | `style.height = "40px"` |
+| `@padding-top="1rem"` | `style.paddingTop = "1rem"` |
+| `@marginTop="2rem"` | `style.marginTop = "2rem"` |
+
+Only string and numeric values are applied; booleans and functions are ignored.
+
+## Real-World Examples
+
+```
+{{!-- Standard vertical spacing between form sections --}}
+<ContentPanel @title="Step 1" @open={{true}}>{{!-- ... --}}</ContentPanel>
+<Spacer @height="1rem" />
+<ContentPanel @title="Step 2" @open={{true}}>{{!-- ... --}}</ContentPanel>
+
+{{!-- Horizontal rule via spacer --}}
+<Spacer @height="1px" @width="100%" @backgroundColor="rgba(0,0,0,0.1)" />
+
+{{!-- Bottom-of-page padding --}}
+<Spacer @height="400px" />
+```
+
+## When to Use
+
+Reach for
+`<Spacer>`
+when you need a one-off amount of space and don't want to add a CSS class. For repeated spacing patterns, use Tailwind utility classes (
+`mt-4`
+,
+`space-y-2`
+, etc.).
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/spacer.hbs` | Template |
+| `addon/components/spacer.js` | Class |

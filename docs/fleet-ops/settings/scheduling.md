@@ -1,0 +1,112 @@
+---
+title: "Scheduling Settings"
+url: https://fleetbase.io/docs/fleet-ops/settings/scheduling
+module: fleet-ops
+---
+
+# Scheduling Settings
+
+Set the materialisation horizon, default shift duration, HOS limits, scheduling behaviours, and reusable schedule templates that drive the Scheduler and Orchestrator.
+
+# Scheduling Settings
+
+**Scheduling Settings**
+controls global defaults for the
+[Scheduler](https://fleetbase.io/docs/fleet-ops/operations/scheduler/overview)
+— how far ahead shifts are materialised, default shift duration, Hours-of-Service (HOS) limits, behaviour toggles, and a library of reusable schedule templates.
+
+Navigate to
+**Fleet-Ops → Settings → Scheduling**
+.
+
+![Scheduling settings panel — materialisation, HOS limits, behaviour, and schedule templates](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-scheduling-settings.3a85e0e3.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+The page is organised into four panels.
+
+## Materialisation
+
+How far ahead Fleet-Ops generates concrete shift instances from each driver's recurring schedule rules.
+
+| Setting | Default | Range | Description |
+| --- | --- | --- | --- |
+| **Horizon (days)** | 60 | 7–365 | How many days into the future shifts are materialised. The Scheduler calendar can only show and the Orchestrator can only plan against shifts that have been materialised. |
+| **Default shift duration (hours)** | 8 | 1–24 | The default length used when a shift is created without an explicit end time. |
+
+Stored on the backend as
+`horizon_days`
+and
+`default_shift_duration`
+.
+
+## Hours of Service (HOS) Limits
+
+Caps that the Orchestrator and Scheduler honour when assigning orders. Drivers approaching their HOS cap are excluded from new allocations.
+
+| Setting | Default | Range | Description |
+| --- | --- | --- | --- |
+| **HOS daily limit (hours)** | 11 | 1–24 | Maximum driving hours per day |
+| **HOS weekly limit (hours)** | 70 | 1–168 | Maximum driving hours per rolling 7-day window |
+
+Stored as
+`hos_daily_limit`
+and
+`hos_weekly_limit`
+. These are the only HOS settings exposed by the page — there are no separate on-duty / mandatory-break / required-rest fields.
+
+## Behaviour
+
+Two toggles that change how the Scheduler and Navigator behave when shifts change.
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| **Auto-activate schedule** | On | When a driver's first shift is added, automatically activate the schedule (rather than leaving it in draft). |
+| **Notify drivers on shift change** | Off | When on, drivers receive a notification in Navigator any time their shift is created, modified, or deleted. |
+
+Stored as
+`auto_activate_schedule`
+and
+`notify_drivers_on_shift_change`
+.
+
+## Schedule Templates
+
+A library of reusable shift patterns. Templates define a recurrence rule (RRULE) and a colour, and can be applied to drivers from the Scheduler to seed their schedule with a known pattern (e.g.
+*Weekday mornings*
+,
+*Three-on three-off*
+).
+
+The panel lists every template with its name, RRULE summary, and colour marker, plus per-row
+**Edit**
+and
+**Delete**
+actions. Click
+**+ New Template**
+in the panel header to create a new one.
+
+Templates are stored as standalone records, so creating one doesn't immediately apply it to anyone — you apply them per-driver from the Scheduler.
+
+## Saving
+
+Click
+**Save Changes**
+in the page header to persist Materialisation, HOS, and Behaviour values. Schedule template changes save inline as you create / edit / delete them.
+
+## How These Settings Affect Other Surfaces
+
+* The
+  **Scheduler**
+  (
+  [calendar view](https://fleetbase.io/docs/fleet-ops/operations/scheduler/overview)
+  ) reads the materialisation horizon to decide how many days of shifts to render and the default shift duration when creating new shifts inline.
+* The
+  **Orchestrator**
+  reads the HOS daily and weekly limits to cap allocation per driver, and excludes drivers at or above their cap from the resource pool.
+* **Navigator**
+  receives the shift-change notification when
+  *Notify drivers on shift change*
+  is on.
+
+The HOS and shift settings only filter Orchestrator allocation — they don't enforce anything in Navigator itself; drivers still drive what they're physically able to. The settings shape how Fleet-Ops
+*plans*
+, not how the road behaves.

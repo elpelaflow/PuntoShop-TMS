@@ -1,0 +1,128 @@
+---
+title: "DatePicker"
+url: https://fleetbase.io/docs/ui/inputs/date-picker
+module: ui
+---
+
+# DatePicker
+
+<DatePicker> is the calendar date picker — wraps `air-datepicker`. Accepts the full air-datepicker option set plus Fleetbase-friendly callbacks.
+
+# <DatePicker>
+
+A calendar-based date picker. Internally wraps the
+[`air-datepicker`](https://air-datepicker.com)
+library — every air-datepicker option is supported as an
+`@`
+-arg.
+
+For combined date + time inputs, use
+[`<DateTimeInput>`](https://fleetbase.io/docs/ui/inputs/date-time-input)
+.
+
+## Basic Usage
+
+```
+<DatePicker
+  @value={{this.start_date}}
+  @placeholder="Start date"
+  @onChange={{fn (mut this.start_date)}}
+/>
+```
+
+## Range Selection
+
+```
+<DatePicker
+  @range={{true}}
+  @value={{this.dateRange}}
+  @onChange={{this.onDateRangeChange}}
+/>
+```
+
+When
+`@range={{true}}`
+, the value is an array of two dates.
+
+## Inline Calendar
+
+To always render the calendar (instead of a popover):
+
+```
+<DatePicker @inline={{true}} @value={{this.date}} @onChange={{fn (mut this.date)}} />
+```
+
+## Custom Format
+
+The default format is
+`yyyy-MM-dd`
+. Override with
+`@dateFormat`
+:
+
+```
+<DatePicker @dateFormat="dd/MM/yyyy" @value={{this.date}} @onChange={{fn (mut this.date)}} />
+```
+
+## Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@value` | Date | Date[] | string | — | The current value (or comma-separated string for range) |
+| `@dateFormat` | string | `yyyy-MM-dd` | Display format |
+| `@placeholder` | string | — | Input placeholder |
+| `@inline` | boolean | `false` | Render the calendar inline |
+| `@range` | boolean | — | Allow range selection |
+| `@class` | string | — | Extra classes on the input |
+
+Plus every
+[air-datepicker option](https://air-datepicker.com/docs#options)
+—
+`multipleDates`
+,
+`minDate`
+,
+`maxDate`
+,
+`disableNavWhenOutOfRange`
+,
+`view`
+,
+`minView`
+,
+`firstDay`
+, etc. Pass any of them as
+`@`
+-args.
+
+### Callbacks
+
+| Argument | Signature | Description |
+| --- | --- | --- |
+| `@onSelect` | `(selection)` | Called with the air-datepicker selection object |
+| `@onChange` | `(date)` | Called with the selected `Date` |
+| `@onDateChanged` | `(formattedDate)` | Called with the formatted string |
+
+## Real-World Examples
+
+```
+{{!-- Inside a form group --}}
+<InputGroup @name="Date of birth">
+  <DatePicker @value={{this.driver.date_of_birth}} @onChange={{fn (mut this.driver.date_of_birth)}} />
+</InputGroup>
+
+{{!-- Range filter --}}
+<DatePicker
+  @range={{true}}
+  @value={{this.dateRange}}
+  @onChange={{this.applyDateFilter}}
+  @placeholder="Date range"
+/>
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/date-picker.hbs` | Template |
+| `addon/components/date-picker.js` | Class — wraps [`air-datepicker`](https://air-datepicker.com) |

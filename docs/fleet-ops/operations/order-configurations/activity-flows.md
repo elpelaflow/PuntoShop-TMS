@@ -1,0 +1,232 @@
+---
+title: "Activity Flows"
+url: https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows
+module: fleet-ops
+---
+
+Order Configurations
+
+# Activity Flows
+
+Define the activity workflow that runs inside an order's started phase — transitions, logic, events, completion flag, and per-activity POD.
+
+# Activity Flows
+
+An
+**Activity Flow**
+is the workflow defined on an Order Configuration. It describes the activities a driver moves through while the order is in the
+`started`
+system status — and which activity ends the order. Each Order Configuration has exactly one flow, stored as a JSON graph of activities keyed by their
+`code`
+.
+
+![Activity flow editor — graph of activities with transitions, logic, events, and completion flag](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-order-config-activity-flow.1fbe82a5.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Activity Shape
+
+Each activity in the flow is a JSON object with the following fields:
+
+| Field | Description |
+| --- | --- |
+| `key` / `code` | Unique identifier for the activity (e.g. `created` , `enroute` , `delivered` ). Used in webhooks, the API, and as the transition target from other activities. |
+| `status` | The display label shown in the console activity timeline (e.g. *Order Dispatched* , *Driver Enroute* ). |
+| `details` | One-line description of what the activity represents. |
+| `color` | Status indicator color in the console UI. |
+| `complete` | Boolean. When `true` , firing this activity moves the order's system status to `completed` . Any custom activity can carry this flag — it does not have to be named "completed". |
+| `sequence` | Integer used for ordering when multiple activities are reachable from the same parent. |
+| `activities` | Array of activity codes this one can transition to next. The flow is a directed graph, not strictly a tree. |
+| `pod_method` | One of `scan` , `signature` , or `photo` . Controls what the driver captures in Navigator at this step. |
+| `require_pod` | Boolean. When `true` , the driver must capture POD before the activity can fire. |
+| `logic` | Optional list of conditions that must pass for the activity to be available. See [Logic Conditions](#logic-conditions) . |
+| `events` | Optional list of events fired when the activity is reached (webhooks, notifications). See [Events](#events) . |
+| `actions` / `options` / `entities` / `internalId` | Internal fields used by the editor and renderer. |
+
+## Default Transport Flow
+
+The built-in
+**Transport**
+Order Configuration ships with a minimal flow:
+
+```
+created ──► dispatched ──► started ──► enroute ──► completed   (complete: true)
+```
+
+That's the entire default. Operations that need richer tracking — pickup confirmation, signature capture, multi-stop progress — extend this flow by adding their own activities and connecting them via the
+`activities`
+(transitions) array on each node.
+
+A typical custom flow for a courier might look like:
+
+```
+created ──► dispatched ──► started ──► arrived_at_pickup ──► items_loaded
+              ▲                                                      │
+              │                                                      ▼
+       canceled (terminal)                                    in_transit
+                                                                     │
+                                                                     ▼
+                                                          arrived_at_dropoff
+                                                                     │
+                                                                     ▼
+                                                          delivered  (complete: true)
+                                                          (pod_method: signature,
+                                                           require_pod: true)
+```
+
+The
+`complete: true`
+flag on
+`delivered`
+is what ends the order — the activity does not have to be named
+`completed`
+.
+
+## Configuring the Flow
+
+Open the
+**Order Configuration**
+editor and switch to the
+**Activity Flow**
+tab.
+
+### View the current flow
+
+The editor renders the activity graph. Each node is one activity; arrows represent the transitions defined in each activity's
+`activities`
+array.
+
+### Add an activity
+
+Click
+**+ Add Activity**
+. Set the
+`code`
+,
+`status`
+(display label),
+`color`
+, and
+`details`
+. The editor wires the new activity into the graph by adding its
+`code`
+to a parent activity's transitions.
+
+### Configure POD per activity
+
+On any activity, set
+`pod_method`
+(one of
+`scan`
+,
+`signature`
+, or
+`photo`
+) and toggle
+`require_pod`
+. When
+`require_pod`
+is on, the driver cannot fire the activity in Navigator without capturing POD first.
+
+### Mark the completion activity
+
+Toggle
+`complete: true`
+on the activity that should end the order — typically the final delivery / sign-off / handover step. Multiple activities can carry the flag (e.g. one for
+*delivered*
+, another for
+*failed-and-returned*
+); whichever fires first ends the order.
+
+### Add logic conditions (optional)
+
+Add a logic block to gate when an activity is available — for example, only show
+*Collect COD*
+if
+`order.cod_amount > 0`
+. See
+[Logic Conditions](#logic-conditions)
+.
+
+### Add events (optional)
+
+Attach events that fire when the activity is reached — webhooks to external systems, customer notifications, push alerts. See
+[Events](#events)
+.
+
+### Save
+
+Click
+**Save Configuration**
+. The updated flow applies to orders created against this config from this point forward.
+
+## Logic Conditions
+
+Logic blocks make an activity conditional. Each block has a
+`type`
+and a list of
+`conditions`
+:
+
+| Type | Behavior |
+| --- | --- |
+| `and` | All conditions must evaluate true |
+| `or` | At least one condition must evaluate true |
+| `not` | None of the conditions may evaluate true |
+| `if` | The single condition must evaluate true |
+
+Conditions evaluate against the current order — pickup, dropoff, status, payload attributes, and custom fields.
+
+## Events
+
+Events fire when an activity is reached. They're configured per activity:
+
+* **Webhooks**
+  — HTTP POST to a registered webhook endpoint with the order payload and the activity event
+* **Notifications**
+  — push, SMS, or email alerts to customers, drivers, or operators
+
+Events are dispatched after the activity transitions and after any required POD has been captured.
+
+## System Statuses vs Activity Codes
+
+A few activity codes are reserved by the system status backbone —
+`created`
+,
+`dispatched`
+,
+`started`
+,
+`canceled`
+, and (when used as a completion target)
+`completed`
+. These activities exist on every flow and drive the order's system status. Any activity carrying
+`complete: true`
+will also move the system status to
+`completed`
+regardless of its code, which lets you give the completion step a domain-appropriate name (
+*delivered*
+,
+*signed-off*
+,
+*handed-over*
+, etc.) while keeping the system status backbone intact.
+
+See
+[Order Lifecycle](https://fleetbase.io/docs/fleet-ops/operations/orders/order-lifecycle)
+for the relationship between system statuses and activity flows.
+
+## Waypoint Activities
+
+For multi-stop orders, each waypoint can run its own subset of activities — for example,
+*arrived at waypoint*
+,
+*items delivered at waypoint*
+,
+*signature captured*
+. Waypoints maintain their own POD and progress independently, while the order-level flow advances once all waypoints have completed their required activities.
+
+[Order Types
+
+Create and manage custom order types — define entity fields, constraints, and service categories per order configuration.](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/order-types)
+[Service Rates
+
+Define pricing rules and rate structures used to calculate order costs — flat fees, distance-based, weight-based, zone pricing, and surcharges.](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)

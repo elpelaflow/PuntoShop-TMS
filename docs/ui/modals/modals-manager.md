@@ -1,0 +1,344 @@
+---
+title: "Modals Manager Service"
+url: https://fleetbase.io/docs/ui/modals/modals-manager
+module: ui
+---
+
+# Modals Manager Service
+
+The `modals-manager` service is the programmatic API for opening, stacking, and dismissing modals. Returns a Promise that resolves on confirm and rejects on decline.
+
+# Modals Manager Service
+
+```
+@service modalsManager;
+```
+
+`modals-manager`
+is the central service for working with modals from JavaScript. Every modal in the Fleetbase Console — confirmations, alerts, prompts, bulk-action sheets, progress trackers, and custom modals — flows through this service.
+
+It supports a stack of nested modals (z-index is auto-incremented) and returns a Promise so you can
+`await`
+user confirmation.
+
+## Inject the Service
+
+```
+import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
+import { action } from '@ember/object';
+
+export default class MyComponent extends Component {
+  @service modalsManager;
+}
+```
+
+## Show a Modal
+
+```
+this.modalsManager.show('my-modal-template', {
+  title: 'Confirm action',
+  body: 'Are you sure?',
+  confirm: async (modal) => { /* … */ },
+});
+```
+
+`show(componentToRender, options)`
+mounts
+`componentToRender`
+inside a modal and returns a Promise that resolves when the modal closes.
+
+## Built-In Layouts
+
+The service provides convenience methods that wrap
+`show()`
+with pre-set layouts.
+
+### confirm(options)
+
+A small confirmation modal — used for destructive actions, "Are you sure?" prompts, and any binary decision.
+
+```
+@action async deleteDriver() {
+  this.modalsManager.confirm({
+    title: 'Delete driver?',
+    body: 'This action cannot be undone.',
+    acceptButtonText: 'Delete',
+    acceptButtonScheme: 'danger',
+    confirm: async (modal) => {
+      await this.driver.destroyRecord();
+    },
+  });
+}
+```
+
+### alert(options)
+
+A small alert modal — single OK button.
+
+```
+this.modalsManager.alert({
+  title: 'Update available',
+  body: 'A new version of the console is available.',
+});
+```
+
+### prompt(options)
+
+A modal that asks the user for a single text input.
+
+```
+this.modalsManager.prompt({
+  title: 'Rename',
+  body: 'Enter a new name',
+  confirm: async (modal) => {
+    const name = modal.options.value;
+    /* save */
+  },
+});
+```
+
+### bulk(options)
+
+A modal designed for bulk-action confirmations (apply across N selected rows).
+
+```
+this.modalsManager.bulk({
+  title: 'Delete selected drivers',
+  body: `Delete ${this.selected.length} drivers?`,
+  selected: this.selected,
+  confirm: async () => { /* … */ },
+});
+```
+
+### progress(options)
+
+Displays the progress of an array of promises with a running percentage.
+
+```
+this.modalsManager.progress({
+  title: 'Processing',
+  promises: this.records.map((r) => r.save()),
+});
+```
+
+`options.promises`
+is required.
+
+### process(options)
+
+Displays a single async process with stages.
+
+```
+this.modalsManager.process({
+  title: 'Importing',
+  process: async () => { /* … */ },
+});
+```
+
+`options.process`
+is required.
+
+### loader(options) / displayLoader(options)
+
+A blocking loader modal (no buttons).
+
+```
+this.modalsManager.loader({ title: 'Loading drivers…' });
+// later
+this.modalsManager.done();
+```
+
+### userSelectOption(title, promptOptions, modalOptions)
+
+A radio-list selection modal. Returns a Promise that resolves with the selected value.
+
+```
+const selected = await this.modalsManager.userSelectOption(
+  'Pick a wallet',
+  [
+    { value: 'main',    label: 'Main' },
+    { value: 'reserve', label: 'Reserve' },
+  ],
+);
+```
+
+## Custom Modals
+
+To show a fully custom modal, pass the component's resolution path as the first arg:
+
+```
+this.modalsManager.show('modals/edit-driver', {
+  title: 'Edit driver',
+  driver: this.driver,
+  confirm: async () => { /* … */ },
+});
+```
+
+Your custom modal component lives at
+`addon/components/modals/edit-driver.{hbs,js}`
+and receives
+`@modalIsOpened`
+,
+`@options`
+,
+`@onConfirm`
+, and
+`@onDecline`
+arguments.
+
+## Common Options
+
+These options work for every modal layout:
+
+### Title / Body
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `title` | string | Modal title |
+| `body` | string | Body text (or yield a custom body in your component) |
+| `footer` | string | Footer text |
+| `hideTitle` | boolean | Don't render the title bar |
+
+### Buttons
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `acceptButtonText` | `Yes` | Confirm button text |
+| `acceptButtonScheme` | `primary` | Confirm button color ( `primary` , `danger` , `success` , `warning` ) |
+| `acceptButtonIcon` | — | FontAwesome icon |
+| `declineButtonText` | `No` | Decline button text |
+| `declineButtonScheme` | `default` | Decline button color |
+| `hideAcceptButton` | `false` | Hide the confirm button |
+| `hideDeclineButton` | `false` | Hide the decline button |
+| `confirmButtonDefaultText` / `confirmButtonPendingText` / `confirmButtonFulfilledText` / `confirmButtonRejectedText` | `Yes` | Per-state texts when using promise-aware buttons |
+
+### Behavior
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `backdrop` | `true` | Show the dimming overlay |
+| `backdropClose` | `true` | Click the backdrop to dismiss |
+| `keyboard` | `true` | Allow Escape to dismiss |
+| `fade` | `true` | Fade transition |
+| `position` | `top` | `top` , `center` |
+| `size` | `null` | `sm` , `md` , `lg` , `xl` , etc. |
+| `scrollable` | `false` | Allow the body to scroll |
+| `renderInPlace` | `false` | Render in DOM order rather than in a portal |
+| `transitionDuration` | `300` | Transition duration in ms |
+| `keepOpen` | `false` | Don't auto-close on confirm — useful for multi-step flows |
+
+### Callbacks
+
+| Option | Signature | Description |
+| --- | --- | --- |
+| `confirm` | `async (modal, done) => void` | Called when the user clicks the confirm button. Return a Promise to keep the button in pending state |
+| `decline` | `async (modal, done) => void` | Called when the user clicks the decline button |
+
+`modal`
+is the manager instance;
+`done`
+is a callback to manually close the modal (useful when
+`keepOpen: true`
+).
+
+## Promise Result
+
+`show()`
+,
+`confirm()`
+,
+`alert()`
+, etc. return a Promise. The Promise resolves when the modal is dismissed via
+`done(modalId, 'onConfirm')`
+and rejects on
+`'onDecline'`
+.
+
+```
+try {
+  await this.modalsManager.confirm({
+    title: 'Delete driver?',
+    confirm: async () => await this.driver.destroyRecord(),
+  });
+  // user confirmed
+} catch (e) {
+  // user declined
+}
+```
+
+## Stacking Modals
+
+Multiple modals can be open at once. The manager tracks them in a stack with auto-incremented z-index (
+`1060`
+,
+`1070`
+, …). The most recently opened modal is the "top modal" returned by
+`getTopModal()`
+.
+
+## Imperative Control
+
+Useful methods for advanced control:
+
+| Method | Purpose |
+| --- | --- |
+| `getTopModal()` | The currently-active modal |
+| `getModalById(id)` | Find a specific modal in the stack |
+| `done(modalId?, type?)` | Close a modal — pass `'onConfirm'` or `'onDecline'` to drive the Promise resolution |
+| `dismiss(modalId?)` | Close without resolving the Promise |
+| `setOptionForModal(modalId, key, value)` | Update an option on a specific modal at runtime |
+| `getOptionForModal(modalId, key)` | Read an option on a specific modal |
+| `startLoadingForModal(modalId)` | Toggle the modal's confirm button to pending state |
+| `stopLoadingForModal(modalId)` | Reverse of the above |
+
+## Real-World Examples
+
+```
+// Confirmation with permission gating
+@action async deleteOrder() {
+  this.modalsManager.confirm({
+    title: 'Cancel order?',
+    body: `Order ${this.order.public_id} will be cancelled.`,
+    acceptButtonText: 'Cancel order',
+    acceptButtonScheme: 'danger',
+    confirm: async () => {
+      await this.order.cancel();
+      this.notifications.success('Order cancelled');
+    },
+  });
+}
+
+// Custom modal with extra props
+@action editProfile(driver) {
+  this.modalsManager.show('modals/driver-form', {
+    title: 'Edit driver',
+    driver,
+    confirm: async (modal) => {
+      await modal.options.driver.save();
+    },
+  });
+}
+
+// Loader during a long-running fetch
+@action async syncWithUpstream() {
+  this.modalsManager.loader({ title: 'Syncing…' });
+  try {
+    await this.upstream.sync();
+  } finally {
+    this.modalsManager.done();
+  }
+}
+
+// User selection
+const choice = await this.modalsManager.userSelectOption(
+  'Choose a destination',
+  this.zones.map(z => ({ value: z.id, label: z.name })),
+);
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/services/modals-manager.js` | Service class |

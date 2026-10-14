@@ -1,0 +1,112 @@
+---
+title: "Kanban Board"
+url: https://fleetbase.io/docs/fleet-ops/operations/orders/kanban-board
+module: fleet-ops
+---
+
+Orders
+
+# Kanban Board
+
+Manage orders visually by status column — see all active orders at a glance, drag to reassign, and filter by driver or fleet.
+
+# Kanban Board
+
+The Kanban Board provides a visual, column-based view of all orders organized by
+**system status**
+. Each column represents one of the five system statuses —
+*created*
+,
+*dispatched*
+,
+*started*
+,
+*completed*
+,
+*canceled*
+— and each card represents an order. It gives dispatchers a real-time snapshot of the operation's current state without navigating individual order records.
+
+![Fleet-Ops Kanban board — columns for each order status, order cards with driver and address info](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orders-board.0a2d988b.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Accessing the Kanban Board
+
+In Fleet-Ops, navigate to
+**Operations → Orders**
+and switch the view toggle from
+**List**
+to
+**Board**
+(Kanban view) using the view switcher in the top right of the orders page.
+
+## Board Columns
+
+The board has one column per system status:
+
+| Column | Orders shown |
+| --- | --- |
+| **Created** | Awaiting dispatch |
+| **Dispatched** | Sent to the Navigator app, awaiting driver start |
+| **Started** | Driver actively executing the order |
+| **Completed** | Order completion activity has fired |
+| **Canceled** | Canceled orders |
+
+By default, completed and canceled orders are hidden to keep the board focused on active work. Toggle their visibility using the column filter.
+
+## Order Cards
+
+Each order card shows:
+
+* **Order ID**
+  (public\_id — e.g.,
+  `ORD-00123`
+  )
+* **Customer**
+  name
+* **Dropoff address**
+  summary
+* **Assigned driver**
+  name (if assigned)
+* **Scheduled time**
+  (if scheduled)
+* **Status badge**
+
+Click a card to open the full order detail panel.
+
+## Filtering the Board
+
+Use the filter bar at the top to narrow the board to:
+
+* **Driver**
+  — show only orders assigned to a specific driver
+* **Fleet**
+  — show only orders belonging to a fleet
+* **Date**
+  — filter by scheduled date or creation date
+* **Order Config**
+  — filter by order type
+
+Filters stack — combine driver and date to see a specific driver's schedule for a given day.
+
+## Quick Actions from Cards
+
+Hover over an order card to reveal quick action buttons:
+
+* **Dispatch**
+  — dispatch a created order directly from the card without opening the detail
+* **Assign**
+  — open the driver/vehicle assignment dialog for a created order
+* **Cancel**
+  — cancel the order
+
+## Using the Board with the Orchestrator
+
+The Kanban Board and the
+[Orchestrator](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview)
+work well together. Use the Orchestrator to do bulk assignment and route optimization, then switch to the board view to monitor real-time progress as drivers work through their manifests.
+
+[Managing Orders
+
+Create, edit, assign, dispatch, and manage orders from the Fleet-Ops orders list and detail views.](https://fleetbase.io/docs/fleet-ops/operations/orders/managing-orders)
+[Scheduling Orders
+
+Schedule an order for a specific date and time — set pickup windows, time constraints, and future dispatch.](https://fleetbase.io/docs/fleet-ops/operations/orders/scheduling-orders)

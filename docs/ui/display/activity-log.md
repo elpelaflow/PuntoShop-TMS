@@ -1,0 +1,137 @@
+---
+title: "ActivityLog"
+url: https://fleetbase.io/docs/ui/display/activity-log
+module: ui
+---
+
+# ActivityLog
+
+<ActivityLog> renders a compact activity timeline — auto-fetches from the `activity` model, supports date-range filtering, and previews changed attributes.
+
+# <ActivityLog>
+
+`<ActivityLog>`
+renders a compact timeline of activity records (user and system actions). It auto-fetches activities from the
+`activity`
+Ember Data model, displays relative timestamps, and summarizes creates, deletes, and changed attributes in a sentence-style feed.
+
+When an activity changes more than one attribute, the attribute count opens a hover popover with the changed fields and their previous/new values.
+
+## Basic Usage
+
+```
+<ActivityLog @subjectId={{this.order.id}} />
+```
+
+This loads activities where
+`subject_id = order.id`
+and renders them as a compact timeline.
+
+## Filtering
+
+```
+<ActivityLog
+  @subjectId={{this.order.id}}
+  @causerId={{this.user.id}}
+/>
+```
+
+Activities are loaded from the API with
+`subject_id`
+and/or
+`causer_id`
+query params plus the date-range filter the user picks.
+
+## Dashboard Preview
+
+```
+<ActivityLog
+  @subjectId={{this.order.id}}
+  @maxVisibleActivities={{3}}
+  @showControls={{false}}
+>
+  <:viewAll>
+    <LinkTo @route="orders.order.activity" @model={{this.order}}>
+      View all
+    </LinkTo>
+  </:viewAll>
+</ActivityLog>
+```
+
+Use
+`@maxVisibleActivities`
+for small panels or dashboard cards. The
+`:viewAll`
+block renders in the header next to the component controls.
+
+## Arguments
+
+### Filtering
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@subjectId` | string | Filter to activities about a specific record |
+| `@causerId` | string | Filter to activities caused by a specific user |
+
+### Visual
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@density` | string | `compact` | `compact` or `cozy` |
+| `@showAvatars` | boolean | `true` | Show user avatars |
+| `@showBadges` | boolean | `false` | Show activity-type badges |
+| `@showHeader` | boolean | `true` | Render the Activity header row |
+| `@showControls` | boolean | `true` | Render the date filter and refresh button |
+| `@showAttributePreviousValues` | boolean | `true` | Include previous values in the changed-attributes popover |
+| `@maxVisibleActivities` | number | — | Limit the number of activities shown |
+| `@dateFilterButtons` | array | — | Quick-pick buttons for the date filter (e.g. "Last 7 days") |
+| `@autoClose` | boolean | — | Close the date picker after selection |
+| `@toggleSelected` | boolean | — | Toggle behavior on the date picker |
+
+### Class Hooks
+
+| Argument | Description |
+| --- | --- |
+| `@headerWrapperClass` | Header row |
+| `@groupClass` | Timeline list |
+| `@itemClass` | Each activity item |
+| `@itemDetailsClass` | Row content wrapper |
+| `@itemSentenceClass` | Activity sentence text |
+| `@itemRelativeTimestampClass` | Relative timestamp |
+| `@itemBadgeClass` | Activity badge when `@showBadges={{true}}` |
+
+### Callbacks
+
+| Argument | Signature | Description |
+| --- | --- | --- |
+| `@onCauserClick` | `(causer)` | Called when a user link in an activity is clicked |
+| `@onSubjectClick` | `(subject)` | Called when a subject link is clicked |
+
+### Yielded Block
+
+| Block | Purpose |
+| --- | --- |
+| `:filters` | Render extra filter controls in the header |
+| `:viewAll` | Render a link or action on the right side of the header |
+| default | Render additional content after the activity log |
+
+## Real-World Example
+
+```
+{{!-- Inside an order detail overlay --}}
+<ContentPanel @title="Activity Log" @open={{true}}>
+  <ActivityLog
+    @subjectId={{this.order.id}}
+    @density="compact"
+    @showAttributePreviousValues={{true}}
+    @onCauserClick={{this.openUser}}
+  />
+</ContentPanel>
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/activity-log.hbs` | Template |
+| `addon/components/activity-log.js` | Class — queries the `activity` Ember Data model |

@@ -1,0 +1,126 @@
+---
+title: "Scheduler Overview"
+url: https://fleetbase.io/docs/fleet-ops/operations/scheduler/overview
+module: fleet-ops
+---
+
+Scheduler
+
+# Scheduler Overview
+
+The Scheduler provides a fleet-wide calendar view of driver shifts, order assignments, and availability windows.
+
+# Scheduler Overview
+
+The
+**Scheduler**
+is a calendar-based planning tool that gives operators a fleet-wide view of driver shifts, scheduled orders, and availability windows. Use it to plan which drivers are working on which days, visualize how orders are distributed across your fleet, and manage shift patterns.
+
+![Scheduler — weekly calendar grid with driver rows, shift blocks, and scheduled order cards](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-scheduler.d1cf0d16.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## What the Scheduler Shows
+
+The Scheduler has two main views:
+
+### Fleet View
+
+A weekly calendar with one row per driver, showing:
+
+* **Shift blocks**
+  — the hours each driver is scheduled to work
+* **Scheduled orders**
+  — orders assigned to each driver on each day
+* **Availability windows**
+  — the driver's active time window within their shift
+
+### Driver View
+
+A detailed single-driver timeline showing:
+
+* Daily shift schedule
+* Individual orders assigned for each shift
+* Break periods
+* HOS (Hours of Service) status
+
+## Opening the Scheduler
+
+Navigate to
+**Fleet-Ops → Operations → Scheduler**
+. The scheduler opens in the current week by default. Use the date controls to navigate forward or backward.
+
+## Driver Shift Schedules
+
+Each driver in Fleet-Ops has a
+**shift schedule**
+— a set of recurring patterns that define when they are available to work. Shifts are managed in the driver record or in bulk from the Scheduler.
+
+A shift schedule entry (ScheduleItem) defines:
+
+* **Day of week**
+  — which days the shift applies
+* **Start time**
+  — when the driver's shift begins
+* **End time**
+  — when the driver's shift ends
+* **Break duration**
+  — scheduled break within the shift
+* **Recurrence**
+  — daily, weekly, or specific dates
+
+The Orchestrator uses shift schedules as
+**time window constraints**
+— it will only assign orders that can be completed within a driver's shift window.
+
+See
+[Driver Shift Schedules](https://fleetbase.io/docs/fleet-ops/operations/scheduler/driver-shift-schedules)
+for details.
+
+## Scheduled Orders in the Calendar
+
+Orders with a
+**Scheduled At**
+date appear in the Scheduler on their scheduled day, in the row of their assigned driver. Each order card shows:
+
+* Order ID and customer
+* Pickup and dropoff addresses
+* Status badge
+
+Click an order card to open the full order detail. Drag an order card to a different driver row to reassign, or to a different day to reschedule.
+
+See
+[Order Scheduling](https://fleetbase.io/docs/fleet-ops/operations/scheduler/order-scheduling)
+for details on scheduling individual orders.
+
+## HOS (Hours of Service) Compliance
+
+For regulated transport operations, the Scheduler includes
+**HOS status tracking**
+. Fleet-Ops monitors driver working hours and flags:
+
+* Drivers approaching their daily driving limit
+* Drivers who have exceeded their weekly hours
+* Required rest periods
+
+HOS rules are configured in
+**Fleet-Ops → Settings → Scheduling**
+.
+
+## Relationship to the Orchestrator
+
+The Scheduler and Orchestrator work together:
+
+1. Define driver shifts in the Scheduler
+2. Run the Orchestrator — it respects shift windows when assigning orders
+3. Review the resulting assignments in the Scheduler calendar
+4. Adjust any conflicts or over-allocations visually
+
+The Scheduler is the human-readable planning surface; the Orchestrator is the multi-phase planner that produces the assignments.
+
+## Related Pages
+
+* [Order Scheduling](https://fleetbase.io/docs/fleet-ops/operations/scheduler/order-scheduling)
+  — schedule individual orders and manage time windows
+* [Driver Shift Schedules](https://fleetbase.io/docs/fleet-ops/operations/scheduler/driver-shift-schedules)
+  — set up recurring driver shifts
+* [Settings → Scheduling](https://fleetbase.io/docs/fleet-ops/settings/scheduling)
+  — configure HOS rules and shift defaults

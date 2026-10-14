@@ -1,0 +1,115 @@
+---
+title: "Uninstall"
+url: https://fleetbase.io/docs/cli/extensions/uninstall
+module: cli
+---
+
+# Uninstall
+
+Remove an installed extension from a running Fleetbase instance using `flb uninstall`.
+
+# flb uninstall
+
+Remove a previously installed extension from a Fleetbase instance. The CLI runs
+`pnpm remove`
+(in
+`console/`
+) and
+`composer remove`
+(in
+`api/`
+).
+
+```
+flb uninstall <packageName>
+```
+
+The package name follows the same forms as
+[`flb install`](https://fleetbase.io/docs/cli/extensions/install)
+— slug or extension ID.
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `[packageName]` | Slug or ID of the extension to uninstall |
+| `-p, --path <path>` | Path to the Fleetbase instance (default: current directory) |
+
+## Examples
+
+### From inside your Fleetbase directory
+
+```
+cd /path/to/fleetbase
+flb uninstall fleetbase/flespi
+```
+
+### From anywhere
+
+```
+flb uninstall fleetbase/flespi --path /path/to/fleetbase
+```
+
+## What Happens
+
+The CLI calls the registry's lookup endpoint to resolve the npm + composer package names.
+
+Verifies the target directory contains both
+`console/`
+and
+`api/`
+subdirectories.
+
+Runs
+`pnpm remove <npm-package>`
+inside
+`console/`
+.
+
+Runs
+`composer remove <composer-package>`
+inside
+`api/`
+.
+
+After uninstall, restart your containers:
+
+```
+docker compose restart
+```
+
+## Cleanup
+
+`flb uninstall`
+removes the package files but does
+**not**
+:
+
+* Drop database tables or rollback migrations created by the extension
+* Remove settings, secrets, or stored credentials
+* Delete uploaded files
+* Revoke API keys or webhooks the extension created
+
+If the extension provides a cleanup command (e.g. an
+`artisan`
+command or a settings panel "Reset" button), run it
+**before**
+uninstalling so it can clean its own state. Otherwise check the extension's docs for any leftover artifacts to clean up manually.
+
+## Troubleshooting
+
+**`Invalid Fleetbase instance path: …`**
+— the
+`--path`
+(or current directory) doesn't contain both
+`console/`
+and
+`api/`
+. Pass the correct path.
+
+**`Uninstall failed: …`**
+— the underlying
+`pnpm remove`
+or
+`composer remove`
+failed. Check the printed error.

@@ -1,0 +1,146 @@
+---
+title: "Bundle Upload"
+url: https://fleetbase.io/docs/cli/extension-development/bundle-upload
+module: cli
+---
+
+# Bundle Upload
+
+Upload an existing extension bundle to the Fleetbase registry using `flb bundle-upload`.
+
+# flb bundle-upload
+
+Upload a
+`.tar.gz`
+bundle (created by
+[`flb bundle`](https://fleetbase.io/docs/cli/extension-development/bundle)
+) to the Fleetbase Extension Registry. Use this when you've already bundled (e.g. as a separate CI step) and just need to ship the archive.
+
+```
+flb bundle-upload                          # Upload the latest bundle in current directory
+flb bundle-upload my-ext-v1.0.0-bundle.tar.gz   # Upload a specific bundle
+```
+
+Without a filename argument, the CLI scans the directory for files matching
+`*-v*-bundle.tar.gz`
+and uploads the highest semver version.
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `[bundleFile]` | Bundle file to upload (auto-detect latest if omitted) |
+| `-p, --path <path>` | Directory containing the bundle (default: current directory) |
+| `--auth-token <token>` | Auth token for the upload |
+
+## Authentication
+
+The upload endpoint requires a registry auth token. The CLI sources it in this order:
+
+1. The
+   `--auth-token`
+   option
+2. Your
+   `~/.npmrc`
+   — looking for the line
+   `//registry.fleetbase.io/:_authToken=<token>`
+
+If neither is set, the command aborts:
+
+```
+Auth token not found for registry https://registry.fleetbase.io.
+Please provide an auth token using the --auth-token option.
+```
+
+To populate
+`~/.npmrc`
+, use
+[`flb login`](https://fleetbase.io/docs/cli/account/login)
+or
+`npm login --registry https://registry.fleetbase.io`
+.
+
+## Examples
+
+### Upload the latest bundle in the current directory
+
+```
+cd /path/to/your-extension
+flb bundle
+flb bundle-upload
+```
+
+The auto-detect logic picks the highest-version bundle. Useful when you've created multiple bundles for testing.
+
+### Upload a specific file
+
+```
+flb bundle-upload vehicle-inspections-v1.2.0-bundle.tar.gz
+```
+
+### CI / non-interactive
+
+```
+flb bundle-upload --auth-token "$FLEETBASE_TOKEN"
+```
+
+## What Gets Sent
+
+The CLI POSTs the file as
+`multipart/form-data`
+(field name
+`bundle`
+) to the registry's upload endpoint. The token is sent as
+`Authorization: Bearer <token>`
+.
+
+Body and content limits are uncapped on the client — the registry decides the maximum bundle size.
+
+## Auto-Detect Logic
+
+When no filename is passed,
+`flb bundle-upload`
+:
+
+1. Scans
+   `--path`
+   (default: current directory) for files matching
+   `*-v*-bundle.tar.gz`
+2. Parses the version out of each filename (supports prereleases like
+   `1.0.0-rc.1`
+   )
+3. Sorts by semver and picks the highest
+
+If no bundle is found, the command aborts:
+
+```
+No bundle file found in the current directory.
+```
+
+## Troubleshooting
+
+**`Error uploading bundle: …`**
+— the registry rejected the upload. Common causes:
+
+* Invalid or expired auth token
+* Bundle exceeds the registry's size limit
+* Network issue between you and the registry
+
+**`Auth token not found for registry …`**
+— set up auth via
+[`flb login`](https://fleetbase.io/docs/cli/account/login)
+or
+`npm login`
+, or pass
+`--auth-token`
+.
+
+## Bundle vs. Publish
+
+|  | `flb bundle-upload` | `flb publish` |
+| --- | --- | --- |
+| What it ships | A pre-built `.tar.gz` | The npm package via `npm publish` |
+| Auth required | Bearer token in `~/.npmrc` | npm credentials in `~/.npmrc` |
+| Best for | Storage of distributable archives | Standard npm-based distribution |
+
+Both can be used to ship an extension. Publish is the npm-native flow; bundle-upload uploads the archive separately for distribution channels that don't pull from npm.

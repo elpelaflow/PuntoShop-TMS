@@ -1,0 +1,234 @@
+---
+title: "Extension Registration"
+url: https://fleetbase.io/docs/extension-development/architecture/extension-registration
+module: extension-development
+---
+
+# Extension Registration
+
+How addon/extension.js wires your extension into the Fleetbase console boot lifecycle. The setupExtension hook, onEngineLoaded, and the contract every extension implements.
+
+# Extension Registration
+
+Every Fleetbase extension declares a single
+**`addon/extension.js`**
+at the root of its addon. The console's
+`ExtensionManager`
+finds this file at boot, dynamic-imports it, and runs its registration hooks.
+
+This is the
+**single canonical entry point**
+— registration code does
+**not**
+live in
+`engine.js`
+, instance initializers, or anywhere else.
+
+## The addon/extension.js Contract
+
+`addon/extension.js`
+exports a
+**default value**
+that is one of:
+
+### Form 1: A plain object with hooks
+
+```
+// addon/extension.js
+export default {
+    setupExtension(app, universe) {
+        // run before any engine loads — register menu items, widgets, hooks, registries
+    },
+
+    onEngineLoaded(engineInstance, universe, app) {
+        // run when *this* extension's engine boots (lazy, on first navigation)
+    },
+};
+```
+
+### Form 2: A single function
+
+```
+// addon/extension.js
+export default function (app, universe) {
+    // equivalent to setupExtension only
+}
+```
+
+The object form is what every modern extension uses because it lets you mix
+`setupExtension`
+and
+`onEngineLoaded`
+in one place.
+
+## setupExtension(app, universe)
+
+Called once at console boot,
+**before any engine has loaded**
+. This is where you do the bulk of registration:
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `app` | `ApplicationInstance` | The host Ember application — useful for `app.lookup('service:router')` etc. |
+| `universe` | `UniverseService` | The central facade — see [Universe Service](https://fleetbase.io/docs/extension-development/universe/overview) |
+
+Use it to:
+
+* Register top-level menu entries via
+  `universe.getService('menu')`
+* Create custom registries via
+  `universe.getService('registry')`
+* Register dashboard widgets via
+  `universe.getService('widget')`
+* Hook into lifecycle events via
+  `universe.getService('hook')`
+* Schedule cross-engine work via
+  `universe.whenEngineLoaded(...)`
+
+```
+import { MenuItem, Widget, ExtensionComponent, Hook } from '@fleetbase/ember-core/contracts';
+
+export default {
+    setupExtension(app, universe) {
+        const menuService     = universe.getService('menu');
+        const widgetService   = universe.getService('widget');
+        const registryService = universe.getService('registry');
+        const hookService     = universe.getService('hook');
+
+        menuService.registerHeaderMenuItem('My Extension', 'console.my-extension', {
+            icon: 'puzzle-piece',
+            description: 'My custom logistics feature.',
+        });
+
+        widgetService.registerWidgets('dashboard', [
+            new Widget({
+                id: 'my-stats',
+                name: 'My Stats',
+                icon: 'chart-line',
+                component: new ExtensionComponent('@my-org/my-extension-engine', 'widget/my-stats'),
+                grid_options: { w: 6, h: 6, minW: 4, minH: 4 },
+            }),
+        ]);
+
+        registryService.createRegistries(['my-extension:sidebar']);
+
+        hookService.registerHook(
+            new Hook('console:after-model', (session, router) => {
+                // …
+            })
+        );
+    },
+};
+```
+
+## onEngineLoaded(engineInstance, universe, app)
+
+Called after
+**your extension's**
+Ember Engine has booted. The engine is loaded lazily — typically on first navigation to a route inside it, or on demand via
+`universe.ensureEngineLoaded(...)`
+.
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `engineInstance` | `EngineInstance` | The booted engine — `engineInstance.lookup('service:my-service')` works here |
+| `universe` | `UniverseService` | The same facade as above |
+| `app` | `ApplicationInstance` | The host application |
+
+Use it for
+**engine-internal setup**
+that needs the engine container — registering services into the engine itself, reading config from the engine, etc. Most extensions don't need it;
+`setupExtension`
+covers the common cases.
+
+## When to Use What
+
+| Need | Use |
+| --- | --- |
+| Register a header menu item | `setupExtension` |
+| Add a widget to the default dashboard | `setupExtension` |
+| Register a hook ( `application:before-model` etc.) | `setupExtension` |
+| Create a registry for other extensions to plug into | `setupExtension` |
+| Inject a component into another extension's slot | `setupExtension` (via `whenEngineLoaded` if the host engine isn't booted yet) |
+| Set up something that needs **your engine's** container | `onEngineLoaded` |
+| Read your engine's config | `onEngineLoaded` |
+
+## Cross-Extension Coordination
+
+When your extension needs to register something into another engine that may not be booted yet, wrap the work in
+`universe.whenEngineLoaded`
+:
+
+```
+export default {
+    setupExtension(app, universe) {
+        // VROOM registers a route-optimization provider into Fleet-Ops
+        universe.whenEngineLoaded('@fleetbase/fleetops-engine', async (fleetopsEngine, universe) => {
+            const myEngine = await universe.extensionManager.ensureEngineLoaded('@fleetbase/vroom-engine');
+
+            const routeOptimization = fleetopsEngine.lookup('service:route-optimization');
+            const vroom = myEngine.lookup('service:vroom');
+
+            routeOptimization.register('vroom', vroom);
+        });
+    },
+};
+```
+
+`whenEngineLoaded`
+runs the callback immediately if the engine is already booted, or queues it for when the engine boots. This is the recommended cross-engine pattern.
+
+`onEngineLoaded(engineName, cb)`
+is also available but
+**only fires for new loads**
+— it doesn't run for engines that booted before you registered the listener.
+
+## The Boot Lifecycle
+
+```
+1. Console application boots
+       ↓
+2. ExtensionManager.loadExtensions()
+       └── fetches the list of enabled extensions from the API
+       ↓
+3. ExtensionManager.setupExtensions()
+       ├── for each extension:
+       │     ├── dynamic-import addon/extension.js
+       │     ├── call setupExtension(app, universe)   ← your registrations run here
+       │     └── store onEngineLoaded for later
+       │
+       ↓
+4. universe.executeBootCallbacks()
+       ↓
+5. User navigates to a route inside an extension engine
+       ↓
+6. Ember loads the engine lazily
+       ├── universe.extensionManager fires `engine.loaded`
+       └── stored onEngineLoaded callbacks for that engine fire
+```
+
+Everything you register in
+`setupExtension`
+is in place before any engine boots — so menu items, widgets, and hooks are all visible from the moment the console loads, even if the user never navigates into your extension.
+
+## Real-World References
+
+| Extension | Pattern shown | Source |
+| --- | --- | --- |
+| VROOM | `whenEngineLoaded` to register an optimization provider into Fleet-Ops | `vroom/addon/extension.js` |
+| Valhalla | `whenEngineLoaded` to register a routing engine into Fleet-Ops | `valhalla/addon/extension.js` |
+| Ledger | Header menu + dashboard, widgets, and a Fleet-Ops order-details tab | `ledger/addon/extension.js` |
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/services/universe/extension-manager.js` | Implements `setupExtensions()` , the boot loop |
+| `addon/services/universe.js` | The `UniverseService` facade |
+
+[Overview
+
+A Fleetbase extension is a single repository with two halves — an Ember.js addon (the console UI) and a Laravel package (the API). The extension.json manifest ties them together and addon/extension.js is the registration entry point.](https://fleetbase.io/docs/extension-development/architecture/overview)
+[Overview
+
+The UniverseService is the central extensibility facade in @fleetbase/ember-core. It exposes sub-services for menus, registries, resource views, widgets, hooks, and engines — and is the single entry point your extension uses to plug into the console.](https://fleetbase.io/docs/extension-development/universe/overview)

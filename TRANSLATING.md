@@ -79,22 +79,16 @@ Here is a list of the primary repositories that accept translation contributions
 
 | Repository                               | Translation Path              |
 | ---------------------------------------- | ----------------------------- |
-| [fleetbase/fleetbase][1]                 | `./console/translations/`     |
-| [fleetbase/fleetops][2]                  | `./translations/`             |
-| [fleetbase/storefront][3]                | `./translations/`             |
-| [fleetbase/dev-engine][4]                | `./translations/`             |
-| [fleetbase/iam-engine][5]                | `./translations/`             |
-| [fleetbase/pallet][6]                    | `./translations/`             |
-| [fleetbase/ledger][7]                    | `./translations/`             |
-| [fleetbase/registry-bridge][8]           | `./translations/`             |
+| [elpelaflow/PuntoShop-TMS][1]            | `./console/translations/`     |
+| [fleetops][2]                            | `./translations/`             |
+| [dev-engine][3]                          | `./translations/`             |
+| [iam-engine][4]                          | `./translations/`             |
+| [ledger][5]                              | `./translations/`             |
 
-[1]: https://github.com/fleetbase/fleetbase
-[2]: https://github.com/fleetbase/fleetops
-[3]: https://github.com/fleetbase/storefront
-[4]: https://github.com/fleetbase/dev-engine
-[5]: https://github.com/fleetbase/iam-engine
-[6]: https://github.com/fleetbase/pallet
-[7]: https://github.com/fleetbase/ledger
-[8]: https://github.com/fleetbase/registry-bridge
+[1]: https://github.com/elpelaflow/PuntoShop-TMS
+[2]: https://github.com/elpelaflow/PuntoShop-TMS
+[3]: https://github.com/elpelaflow/PuntoShop-TMS
+[4]: https://github.com/elpelaflow/PuntoShop-TMS
+[5]: https://github.com/elpelaflow/PuntoShop-TMS
 
 Thank you again for your contribution to the Fleetbase community!

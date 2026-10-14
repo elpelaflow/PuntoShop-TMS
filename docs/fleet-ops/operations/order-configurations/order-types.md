@@ -1,0 +1,155 @@
+---
+title: "Order Types"
+url: https://fleetbase.io/docs/fleet-ops/operations/order-configurations/order-types
+module: fleet-ops
+---
+
+Order Configurations
+
+# Order Types
+
+Create and manage custom order types — define entity fields, constraints, and service categories per order configuration.
+
+# Order Types
+
+**Order Types**
+refer to the different categories of orders your operation handles, each backed by an
+**Order Configuration**
+. An order type determines what data is collected on each delivery, what fields appear on each item, and how drivers execute the workflow.
+
+## What Defines an Order Type
+
+Each Order Configuration defines an order type through:
+
+1. **Entity definitions**
+   — field templates that pre-populate when items are added to orders of this type
+2. **Tags**
+   — for categorizing and filtering
+3. **Activity flow**
+   — the activities the driver moves through, including per-activity POD settings (defined on each activity, not on the config itself)
+
+## Entity Definitions
+
+Entity definitions specify what data must be filled in for each item (entity) added to an order of this type. You configure these inside the Order Configuration editor.
+
+### Available Entity Fields
+
+These fields exist on the Entity model and can be templated in an Order Configuration's entity definitions:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name` | Text | Item name |
+| `description` | Text | Item description (e.g. "Laptop") |
+| `internal_id` | Text | Your external reference ID for the item |
+| `sku` | Text | Stock Keeping Unit identifier |
+| `barcode` | Text | Barcode value (used by `scan` POD) |
+| `qr_code` | Text | QR code value (used by `scan` POD) |
+| `weight` / `weight_unit` | Number + Unit | Weight in kg, lb, etc. |
+| `length` / `width` / `height` / `dimensions_unit` | Number + Unit | Physical dimensions |
+| `declared_value` / `currency` | Number + Code | Declared value for the item |
+| `price` / `sale_price` | Number | Per-item pricing |
+| `photo_uuid` | File | Reference to an uploaded photo of the item |
+| `customer_uuid` | Contact | Recipient for this specific item (multi-drop) |
+| `destination_uuid` | Waypoint | Specific waypoint this item is destined for (multi-drop) |
+| `meta` | JSON | Custom fields specific to your operation |
+
+You can mark fields as
+**required**
+or
+**optional**
+per order type. Required fields must be completed before an order can be saved.
+
+### Custom Entity Fields
+
+Beyond the standard fields, each entity definition can include custom fields created through
+**Fleet-Ops → Settings → Custom Fields**
+. For example, a cold-chain logistics operation might add:
+
+* Temperature requirement (select: ambient, refrigerated, frozen)
+* Fragile flag (toggle)
+* Handling instructions (text)
+
+## What Ships Out of the Box
+
+Fleet-Ops ships with
+**one built-in order type — Transport**
+, created automatically as a
+`core_service`
+config on every new company. It has no entity templates by default; you add the fields your operation needs.
+
+Common patterns customers build on top of Transport (or as separate configs):
+
+### Standard Delivery
+
+* **Pickup → Dropoff**
+  route
+* Entity template:
+  `description`
+  ,
+  `weight`
+  , dimensions optional
+* POD:
+  `signature`
+  set on the delivery activity,
+  `require_pod: true`
+
+### Pickup & Delivery (P&D)
+
+* Driver collects from a supplier then delivers to a customer
+* Entity template:
+  `description`
+  ,
+  `barcode`
+* POD:
+  `signature`
+  on the dropoff activity
+
+### Return to Sender (RTS)
+
+* Driver collects an undeliverable item from a customer and returns it to origin
+* Entity template:
+  `internal_id`
+  (original order reference), reason in
+  `meta`
+* POD:
+  `photo`
+  on the collection activity
+
+### Multi-Drop Courier
+
+* Single pickup, multiple dropoffs
+* Entity template: each entity sets
+  `destination_uuid`
+  to a specific waypoint
+* POD:
+  `signature`
+  on each waypoint's delivery activity
+
+## Creating a Custom Order Type
+
+Order types are created by creating a new
+**Order Configuration**
+. Navigate to
+**Fleet-Ops → Operations → Order Configurations → + New Configuration**
+.
+
+![Create a new order configuration dialog — config name, description, and tags](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-order-config-create.dfad23c9.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+For the entity definitions section, add the fields your drivers need to collect and mark which are required. Save the configuration — it immediately becomes available as an option when creating new orders.
+
+## Filtering Orders by Type
+
+In the Orders list, use the
+**Order Config**
+filter to show only orders of a specific type. This is useful for separating same-day orders from scheduled deliveries, or express from standard.
+
+In the API, orders include the
+`type`
+field (the namespace key of their Order Config) for filtering and sorting.
+
+[Order Configurations
+
+Order configurations define custom order types with their own workflows, entity fields, POD methods, and activity steps.](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/overview)
+[Activity Flows
+
+Define the activity workflow that runs inside an order's started phase — transitions, logic, events, completion flag, and per-activity POD.](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows)

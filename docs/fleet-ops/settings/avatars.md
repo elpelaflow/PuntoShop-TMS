@@ -1,0 +1,93 @@
+---
+title: "Avatar Settings"
+url: https://fleetbase.io/docs/fleet-ops/settings/avatars
+module: fleet-ops
+---
+
+# Avatar Settings
+
+Manage the avatar image library used for vehicles, places, and drivers across the Fleet-Ops console and live map.
+
+# Avatar Settings
+
+**Avatars**
+are the icons and images Fleet-Ops uses to identify vehicles, places, and drivers in the console and on the live map. The Avatar Manager is a centralised library of those images organised by
+**category**
+— so when you assign an avatar on a driver, vehicle, or place record, you pick from the correct category's library rather than re-uploading per resource.
+
+Navigate to
+**Fleet-Ops → Settings → Avatars**
+.
+
+![Avatar Manager — category sidebar with Vehicles / Places / Drivers, and a grid of uploaded avatars on the right](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-avatar-settings.984ec6b1.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Categories
+
+The Avatar Manager organises uploads into three categories. Pick the category in the left-hand sidebar; the right-hand panel shows the upload dropzone and the existing avatars for that category.
+
+| Category | Used for |
+| --- | --- |
+| **Vehicles** | Vehicle photos and type icons (cars, vans, trucks, motorcycles) — appear as map markers and in vehicle list views |
+| **Places** | Location-type icons (warehouse, hub, store) — appear next to Place records and on the live map |
+| **Drivers** | Driver profile photos and identifying icons — appear next to driver records and on the live map |
+
+Other resources (contacts, fleets, vendors, etc.) use their own avatar fields stored on the resource itself, not pulled from this library.
+
+## Accepted File Types
+
+The Avatar Manager accepts only two image formats:
+
+* **PNG**
+  (
+  `image/png`
+  )
+* **SVG**
+  (
+  `image/svg+xml`
+  )
+
+Other formats are rejected at upload time. SVGs are recommended where possible — they scale cleanly to map marker sizes and dark/light themes.
+
+## Uploading Avatars
+
+Open
+**Fleet-Ops → Settings → Avatars**
+.
+
+Click the category in the left sidebar (Vehicles, Places, or Drivers).
+
+Drag PNG or SVG files into the dropzone in the right panel, or click
+**Select**
+to pick files. Multiple files at once is supported.
+
+Files upload sequentially with a per-file progress indicator. When complete, they appear in the category grid and are immediately selectable on resource records.
+
+## Removing Avatars
+
+Hover over any avatar in the category grid and click the delete control to remove it from the library. Resources that already had the deleted avatar assigned fall back to whatever default avatar that category uses.
+
+## Recommended Image Specs
+
+For the best result on the live map and in console list views:
+
+* Square aspect (e.g. 64×64 px or 128×128 px for PNG)
+* Transparent background — PNG with alpha channel, or SVG
+* High-contrast strokes / fills so the icon reads on both light and dark map themes
+* For vehicle markers: keep the icon centred with a small visual padding so it doesn't clip when rendered at marker scale
+
+## Assigning Avatars to Resources
+
+Avatars from the library are picked on the resource itself, not on this page:
+
+* **Driver**
+  — open a driver record → photo / avatar field → pick from the Drivers library
+* **Vehicle**
+  — open a vehicle record → photo / avatar field → pick from the Vehicles library
+* **Place**
+  — open a place record → icon / avatar field → pick from the Places library
+
+Any resource that doesn't have an avatar assigned displays the system default for its type.
+
+[Custom Fields
+
+Define additional structured fields for any Fleet-Ops resource — drivers, vehicles, contacts, vendors, places, entities, fleets, issues, and fuel reports.](https://fleetbase.io/docs/fleet-ops/settings/custom-fields)

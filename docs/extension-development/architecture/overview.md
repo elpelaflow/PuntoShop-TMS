@@ -1,0 +1,266 @@
+---
+title: "Overview"
+url: https://fleetbase.io/docs/extension-development/architecture/overview
+module: extension-development
+---
+
+# Overview
+
+A Fleetbase extension is a single repository with two halves — an Ember.js addon (the console UI) and a Laravel package (the API). The extension.json manifest ties them together and addon/extension.js is the registration entry point.
+
+# Architecture Overview
+
+A Fleetbase extension is
+**one repository with two halves**
+:
+
+1. An
+   **Ember.js addon**
+   under
+   `addon/`
+   — your console UI
+2. A
+   **Laravel/Composer package**
+   under
+   `server/`
+   — your API
+
+Plus a top-level
+`extension.json`
+manifest that links the two.
+
+When the console boots, it loads each installed extension's
+`addon/extension.js`
+and runs its
+`setupExtension(app, universe)`
+hook. When Laravel boots, your
+`<Name>ServiceProvider.php`
+(extending
+`Fleetbase\Providers\CoreServiceProvider`
+) wires up routes, observers, expansions, and migrations.
+
+## Repository Layout
+
+```
+my-extension/
+├── extension.json                    ← manifest (links addon + server)
+├── package.json                      ← npm package — the Ember addon
+├── composer.json                     ← Composer package — the Laravel package
+├── addon/                            ← Ember addon source
+│   ├── extension.js                  ← REGISTRATION entry point
+│   ├── engine.js                     ← Ember Engine declaration + service deps
+│   ├── routes.js                     ← Engine route map (buildRoutes)
+│   ├── components/
+│   ├── controllers/
+│   ├── routes/
+│   ├── templates/
+│   ├── services/
+│   ├── adapters/
+│   ├── serializers/
+│   └── models/
+└── server/
+    ├── src/
+    │   ├── Providers/
+    │   │   └── <Name>ServiceProvider.php   ← Laravel boot point
+    │   ├── Http/
+    │   │   └── Controllers/
+    │   ├── Models/
+    │   ├── Observers/
+    │   ├── Expansions/
+    │   └── routes.php                       ← HTTP routes
+    └── migrations/
+```
+
+For a full file-by-file walkthrough, see
+[Extension Anatomy](https://fleetbase.io/docs/extension-development/getting-started/extension-anatomy)
+.
+
+## Frontend — addon/
+
+The frontend is an
+**Ember Engine**
+that mounts inside the host console application.
+
+Two files are special:
+
+| File | Role |
+| --- | --- |
+| `addon/extension.js` | The **registration entry point** . Exports a default object with `setupExtension(app, universe)` (and optionally `onEngineLoaded` ). Called by `ExtensionManager` at console boot |
+| `addon/engine.js` | The **Ember Engine declaration** . Declares `dependencies.services` (host services to inject), the resolver, and exports the Engine class |
+
+**Registration code lives in
+`addon/extension.js`
+, not
+`engine.js`
+.**
+The Engine is just a container — registrations happen at boot via
+`setupExtension`
+. See
+[Extension Registration](https://fleetbase.io/docs/extension-development/architecture/extension-registration)
+.
+
+A typical
+`addon/extension.js`
+:
+
+```
+import { MenuItem, ExtensionComponent } from '@fleetbase/ember-core/contracts';
+
+export default {
+    setupExtension(app, universe) {
+        const menuService = universe.getService('menu');
+
+        menuService.registerHeaderMenuItem('My Extension', 'console.my-extension', {
+            icon: 'puzzle-piece',
+            description: 'My custom feature.',
+        });
+    },
+};
+```
+
+See
+[Frontend Routing](https://fleetbase.io/docs/extension-development/frontend/routing)
+for engine and route patterns.
+
+## Backend — server/
+
+The backend is a
+**Composer package**
+with a Laravel service provider extending
+`Fleetbase\Providers\CoreServiceProvider`
+(from
+`core-api`
+):
+
+```
+<?php
+
+namespace MyOrg\MyExtension\Providers;
+
+use Fleetbase\Providers\CoreServiceProvider;
+
+class MyExtensionServiceProvider extends CoreServiceProvider
+{
+    public $observers = [
+        \MyOrg\MyExtension\Observers\MyModelObserver::class,
+    ];
+
+    public function boot()
+    {
+        parent::boot();
+
+        $this->registerObservers();
+        $this->registerExpansionsFrom(__DIR__ . '/../Expansions');
+        $this->loadRoutesFrom(__DIR__ . '/../routes.php');
+        $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
+    }
+}
+```
+
+Routes live in
+`server/src/routes.php`
+(loaded via
+`loadRoutesFrom(__DIR__ . '/../routes.php')`
+). Migrations live in
+`server/migrations/`
+(loaded via
+`loadMigrationsFrom(__DIR__ . '/../../migrations')`
+). Both paths are relative to the provider, which lives in
+`server/src/Providers/`
+.
+
+`CoreServiceProvider`
+provides:
+
+* Auto-registration for
+  `$observers`
+  and
+  `$middleware`
+  arrays you declare
+* Auto-loading of
+  `Expansions/`
+  ,
+  `Macros/`
+  ,
+  `Mixins/`
+  directories
+* Route helpers —
+  `$router->fleetbaseRoutes($name)`
+  ,
+  `$router->fleetbaseRestRoutes(...)`
+  ,
+  `$router->fleetbaseAuthRoutes(...)`
+* Middleware groups —
+  `'fleetbase.api'`
+  (API-key auth),
+  `'fleetbase.protected'`
+  (session auth)
+* Schedule helper —
+  `$this->scheduleCommands($callable)`
+
+See
+[Service Provider](https://fleetbase.io/docs/extension-development/backend/service-provider)
+for the full pattern.
+
+## Manifest — extension.json
+
+A small file that links the two halves:
+
+```
+{
+    "name": "Ledger",
+    "version": "0.0.3",
+    "description": "Accounting & Invoicing Extension for Fleetbase",
+    "repository": "https://github.com/elpelaflow/PuntoShop-TMS",
+    "license": "AGPL-3.0-or-later",
+    "author": "Fleetbase Pte Ltd <hello@fleetbase.io>",
+    "engine": "package.json",
+    "api": "composer.json"
+}
+```
+
+`engine`
+and
+`api`
+are paths to the two package definitions (relative to the manifest). The Fleetbase registry uses this manifest to discover and install your extension.
+
+## How Boot Works
+
+```
+Console boots
+  ├── ExtensionManager loads each enabled extension
+  │     └── For each, dynamic-imports addon/extension.js
+  │           └── runs setupExtension(app, universe)
+  │
+  └── On first navigation to an extension route:
+        └── Ember loads addon/engine.js (lazy)
+              └── onEngineLoaded fires (if exported)
+
+Laravel boots
+  └── <Name>ServiceProvider.boot() runs
+        ├── parent::boot() — middleware groups, abilities
+        ├── registerObservers() — model observers
+        ├── registerExpansionsFrom() — class expansions
+        ├── loadRoutesFrom() — server/src/routes.php
+        └── loadMigrationsFrom() — server/migrations/
+```
+
+## Next
+
+* [Extension Anatomy](https://fleetbase.io/docs/extension-development/getting-started/extension-anatomy)
+  — the full file-by-file tour
+* [Extension Registration](https://fleetbase.io/docs/extension-development/architecture/extension-registration)
+  — the
+  `addon/extension.js`
+  contract in depth
+* [Universe Service](https://fleetbase.io/docs/extension-development/universe/overview)
+  — what you register through
+* [Backend Service Provider](https://fleetbase.io/docs/extension-development/backend/service-provider)
+  — the Laravel side
+
+[Extension Anatomy
+
+A tour of a scaffolded Fleetbase extension — addon/, server/, extension.json, and the key entry points (addon/extension.js, the engine, the service provider).](https://fleetbase.io/docs/extension-development/getting-started/extension-anatomy)
+[Extension Registration
+
+How addon/extension.js wires your extension into the Fleetbase console boot lifecycle. The setupExtension hook, onEngineLoaded, and the contract every extension implements.](https://fleetbase.io/docs/extension-development/architecture/extension-registration)

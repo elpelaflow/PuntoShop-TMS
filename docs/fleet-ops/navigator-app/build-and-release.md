@@ -1,0 +1,414 @@
+---
+title: "Build & Release"
+url: https://fleetbase.io/docs/fleet-ops/navigator-app/build-and-release
+module: fleet-ops
+---
+
+# Build & Release
+
+Build and ship your white-labeled Navigator app to the Apple App Store and Google Play — accounts, signing, Fastlane lanes, and the Google testing requirement.
+
+# Build & Release
+
+This page walks through the end-to-end publishing flow for a forked Navigator app: developer accounts, namespace, store profiles, code signing, build automation with Fastlane, and the constraints that gate each store.
+
+You should have already finished
+[Configuration](https://fleetbase.io/docs/fleet-ops/navigator-app/configuration)
+— env vars and a working debug build on simulator — and
+[Theming & Branding](https://fleetbase.io/docs/fleet-ops/navigator-app/theming)
+for your icon, splash, and colors.
+
+**Expect iOS to go live faster.**
+Apple review is typically 24–48 hours. Google requires a
+**closed testing track with at least 12 active testers for at least 14 days**
+before you can promote to production — this is a hard policy and there is no shortcut.
+
+## Prerequisites Checklist
+
+**Apple Developer Account**
+—
+[$99/year](https://developer.apple.com/programs/enroll/)
+. For organizations, expect 1–3 weeks for D-U-N-S verification before enrollment completes.
+
+**Google Play Developer Account**
+—
+[$25 one-time fee](https://play.google.com/console/signup)
+. Identity verification is required and usually completes within a few business days.
+
+**App namespace decided.**
+Convention is reverse-domain + app name, e.g.
+`io.fleetbase.navigator`
+,
+`com.acme.driver`
+. Once published, the namespace is permanent — you cannot change it later. Set it as
+`APP_IDENTIFIER`
+in your
+`.env`
+and verify it's reflected in
+`android/app/build.gradle`
+(
+`applicationId`
+) and the iOS
+`Bundle Identifier`
+.
+
+**Publish name decided.**
+Set as
+`APP_NAME`
+. It appears under the icon on home screens, in app store search, and in the app title bar. Keep it under 30 characters for App Store / 50 characters for Google Play.
+
+**Background geolocation license purchased for both platforms.**
+[Buy at docs.transistorsoft.com/purchase](https://docs.transistorsoft.com/purchase/?platform=react-native)
+and follow
+[the setup guide](https://docs.transistorsoft.com/react-native/setup/)
+to inject the keys into
+`AndroidManifest.xml`
+and
+`Info.plist`
+. Release builds will fail on launch without this.
+
+## Create Store Profiles
+
+### Apple — App Store Connect
+
+1. Sign in to
+   [App Store Connect](https://appstoreconnect.apple.com/)
+   .
+2. **My Apps → +**
+   →
+   **New App**
+   .
+3. Fill in:
+   * **Platform**
+     : iOS
+   * **Name**
+     : your
+     `APP_NAME`
+   * **Primary Language**
+   * **Bundle ID**
+     : matches
+     `APP_IDENTIFIER`
+     (must already exist under
+     **Certificates, Identifiers & Profiles → Identifiers**
+     ; register it first if not).
+   * **SKU**
+     : an internal identifier of your choice.
+   * **User Access**
+     : who on your team can see the app.
+4. In
+   **App Information**
+   , set the category and content rights.
+5. In
+   **Pricing and Availability**
+   , set the price (free is fine) and the country list.
+6. Prepare
+   **App Privacy**
+   answers — Navigator collects location continuously while in use
+   *and*
+   in the background, plus identifiers used for auth. Disclose accordingly.
+
+### Google — Play Console
+
+1. Sign in to
+   [Google Play Console](https://play.google.com/console/)
+   .
+2. **Create app**
+   .
+3. Fill in:
+   * **App name**
+     : matches
+     `APP_NAME`
+     .
+   * **Default language**
+     .
+   * **App or game**
+     : App.
+   * **Free or paid**
+     : typically Free.
+   * Accept the developer program policies declaration.
+4. Complete the
+   **Dashboard → Set up your app**
+   checklist:
+   * **App access**
+     — provide test credentials for review.
+   * **Ads**
+     — declare whether the app contains ads.
+   * **Content rating**
+     — questionnaire.
+   * **Target audience**
+     — choose age groups (Navigator is for working drivers, so 18+).
+   * **News app**
+     — typically no.
+   * **COVID-19 contact tracing**
+     — no.
+   * **Data safety**
+     — declare location (background), email, phone, photos.
+   * **Government app**
+     — typically no.
+   * **Financial features**
+     — no, unless you collect COD via the app.
+   * **Health**
+     — no.
+   * **Store listing**
+     — title, short description, full description, icon, feature graphic, screenshots, video.
+   * **Main store listing → Privacy policy URL**
+     — required.
+
+Google asks compliance questions up front about your
+*company*
+, not just the app — data controller, EU representative, contact email, physical address. Have these ready before you start. Misrepresenting any of this is grounds for permanent account termination.
+
+## iOS — Build and Submit
+
+### Versioning
+
+In Xcode, open
+`ios/NavigatorApp.xcworkspace`
+and set:
+
+* **MARKETING\_VERSION**
+  (e.g.
+  `1.4.0`
+  ) — the version users see.
+* **CURRENT\_PROJECT\_VERSION**
+  (e.g.
+  `42`
+  ) — a monotonically increasing build number. Must be unique per TestFlight submission for a given marketing version.
+
+### Code Signing with Fastlane Match
+
+Navigator ships with Fastlane lanes that use
+[match](https://docs.fastlane.tools/actions/match/)
+with S3 storage for provisioning profiles, so multiple machines and CI can sign without manually shuffling certificates.
+
+Required environment variables (see
+`ios/fastlane/Fastfile`
+):
+
+| Variable | Purpose |
+| --- | --- |
+| `APP_IDENTIFIER` | Bundle ID (single or comma-separated for multi-target). |
+| `APPSTORE_API_KEY_ID` | App Store Connect API Key ID. |
+| `APPSTORE_API_ISSUER_ID` | App Store Connect API Issuer ID. |
+| `DEVELOPMENT_TEAM_ID` | Apple Developer Team ID. |
+| `MATCH_S3_BUCKET` | S3 bucket holding the match repo (default `flb-navigator-app-profiles` ). |
+| `MATCH_S3_REGION` | AWS region of the bucket (default `ap-southeast-1` ). |
+| `MATCH_S3_OBJECT_PREFIX` | Prefix inside the bucket (defaults to `$PROFILE/certs` ). |
+| `MATCH_READONLY` | `true` on CI to prevent accidental regeneration. |
+
+The
+`.p8`
+key file from App Store Connect must live at
+`~/.appstoreconnect/private_keys/AuthKey_<APPSTORE_API_KEY_ID>.p8`
+.
+
+### Available Lanes
+
+```
+cd ios
+
+# Build only (no upload)
+bundle exec fastlane build_ios
+
+# Build and upload to TestFlight (external testers enabled)
+bundle exec fastlane deploy_testflight
+
+# Build and upload to App Store (does NOT submit for review automatically)
+bundle exec fastlane deploy_appstore
+```
+
+Each lane:
+
+1. Loads the App Store Connect API key from env.
+2. Creates an isolated
+   `ci-signing`
+   keychain.
+3. Pulls certificates and provisioning profiles from S3 via match.
+4. Builds with
+   `gym`
+   using manual signing and the
+   `match AppStore <APP_IDENTIFIER>`
+   profile.
+5. Uploads to the chosen destination.
+6. Tears down the keychain.
+
+### Submit for Review
+
+After
+`deploy_appstore`
+, the build lands in App Store Connect under your selected version. In the App Store Connect UI:
+
+1. Select the uploaded build.
+2. Fill
+   **Version Information**
+   : what's new, screenshots (per device class), promotional text, support URL.
+3. Fill
+   **App Review Information**
+   : contact, demo account credentials, notes for reviewers (mention that this is a fleet management app for commercial drivers, and that continuous location is required for live dispatch).
+4. **Submit for Review**
+   .
+
+Typical review: 24–48 hours. Common reasons for rejection are covered in
+[Troubleshooting](#troubleshooting)
+.
+
+## Android — Build and Submit
+
+### Versioning
+
+Set in your
+`.env`
+(or CI environment):
+
+```
+ANDROID_VERSION_CODE=42
+ANDROID_VERSION_NAME=1.4.0
+```
+
+`ANDROID_VERSION_CODE`
+must increment for every upload, even across testing tracks.
+
+### Generate an Upload Keystore
+
+If you don't already have one:
+
+```
+keytool -genkeypair -v \
+  -keystore navigator-upload.keystore \
+  -alias navigator-upload \
+  -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Store the resulting
+`.keystore`
+file somewhere safe (1Password, a sealed secret, an S3 bucket with KMS).
+**If you lose it, you cannot publish updates**
+without going through Google's Play App Signing key reset, which is a multi-week process.
+
+Then export the signing envs the release build expects (already read in
+`android/app/build.gradle`
+):
+
+```
+export ANDROID_NAVIGATOR_APP_UPLOAD_STORE_FILE=/secure/path/navigator-upload.keystore
+export ANDROID_NAVIGATOR_APP_UPLOAD_STORE_PASSWORD=...
+export ANDROID_NAVIGATOR_APP_UPLOAD_KEY_ALIAS=navigator-upload
+export ANDROID_NAVIGATOR_APP_UPLOAD_KEY_PASSWORD=...
+```
+
+### Available Lanes
+
+The Fastlane lanes (
+`android/fastlane/Fastfile`
+) all run
+`gradle clean bundleRelease`
+and upload an
+`.aab`
+to the named track:
+
+```
+cd android
+
+bundle exec fastlane deploy_internal     # → Internal testing (instant, up to 100 testers)
+bundle exec fastlane deploy_alpha        # → Closed testing (alpha)
+bundle exec fastlane deploy_beta         # → Closed testing (beta) — use this for the 12-tester / 14-day requirement
+bundle exec fastlane deploy_production   # → Production track
+```
+
+You need a Play Console service account JSON key referenced by Fastlane's
+`json_key_file`
+(typically set in
+`android/fastlane/Appfile`
+or via the
+`SUPPLY_JSON_KEY`
+env). Create it in
+**Play Console → Setup → API access**
+and grant it
+**Release manager**
+access for the app.
+
+### The Google 12-Tester Rule
+
+Since November 2023, any new Google Play personal developer account must run their app in
+**closed testing with at least 12 testers opted-in continuously for at least 14 days**
+before they can apply for production access. The 14-day clock only counts days where you have ≥ 12 active testers, and Google reviews the application manually before granting promotion.
+
+Workflow:
+
+1. `bundle exec fastlane deploy_beta`
+   to upload your release
+   `.aab`
+   to the Beta closed track.
+2. In
+   **Play Console → Testing → Closed testing**
+   , add testers via a Google Group or an email list of 12+ real Gmail accounts.
+3. Share the opt-in URL with testers — each tester must click the URL
+   **and**
+   install the app from the resulting Play Store listing for the clock to start.
+4. After ≥ 14 days with ≥ 12 active testers, you'll see an
+   **Apply for production access**
+   button on the testing page. Submit the form (Google may ask for screenshots showing testers in-app or feedback artifacts).
+5. Once Google grants production access (typically a few days), promote the build via
+   `deploy_production`
+   or by selecting the closed-track release in the Production dashboard.
+
+For corporate / organizational developer accounts, the 12-tester requirement does not currently apply — verify your account type in
+**Play Console → Setup → Developer account → Account details**
+.
+
+### Submit for Review
+
+Once promoted to Production, Google reviews the release. Initial reviews can take 7+ days; subsequent updates are usually under 24 hours. Releases on internal/closed tracks are reviewed but typically go live the same day.
+
+## Version Bumping Convention
+
+| Platform | Public version | Internal build number |
+| --- | --- | --- |
+| **iOS** | `MARKETING_VERSION` in Xcode (or `agvtool new-marketing-version` ) | `CURRENT_PROJECT_VERSION` in Xcode (or `agvtool next-version -all` ) |
+| **Android** | `ANDROID_VERSION_NAME` env var | `ANDROID_VERSION_CODE` env var |
+
+Keep public versions in sync across platforms. Build numbers are independent — Apple wants monotonic per marketing version, Google wants monotonic across all uploads.
+
+## CI / Continuous Delivery
+
+The Fastfiles are CI-friendly:
+
+* `ensure_ci_keychain`
+  /
+  `cleanup_ci_keychain`
+  wrap iOS lanes so a fresh
+  `ci-signing`
+  keychain is created and destroyed per run.
+* Match runs in
+  `MATCH_READONLY=true`
+  mode on CI to prevent accidental certificate regeneration.
+* All sensitive values flow through env vars — wire them in via your CI provider's secret store (GitHub Actions, GitLab CI, CircleCI, etc.).
+
+A typical GitHub Actions matrix would have one job for iOS (running on
+`macos-latest`
+) and one for Android (running on
+`ubuntu-latest`
+), each loading the relevant secrets and invoking the matching Fastlane lane on tag push.
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+| --- | --- |
+| App crashes on launch with `licenseKey` in the stack | Transistor Soft background-geolocation license missing or wrong. Re-verify the value injected into `AndroidManifest.xml` / `Info.plist` . |
+| iOS reviewer rejects for "background location not justified" | Strengthen your usage-description strings in `Info.plist` ( `NSLocationAlwaysAndWhenInUseUsageDescription` , etc.) and explain the dispatch use case in App Review notes. |
+| iOS reviewer rejects for missing privacy manifest | Add `PrivacyInfo.xcprivacy` declaring required-reason API usage for tracking, file system access, and user defaults. |
+| Android build fails on `bundleRelease` with signing errors | Re-check all four `ANDROID_NAVIGATOR_APP_UPLOAD_*` envs are exported in the same shell as the gradle invocation. |
+| Match keeps trying to regenerate certs | Unset `MATCH_FORCE` and re-run with `MATCH_READONLY=true` . The S3 bucket is the source of truth. |
+| Google rejects with "policy violation: background location" | Provide a video walkthrough demonstrating the location-required driver workflow and link the privacy policy in the rejection appeal. |
+
+## Post-Launch
+
+Once your app is live:
+
+* Distribute the
+  **App Link**
+  (QR + URL) from
+  **Console → Admin → Fleet-Ops Config → Navigator App**
+  so drivers can configure the app with one scan.
+* Wire crash and performance monitoring (Crashlytics, Sentry, or your provider of choice) into the release builds.
+* For each subsequent release, follow the same flow: bump versions, run the deploy lane, submit for review.

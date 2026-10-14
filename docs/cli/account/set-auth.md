@@ -1,0 +1,131 @@
+---
+title: "Set Auth"
+url: https://fleetbase.io/docs/cli/account/set-auth
+module: cli
+---
+
+# Set Auth
+
+Write a registry auth token into your Fleetbase instance's `.npmrc` and Composer `auth.json` using `flb set-auth`.
+
+# flb set-auth
+
+Write a registry auth token into your Fleetbase instance's
+`console/.npmrc`
+(for npm) and
+`api/auth.json`
+(for Composer). Run this after
+[`flb verify`](https://fleetbase.io/docs/cli/account/verify)
+or
+[`flb generate-token`](https://fleetbase.io/docs/cli/account/generate-token)
+returns a token.
+
+```
+flb set-auth <token>
+```
+
+The token is the value printed by
+`verify`
+or
+`generate-token`
+. The CLI writes it for both package managers in one shot — Fleetbase extensions are typically dual-distributed (npm package for the addon, Composer package for the API), and both auth files need the token.
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `[token]` | The auth token (positional argument) |
+| `-p, --path <path>` | Path to the Fleetbase instance (default: current directory; falls back to `/fleetbase` ) |
+| `-r, --registry <url>` | Registry URL the token is for (default: `https://registry.fleetbase.io` ) |
+
+## Examples
+
+### From inside your Fleetbase directory
+
+```
+cd /path/to/fleetbase
+flb set-auth <token>
+```
+
+### From anywhere with --path
+
+```
+flb set-auth <token> --path /path/to/fleetbase
+```
+
+### Self-hosted registry
+
+```
+flb set-auth <token> --registry https://registry.mycompany.com
+```
+
+## What Gets Written
+
+`flb set-auth`
+updates two files inside your Fleetbase instance:
+
+| File | Format |
+| --- | --- |
+| `console/.npmrc` | Appends `//<registry-host>/:_authToken="<token>"` |
+| `api/auth.json` | Adds `{ "bearer": { "<registry-host>": "<token>" } }` |
+
+If
+`console/.npmrc`
+already exists, the token line is
+**appended**
+— existing auth lines for other registries are preserved. The same applies to
+`api/auth.json`
+— existing
+`bearer`
+entries for other hosts are kept and the new entry merged in.
+
+## Path Resolution
+
+The CLI resolves the Fleetbase instance path in this order:
+
+1. The path passed via
+   `--path`
+   , or the current directory
+2. If neither contains both
+   `console/`
+   and
+   `api/`
+   subdirectories, falls back to
+   `/fleetbase`
+
+If neither location is a valid Fleetbase install,
+`set-auth`
+writes anyway — but the resulting files won't be picked up by your installer until you copy them into the right place.
+
+## When You Need This
+
+You need to set auth on the instance whenever you're going to:
+
+* **Install a paid or private extension**
+  —
+  `flb install`
+  needs
+  `_authToken`
+  access to fetch the package from the registry
+* **Develop against a registry**
+  —
+  `composer require`
+  and
+  `pnpm install`
+  from your console / api need credentials
+
+You do
+**not**
+need
+`flb set-auth`
+to install
+**public free**
+extensions.
+
+## Difference from flb login
+
+|  | `flb login` | `flb set-auth` |
+| --- | --- | --- |
+| Writes to | `~/.npmrc` (your home dir) | `console/.npmrc` + `api/auth.json` (the instance) |
+| Auth method | Username + password | Token |
+| Best for | Interactive use on your dev machine | CI, server installs, headless setups |

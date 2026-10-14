@@ -1,0 +1,201 @@
+---
+title: "Publish"
+url: https://fleetbase.io/docs/cli/extension-development/publish
+module: cli
+---
+
+# Publish
+
+Publish your extension to the Fleetbase Extension Registry using `flb publish` — runs `npm publish` against the configured registry.
+
+# flb publish
+
+Publish your extension to the Fleetbase Extension Registry. Under the hood this runs
+`npm publish`
+against the registry. Both an npm package (
+`package.json`
+) and a Composer package (
+`composer.json`
+) are typically published — but
+`flb publish`
+handles them via the same npm publish mechanism (the CLI auto-converts
+`composer.json`
+into a temporary
+`package.json`
+for the API side).
+
+```
+flb publish               # Publish from current directory
+flb publish ./api         # Publish from a subdirectory
+```
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `[packagePath]` | Path of the package to publish (default: current directory) |
+| `-r, --registry <url>` | Registry URL (default: `https://registry.fleetbase.io` ) |
+
+## Prerequisites
+
+Before publishing you need to be logged in. The CLI checks
+`npm whoami --registry <url>`
+; if it fails, the command aborts:
+
+```
+You must be logged in to publish. Run `npm adduser`.
+```
+
+Set up auth with one of:
+
+* [`flb login`](https://fleetbase.io/docs/cli/account/login)
+  — username + password
+* `flb set-auth <token>`
+  after
+  [`flb generate-token`](https://fleetbase.io/docs/cli/account/generate-token)
+  — recommended for CI
+
+## Examples
+
+### Publish the addon (npm package)
+
+From the addon root (where
+`package.json`
+lives):
+
+```
+flb publish
+```
+
+### Publish the API (composer package via npm)
+
+From the API root (where
+`composer.json`
+lives):
+
+```
+flb publish ./api
+```
+
+When publishing from a directory that has
+`composer.json`
+but no
+`package.json`
+, the CLI:
+
+1. Converts
+   `composer.json`
+   to a synthetic
+   `package.json`
+   with
+   `fleetbase.from-composer = true`
+2. Runs
+   `npm publish`
+3. Removes the synthetic
+   `package.json`
+   afterwards
+
+This lets the same
+`npm publish`
+flow ship Composer packages too.
+
+### Publish to a self-hosted registry
+
+```
+flb publish --registry https://registry.mycompany.com
+```
+
+## Typical Publish Workflow
+
+```
+# 1. Make sure your local checkout is clean and tests pass
+git status
+pnpm test
+
+# 2. Bump the version in all three manifests
+flb version-bump --minor
+
+# 3. Commit and tag
+git add extension.json package.json composer.json
+git commit -m "Release v1.3.0"
+git tag v1.3.0
+
+# 4. Publish
+flb publish
+
+# 5. Push
+git push origin main --tags
+```
+
+If your extension has both an addon and API package, repeat step 4 for each:
+
+```
+flb publish ./addon   # or run from the addon directory
+flb publish ./api     # or run from the api directory
+```
+
+## CI / Automated Publishing
+
+For CI, use a token-based auth flow:
+
+```
+# .github/workflows/publish.yml (excerpt)
+- name: Configure auth
+  run: |
+    echo "//registry.fleetbase.io/:_authToken=${FLEETBASE_TOKEN}" > ~/.npmrc
+  env:
+    FLEETBASE_TOKEN: ${{ secrets.FLEETBASE_TOKEN }}
+
+- name: Publish
+  run: flb publish
+```
+
+Generate the token once with
+[`flb generate-token`](https://fleetbase.io/docs/cli/account/generate-token)
+and store it as a CI secret.
+
+## Difference from flb bundle-upload
+
+* **`flb publish`**
+  uses the npm publish flow — the canonical path for distribution. The package becomes installable via
+  `flb install fleetbase/<slug>`
+  .
+* **`flb bundle-upload`**
+  ships a pre-built
+  `.tar.gz`
+  to the registry's bundle storage. Useful for distribution channels that don't pull from npm.
+
+Most extensions use
+**`flb publish`**
+as their primary distribution method.
+
+## Troubleshooting
+
+**`You must be logged in to publish. Run npm adduser.`**
+— set up auth via
+`flb login`
+or write a token into
+`~/.npmrc`
+.
+
+**`Error: 403 Forbidden`**
+— your account doesn't have permission to publish under the package's scope/name. Either you don't own the scope or the version already exists.
+
+**`Error: 409 Conflict`**
+— the version you're trying to publish already exists. Bump with
+`flb version-bump --patch`
+first.
+
+## Next
+
+* [`flb unpublish`](https://fleetbase.io/docs/cli/extension-development/unpublish)
+  — remove a published version
+* [`flb version-bump`](https://fleetbase.io/docs/cli/extension-development/version-bump)
+  — bump versions before re-publishing
+
+[Bundle Upload
+
+Upload an existing extension bundle to the Fleetbase registry using `flb bundle-upload`.](https://fleetbase.io/docs/cli/extension-development/bundle-upload)
+[Unpublish
+
+Remove a published extension from the Fleetbase Extension Registry using `flb unpublish`.](https://fleetbase.io/docs/cli/extension-development/unpublish)

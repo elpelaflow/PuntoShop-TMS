@@ -1,0 +1,56 @@
+---
+title: "Resources Overview"
+url: https://fleetbase.io/docs/fleet-ops/resources/overview
+module: fleet-ops
+---
+
+# Resources Overview
+
+Manage the core resources that power your fleet operations — drivers, vehicles, fleets, vendors, contacts, and places.
+
+# Resources Overview
+
+The
+**Resources**
+section of Fleet-Ops is where you manage the assets and entities your operations depend on. Resources are the building blocks the Orchestrator uses for assignment, the live map displays in real time, and the activity timeline references throughout an order's lifecycle.
+
+## Resource Types
+
+| Resource | What it represents |
+| --- | --- |
+| [**Drivers**](https://fleetbase.io/docs/fleet-ops/resources/drivers/overview) | People who execute orders using the Navigator app |
+| [**Vehicles**](https://fleetbase.io/docs/fleet-ops/resources/vehicles/overview) | Fleet assets assigned to carry out deliveries |
+| [**Trailers**](https://fleetbase.io/docs/fleet-ops/resources/trailers/overview) | Independently managed towed assets with connections, maintenance, and telematics |
+| [**Fleets**](https://fleetbase.io/docs/fleet-ops/resources/fleets/overview) | Logical groupings of drivers and vehicles |
+| [**Vendors**](https://fleetbase.io/docs/fleet-ops/resources/vendors/overview) | Third-party carriers and integrated service partners |
+| [**Contacts**](https://fleetbase.io/docs/fleet-ops/resources/contacts/overview) | Customers, suppliers, and facilitators |
+| [**Places**](https://fleetbase.io/docs/fleet-ops/resources/places/overview) | Saved locations — pickup points, warehouses, delivery addresses |
+| [**Issues**](https://fleetbase.io/docs/fleet-ops/resources/issues/overview) | Incidents, faults, and exceptions reported by drivers or operators |
+| [**Fuel Reports**](https://fleetbase.io/docs/fleet-ops/resources/fuel-reports/overview) | Fuel consumption records per driver and vehicle |
+
+## Common Resource Features
+
+All resource types share a consistent set of features:
+
+* **List view**
+  with search, filtering, and sortable columns
+* **Detail panel**
+  accessible by clicking any row
+* **Create / Edit / Delete**
+  from the list or detail view
+* **Export**
+  to CSV for reporting
+* **Import**
+  from CSV for bulk onboarding
+* **Custom Fields**
+  — attach additional structured data via
+  **Settings → Custom Fields**
+* **Avatars**
+  — assign profile photos or icons via
+  **Settings → Avatars**
+
+## Accessing Resources
+
+Navigate to
+**Fleet-Ops → Resources**
+in the left sidebar. Each resource type has its own list view and detail panels.

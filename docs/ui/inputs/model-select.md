@@ -1,0 +1,248 @@
+---
+title: "ModelSelect"
+url: https://fleetbase.io/docs/ui/inputs/model-select
+module: ui
+---
+
+# ModelSelect
+
+<ModelSelect> is a typeahead select for Ember Data records — live-searches the registered store, supports infinite scroll, and accepts the full ember-power-select API.
+
+# <ModelSelect>
+
+`<ModelSelect>`
+is a typeahead select for Ember Data model records. It live-queries your registered store as the user types and supports infinite scroll. It is the standard way to let a user pick a driver, vehicle, customer, store, or any other Fleetbase resource.
+
+The component wraps
+`ember-power-select`
+and accepts that library's full API on top of its own arguments.
+
+There is also a sibling
+**`<ModelSelectMultiple>`**
+for multi-value selection — same API but selects an array of records.
+
+## Basic Usage
+
+```
+<ModelSelect
+  @modelName="vehicle"
+  @selectedModel={{this.driver.vehicle}}
+  @optionLabel="display_name"
+  @placeholder="Select a vehicle"
+  @onChange={{fn (mut this.driver.vehicle)}}
+/>
+```
+
+The component will issue a
+`store.query('vehicle', { ... })`
+request, paginated by
+`pageSize`
+(default 25), and update results as the user types.
+
+## With Infinite Scroll
+
+Infinite scroll is
+**on by default**
+. Disable it with
+`@infiniteScroll={{false}}`
+:
+
+```
+<ModelSelect
+  @modelName="zone"
+  @infiniteScroll={{false}}
+  @selectedModel={{this.zone}}
+  @onChange={{fn (mut this.zone)}}
+/>
+```
+
+## With Inline Creation
+
+```
+<ModelSelect
+  @modelName="tag"
+  @selectedModel={{this.tag}}
+  @onChange={{fn (mut this.tag)}}
+  @withCreate={{true}}
+  @onCreate={{this.createTag}}
+  @optionLabel="name"
+/>
+```
+
+When the user types something not in the list, a "Create…" option appears.
+
+## Yielded Block
+
+The yielded value is the option model — useful for rich rendering:
+
+```
+<ModelSelect @modelName="driver" @selectedModel={{this.driver}} @onChange={{fn (mut this.driver)}} as |driver|>
+  <Pill @resource={{driver}} @subtitle={{driver.public_id}} />
+</ModelSelect>
+```
+
+## Arguments
+
+### Source
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@modelName` | string | — | Ember Data model name to query |
+| `@source` | object | the registered `store` service | Override the data source — e.g. for `ember-data-has-many-query` |
+
+### Display
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@selectedModel` | model | null | The currently-selected record |
+| `@optionLabel` | string | Property path on the model used for the label |
+| `@searchField` | string | Property to search on (defaults to `@optionLabel` ) |
+| `@placeholder` | string | Placeholder for the empty state |
+| `@searchPlaceholder` | string | Placeholder shown inside the search input |
+| `@noMatchesMessage` | string | Message shown when no results match |
+
+### Pagination & Search
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@infiniteScroll` | boolean | `true` | Lazy-load results as the user scrolls |
+| `@pageSize` | number | `25` | Records per page |
+| `@debounceDuration` | number | `250` | Search debounce in ms |
+| `@searchEnabled` | boolean | `true` | Enable typeahead search |
+| `@perPageParam` | string | `limit` | Query param for the page size |
+| `@pageParam` | string | `page` | Query param for the page number |
+
+### Permissions
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@permission` | string | If the user lacks this ability, the select is disabled and shows an "Unauthorized" tooltip |
+
+### Inline Create
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@withCreate` | boolean | `false` | Show a "Create new…" option when the search has no match |
+| `@onCreate` | `(query)` | — | Called with the user's typed search when they choose "Create new" |
+
+### Tooltip
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@helpText` | string | Tooltip text |
+| `@exampleText` | string | Optional example beneath the tooltip text |
+| `@tooltipPlacement` | string | `top` (default), `bottom` , `left` , `right` |
+
+### Power-Select Pass-Through
+
+In addition to the above, every
+`ember-power-select`
+argument is supported — including
+`@allowClear`
+,
+`@closeOnSelect`
+,
+`@disabled`
+,
+`@multiple`
+,
+`@matcher`
+,
+`@matchTriggerWidth`
+,
+`@onBlur`
+,
+`@onFocus`
+,
+`@onClose`
+,
+`@onOpen`
+,
+`@onKeydown`
+,
+`@onInput`
+,
+`@triggerClass`
+,
+`@dropdownClass`
+,
+`@verticalPosition`
+,
+`@horizontalPosition`
+,
+`@renderInPlace`
+,
+`@triggerComponent`
+,
+`@selectedItemComponent`
+,
+`@searchFieldPosition`
+, etc.
+
+See
+[ember-power-select docs](https://ember-power-select.com/docs/api-reference)
+for the full list.
+
+### Callbacks
+
+| Argument | Signature | Description |
+| --- | --- | --- |
+| `@onChange` | `(model)` | Called with the selected model |
+| `@onChangeId` | `(id)` | Called with just the model's `id` — convenient for binding to a `<entity>_uuid` field |
+
+## Real-World Examples
+
+```
+{{!-- Pick a vehicle for a driver --}}
+<InputGroup @name="Vehicle">
+  <ModelSelect
+    @modelName="vehicle"
+    @selectedModel={{this.driver.vehicle}}
+    @optionLabel="display_name"
+    @onChange={{fn (mut this.driver.vehicle)}}
+  />
+</InputGroup>
+
+{{!-- Pick a customer with rich rendering --}}
+<ModelSelect
+  @modelName="customer"
+  @selectedModel={{this.order.customer}}
+  @optionLabel="name"
+  @placeholder="Search customers…"
+  @onChange={{fn (mut this.order.customer)}}
+  as |customer|
+>
+  <Pill @resource={{customer}} @subtitle={{customer.email}} />
+</ModelSelect>
+
+{{!-- Multi-select drivers (uses ModelSelectMultiple) --}}
+<ModelSelectMultiple
+  @modelName="user"
+  @selectedModel={{@network.alertable.for_new_order}}
+  @optionLabel="name"
+  @onChange={{fn this.makeAlertable "for_new_order"}}
+/>
+```
+
+## See Also
+
+* [`<Select>`](https://fleetbase.io/docs/ui/inputs/select)
+  — for static option lists
+* [`<ComboBox>`](https://fleetbase.io/docs/ui/inputs/combo-box)
+  — for static option lists with typeahead
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/model-select.hbs` | Template |
+| `addon/components/model-select.js` | Class |
+| `addon/components/model-select-multiple.hbs` | Sibling — multi-value variant |
+| `addon/components/model-select-multiple.js` |  |
+
+[ComboBox
+
+<ComboBox> is a dual-list selector — left column shows available options, right column shows selected options, with arrow buttons to move items between.](https://fleetbase.io/docs/ui/inputs/combo-box)
+[DatePicker
+
+<DatePicker> is the calendar date picker — wraps `air-datepicker`. Accepts the full air-datepicker option set plus Fleetbase-friendly callbacks.](https://fleetbase.io/docs/ui/inputs/date-picker)

@@ -1,0 +1,156 @@
+---
+title: "Bundle"
+url: https://fleetbase.io/docs/cli/extension-development/bundle
+module: cli
+---
+
+# Bundle
+
+Pack an extension into a versioned `.tar.gz` for distribution using `flb bundle`.
+
+# flb bundle
+
+Package your extension into a
+`.tar.gz`
+archive for distribution. The output is named
+`<package-name>-v<version>-bundle.tar.gz`
+and excludes
+`node_modules/`
+,
+`server_vendor/`
+, and any previously generated bundle files.
+
+```
+flb bundle               # Just create the bundle
+flb bundle --upload      # Create and upload to the registry
+```
+
+Run from inside your extension's root directory, or pass
+`--path`
+.
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-p, --path <path>` | Path to the extension directory (default: current directory) |
+| `-u, --upload` | Upload the bundle to the registry after creating it |
+| `--auth-token <token>` | Auth token for the upload (only relevant with `--upload` ) |
+
+## Examples
+
+### Create a bundle
+
+```
+cd /path/to/your-extension
+flb bundle
+```
+
+Output:
+
+```
+Creating bundle vehicle-inspections-v1.2.0-bundle.tar.gz...
+Bundle created at /path/to/your-extension/vehicle-inspections-v1.2.0-bundle.tar.gz
+```
+
+### Bundle and upload in one step
+
+```
+flb bundle --upload
+```
+
+The CLI looks up your auth token from
+`~/.npmrc`
+. Pass
+`--auth-token`
+to override.
+
+### Bundle a different directory
+
+```
+flb bundle --path ./extensions/vehicle-inspections
+```
+
+## What's Included
+
+The bundle includes everything in your extension directory
+**except**
+:
+
+* `node_modules/`
+* `server_vendor/`
+* Any files matching the bundle filename pattern (
+  `*-v*-bundle.tar.gz`
+  ) — so re-bundling never includes a previous bundle
+
+This means manifests (
+`extension.json`
+,
+`package.json`
+,
+`composer.json`
+), the addon (
+`addon/`
+), the server (
+`server/`
+), tests, configs, and any docs all ship in the archive.
+
+## Bundle Filename
+
+The CLI reads
+`extension.json`
+to determine the name and version, then produces:
+
+```
+<kebab-cased-name>-v<version>-bundle.tar.gz
+```
+
+For example:
+
+| `extension.json` | Bundle file |
+| --- | --- |
+| `{"name": "@acme/vehicle-inspections-engine", "version": "1.2.0"}` | `acme-vehicle-inspections-engine-v1.2.0-bundle.tar.gz` |
+| `{"name": "Vehicle Inspections", "version": "0.0.1-rc.1"}` | `vehicle-inspections-v0.0.1-rc.1-bundle.tar.gz` |
+
+## Prerequisites
+
+Your extension directory must contain a valid
+`extension.json`
+with both
+`name`
+and
+`version`
+set. If either is missing,
+`flb bundle`
+aborts:
+
+```
+Name or version not specified in extension.json
+```
+
+## Next
+
+* [`flb bundle-upload`](https://fleetbase.io/docs/cli/extension-development/bundle-upload)
+  — upload an existing bundle to the registry
+* [`flb publish`](https://fleetbase.io/docs/cli/extension-development/publish)
+  — alternative publishing flow via npm
+
+## Troubleshooting
+
+**`extension.json not found in …`**
+— you're not in the extension's root directory. Pass the correct
+`--path`
+.
+
+**Bundle is unexpectedly large**
+— verify
+`node_modules/`
+and
+`server_vendor/`
+are excluded. If you have other large directories you want excluded (e.g.
+`tests/fixtures/`
+), use a
+`.gitignore`
+-style approach in your build by deleting them before
+`flb bundle`
+runs.

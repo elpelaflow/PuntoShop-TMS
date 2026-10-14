@@ -1,0 +1,126 @@
+---
+title: "Dashboard Service"
+url: https://fleetbase.io/docs/ui/dashboard/service
+module: ui
+---
+
+# Dashboard Service
+
+The `dashboard` service manages an extension's dashboards — load, switch, create, delete — and tracks edit state and widget panels.
+
+# Dashboard Service
+
+```
+@service dashboard;
+```
+
+The
+`dashboard`
+service is the API behind the dashboard pages in the console. Each extension that ships a dashboard interacts with this service to load its set of dashboards, switch between them, and add/remove widgets.
+
+For most extension authors, the
+`<Layout::Resource::Tabular>`
+and the dashboard component handle this automatically — you only inject the service directly for custom flows.
+
+## Inject
+
+```
+import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
+
+export default class DashboardPageComponent extends Component {
+  @service dashboard;
+}
+```
+
+## Loading Dashboards
+
+```
+@action async loadInitialDashboards() {
+  await this.dashboard.loadDashboards.perform({
+    defaultDashboardId: 'fleet-ops-overview',
+    defaultDashboardName: 'Overview',
+    extension: 'fleet-ops',
+  });
+}
+```
+
+`loadDashboards`
+is a drop-task — concurrent calls are dropped to prevent race conditions. After loading:
+
+* `dashboards`
+  is an array of dashboard records (the default is unshifted to the front if not already present)
+* `currentDashboard`
+  is set to the next applicable dashboard
+
+## Tracked State
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `dashboards` | array | All loaded dashboards |
+| `currentDashboard` | dashboard | The active dashboard |
+| `isEditingDashboard` | boolean | Whether the user is in edit mode |
+| `isAddingWidget` | boolean | Whether the add-widget panel is open |
+| `showPanelWhenZeroWidgets` | boolean | Auto-open the add-widget panel for empty dashboards |
+
+## Tasks
+
+| Task | Args | Description |
+| --- | --- | --- |
+| `loadDashboards` | `{ defaultDashboardId, defaultDashboardName, extension }` | Load dashboards from the API and select the next one |
+| `selectDashboard` | `dashboard` | Switch to a different dashboard (POSTs to `/dashboards/switch` ) |
+| `createDashboard` | `name, attributes?` | Create a new dashboard |
+| `deleteDashboard` | `dashboard, options?` | Delete a dashboard |
+| `setCurrentDashboard` | `dashboard` | Set the active dashboard without firing the switch endpoint |
+
+## Actions
+
+| Action | Description |
+| --- | --- |
+| `onChangeEdit(state = true)` | Toggle edit mode |
+| `onAddingWidget(state = true)` | Toggle the add-widget panel |
+| `reset()` | Clear all loaded dashboards and reset state |
+
+## System Dashboards
+
+Some dashboards are flagged as
+**system dashboards**
+(the seeded default for an extension). When the user changes which one is "default", the service POSTs to
+`/dashboards/reset-default`
+to persist the selection at the company level.
+
+## Real-World Example
+
+```
+import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
+import { action } from '@ember/object';
+
+export default class FleetOpsDashboardComponent extends Component {
+  @service dashboard;
+
+  constructor() {
+    super(...arguments);
+    this.dashboard.loadDashboards.perform({
+      defaultDashboardId: 'fleet-ops-overview',
+      defaultDashboardName: 'Overview',
+      extension: 'fleet-ops',
+    });
+  }
+
+  @action toggleEdit() {
+    this.dashboard.onChangeEdit(!this.dashboard.isEditingDashboard);
+  }
+
+  @action async addWidget() {
+    this.dashboard.onAddingWidget(true);
+  }
+}
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/services/dashboard.js` | Service class |
+| `addon/services/universe/widget-service.js` | Companion service — manages the registry of available widgets |

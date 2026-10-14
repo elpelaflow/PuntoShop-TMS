@@ -1,0 +1,186 @@
+---
+title: "Submitting"
+url: https://fleetbase.io/docs/contributing/translations/submitting
+module: contributing
+---
+
+Translations
+
+# Submitting
+
+Pull request conventions, reviewer expectations, and what happens after you submit a translation.
+
+# Submitting your translation
+
+You've translated some keys. Time to ship it.
+
+## Before opening the PR
+
+Run through the
+[sanity checks](https://fleetbase.io/docs/contributing/translations/file-format#sanity-checks-before-committing)
+one more time:
+
+* Keys match
+  `en-us.yaml`
+* Placeholders preserved
+* No empty string values
+* No translated brand names (Fleetbase, Fleet-Ops, etc.)
+* File is UTF-8
+
+If you ran Fleetbase locally, click through the screens you translated and check that nothing overflows, breaks the layout, or looks wrong in context.
+
+## Commit conventions
+
+Use clear commit messages so the maintainers and other translators can understand what changed at a glance.
+
+```
+i18n(es-mx): translate orders module
+i18n(fr-fr): port new keys from en-us
+i18n(zh-cn): fix translation of "dispatched" → 已派遣
+i18n: add Vietnamese (vi) translations for FleetOps
+```
+
+Conventional pattern:
+`i18n(<locale>): <what>`
+. Use
+`i18n`
+(without locale) only when the change spans multiple locales.
+
+## Opening the pull request
+
+Push your branch and open a PR against the
+`main`
+branch of the upstream repository.
+
+### PR title
+
+Match your commit style:
+
+```
+i18n(es-mx): translate orders module
+```
+
+### PR description template
+
+Copy this into your PR body and fill it in:
+
+```
+## Locale
+es-mx (Mexican Spanish)
+
+## Scope
+Translated all keys under the `orders.*` namespace in FleetOps.
+
+## Coverage delta
+Before: ~40% of keys translated
+After: ~78% of keys translated
+
+## Notes for reviewers
+- "Dispatch" → "Despachar" (matches Mexican logistics industry usage)
+- Left a few technical terms like "geofence" untranslated — see translations/glossary discussion
+- Did NOT touch the driver-management section yet (separate PR)
+
+## Tested locally
+- [x] Ran fleetbase console with FLEETBASE_LOCALE=es-mx
+- [x] Verified no UI overflow on the orders list and detail screens
+- [ ] Did not test on mobile
+```
+
+The fields don't all have to be filled — but
+**locale, scope, and any judgment calls**
+should always be there.
+
+## What reviewers look for
+
+Translation reviews check:
+
+1. **Correctness**
+   — Does the translation mean what the English version means?
+2. **Tone consistency**
+   — Does it match the rest of the locale file? (Formal vs. informal, polite forms, etc.)
+3. **Placeholder preservation**
+   — All
+   `{vars}`
+   intact and present
+4. **No breakages**
+   — Keys not renamed, structure not altered, brand names not translated
+5. **Technical accuracy**
+   — Logistics terms used correctly (
+   `waybill`
+   ,
+   `dispatch`
+   ,
+   `dropoff`
+   , etc.)
+
+If a native speaker on the team or in the community can review, they will. If no native speaker is available, the maintainers will merge based on placeholder/structural correctness and trust your linguistic judgment.
+
+## Reviewer expectations
+
+* **Initial response**
+  : usually within a few business days
+* **Style nits**
+  : discussed inline; you choose how to resolve
+* **Structural problems**
+  : requested as changes (renamed keys, missing placeholders, broken YAML) — must be fixed before merge
+* **Disagreement on phrasing**
+  : discussed openly. Translation is judgment work — there's rarely a single right answer
+
+## After merge
+
+* Your contribution is credited in the repo's contributors graph
+* The
+  `translations/<locale>.yaml`
+  becomes available the next time the relevant package is published or rebuilt
+* For self-hosted instances on the next release version
+* For Fleetbase Cloud, the next deploy after the merged release
+
+## Common mistakes that block merge
+
+| Issue | Fix |
+| --- | --- |
+| Renamed a key (translated `new:` to `nouveau:` ) | Restore the original key, only translate the value |
+| Missing or renamed `{placeholder}` | Restore the placeholder exactly as in `en-us.yaml` |
+| Translated brand names (Fleetbase → "Base de Flotte") | Keep brand names in English |
+| Mixed locales in one PR (e.g. partial es + partial fr) | Split into separate PRs per locale |
+| Unrelated changes (formatting, key reorder) bundled in | Translation PRs should only change values |
+| File not UTF-8 | Re-save as UTF-8 (most editors have a "Save as Encoding" option) |
+
+## Updating an existing translation
+
+For PRs that update an already-merged translation, follow the same flow but in the PR description:
+
+```
+## Locale
+fr-fr (French)
+
+## Type
+Update — porting new keys from `en-us.yaml`
+
+## Coverage delta
+Before: 65% (rev 4a8c1e2)
+After: 91% (current main)
+
+## Notes
+- Added the entire `extensions.*` namespace (new since the last update)
+- Re-translated 3 keys under `orders.status.*` for terminology consistency
+- One key intentionally left untranslated — see inline comment
+```
+
+## Need to bail mid-PR
+
+You don't have to translate the whole file at once. If you've translated half and want to ship, do it. Open the PR with what you have, mark unfinished sections in the description, and someone else (or you, later) can pick up the rest.
+
+Empty values aren't acceptable, but
+**leaving keys absent is fine**
+— the application falls back to English.
+
+## Recognition
+
+Every merged translation PR is credited in:
+
+* The repo's contributors graph on GitHub
+* The release notes for the version it ships in
+* The community changelog when significant new locales land
+
+Thanks for contributing.

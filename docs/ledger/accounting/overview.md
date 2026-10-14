@@ -1,0 +1,125 @@
+---
+title: "Accounting"
+url: https://fleetbase.io/docs/ledger/accounting/overview
+module: ledger
+---
+
+# Accounting
+
+Manage your chart of accounts, general ledger, and journal entries — the foundation of Ledger's double-entry bookkeeping system.
+
+# Accounting
+
+The
+**Accounting**
+module provides the double-entry bookkeeping foundation of Ledger. It manages the chart of accounts, records all financial activity as journal entries, and aggregates them in the general ledger.
+
+Navigate to
+**Ledger → Accounting**
+to access accounting features.
+
+## Core Components
+
+### Chart of Accounts
+
+A structured list of all accounts used to categorize financial activity. Ledger seeds a default chart of accounts when your company is created — Cash, Bank Account, Accounts Receivable, Stripe Clearing, Wallet Liability Pool, Driver Earnings Payable, Tax Payable, Owner's Equity, Delivery Revenue, Driver Payout Expense, and more.
+
+Five account types:
+
+* **Asset**
+  — what your organization owns (cash, receivables, gateway clearing accounts)
+* **Liability**
+  — what your organization owes (payables, wallet balances, tax payable)
+* **Equity**
+  — owner's stake (Owner's Equity, Retained Earnings)
+* **Revenue**
+  — income from operations (delivery, service fee, subscription)
+* **Expense**
+  — costs incurred (driver payouts, gateway fees, refunds, operations)
+
+See
+[Chart of Accounts](https://fleetbase.io/docs/ledger/accounting/chart-of-accounts)
+for the full reference.
+
+### Journal Entries
+
+The atomic records of every financial event. Each journal entry debits one account and credits another. Ledger creates journal entries automatically for invoice payments, gateway transactions, wallet operations, and transport order settlements. You can also create manual entries for adjustments. See
+[Journal Entries](https://fleetbase.io/docs/ledger/accounting/journal-entries)
+.
+
+### General Ledger
+
+The master record of all journal entries. The general ledger view shows every entry across the chart with date, reference, debit, credit, and running balance. See
+[General Ledger](https://fleetbase.io/docs/ledger/accounting/general-ledger)
+.
+
+## Automated Accounting
+
+Most journal entries in Ledger are created automatically:
+
+| Event | Journal Entry Created | Type |
+| --- | --- | --- |
+| Fleet-Ops PurchaseRate created | DEBIT Accounts Receivable, CREDIT Revenue | `revenue_recognition` |
+| Invoice payment recorded | DEBIT Cash, CREDIT Accounts Receivable | `invoice_payment` |
+| Gateway payment processed | DEBIT Cash, CREDIT clearing or revenue account | `gateway_payment` |
+| Freight order completed | DEBIT Cash, CREDIT Revenue | `order_settlement` |
+| Wallet top-up / credit | DEBIT Cash, CREDIT Wallet Liability | `general` |
+| Wallet payout | DEBIT Wallet Liability, CREDIT Cash | `general` |
+| Wallet transfer (A → B) | DEBIT Wallet A's liability, CREDIT Wallet B's liability (direct) | `general` |
+
+Manual journal entries can be created for one-off adjustments, closing entries, or corrections. The form picker offers
+`standard`
+,
+`adjusting`
+,
+`closing`
+,
+`reversing`
+, and
+`opening`
+types.
+
+## Accounting Lifecycle
+
+```
+Financial event occurs
+  → Ledger creates Journal Entry (debit + credit, status = posted)
+    → Account balances updated
+      → General Ledger reflects updated history
+        → Financial reports draw from posted journal entries
+```
+
+## Settings
+
+Configure accounting defaults in
+**Ledger → Settings → Accounting**
+:
+
+* **Base currency**
+  (
+  `base_currency`
+  ) — default currency for the organization
+* **Fiscal year start month**
+  (
+  `fiscal_year_start_month`
+  )
+* **Auto-post journal entries**
+  (
+  `auto_post_journal_entries`
+  )
+* **Default Accounts Receivable account**
+  (
+  `default_ar_account_uuid`
+  )
+* **Default Revenue account**
+  (
+  `default_revenue_account_uuid`
+  )
+* **Default Expense account**
+  (
+  `default_expense_account_uuid`
+  )
+
+See
+[Settings](https://fleetbase.io/docs/ledger/settings/overview)
+.

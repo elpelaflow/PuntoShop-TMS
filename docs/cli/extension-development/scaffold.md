@@ -1,0 +1,170 @@
+---
+title: "Scaffold"
+url: https://fleetbase.io/docs/cli/extension-development/scaffold
+module: cli
+---
+
+# Scaffold
+
+Generate a new Fleetbase extension from the starter template using `flb scaffold`.
+
+# flb scaffold
+
+Generate a new Fleetbase extension from the
+`starter-extension`
+template. The CLI clones the template, prompts for your extension's name and metadata, then refactors namespaces, package names, and class names so it's ready to develop against immediately.
+
+```
+flb scaffold
+```
+
+You'll be prompted for the extension name, description, author, email, keywords, PHP namespace, and repository URL. Hit enter to accept defaults.
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-p, --path <path>` | Where to scaffold (default: current directory) |
+| `-n, --name <name>` | Extension name |
+| `-d, --description <description>` | Description |
+| `-a, --author <author>` | Author name |
+| `-e, --email <email>` | Author email |
+| `-k, --keywords <keywords>` | Comma-separated keywords |
+| `-n, --namespace <namespace>` | PHP namespace (auto-prefixed with `Fleetbase\` ) |
+| `-r, --repo <repo>` | Repository URL (default: the starter template repo URL) |
+
+Anything you don't pass is asked for interactively.
+
+## Example
+
+```
+flb scaffold \
+  --name "Vehicle Inspections" \
+  --description "Pre-trip and post-trip vehicle inspection workflows" \
+  --author "Acme Logistics" \
+  --email "engineering@acme.com" \
+  --keywords "fleet,inspections,compliance"
+```
+
+Or just run
+`flb scaffold`
+and answer the prompts.
+
+## What Gets Generated
+
+The CLI clones the starter into a kebab-cased folder named after your extension (e.g.
+`vehicle-inspections/`
+). If a folder of that name already exists, it appends
+`-1`
+,
+`-2`
+, etc. until it finds a free name.
+
+It then:
+
+1. **Updates manifests**
+   —
+   `extension.json`
+   ,
+   `package.json`
+   ,
+   `composer.json`
+   are rewritten with your name, description, author, keywords, and computed package names.
+2. **Renames the engine class**
+   —
+   `addon/engine.js`
+   swaps
+   `StarterEngine`
+   for your
+   `<Name>Engine`
+   class and registers the menu item under your display name.
+3. **Renames PHP files**
+   —
+   `StarterResourceController.php`
+   becomes
+   `<Name>ResourceController.php`
+   , the service provider is renamed, and the config and routes files are updated.
+4. **Refactors namespaces**
+   — every PHP file under
+   `server/`
+   has its
+   `namespace`
+   and
+   `use`
+   statements rewritten from the starter's
+   `Fleetbase\Starter\…`
+   to your
+   `Fleetbase\<YourName>\…`
+   .
+
+## Computed Names
+
+Given the inputs
+`--author "Acme Logistics" --name "Vehicle Inspections"`
+, the scaffolder produces:
+
+| Asset | Value |
+| --- | --- |
+| Folder | `vehicle-inspections/` |
+| Engine class | `VehicleInspectionsEngine` |
+| PHP namespace | `Fleetbase\VehicleInspections` |
+| npm package | `@acme-logistics/vehicle-inspections-engine` |
+| Composer package | `acme-logistics/vehicle-inspections-api` |
+
+The author name is normalized — common company suffixes (
+`LLC`
+,
+`Pte Ltd`
+,
+`Inc`
+,
+`Corp`
+,
+`GmbH`
+,
+`Limited`
+,
+`Ltd`
+) are stripped before being used in package names.
+
+## Next Steps
+
+Once the scaffold finishes:
+
+```
+cd vehicle-inspections
+
+# Link the addon into your Fleetbase console
+cd ../fleetbase/console
+pnpm link ../vehicle-inspections
+
+# Link the API package into your Fleetbase api
+cd ../api
+composer config repositories.local path ../vehicle-inspections/server
+composer require acme-logistics/vehicle-inspections-api:dev-main
+```
+
+For the full development workflow (Ember serve, Laravel migrations, Universe service registration), see the
+[Extension Development](https://fleetbase.io/docs/extension-development/getting-started/quickstart)
+.
+
+## Troubleshooting
+
+**`Error scaffolding extension: …`**
+— usually a network failure on
+`git clone`
+or a permissions issue writing to the target path.
+
+**The folder name already exists**
+— the scaffolder auto-appends a counter (
+`-1`
+,
+`-2`
+, …). If you want to overwrite, delete the existing folder first.
+
+[Overview
+
+Build, test, version, bundle, and publish custom Fleetbase extensions using the CLI.](https://fleetbase.io/docs/cli/extension-development/overview)
+[Version Bump
+
+Increment the version of your extension across all manifest files using `flb version-bump`.](https://fleetbase.io/docs/cli/extension-development/version-bump)

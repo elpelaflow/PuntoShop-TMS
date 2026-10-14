@@ -4,4 +4,5 @@
 @import 'tailwindcss/utilities';
 @import 'inter-ui/inter.css';
 @import 'typography.css';
+@import 'docs.css';
 @import 'console.css';

@@ -1,0 +1,157 @@
+---
+title: "Quickstart"
+url: https://fleetbase.io/docs/fleet-ops/navigator-app/quickstart
+module: fleet-ops
+---
+
+# Quickstart
+
+Clone the Navigator App, install dependencies, configure your Fleetbase keys, and run it in iOS, Android, or web.
+
+# Navigator App Quickstart
+
+Get the Navigator driver app running locally against your Fleetbase backend in about 15 minutes.
+
+## Prerequisites
+
+| Tool | Version | Notes |
+| --- | --- | --- |
+| **Node.js** | ≥18 | JS runtime |
+| **Yarn** | — | Package manager (npm/pnpm also work, but Yarn is the documented path) |
+| **React Native CLI environment** | — | [Set up your dev environment](https://reactnative.dev/docs/set-up-your-environment) for iOS (Xcode + Watchman) and Android (Android Studio + JDK 17) |
+| **Ruby + Bundler** | 3.x | iOS pods are installed via `bundle exec pod install` ; release automation uses Fastlane |
+| **A Fleetbase instance** | — | Self-hosted or [fleetbase.io](https://fleetbase.io) |
+
+You will also need:
+
+* A
+  **Fleetbase API secret key**
+  — Console →
+  **Developers → API Keys**
+* A
+  **Google Maps API key**
+  with Maps SDK for iOS, Maps SDK for Android, and Directions API enabled
+
+Publishing release builds requires a
+**paid commercial license**
+for
+`react-native-background-geolocation`
+(Transistor Soft) — one per platform. Debug builds work without it; release builds do not. See the
+[purchase page](https://docs.transistorsoft.com/purchase/?platform=react-native)
+.
+
+## 1. Clone and Install
+
+```
+git clone git@github.com:fleetbase/navigator-app.git
+cd navigator-app
+yarn
+yarn pod:install
+touch .env
+```
+
+`yarn pod:install`
+runs
+`bundle exec pod install --repo-update`
+with
+`RCT_NEW_ARCH_ENABLED=1`
+so the React Native New Architecture is wired up correctly.
+
+## 2. Configure .env
+
+Create a
+`.env`
+file at the project root with at minimum:
+
+```
+APP_NAME=Navigator
+APP_IDENTIFIER=io.fleetbase.navigator
+APP_LINK_PREFIX=flbnavigator
+
+# Your Fleetbase backend
+FLEETBASE_HOST=https://api.fleetbase.io
+FLEETBASE_KEY=flb_live_xxxxxxxxxxxxxxxx
+
+# Maps
+GOOGLE_MAPS_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# Initial map center when no driver position is available
+DEFAULT_COORDINATES=1.369,103.8864
+```
+
+The full set of supported environment variables — Fleetbase connection, maps, driver UI tabs, push, geolocation, theming — is documented in
+[Configuration](https://fleetbase.io/docs/fleet-ops/navigator-app/configuration)
+.
+
+## 3. Run the App
+
+### iOS Simulator
+
+```
+yarn ios
+```
+
+This starts Metro and launches the iOS simulator. To target a specific device:
+
+```
+npx react-native run-ios --simulator="iPhone 15 Pro"
+```
+
+### Android Emulator
+
+```
+yarn android
+```
+
+Make sure an emulator is already running (
+`emulator -list-avds`
+, then
+`emulator -avd <name>`
+) or a physical device is connected with USB debugging enabled.
+
+### Web
+
+```
+yarn web
+```
+
+Webpack dev server boots and serves the app at the URL it logs. The web target uses
+`react-native-web`
+with build-time aliasing for native-only modules.
+
+The web build is functional for development and demos. Background geolocation, push notifications, and other native-only modules are stubbed on web — release deployments target iOS and Android.
+
+## 4. Sign In
+
+Once the app launches:
+
+1. The setup screen reads
+   `FLEETBASE_HOST`
+   and
+   `FLEETBASE_KEY`
+   as defaults.
+2. To override at runtime, scan the
+   **App Link**
+   QR code emitted by your Fleetbase console — see
+   [Navigator App Setup](https://fleetbase.io/docs/fleet-ops/getting-started/navigator-app-setup)
+   for how the console generates it.
+3. Drivers sign in with their phone number; the SMS OTP flow runs via your configured notifications gateway.
+
+## Common Issues
+
+| Symptom | Likely cause |
+| --- | --- |
+| `Unauthorized` on launch | `FLEETBASE_KEY` is missing or wrong, or `FLEETBASE_HOST` is unreachable |
+| Maps not rendering | `GOOGLE_MAPS_API_KEY` missing, or the relevant platform SDK is not enabled in Google Cloud |
+| Real-time updates stuck | `SOCKETCLUSTER_HOST` / `SOCKETCLUSTER_PORT` not set, or the Fleetbase socket service isn't reachable |
+| iOS build fails on first run | Run `yarn pod:install` again after a clean checkout |
+| Release build crashes on launch | Missing `react-native-background-geolocation` license — see Prerequisites above |
+
+## Next Steps
+
+* [Configuration](https://fleetbase.io/docs/fleet-ops/navigator-app/configuration)
+  — full env-var reference and runtime overrides
+* [Theming & Branding](https://fleetbase.io/docs/fleet-ops/navigator-app/theming)
+  — colors, themes, app icon, splash, native display names
+* [Build & Release](https://fleetbase.io/docs/fleet-ops/navigator-app/build-and-release)
+  — release builds for the App Store and Google Play

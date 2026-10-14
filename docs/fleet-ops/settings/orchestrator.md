@@ -1,0 +1,75 @@
+---
+title: "Orchestrator Settings"
+url: https://fleetbase.io/docs/fleet-ops/settings/orchestrator
+module: fleet-ops
+---
+
+# Orchestrator Settings
+
+Configure the default Orchestrator engine, automatic allocation triggers, global allocation constraints, and order card field display.
+
+# Orchestrator Settings
+
+**Orchestrator Settings**
+control the defaults for the
+[Orchestrator](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview)
+— which engine new phases use by default, whether new orders are allocated automatically, and the global constraints that apply across every Orchestrator run.
+
+Navigate to
+**Fleet-Ops → Settings → Orchestrator**
+.
+
+![Orchestrator settings panel — active engine, auto-allocate toggles, allocation constraints, and card fields](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orchestrator-settings.e02fd0e4.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Engine Settings
+
+| Setting | Description |
+| --- | --- |
+| **Active Engine** | The default engine used when adding a new phase in the Workbench. Engines registered with the `OrchestrationEngineRegistry` appear in this dropdown — at minimum `Greedy (built-in)` and `VROOM` ship out of the box; extensions can register more. |
+| **Auto Allocate on Create** | When enabled, every newly created order is run through an automatic Orchestrator pass for allocation. Useful for high-volume operations that want zero-touch dispatch. |
+| **Auto Reallocate on Complete** | When enabled, completing an order triggers an Orchestrator pass for the affected driver to re-balance their remaining work. Useful for operations where the plan needs to adapt as orders are completed. |
+
+Both auto-allocate flags fire the active engine using a default phase configuration. For more control over what runs automatically, leave these off and run the Orchestrator manually from the Workbench (or trigger it via API on a schedule).
+
+## Allocation Constraints
+
+These constraints apply globally to every Orchestrator run and are honored by every engine.
+
+| Setting | Description |
+| --- | --- |
+| **Max Travel Time** | Maximum driving time (in seconds) the Orchestrator will plan into a single driver's route. Orders that would push the route past this limit are returned to the unassigned pool. |
+| **Balance Workload** | Attempt to distribute orders evenly across the available drivers/vehicles rather than front-loading the most efficient ones. Equivalent to enabling the per-phase *Balance Workload* setting by default. |
+
+Engine-specific constraints —
+*respect skills*
+,
+*respect capacity*
+,
+*return to depot*
+— are configured per phase in the Workbench's
+[Phase Builder](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/workbench)
+, not globally here.
+
+## Order Card Fields
+
+The Orchestrator Workbench renders each order as a card in the order pool and the Plan Viewer. The
+**Card Fields**
+panel lets you choose which fields appear on those cards. You can configure:
+
+* A
+  **standard**
+  field set used by default
+* A
+  **per Order Configuration**
+  override — different fields per order type
+* A
+  **metadata fields**
+  set for custom-field display
+
+Trim down the visible fields to what your dispatchers actually need on screen — fewer fields per card means more orders fit on the Workbench at once.
+
+## Applying Settings
+
+Click
+**Save Changes**
+after editing. Updated settings apply to the next Orchestrator run; in-progress runs are unaffected.

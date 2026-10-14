@@ -1,0 +1,336 @@
+---
+title: "Build a Custom Integration"
+url: https://fleetbase.io/docs/platform/recipes/build-a-custom-integration
+module: platform
+---
+
+# Build a Custom Integration
+
+Use the Fleetbase REST API and webhooks to integrate an external system — push orders in, receive status events out, handle retries safely.
+
+# Build a Custom Integration
+
+This recipe shows a complete, production-ready integration pattern: an external system (ERP, WMS, or e-commerce platform) that creates orders in Fleetbase via the REST API, then receives real-time status updates back via webhooks.
+
+## Integration Architecture
+
+```
+External System
+      │
+      │  POST /v1/orders (create order)
+      ▼
+Fleetbase REST API ──── FleetOps (dispatch, routing)
+      │
+      │  POST webhook (order status changes)
+      ▼
+External System
+```
+
+The two channels work independently — push data in via API, receive events back via webhooks — but together they create a fully synchronised two-way integration.
+
+## Prerequisites
+
+* A Fleetbase account with Fleet-Ops installed
+* An
+  **API public key**
+  (live or test) from
+  **Developers → API Keys**
+* A publicly reachable HTTPS endpoint for receiving webhooks
+
+## Step 1 — Authenticate API Requests
+
+All API requests require a Bearer token using your public API key:
+
+```
+Authorization: Bearer flb_live_your_public_key_here
+Content-Type: application/json
+```
+
+Use
+**test keys**
+(
+`flb_test_...`
+) during development and switch to live keys (
+`flb_live_...`
+) for production. Test mode data is completely isolated from live data.
+
+Generate keys at
+**Developers → API Keys**
+. See
+[API Keys](https://fleetbase.io/docs/platform/developer-console/api-keys)
+for details.
+
+## Step 2 — Create Orders from Your External System
+
+When your ERP or WMS generates a delivery task, push it to Fleetbase as an order:
+
+```
+const FLEETBASE_API = 'https://api.fleetbase.io';
+const API_KEY = 'flb_live_your_public_key_here';
+
+async function createFleetbaseOrder(externalOrder) {
+    const response = await fetch(`${FLEETBASE_API}/v1/orders`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            // Internal reference — use your external ID for deduplication
+            internal_id: externalOrder.id,
+
+            // Pickup location
+            payload: {
+                pickup: {
+                    name: externalOrder.warehouse.name,
+                    street1: externalOrder.warehouse.address,
+                    city: externalOrder.warehouse.city,
+                    country: externalOrder.warehouse.country,
+                },
+                dropoff: {
+                    name: externalOrder.customer.name,
+                    street1: externalOrder.customer.address,
+                    city: externalOrder.customer.city,
+                    country: externalOrder.customer.country,
+                    phone: externalOrder.customer.phone,
+                },
+            },
+
+            // Custom fields for your business data
+            meta: {
+                external_order_id: externalOrder.id,
+                priority: externalOrder.priority,
+                notes: externalOrder.deliveryNotes,
+            },
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Failed to create order: ${JSON.stringify(error)}`);
+    }
+
+    const { data: order } = await response.json();
+    console.log(`Created Fleetbase order: ${order.public_id} for external ID: ${externalOrder.id}`);
+
+    return order;
+}
+```
+
+## Step 3 — Store the Mapping
+
+Store the relationship between your external order ID and the Fleetbase order ID so you can correlate incoming webhook events later:
+
+```
+// Example using a simple in-memory map (use a database in production)
+const orderMapping = new Map();
+
+async function syncOrder(externalOrder) {
+    const fleetbaseOrder = await createFleetbaseOrder(externalOrder);
+
+    // Store both directions
+    orderMapping.set(externalOrder.id, fleetbaseOrder.id);
+    orderMapping.set(fleetbaseOrder.public_id, externalOrder.id);
+
+    return fleetbaseOrder;
+}
+```
+
+## Step 4 — Set Up the Webhook Receiver
+
+Register an HTTPS endpoint to receive status events back from Fleetbase:
+
+```
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+// Map of processed event IDs for deduplication
+const processedEvents = new Set();
+
+app.post('/webhooks/fleetbase', async (req, res) => {
+    const event = req.body;
+
+    // Acknowledge immediately — don't make Fleetbase wait for your processing
+    res.sendStatus(200);
+
+    // Deduplicate retries
+    if (processedEvents.has(event.id)) {
+        console.log(`Skipping duplicate event: ${event.id}`);
+        return;
+    }
+    processedEvents.add(event.id);
+
+    await handleStatusUpdate(event);
+});
+
+async function handleStatusUpdate(event) {
+    const { event: eventType, data: order } = event;
+
+    // Look up your external order from the Fleetbase public_id
+    const externalOrderId = orderMapping.get(order.public_id);
+    if (!externalOrderId) {
+        console.log(`No mapping found for order ${order.public_id}`);
+        return;
+    }
+
+    console.log(`Order ${order.public_id} (external: ${externalOrderId}) → ${eventType}`);
+
+    switch (eventType) {
+        case 'order.dispatched':
+            await updateExternalSystem(externalOrderId, {
+                status: 'in_transit',
+                driver: order.driver_assigned?.name,
+            });
+            break;
+
+        case 'order.completed':
+            await updateExternalSystem(externalOrderId, {
+                status: 'delivered',
+                completed_at: order.completed_at,
+            });
+            break;
+
+        case 'order.cancelled':
+            await updateExternalSystem(externalOrderId, {
+                status: 'cancelled',
+                reason: order.cancel_reason,
+            });
+            break;
+    }
+}
+
+async function updateExternalSystem(externalOrderId, update) {
+    // Your ERP/WMS update logic here
+    console.log(`Updating external order ${externalOrderId}:`, update);
+}
+
+app.listen(3000);
+```
+
+## Step 5 — Register the Webhook in the Developer Console
+
+Go to
+**Developers → Webhooks**
+and click
+**New**
+.
+
+Set the
+**Endpoint URL**
+to your receiver's public HTTPS URL.
+
+Subscribe to the events relevant to your integration:
+
+| Event | Meaning |
+| --- | --- |
+| `order.created` | Order accepted into Fleetbase |
+| `order.dispatched` | Driver assigned and en route |
+| `order.completed` | Delivery confirmed |
+| `order.cancelled` | Order cancelled |
+
+Click
+**Save**
+. Fleetbase will begin delivering to your endpoint immediately.
+
+## Step 6 — Handle Idempotency for Retries
+
+If your receiver returns a non-2xx status or times out, Fleetbase will retry the delivery. Your handler must be safe to call multiple times with the same event.
+
+The deduplication approach above (checking
+`event.id`
+) handles this for in-memory state. For a production system, persist processed event IDs to a database:
+
+```
+// PostgreSQL example using node-postgres
+const { Pool } = require('pg');
+const pool = new Pool();
+
+async function isEventProcessed(eventId) {
+    const result = await pool.query(
+        'SELECT 1 FROM processed_webhook_events WHERE event_id = $1',
+        [eventId]
+    );
+    return result.rowCount > 0;
+}
+
+async function markEventProcessed(eventId) {
+    await pool.query(
+        'INSERT INTO processed_webhook_events (event_id, processed_at) VALUES ($1, NOW()) ON CONFLICT DO NOTHING',
+        [eventId]
+    );
+}
+
+app.post('/webhooks/fleetbase', async (req, res) => {
+    const event = req.body;
+    res.sendStatus(200);
+
+    if (await isEventProcessed(event.id)) return;
+    await markEventProcessed(event.id);
+    await handleStatusUpdate(event);
+});
+```
+
+## Querying Order Status on Demand
+
+In addition to webhooks, you can poll the API for the current state of any order:
+
+```
+async function getOrderStatus(fleetbasePublicId) {
+    const response = await fetch(`${FLEETBASE_API}/v1/orders/${fleetbasePublicId}`, {
+        headers: { 'Authorization': `Bearer ${API_KEY}` }
+    });
+
+    const { data: order } = await response.json();
+    return {
+        status: order.status,
+        driver: order.driver_assigned,
+        updated_at: order.updated_at,
+    };
+}
+```
+
+Prefer webhooks over polling for real-time updates. Polling introduces latency and unnecessary API load. Use polling only as a fallback for reconciliation (e.g., a nightly job to catch any missed events).
+
+## Test vs. Live Environments
+
+Build and test against the
+**test environment**
+first:
+
+|  | Test | Live |
+| --- | --- | --- |
+| **API key prefix** | `flb_test_...` | `flb_live_...` |
+| **Data isolation** | Completely separate | Production data |
+| **Webhooks** | Delivered to registered test endpoints | Delivered to live endpoints |
+
+Switch between environments using the
+**Test mode**
+toggle in the console header. Keys, webhooks, and request logs are scoped to the active environment.
+
+## Monitoring the Integration
+
+Once live, use the Developer Console to monitor your integration:
+
+* **Request Logs**
+  — every inbound API call with status codes and payloads →
+  [Developers → Request Logs](https://fleetbase.io/docs/platform/developer-console/request-logs)
+* **System Events**
+  — all emitted events you can correlate with webhook deliveries →
+  [Developers → System Events](https://fleetbase.io/docs/platform/developer-console/system-events)
+* **Webhook Attempts**
+  — delivery history and response codes for each endpoint →
+  [Developers → Webhooks](https://fleetbase.io/docs/platform/developer-console/webhooks)
+
+## Next Steps
+
+* See
+  [Connect Your First Webhook](https://fleetbase.io/docs/platform/recipes/connect-your-first-webhook)
+  for a deeper webhook reference
+* See
+  [API Keys](https://fleetbase.io/docs/platform/developer-console/api-keys)
+  for key management and rotation
+* See
+  [API Reference](https://fleetbase.io/docs/api)
+  for all available endpoints across extensions

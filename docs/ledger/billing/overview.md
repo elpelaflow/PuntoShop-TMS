@@ -1,0 +1,132 @@
+---
+title: "Billing & Invoicing"
+url: https://fleetbase.io/docs/ledger/billing/overview
+module: ledger
+---
+
+# Billing & Invoicing
+
+Create, send, and collect payment on invoices — manually or automatically from Fleet-Ops orders.
+
+# Billing & Invoicing
+
+The
+**Billing**
+module handles invoice creation, delivery, and payment collection. Invoices are typed payment requests with a lifecycle from
+`draft`
+through
+`paid`
+. Customers pay invoices online via a public URL (no login required).
+
+Navigate to
+**Ledger → Billing**
+to access invoices and templates.
+
+## Core Components
+
+### Invoices
+
+Formal payment requests with line items, tax, totals, and a lifecycle from
+`draft`
+through
+`paid`
+. Invoices can be created manually, from a Fleet-Ops order, or automatically when a
+`PurchaseRate`
+is added to an order. See
+[Invoices](https://fleetbase.io/docs/ledger/billing/invoices)
+.
+
+### Invoice Templates
+
+Reusable templates that define how invoices are rendered to PDF. Templates use Fleetbase's core
+`Template`
+model with the
+`invoice`
+context — they reference invoice variables like
+`{invoice.number}`
+,
+`{invoice.total_amount}`
+, and
+`{transaction.reference}`
+. See
+[Invoice Templates](https://fleetbase.io/docs/ledger/billing/invoice-templates)
+.
+
+## The Invoicing Lifecycle
+
+```
+draft → sent → viewed → partial → paid
+                      ↘ overdue
+                      ↘ cancelled
+                      ↘ refunded
+                      ↘ void
+```
+
+| Status | Meaning |
+| --- | --- |
+| `draft` | Created, not yet sent |
+| `sent` | Marked as sent (via `Mark as Sent` ) |
+| `viewed` | Customer opened the invoice via the public URL |
+| `partial` | Partial payment received; balance remains |
+| `paid` | Fully paid ( `balance = 0` ) |
+| `overdue` | Past due date, not yet paid. Set by the `ledger:update-overdue-invoices` console command, which transitions only `sent` and `viewed` invoices |
+| `cancelled` | Cancelled; should not be paid |
+| `refunded` | Set by `HandleProcessedRefund` when a gateway refund completes |
+| `void` | Set programmatically when a draft invoice is superseded — e.g., a new `PurchaseRate` replaces an earlier draft on the same order |
+
+The
+`cancelled`
+,
+`paid`
+, and
+`void`
+statuses are excluded from AR Aging.
+
+## Automated Invoicing
+
+### From Fleet-Ops Orders (PurchaseRate trigger)
+
+Ledger's
+`PurchaseRateObserver`
+listens for the
+**`PurchaseRate.created`**
+event. When a Fleet-Ops order has a purchase rate added (which happens when a service quote is accepted as the order's purchase rate), Ledger creates a
+**draft**
+invoice automatically. The trigger is the PurchaseRate creation,
+**not**
+the order reaching a
+`completed`
+status.
+
+Line items are extracted in this priority:
+
+1. From
+   `serviceQuote.items`
+   if present
+2. Falls back to a single summary line item using
+   `serviceQuote.amount`
+3. Falls back to entities/payload extraction from the order
+
+If a previous draft invoice already exists for the same order, it is voided and replaced. See
+[Fleet-Ops Integration](https://fleetbase.io/docs/ledger/integrations/fleet-ops)
+for the full mechanics.
+
+## Revenue Recognition
+
+When a draft invoice is created via the PurchaseRate observer, Ledger posts a
+`revenue_recognition`
+journal entry:
+
+```
+DEBIT  Accounts Receivable (asset increases — customer owes you)
+CREDIT Revenue (revenue increases)
+```
+
+When a payment is recorded, Ledger posts an
+`invoice_payment`
+journal entry:
+
+```
+DEBIT  Cash (asset increases — you received cash)
+CREDIT Accounts Receivable (asset decreases — debt cleared)
+```

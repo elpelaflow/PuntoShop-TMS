@@ -1,0 +1,116 @@
+---
+title: "Income Statement"
+url: https://fleetbase.io/docs/ledger/reports/income-statement
+module: ledger
+---
+
+# Income Statement
+
+Analyze revenue, expenses, and net income — your profit and loss statement for a selected period.
+
+# Income Statement
+
+The
+**Income Statement**
+(also called a Profit & Loss or P&L statement) summarizes your revenue, costs, and expenses during a specific period. It shows whether your organization made a profit or loss.
+
+Navigate to
+**Ledger → Reports → Income Statement**
+.
+
+## Report Structure
+
+### Revenue
+
+All
+**revenue**
+accounts from your chart of accounts. Default seeded revenue accounts:
+
+* Delivery Revenue (
+  `REVENUE-DELIVERY`
+  )
+* Service Fee Revenue (
+  `REVENUE-SERVICE-FEE`
+  )
+* Subscription Revenue (
+  `REVENUE-SUBSCRIPTION`
+  )
+* Other Revenue (
+  `REVENUE-OTHER`
+  )
+
+**Total Revenue**
+
+### Expenses
+
+All
+**expense**
+accounts. Default seeded expenses:
+
+* Driver Payout Expense (
+  `EXPENSE-DRIVER-PAYOUT`
+  )
+* Payment Gateway Fees (
+  `EXPENSE-GATEWAY-FEES`
+  )
+* Refunds & Chargebacks (
+  `EXPENSE-REFUNDS`
+  )
+* Wallet Expenses (
+  `EXPENSE-WALLET`
+  )
+* Other Operating Expenses (
+  `EXPENSE-OTHER`
+  )
+
+**Total Expenses**
+
+### Net Income
+
+```
+Net Income = Total Revenue - Total Expenses
+```
+
+A positive net income indicates profit; negative indicates a loss for the period.
+
+## Setting the Report Period
+
+Navigate to
+**Ledger → Reports → Income Statement**
+.
+
+Set the
+**Start Date**
+and
+**End Date**
+for the period.
+
+Click
+**Generate**
+.
+
+The default period is the current month (start of month → today).
+
+## Revenue Recognition
+
+Ledger uses
+**accrual accounting**
+— revenue is recognized at the time a
+`revenue_recognition`
+journal entry is posted (typically when a draft invoice is created from a Fleet-Ops
+`PurchaseRate`
+, or when an order records an
+`order_settlement`
+entry), not when cash is received.
+
+For cash-basis reporting, filter the general ledger to journal entries of type
+`invoice_payment`
+and
+`gateway_payment`
+and aggregate those instead.
+
+## Comparing Periods
+
+The Ledger dashboard shows
+**previous-period comparison**
+for total revenue, total expenses, and net income — i.e. the prior period of equal length, not year-over-year. For arbitrary period-over-period comparison, generate two income statements for the respective ranges and compare them side by side.

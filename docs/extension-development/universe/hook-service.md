@@ -1,0 +1,215 @@
+---
+title: "Hook Service"
+url: https://fleetbase.io/docs/extension-development/universe/hook-service
+module: extension-development
+---
+
+# Hook Service
+
+Tap into platform lifecycle events using hooks to run logic at key points in the application — login, route transitions, console boot, and custom events you fire yourself.
+
+# Hook Service
+
+The
+**hook service**
+(
+`universe/hook-service`
+) is a typed event bus shared across all engines. Extensions register handlers for named events; the platform (and other extensions) execute them at the right moment.
+
+Hooks live in a singleton registry on the root application, so a hook registered in one engine fires for events emitted in another. For example, a custom client extension can redirect authenticated users from the main console (
+`console:before-model`
+) without either engine knowing about the other.
+
+## Resolving the Service
+
+```
+// addon/extension.js
+import { Hook } from '@fleetbase/ember-core/contracts';
+
+export default {
+    setupExtension(app, universe) {
+        const hookService = universe.getService('hook');
+        // …
+    },
+};
+```
+
+## Registering a Hook
+
+```
+// Form 1: Hook contract (preferred — explicit and chainable)
+hookService.registerHook(
+    new Hook('console:before-model', (session, router) => {
+        // Run extension-specific bootstrap before any console route resolves
+    })
+);
+
+// Form 2: name + handler + options
+hookService.registerHook('console:after-model', (session, router) => {
+    // …
+}, { priority: 10, once: false });
+```
+
+`registerHook`
+accepts:
+
+* A
+  `Hook`
+  instance (constructed via the
+  [`Hook`
+  contract](https://fleetbase.io/docs/extension-development/reference/contracts#hook)
+  )
+* A
+  `(name, handler, options?)`
+  tuple — the service constructs the
+  `Hook`
+  for you
+
+## Hook Options
+
+Pass these via
+`new Hook({ … })`
+or as the third argument to
+`registerHook`
+:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `priority` | `0` | Lower numbers run first |
+| `runOnce` (alias `once` ) | `false` | Hook removes itself after firing |
+| `id` | auto-guid | Stable identifier — pass to `removeHook(name, id)` |
+| `enabled` | `true` | Hook is skipped when `false` |
+
+```
+new Hook('application:before-model')
+    .execute((session, router) => { /* … */ })
+    .withPriority(20)
+    .once()
+    .withId('my-extension:bootstrap');
+```
+
+## Executing Hooks
+
+Most extension authors won't call
+`execute`
+themselves — the platform fires the well-known events. But you can emit your own:
+
+```
+// Async — awaits all handlers in priority order
+const results = await hookService.execute('my-extension:order-imported', order, source);
+
+// Sync — for code that can't be async
+hookService.executeSync('my-extension:before-render', context);
+```
+
+`execute`
+swallows handler errors (logged to the console with the hook id) so one broken extension doesn't take out the chain. Each handler's return value is collected into the results array.
+
+## Removing and Toggling Hooks
+
+```
+hookService.removeHook('console:before-model', hookId);
+hookService.removeAllHooks('my-extension:custom-event');
+hookService.disableHook('console:before-model', hookId);
+hookService.enableHook('console:before-model', hookId);
+```
+
+Capture the id when you register if you'll need it later:
+
+```
+const hook = new Hook('console:after-model', handler).withId('my-bootstrap');
+hookService.registerHook(hook);
+// …later
+hookService.removeHook('console:after-model', 'my-bootstrap');
+```
+
+## Inspecting Hooks
+
+```
+hookService.getHooks('console:before-model'); // → array
+hookService.hasHook('console:before-model');  // → boolean
+```
+
+## Built-in Events
+
+These are the events the platform fires today. Naming convention:
+`<engine>:<lifecycle>`
+. The
+`session`
+,
+`router`
+, and
+`transition`
+arguments mirror Ember's route hooks.
+
+| Event | Args | Fired by |
+| --- | --- | --- |
+| `application:before-model` | `(session, router, transition)` | `console` ApplicationRoute — earliest hook, runs before any auth check |
+| `console:before-model` | `(session, router, transition)` | `console.*` ApplicationRoute |
+| `console:after-model` | `(session, router)` | `console.*` ApplicationRoute |
+
+Engines may emit their own scoped events — search for
+`hookService.execute(`
+in the host application source to see what's currently fired.
+
+## Naming Custom Hooks
+
+Use a colon-delimited namespace prefix so your events don't collide with another extension or core:
+
+```
+'my-extension:order:imported'
+'my-extension:invoice:rendering'
+'@my-org/my-extension:before-export'
+```
+
+## Façade Methods
+
+`UniverseService`
+re-exports the common methods so you can also call:
+
+```
+universe.registerHook(hookOrName, handler, options);
+universe.executeHook(hookName, ...args);   // async
+universe.hooks;                            // raw registry
+```
+
+The façade is fine for one-off calls; resolve
+`getService('hook')`
+directly when you need the full surface (
+`removeAllHooks`
+,
+`executeSync`
+,
+`enableHook`
+,
+`disableHook`
+).
+
+## Frontend Hooks vs. Backend Webhooks
+
+The hook service is
+**frontend-only**
+— it fires inside the browser when console code runs. For server-side reactions to platform events (e.g. send an email when an order completes, sync to an external ERP, run a background job), use
+**webhooks**
+: configured in the
+[Developer Console](https://fleetbase.io/docs/platform/developer-console/webhooks)
+and delivered as HTTP POSTs to your backend. Webhooks fire from
+`core-api`
+model observers; see
+[Backend → Expansions & Observers](https://fleetbase.io/docs/extension-development/backend/expansions-and-observers)
+.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/services/universe/hook-service.js` | `HookService` |
+| `addon/contracts/hook.js` | `Hook` contract |
+| `addon/contracts/hook-registry.js` | Internal singleton storage |
+
+[Menu Service
+
+Register navigation entries in the console — header items, settings panels, admin panels, organization & user menus, and custom registries — via universe.getService('menu').](https://fleetbase.io/docs/extension-development/universe/menu-service)
+[Widget Service
+
+Register dashboards and widgets that show up on the Fleetbase home dashboard or your extension's own dashboard surface.](https://fleetbase.io/docs/extension-development/universe/widget-service)

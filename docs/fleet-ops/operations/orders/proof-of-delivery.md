@@ -1,0 +1,156 @@
+---
+title: "Proof of Delivery"
+url: https://fleetbase.io/docs/fleet-ops/operations/orders/proof-of-delivery
+module: fleet-ops
+---
+
+Orders
+
+# Proof of Delivery
+
+Configure and review proof of delivery — signatures, photos, QR scans, and custom data captured via the Navigator app.
+
+# Proof of Delivery
+
+**Proof of Delivery (POD)**
+is evidence captured by the driver at the point of delivery, confirming that an order — or a specific item or waypoint within an order — was successfully handed over. Fleet-Ops supports four POD methods, and POD is configured
+**per activity**
+in the Order Configuration's
+[activity flow](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows)
+.
+
+## POD Methods
+
+The
+`pod_method`
+field on each activity accepts one of four values:
+
+| Method | Value | How it works |
+| --- | --- | --- |
+| **Scan (barcode / QR)** | `scan` | Driver scans a barcode or QR code on the parcel; the scanned value is recorded against the order, entity, or waypoint |
+| **Signature** | `signature` | Recipient signs on the driver's phone screen in the Navigator app |
+| **Photo** | `photo` | Driver takes a photo of the delivery |
+| **SMS verification** | `sms` | Fleet-Ops sends a one-time confirmation code to the customer by SMS; the driver enters the code from the customer in Navigator to confirm delivery |
+
+POD lives on individual activities — not on the Order Configuration as a whole. This means a single flow can require a barcode scan at pickup, a signature at the dropoff, an SMS code at customer hand-over, and no POD at intermediate transit steps.
+
+## Configuring POD per Activity
+
+POD is configured inside the activity flow, on each activity that should capture proof.
+
+Navigate to
+**Fleet-Ops → Operations → Order Configurations**
+.
+
+Open or create an Order Configuration and switch to the
+**Activity Flow**
+tab.
+
+On the activity that should capture POD, set:
+
+* `pod_method`
+  — one of
+  `scan`
+  ,
+  `signature`
+  ,
+  `photo`
+  , or
+  `sms`
+* `require_pod: true`
+  — the driver cannot fire the activity in Navigator without capturing POD first
+
+For multi-stop orders, you can configure different POD requirements per waypoint by attaching POD-bearing activities to each stop's sub-flow.
+
+Save the configuration. New orders created against this config will pick up the updated POD requirements.
+
+## How Drivers Capture POD
+
+In the Navigator app, when a driver fires an activity that has
+`require_pod: true`
+:
+
+1. The app prompts them to capture POD based on the configured
+   `pod_method`
+2. For
+   **`signature`**
+   : the recipient signs directly on screen
+3. For
+   **`photo`**
+   : the app opens the camera; the driver photographs the delivery
+4. For
+   **`scan`**
+   : the app opens the scanner; the driver scans a barcode or QR code on the parcel
+5. For
+   **`sms`**
+   : Fleet-Ops sends a one-time code to the customer's phone; the driver asks the customer for the code and enters it in Navigator
+6. The driver confirms — the POD is uploaded as a
+   **Proof**
+   record and the activity advances
+
+## POD for Entities and Waypoints
+
+For orders with multiple items (entities) or multiple stops (waypoints), POD can be captured individually:
+
+* **Per entity**
+  — each item requires its own proof (e.g., photo of each parcel delivered)
+* **Per waypoint**
+  — each stop requires POD before the driver can move to the next stop
+
+This creates a granular audit trail for complex multi-drop deliveries.
+
+## Viewing POD in the Console
+
+Captured POD appears in the
+**Order Detail Panel**
+under the
+**Proofs**
+section:
+
+* Signature images are displayed inline
+* Photos are displayed as thumbnails with full-screen view
+* Scan records show the captured barcode/QR value and timestamp
+
+Each Proof record stores:
+
+| Field | Meaning |
+| --- | --- |
+| `subject_uuid` / `subject_type` | The polymorphic subject — Order, Entity, or Waypoint the proof attaches to |
+| `file_uuid` | The uploaded image (signature or photo) |
+| `raw_data` | The raw scanned value (for `scan` method) |
+| `data` | Structured proof metadata |
+| `remarks` | Optional notes entered by the driver |
+| `created_at` | Timestamp of capture |
+
+![Order detail — Proofs section showing captured signature and delivery photo](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-order-proof-of-delivery.5929ff8f.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Downloading POD
+
+From the order detail panel, click
+**Download**
+on any proof to save the signature image or photo. For bulk exports, use the order export function — CSV exports include proof URLs that link to the stored files.
+
+## POD via the API
+
+POD can also be captured via the API. Three endpoints accept proof submissions:
+
+```
+POST /v1/orders/{id}/capture-signature/{subjectId}
+POST /v1/orders/{id}/capture-photo/{subjectId}
+POST /v1/orders/{id}/capture-qr/{subjectId}
+```
+
+The
+`subjectId`
+is the UUID of the order, entity, or waypoint to attach the proof to.
+
+See the
+[API Reference](https://fleetbase.io/docs/api)
+for request body schemas.
+
+[Importing
+
+Import many orders at once from a spreadsheet — including multi-waypoint and multi-entity orders — using the Order Import wizard.](https://fleetbase.io/docs/fleet-ops/operations/orders/importing-orders)
+[Tracking
+
+Track live order progress, driver position, and ETA from the order detail view and live map.](https://fleetbase.io/docs/fleet-ops/operations/orders/tracking)

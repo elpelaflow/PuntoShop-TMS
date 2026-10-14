@@ -1,0 +1,59 @@
+---
+title: "CommentThread"
+url: https://fleetbase.io/docs/ui/display/comment-thread
+module: ui
+---
+
+# CommentThread
+
+<CommentThread> renders a comment input + thread of existing comments for a resource. Persists via the `comment` Ember Data model.
+
+# <CommentThread>
+
+`<CommentThread>`
+renders a textarea for posting new comments plus a thread of existing comments. Comments persist via the
+`comment`
+Ember Data model and are scoped to the subject record you pass in.
+
+## Basic Usage
+
+```
+<CommentThread @subject={{this.order}} />
+```
+
+Posts and loads comments tied to the order.
+
+## Custom Comment Rendering
+
+Yield a block to render comments with custom markup. The yielded value is a curried
+`<CommentThread::Comment>`
+component:
+
+```
+<CommentThread @subject={{this.order}} as |Comment comment|>
+  <Comment />
+  {{!-- or fully custom: --}}
+  <div>
+    <strong>{{comment.author.name}}</strong>: {{comment.body}}
+  </div>
+</CommentThread>
+```
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@subject` | model | The Ember Data record the comments belong to |
+
+The component auto-loads comments for
+`@subject`
+and posts new ones to the same scope.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/comment-thread.hbs` | Template |
+| `addon/components/comment-thread.js` | Class |
+| `addon/components/comment-thread/comment.hbs` | Subcomponent template |
+| `addon/components/comment-thread/comment.js` | Subcomponent class |

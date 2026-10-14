@@ -1,0 +1,118 @@
+---
+title: "Routing Settings"
+url: https://fleetbase.io/docs/fleet-ops/settings/routing
+module: fleet-ops
+---
+
+# Routing Settings
+
+Pick which routing service renders Fleet-Ops routes, which engine optimises stop order, and the distance unit used in the UI.
+
+# Routing Settings
+
+**Routing Settings**
+is a small page with three selections that drive how Fleet-Ops calculates and renders routes. Two of the three sit on opposite sides of an important distinction:
+
+| Concept | What it does |
+| --- | --- |
+| **Routing** | Draws the route between stops on maps and returns ETAs and distance. This is purely a *display* concern — it answers "how should this sequence of stops be rendered as a polyline on the map?" |
+| **Route Optimization** | Re-sequences stops *before* the route is rendered. This is purely an *ordering* concern — it answers "given these stops, what's the optimal visit order?" |
+
+The two are deliberately decoupled — you can, for example, optimise stop order with VROOM (which is purely a solver and doesn't render maps) and then render the resulting route with OSRM or Google.
+
+Navigate to
+**Fleet-Ops → Settings → Routing**
+.
+
+![Routing settings — three dropdowns: Routing Service, Route Optimization Engine, and Routing Distance Unit](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-routing-settings.bf5e4bef.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Routing Service
+
+The service Fleet-Ops calls to render routes on maps and return ETAs. Stored as
+`display_engine`
+. Default:
+`osrm`
+.
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| **OSRM** | ✓ | Open-source, self-hosted. The default for both Cloud and self-hosted Fleetbase. |
+| **Google Maps** |  | Traffic-aware routing using Google's directions API. |
+| **Valhalla** |  | Open-source routing engine — alternative to OSRM with multi-modal support. |
+
+The list is registry-driven from the
+`routeEngine`
+service, so additional providers may appear if installed by an extension.
+
+## Route Optimization Engine
+
+The engine Fleet-Ops uses to re-sequence stops before the route is rendered. Stored as
+`optimization_engine`
+. Default:
+`osrm`
+.
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| **OSRM** | ✓ | Uses OSRM's trip endpoint to compute an optimal stop sequence. |
+| **Google Maps** |  | Uses Google's directions API with `optimize:true` to re-sequence waypoints. |
+| **Valhalla** |  | Uses Valhalla's optimised-route endpoint. |
+| **VROOM** |  | High-quality vehicle-routing solver — purpose-built for stop sequencing with constraints (time windows, capacities, skills). VROOM is *only* an optimiser; it doesn't render maps, which is why it appears here but not in the Routing Service list. |
+
+The list is registry-driven from the
+`routeOptimization`
+service.
+
+## Routing Distance Unit
+
+The unit Fleet-Ops uses to display route distances throughout the console (order details, route summaries, Orchestrator plan summaries).
+
+| Value | Label |
+| --- | --- |
+| `km` | Kilometers (default) |
+| `mi` | Miles |
+
+This is purely a display preference — it doesn't change how distances are calculated, only how they're shown.
+
+## Where Provider Credentials Live
+
+The Fleet-Ops Routing settings page picks the engine to use, but credentials and endpoints for each provider are configured elsewhere — different providers use different paths:
+
+| Provider | Where credentials are configured |
+| --- | --- |
+| **Google** | Google Maps **API key** is set in **Admin → Services** . The Google **Map ID** for the live map is set separately in **Admin → Fleet-Ops → Map** . |
+| **OSRM** | OSRM has no UI configuration — the OSRM host is supplied via an environment variable ( `OSRM_HOST` ) at the platform level. |
+| **Valhalla** | The system-wide Valhalla endpoint is configured in **Admin → Fleet-Ops Config → Routing** . Individual organisations can override the system endpoint with their own Valhalla server and API key — selecting Valhalla on this Routing settings page reveals an override box for the organisation-level endpoint and key. The override flow is registered into this page by the **Valhalla extension** . |
+| **VROOM** | Same pattern as Valhalla: a system-wide VROOM endpoint in **Admin → Fleet-Ops Config → Routing** , with an override box that appears on this page when VROOM is selected, registered by the **VROOM extension** . Per-organisation overrides let you point at your own VROOM server and supply an API key. |
+
+The Valhalla and VROOM in-page overrides are extension-driven — they only show up when the corresponding extension is installed. Without the extension you'll see the engine option (registered by the routing-service registry) but not the override box.
+
+## Other Things This Page Doesn't Configure
+
+A couple of things people sometimes look for here:
+
+* **Routing mode**
+  (driving / walking / cycling) is not exposed as a global setting. Where modes apply (e.g. Navigator's turn-by-turn) they are determined by the calling context, not a global default here.
+* **Toll / highway / ferry preferences**
+  are not exposed as global settings either; they're decided by the routing service in use and any options it supports natively.
+
+## How Routing Settings Affect Other Surfaces
+
+| Surface | Effect |
+| --- | --- |
+| **Order detail map** | Renders the route using the selected Routing Service |
+| **ETA on dispatched orders** | Calculated by the selected Routing Service from the driver's position |
+| **Orchestrator** | Optimization phases call the selected Routing Optimization Engine to re-sequence stops |
+| **Service rate calculation** | Distance-based rates use the calculated route distance, expressed in the selected unit on receipts |
+
+## Saving
+
+Click
+**Save Changes**
+in the page header to persist all three selections. The change applies to new route calculations immediately; in-progress orders keep whatever distance and ETA they had at dispatch time until the next recalculation.
+
+## Extending Routing Settings
+
+The routing page exposes an extension point at the registry key
+`fleet-ops:template:settings:routing`
+. Extensions adding their own routing-related settings (for example, a per-engine credentials panel, or routing-profile management) register a panel against that key and it renders below the built-in selectors.

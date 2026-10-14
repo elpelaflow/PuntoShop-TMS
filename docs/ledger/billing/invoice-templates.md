@@ -1,0 +1,182 @@
+---
+title: "Invoice Templates"
+url: https://fleetbase.io/docs/ledger/billing/invoice-templates
+module: ledger
+---
+
+# Invoice Templates
+
+Design reusable invoice templates with variable interpolation — invoice number, totals, customer details, and payment references.
+
+# Invoice Templates
+
+**Invoice Templates**
+control how invoices are rendered for PDF and the public online portal. Ledger's templates use Fleetbase's core
+`Template`
+model with the
+`invoice`
+context — they are HTML bodies with variable interpolation, edited via the
+**Template Builder**
+component.
+
+Navigate to
+**Ledger → Billing → Invoice Templates**
+.
+
+![Invoice template editor — template builder with variable picker and live preview](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-invoice-template-editor.542a0fd6.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Creating a Template
+
+Navigate to
+**Ledger → Billing → Invoice Templates**
+.
+
+Click
+**New Template**
+.
+
+Enter a
+**Name**
+(e.g., "Standard Invoice", "Service Agreement").
+
+Use the
+**Template Builder**
+to author the HTML body. Insert variables via the variable picker — they resolve at render time against the invoice you're previewing.
+
+Click
+**Preview**
+at any time to see the template rendered with sample data so you can iterate on the layout.
+
+Click
+**Save**
+.
+
+## Template Variables
+
+Templates can reference any of these namespaces. Each maps to fields on the corresponding model.
+
+### {invoice.\*}
+
+* `{invoice.number}`
+  ,
+  `{invoice.status}`
+  ,
+  `{invoice.invoice_date}`
+  ,
+  `{invoice.due_date}`
+  ,
+  `{invoice.currency}`
+* `{invoice.subtotal}`
+  ,
+  `{invoice.tax}`
+  ,
+  `{invoice.total_amount}`
+  ,
+  `{invoice.amount_paid}`
+  ,
+  `{invoice.balance}`
+* `{invoice.notes}`
+  ,
+  `{invoice.terms}`
+* `{invoice.formatted_total_amount}`
+  ,
+  `{invoice.formatted_balance}`
+  ,
+  `{invoice.formatted_due_date}`
+
+### {transaction.\*}
+
+* `{transaction.reference}`
+  ,
+  `{transaction.amount}`
+  ,
+  `{transaction.formatted_amount}`
+  ,
+  `{transaction.created_at}`
+
+### {account.\*}
+
+* `{account.name}`
+  ,
+  `{account.code}`
+  ,
+  `{account.type}`
+
+### {wallet.\*}
+
+* `{wallet.balance}`
+  ,
+  `{wallet.formatted_balance}`
+  ,
+  `{wallet.currency}`
+
+The full set of registered variables is defined by the Ledger service provider's context schema and is what the template builder's variable picker offers.
+
+## Setting the Default Template
+
+To automatically apply a template to all new invoices and to allow PDF rendering without per-invoice template selection:
+
+Navigate to
+**Ledger → Settings → Invoice**
+.
+
+Select your preferred template in the
+**Default Template**
+field (
+`default_template_uuid`
+).
+
+Save.
+
+If neither the invoice nor the settings have a template,
+**Download PDF**
+on an invoice will fail until one is set.
+
+## Per-Invoice Override
+
+When creating or editing an invoice, the
+**Template**
+field lets you choose a different template for that specific invoice. Use this if you maintain separate templates for, e.g., standard invoices vs. credit notes.
+
+## Previewing a Template
+
+The fastest way to preview a template is from the template editor itself:
+
+Open the template under
+**Ledger → Billing → Invoice Templates**
+.
+
+Click
+**Preview**
+in the template editor — the template renders with sample data so you can adjust layout, variables, and styling without needing a real invoice.
+
+To preview against a specific real invoice, open the invoice and click
+**Preview**
+there — it renders using the invoice's assigned template (or the default).
+
+## Default Notes & Terms (live in Invoice Settings, not the template)
+
+Default
+`notes`
+and
+`terms`
+strings used to pre-fill new invoices live on
+**Invoice Settings**
+, not on the template itself:
+
+* `default_notes`
+* `default_terms`
+
+Set them under
+**Ledger → Settings → Invoice**
+. See
+[Settings](https://fleetbase.io/docs/ledger/settings/overview)
+.
+
+## Legacy ledger-invoice Context
+
+Templates created before the context normalization use the context type
+`ledger-invoice`
+instead of
+`invoice`
+. Ledger normalizes both transparently when listing and rendering — no migration is required.

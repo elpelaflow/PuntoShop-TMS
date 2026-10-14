@@ -1,0 +1,81 @@
+---
+title: "Wallet Summary"
+url: https://fleetbase.io/docs/ledger/reports/wallet-summary
+module: ledger
+---
+
+# Wallet Summary
+
+Get an overview of all wallet balances — counts by type and currency, period credits and debits, and the top 10 wallets by balance.
+
+# Wallet Summary
+
+The
+**Wallet Summary**
+report provides an analytical overview of all digital wallets in your Fleetbase ecosystem — wallet counts by subject type and currency, credit and debit totals for the selected period, and the top wallets by current balance.
+
+Navigate to
+**Ledger → Reports → Wallet Summary**
+.
+
+## What the Report Shows
+
+### Wallet Counts
+
+Counts of wallets grouped by subject type and currency:
+
+| Subject Type | What it represents |
+| --- | --- |
+| **driver** | Drivers' earnings wallets |
+| **customer** | Customers' prepaid credit / loyalty wallets |
+| **company** | Your organization's operating, revenue, and reserve wallets |
+| **user** | Individual users' personal wallets |
+
+Wallet counts are
+**all-time**
+— they are not affected by the selected date range.
+
+### Period Stats
+
+Per-currency credits and debits posted during the selected period — useful for understanding how much money flowed into or out of wallets over a window.
+
+### Top 10 Wallets
+
+A ranked list of the wallets with the highest current balances. Useful for identifying:
+
+* Drivers with large pending earnings that need payout
+* Customers with high prepaid credit
+* Any anomalous balances that warrant review
+
+## Currency
+
+If you operate in multiple currencies, wallet counts and period stats are grouped by currency. There is no automatic conversion — each currency is reported separately.
+
+## Setting the Report Period
+
+Navigate to
+**Ledger → Reports → Wallet Summary**
+.
+
+Set the
+**Date From**
+and
+**Date To**
+for the period.
+
+Click
+**Generate**
+.
+
+The default period is the current month (start of month → today). Wallet counts and top wallets ignore the date range; only the period stats are bounded by it.
+
+## Using the Wallet Summary
+
+* **Payout runs**
+  — check period stats and top wallets before initiating batch payouts
+* **Float management**
+  — monitor company wallet balances to ensure sufficient float
+* **Fraud detection**
+  — anomalous spikes in period stats or unusual top-wallet entries may warrant investigation
+* **Customer lifetime value**
+  — customers with high wallet balances indicate platform engagement

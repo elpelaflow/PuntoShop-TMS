@@ -1,0 +1,62 @@
+---
+title: "Resend Verification"
+url: https://fleetbase.io/docs/cli/account/resend-verification
+module: cli
+---
+
+# Resend Verification
+
+Request a fresh verification code from the registry using `flb resend-verification`.
+
+# flb resend-verification
+
+Request that the registry email a fresh verification code. Use this when the original email from
+`flb register`
+never arrived, or when the code has expired.
+
+```
+flb resend-verification
+```
+
+You'll be prompted for the email address.
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-e, --email <email>` | Email address |
+| `-h, --host <host>` | API host (default: `https://api.fleetbase.io` ) |
+
+## Examples
+
+```
+flb resend-verification -e jane@example.com
+```
+
+Against a self-hosted registry:
+
+```
+flb resend-verification -e jane@example.com --host registry.mycompany.com
+```
+
+## What Happens on Success
+
+The registry sends a fresh code to the email address. The CLI prints the next command to run:
+
+```
+✓ Verification code sent!
+✓ Check your email for the new verification code.
+
+👉 Once you receive it, run:
+   flb verify -e jane@example.com
+```
+
+## Troubleshooting
+
+**`Failed to resend: No response from server`**
+— the API host isn't reachable. Check your
+`--host`
+value.
+
+**No email arrives even after resending**
+— check spam folder; verify the email is correct (the registry won't tell you if a typo'd email matches no account, to avoid disclosing account existence). If you've genuinely typed it wrong, contact support to clean up the unverified account.

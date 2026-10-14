@@ -1,0 +1,120 @@
+---
+title: "Formatting Helpers"
+url: https://fleetbase.io/docs/ui/helpers/formatting
+module: ui
+---
+
+# Formatting Helpers
+
+Helpers for formatting bytes, currency, dates, durations, distances, file names, and humanizing strings.
+
+# Formatting Helpers
+
+These helpers convert raw values into display-ready strings. All are globally available in any template — no import needed.
+
+## {{format-bytes value}}
+
+Formats a byte count as human-readable size:
+
+```
+{{format-bytes 1024}}        {{!-- "1 KB" --}}
+{{format-bytes 1048576}}     {{!-- "1 MB" --}}
+{{format-bytes 1073741824}}  {{!-- "1 GB" --}}
+```
+
+## {{format-currency amount currency}}
+
+Formats a monetary amount with currency symbol and locale-appropriate separators:
+
+```
+{{format-currency 12500 "USD"}}   {{!-- "$125.00" --}}
+{{format-currency 1234 "EUR"}}    {{!-- "€12.34" --}}
+{{format-currency 50000 "MNT"}}   {{!-- "₮500" --}}
+```
+
+The first arg is in
+**minor currency units**
+(cents). The helper handles each currency's decimal scheme.
+
+## {{format-date-fns date format}}
+
+Formats a date using
+[date-fns](https://date-fns.org)
+format tokens:
+
+```
+{{format-date-fns @order.created_at "PPpp"}}        {{!-- "Jul 4, 2025 at 3:42 PM" --}}
+{{format-date-fns @order.created_at "yyyy-MM-dd"}}  {{!-- "2025-07-04" --}}
+{{format-date-fns @order.created_at "EEEE"}}        {{!-- "Friday" --}}
+```
+
+## {{format-duration ms}}
+
+Formats a duration in milliseconds as human-readable text:
+
+```
+{{format-duration 5000}}      {{!-- "5 seconds" --}}
+{{format-duration 90000}}     {{!-- "1 minute 30 seconds" --}}
+{{format-duration 3600000}}   {{!-- "1 hour" --}}
+```
+
+## {{format-milliseconds ms}}
+
+Variant of
+`format-duration`
+with millisecond-level precision.
+
+## {{format-meters meters}}
+
+Formats a distance in meters with the right unit (m vs km):
+
+```
+{{format-meters 250}}    {{!-- "250 m" --}}
+{{format-meters 4500}}   {{!-- "4.5 km" --}}
+```
+
+## {{smart-humanize value}}
+
+Humanizes any string with a few extra rules — handles snake\_case, kebab-case, camelCase, and known acronyms:
+
+```
+{{smart-humanize "pickup_ready"}}       {{!-- "Pickup Ready" --}}
+{{smart-humanize "createdAt"}}          {{!-- "Created At" --}}
+{{smart-humanize "QR-code"}}            {{!-- "QR Code" --}}
+```
+
+Compare with
+`{{safe-humanize}}`
+(a thinner helper) and Ember's stock
+`{{humanize}}`
+.
+
+## {{truncate-filename filename maxLength?}}
+
+Truncates a filename to a max length while preserving the extension:
+
+```
+{{truncate-filename "very-long-document-name.pdf" 20}}   {{!-- "very-long-do…me.pdf" --}}
+```
+
+## {{safe-humanize value}}
+
+Humanizes a value safely — returns empty string for null/undefined rather than throwing:
+
+```
+{{safe-humanize @order.status}}
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/helpers/format-bytes.js` | Helper |
+| `addon/helpers/format-currency.js` | Helper |
+| `addon/helpers/format-date-fns.js` | Helper |
+| `addon/helpers/format-duration.js` | Helper |
+| `addon/helpers/format-milliseconds.js` | Helper |
+| `addon/helpers/format-meters.js` | Helper |
+| `addon/helpers/smart-humanize.js` | Helper |
+| `addon/helpers/safe-humanize.js` | Helper |
+| `addon/helpers/truncate-filename.js` | Helper |

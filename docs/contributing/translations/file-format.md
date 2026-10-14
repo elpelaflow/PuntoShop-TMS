@@ -1,0 +1,259 @@
+---
+title: "File format"
+url: https://fleetbase.io/docs/contributing/translations/file-format
+module: contributing
+---
+
+Translations
+
+# File format
+
+YAML structure, placeholder syntax, pluralization, and translation conventions for Fleetbase locale files.
+
+# File format
+
+Translation files are
+**YAML**
+. This page covers the structure, what to translate (and what to leave alone), and the conventions that keep translations consistent across locales.
+
+## Anatomy of a locale file
+
+A locale file is a deeply nested key/value map. Keys describe where a string is used; values are the strings themselves.
+
+```
+# en-us.yaml
+common:
+  new: New
+  create: Create
+  edit: Edit
+  delete: Delete
+  delete-selected-count: Delete {count} Selected
+
+orders:
+  new-order: New Order
+  status:
+    created: Created
+    dispatched: Dispatched
+    completed: Completed
+```
+
+The translated equivalent in French:
+
+```
+# fr-fr.yaml
+common:
+  new: Nouveau
+  create: Créer
+  edit: Modifier
+  delete: Supprimer
+  delete-selected-count: Supprimer {count} sélectionné(s)
+
+orders:
+  new-order: Nouvelle commande
+  status:
+    created: Créé
+    dispatched: Envoyé
+    completed: Terminé
+```
+
+## The two non-negotiable rules
+
+1. **Translate values, never keys.**
+   Keys are how the application looks up the translation. Changing a key (
+   `new`
+   →
+   `nouveau`
+   ) breaks the lookup and the UI falls back to the raw key.
+2. **Preserve placeholders exactly.**
+   Anything in
+   `{curly_braces}`
+   is a runtime variable. Leave the name, the braces, and the position intact (you can move it around the sentence — see below).
+
+## Placeholders
+
+Placeholders are tokens like
+`{count}`
+,
+`{name}`
+,
+`{resource}`
+. They are replaced at runtime with dynamic values.
+
+### Don't translate the placeholder name
+
+```
+# en-us.yaml
+delete-confirm: Are you sure you want to delete {count} items?
+
+# ❌ WRONG — placeholder name was translated
+delete-confirm: Êtes-vous sûr de supprimer {compte} éléments ?
+
+# ✅ CORRECT — placeholder name preserved
+delete-confirm: Êtes-vous sûr de supprimer {count} éléments ?
+```
+
+### You can move placeholders within the sentence
+
+Word order varies by language — that's fine. The placeholder can move:
+
+```
+# en-us.yaml — count comes after the verb
+deleted-count: Deleted {count} items
+
+# ja-jp.yaml — count comes before the noun in Japanese sentence structure
+deleted-count: '{count}件のアイテムを削除しました'
+```
+
+### Multiple placeholders
+
+When a string has multiple placeholders, all of them must be present in the translation:
+
+```
+# en-us.yaml
+assigned-driver-to-order: Assigned {driver} to order {order_id}
+
+# ✅ CORRECT
+assigned-driver-to-order: Conducteur {driver} affecté à la commande {order_id}
+```
+
+## What to translate
+
+| Type | Translate? | Example |
+| --- | --- | --- |
+| **UI labels & buttons** | ✅ Yes | `Save` , `Cancel` , `Delete` |
+| **Headings & titles** | ✅ Yes | `New Order` , `Driver Settings` |
+| **Helper text & descriptions** | ✅ Yes | `Choose the vehicle assigned to this driver` |
+| **Error & success messages** | ✅ Yes | `Order created successfully` |
+| **Plain dates/times** | ✅ Yes | `Today` , `Yesterday` , `tomorrow` |
+| **Placeholder names** ( `{count}` ) | ❌ No | Leave `{count}` , `{driver}` , etc. as-is |
+| **Brand names** | ❌ No | `Fleetbase` , `Fleet-Ops` , `Ledger` , `Navigator` |
+| **Technical terms with no local equivalent** | ❌ No (usually) | `API` , `webhook` , `OAuth` , `JWT` — see [Glossary](https://fleetbase.io/docs/contributing/translations/glossary) |
+| **HTML tags inside strings** | ❌ Don't change structure | `<b>` , `<a>` , `<br>` — preserve as-is, translate the text inside |
+| **Markdown formatting** | ❌ Don't change structure | `**bold**` , `[link](...)` — preserve syntax, translate the visible text |
+
+## Pluralization
+
+Some locale files use pluralization keys. The convention follows the language file's existing pattern —
+**don't introduce new pluralization styles**
+if the file doesn't already use them.
+
+If a key has multiple plural variants in
+`en-us.yaml`
+:
+
+```
+# en-us.yaml
+items-count:
+  one: '{count} item'
+  other: '{count} items'
+```
+
+Provide all of them in your locale, even if the language only has one form (you can use the same value for
+`one`
+and
+`other`
+):
+
+```
+# ja-jp.yaml — Japanese has no plural distinction
+items-count:
+  one: '{count}件のアイテム'
+  other: '{count}件のアイテム'
+```
+
+If a language has more plural forms than English (Russian, Polish, Arabic), match what's in the locale file. If the file doesn't have those forms yet,
+**don't add them**
+— open an issue first so the maintainers can extend the schema.
+
+## RTL languages
+
+For right-to-left languages (Arabic, Hebrew, Persian, Urdu), the YAML file is the same — translate values normally. The Console handles directional rendering at runtime via CSS logical properties.
+
+Numerical and Latin-script content stays in its natural direction. Brand names like
+`Fleetbase`
+stay in Latin script.
+
+## Quoting and escaping
+
+YAML is whitespace-sensitive. A few rules:
+
+* **Single quotes**
+  when the value contains a colon, hash, or starts with a special character:
+  `'New: order created'`
+  ,
+  `'#123 received'`
+* **Pipe
+  `|`**
+  for multi-line strings (preserves line breaks):
+
+  ```
+  long-message: |
+    First line.
+    Second line.
+  ```
+* **Greater-than
+  `>`**
+  for multi-line strings that should fold to a single line:
+
+  ```
+  long-message: >
+    This is a long sentence
+    that will be rendered as one line.
+  ```
+* **Escape special characters**
+  inside double-quoted strings:
+  `"Save \"Draft\""`
+  . Single-quoted strings need
+  `''`
+  for an apostrophe:
+  `'L''Étranger'`
+  .
+
+## Special characters and accents
+
+UTF-8 encoding is required (it's the YAML default — most editors get this right automatically). Accented characters, CJK characters, RTL scripts, emoji — all fine. Save your editor file encoding as UTF-8 (no BOM).
+
+## Apostrophes and curly quotes
+
+Use straight ASCII quotes (
+`'`
+`"`
+) inside YAML, not curly quotes (
+`'`
+`"`
+`"`
+`"`
+) — curly quotes can break the YAML parser depending on context. The rendered output handles typography automatically.
+
+## Empty strings
+
+Don't leave a key with an empty value:
+
+```
+# ❌ WRONG — UI will show nothing
+title: ''
+
+# ✅ Either delete the key entirely (it falls back to en-us)
+# ✅ Or translate it
+title: Mon titre
+```
+
+If you don't know how to translate a key yet,
+**leave it absent**
+rather than empty — Fleetbase falls back to the English version.
+
+## Sanity checks before committing
+
+* All keys still match
+  `en-us.yaml`
+* All
+  `{placeholders}`
+  preserved with original names
+* No keys translated, only values
+* HTML/Markdown structure preserved
+* File saves as UTF-8
+* No empty string values
+
+Continue to
+[Repositories →](https://fleetbase.io/docs/contributing/translations/repositories)
+for the full list of where to send your changes.

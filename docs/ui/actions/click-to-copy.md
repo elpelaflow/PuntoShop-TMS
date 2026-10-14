@@ -1,0 +1,91 @@
+---
+title: "ClickToCopy"
+url: https://fleetbase.io/docs/ui/actions/click-to-copy
+module: ui
+---
+
+# ClickToCopy
+
+<ClickToCopy> wraps any value with a one-click copy-to-clipboard interaction. Hover shows a tooltip; click copies.
+
+# <ClickToCopy>
+
+Wraps any value with a one-click copy-to-clipboard action. Hovering shows a "Click to copy" tooltip; clicking copies the value and the tooltip flips to "Copied!".
+
+Used everywhere a user might need to grab an ID, public key, or generated token — auto-generated public IDs in tables, API keys in settings, gateway transaction references in audit logs.
+
+## Basic Usage
+
+```
+<ClickToCopy @value={{this.order.public_id}} />
+```
+
+This renders the value (or
+`N/A`
+if empty), and clicking the wrapper copies the value to the clipboard.
+
+## Custom Display
+
+Yield a block to render something other than the raw value — but still copy
+`@value`
+on click:
+
+```
+<ClickToCopy @value={{this.gateway.api_key}}>
+  <FaIcon @icon="copy" class="mr-2" />
+  Copy API key
+</ClickToCopy>
+```
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@value` | string | The text copied to the clipboard. Falls back to `N/A` for display if empty (when no block) |
+
+Any additional
+`...attributes`
+are forwarded to the outer
+`<div>`
+.
+
+## Behavior
+
+The component first tries
+`navigator.clipboard.writeText()`
+. If that's unavailable (older browsers, non-secure context), it falls back to a hidden
+`<textarea>`
+plus
+`document.execCommand('copy')`
+. The "Copied!" tooltip flashes briefly on success.
+
+## Real-World Examples
+
+```
+{{!-- Copy a generated public ID --}}
+<ClickToCopy @value={{order.public_id}}>
+  <span class="font-mono">{{order.public_id}}</span>
+</ClickToCopy>
+
+{{!-- Inside a table cell --}}
+<td>
+  <ClickToCopy @value={{row.id}}>
+    {{row.id}}
+  </ClickToCopy>
+</td>
+
+{{!-- For sensitive values, prefer ClickToReveal --}}
+<ClickToReveal @value={{store.api_key}} />
+```
+
+## See Also
+
+* [`<ClickToReveal>`](https://fleetbase.io/docs/ui/actions/click-to-reveal)
+  — extends ClickToCopy with hidden-by-default rendering for sensitive values
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/click-to-copy.hbs` | Template |
+| `addon/components/click-to-copy.js` | Class |

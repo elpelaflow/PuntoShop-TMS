@@ -1,0 +1,79 @@
+---
+title: "Cash Flow Statement"
+url: https://fleetbase.io/docs/ledger/reports/cash-flow
+module: ledger
+---
+
+# Cash Flow Statement
+
+Track cash inflows and outflows — operating, financing, and investing activities — derived from movement on the Cash account.
+
+# Cash Flow Statement
+
+The
+**Cash Flow Statement**
+tracks the actual movement of cash into and out of your organization over a period. Unlike the income statement (which uses accrual accounting), the cash flow statement shows real cash movements — it is computed from journal entries that touch the Cash account (
+`CASH-DEFAULT`
+).
+
+Navigate to
+**Ledger → Reports → Cash Flow**
+.
+
+## Why Cash Flow Matters
+
+A profitable business on paper can still run out of cash. The cash flow statement tells you whether your operations are generating or consuming cash — critical for liquidity management and planning payroll, vendor payments, and driver payouts.
+
+## Report Structure
+
+The report groups journal entries against the Cash account into three classifications, each shown as a list of items plus a net flow:
+
+### Operating Activities
+
+Cash flows from core business operations — for example, customer payments on invoices and operating-expense payments.
+
+### Financing Activities
+
+Cash flows from raising or returning capital and from wallet top-ups / payouts that move cash in or out of the system.
+
+### Investing Activities
+
+Cash flows from longer-term asset acquisitions or disposals (typically zero for a logistics platform unless you record asset purchases through Ledger).
+
+### Net Change in Cash
+
+```
+Net Change = Net Operating + Net Financing + Net Investing
+```
+
+Add this to the
+**opening cash balance**
+to get the
+**closing cash balance**
+— both are shown alongside the period's net change at the top of the report.
+
+## Setting the Report Period
+
+Navigate to
+**Ledger → Reports → Cash Flow**
+.
+
+Set the
+**Start Date**
+and
+**End Date**
+.
+
+Click
+**Generate**
+.
+
+The default period is the current month (start of month → today).
+
+## How Classification Works
+
+Journal entries are classified into operating / financing / investing based on the contra account on the entry. The exact rules are implemented in
+`LedgerService`
+— if you configure custom accounts, ensure their
+`type`
+is set correctly so they classify as expected (e.g., expense accounts → operating, equity accounts → financing).

@@ -1,0 +1,273 @@
+---
+title: "Adding a Payment Gateway Driver"
+url: https://fleetbase.io/docs/extension-development/recipes/adding-a-payment-gateway-driver
+module: extension-development
+---
+
+# Adding a Payment Gateway Driver
+
+Plug a new payment gateway (PayPal, Razorpay, etc.) into Ledger by extending AbstractGatewayDriver and registering it with the PaymentGatewayManager.
+
+# Adding a Payment Gateway Driver
+
+The
+Ledger
+extension uses a Laravel
+[`Manager`](https://laravel.com/api/11.x/Illuminate/Support/Manager.html)
+-based driver pattern for payment gateways. Stripe, QPay, and Cash drivers ship by default — third-party drivers register via
+`PaymentGatewayManager::extend()`
+.
+
+## What a Driver Implements
+
+The contract is
+`Fleetbase\Ledger\Contracts\GatewayDriverInterface`
+. The abstract base class
+`AbstractGatewayDriver`
+covers most of it; you only need to fill in gateway-specific methods.
+
+| Method | What it does |
+| --- | --- |
+| `getName()` / `getCode()` | Display name + URL-safe machine code |
+| `getCapabilities()` | Array of `'purchase'` , `'refund'` , `'tokenization'` , `'webhooks'` , `'sandbox'` , `'recurring'` , etc. |
+| `getConfigSchema()` | Form schema rendered when configuring the gateway |
+| `initialize($config, $sandbox)` | Receives decrypted config — handled by `AbstractGatewayDriver` |
+| `purchase(PurchaseRequest $req)` | Charge the customer |
+| `refund(RefundRequest $req)` | Refund a transaction |
+| `handleWebhook(Request $req)` | Process inbound webhook events |
+| `createPaymentMethod($data)` | Tokenize/save a payment method (if supported) |
+
+## 1. Implement the Driver
+
+```
+<?php
+// server/src/Gateways/PaypalDriver.php
+
+namespace MyOrg\MyExtension\Gateways;
+
+use Fleetbase\Ledger\DTO\GatewayResponse;
+use Fleetbase\Ledger\DTO\PurchaseRequest;
+use Fleetbase\Ledger\DTO\RefundRequest;
+use Fleetbase\Ledger\Gateways\AbstractGatewayDriver;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+class PaypalDriver extends AbstractGatewayDriver
+{
+    public function getName(): string
+    {
+        return 'PayPal';
+    }
+
+    public function getCode(): string
+    {
+        return 'paypal';
+    }
+
+    public function getCapabilities(): array
+    {
+        return ['purchase', 'refund', 'webhooks', 'sandbox'];
+    }
+
+    public function getConfigSchema(): array
+    {
+        return [
+            ['key' => 'client_id',     'label' => 'Client ID',     'type' => 'text',     'required' => true],
+            ['key' => 'client_secret', 'label' => 'Client Secret', 'type' => 'password', 'required' => true],
+        ];
+    }
+
+    public function purchase(PurchaseRequest $request): GatewayResponse
+    {
+        $token = $this->getAccessToken();
+
+        $response = Http::withToken($token)
+            ->baseUrl($this->host())
+            ->post('/v2/checkout/orders', [
+                'intent'         => 'CAPTURE',
+                'purchase_units' => [[
+                    'amount' => [
+                        'currency_code' => $request->currency,
+                        'value'         => sprintf('%.2f', $request->amount / 100),
+                    ],
+                    'reference_id' => $request->reference,
+                ]],
+            ])
+            ->throw();
+
+        $data = $response->json();
+
+        return new GatewayResponse(
+            success:   true,
+            reference: $data['id'],
+            raw:       $data,
+        );
+    }
+
+    public function refund(RefundRequest $request): GatewayResponse
+    {
+        $token = $this->getAccessToken();
+
+        $response = Http::withToken($token)
+            ->baseUrl($this->host())
+            ->post("/v2/payments/captures/{$request->transactionReference}/refund", [
+                'amount' => [
+                    'currency_code' => $request->currency,
+                    'value'         => sprintf('%.2f', $request->amount / 100),
+                ],
+            ])
+            ->throw();
+
+        return new GatewayResponse(
+            success:   true,
+            reference: $response->json('id'),
+            raw:       $response->json(),
+        );
+    }
+
+    public function handleWebhook(Request $request): GatewayResponse
+    {
+        $event = $request->input('event_type');
+
+        return match ($event) {
+            'PAYMENT.CAPTURE.COMPLETED' => $this->handleCaptureCompleted($request),
+            'PAYMENT.CAPTURE.REFUNDED'  => $this->handleRefundCompleted($request),
+            default                      => GatewayResponse::ignored($event),
+        };
+    }
+
+    protected function host(): string
+    {
+        return $this->sandbox
+            ? 'https://api-m.sandbox.paypal.com'
+            : 'https://api-m.paypal.com';
+    }
+
+    protected function getAccessToken(): string
+    {
+        return Http::withBasicAuth($this->config['client_id'], $this->config['client_secret'])
+            ->asForm()
+            ->baseUrl($this->host())
+            ->post('/v1/oauth2/token', ['grant_type' => 'client_credentials'])
+            ->json('access_token');
+    }
+
+    protected function handleCaptureCompleted(Request $request): GatewayResponse { /* ... */ }
+    protected function handleRefundCompleted(Request $request): GatewayResponse { /* ... */ }
+}
+```
+
+## 2. Register the Driver
+
+In your service provider's
+`boot()`
+, extend the
+`PaymentGatewayManager`
+:
+
+```
+<?php
+// server/src/Providers/MyExtensionServiceProvider.php
+
+use Fleetbase\Ledger\PaymentGatewayManager;
+use MyOrg\MyExtension\Gateways\PaypalDriver;
+
+public function boot()
+{
+    parent::boot();
+
+    $this->app->afterResolving(PaymentGatewayManager::class, function (PaymentGatewayManager $manager) {
+        $manager->extend('paypal', fn ($app) => $app->make(PaypalDriver::class));
+    });
+}
+```
+
+`afterResolving`
+hooks into Laravel's container so your driver is registered the moment any code requests the manager — boot-order safe.
+
+### Surfacing the Driver in the UI
+
+Ledger renders the "Add Gateway" form from
+`PaymentGatewayManager::getDriverManifest()`
+, which iterates
+`getRegisteredDriverCodes()`
+. To add your driver to that list, you'll need to either:
+
+1. Submit a small PR to Ledger to add
+   `'paypal'`
+   to
+   `getRegisteredDriverCodes()`
+   — preferred for first-party widely-used drivers
+2. Override
+   `PaymentGatewayManager`
+   in your container with a subclass that adds your code
+
+Option 1 is simpler. Option 2 looks like:
+
+```
+$this->app->extend(PaymentGatewayManager::class, function (PaymentGatewayManager $manager) {
+    return new class($manager) extends PaymentGatewayManager {
+        public function getRegisteredDriverCodes(): array
+        {
+            return [...parent::getRegisteredDriverCodes(), 'paypal'];
+        }
+    };
+});
+```
+
+## 3. Webhook Endpoint
+
+Ledger ships a generic webhook controller that calls
+`handleWebhook()`
+on the driver matching the URL segment. Once registered, your driver gets POSTs at:
+
+```
+/ledger/webhooks/paypal
+```
+
+Configure that URL in PayPal's webhook dashboard, with the events you handle.
+
+## 4. Test in the Console
+
+In Ledger's settings, "Add Payment Gateway" now offers PayPal. The form reads
+`getConfigSchema()`
+; user input is encrypted and persisted on a
+`Gateway`
+model. From any code path:
+
+```
+use Fleetbase\Ledger\PaymentGatewayManager;
+use Fleetbase\Ledger\DTO\PurchaseRequest;
+
+$manager = app(PaymentGatewayManager::class);
+$paypal  = $manager->gateway('paypal');
+
+$response = $paypal->purchase(new PurchaseRequest(
+    amount: 5000, // cents
+    currency: 'USD',
+    reference: $invoice->public_id,
+));
+```
+
+## Reference
+
+* `ledger/server/src/Contracts/GatewayDriverInterface.php`
+  — full contract
+* `ledger/server/src/Gateways/AbstractGatewayDriver.php`
+  — extend this
+* `ledger/server/src/Gateways/StripeDriver.php`
+  — full reference driver with tokenization
+* `ledger/server/src/PaymentGatewayManager.php`
+  — registration via
+  `extend()`
+* [Laravel
+  `Manager`
+  API](https://laravel.com/api/11.x/Illuminate/Support/Manager.html)
+  — the upstream driver pattern
+
+[Adding an Integrated Vendor
+
+Wire a third-party logistics provider into Fleet-Ops as a selectable IntegratedVendor — credentials form, API bridge, lifecycle callbacks, and webhook routing.](https://fleetbase.io/docs/extension-development/recipes/adding-an-integrated-vendor)
+[Adding a SMS Provider
+
+Plug a new SMS gateway into the platform's SmsService — implement a sender class, wire it through configuration, and route specific phone-number prefixes to it.](https://fleetbase.io/docs/extension-development/recipes/adding-a-sms-provider)

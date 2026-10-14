@@ -1,0 +1,76 @@
+---
+title: "Support Plans"
+url: https://fleetbase.io/docs/community/support-plans
+module: community
+---
+
+# Support Plans
+
+Community, cloud, and enterprise support options for Fleetbase — from free community channels to dedicated SLAs.
+
+# Support Plans
+
+Fleetbase offers several support options depending on whether you're self-hosting, on Fleetbase Cloud, or need enterprise-grade guarantees.
+
+## Community Support — Free
+
+Available to everyone, regardless of deployment type.
+
+| Channel | Best for |
+| --- | --- |
+| [Discord `#help`](https://fleetbase.io/docs/community/discord) | Quick questions, installation issues, API usage |
+| [GitHub Discussions](https://github.com/elpelaflow/PuntoShop-TMS/discussions) | Feature proposals, architecture questions, longer-form Q&A |
+| [GitHub Issues](https://github.com/elpelaflow/PuntoShop-TMS/issues) | Bug reports with reproduction steps |
+| [FAQ](https://fleetbase.io/docs/community/faq) | Common questions and troubleshooting |
+
+Community support is monitored by the Fleetbase core team on a best-effort basis. Response times are not guaranteed.
+
+## Fleetbase Cloud — Email Support
+
+All
+[Fleetbase Cloud](https://console.fleetbase.io/onboard)
+accounts include support from the Fleetbase team via two channels:
+
+* **Email support**
+  — submit tickets for account, billing, and platform questions
+* **Live chat**
+  — embedded directly in the Fleetbase Console, available while you're logged in
+
+Cloud support covers:
+
+* Account and billing questions
+* Platform configuration and setup assistance
+* Extension installation and troubleshooting
+* Escalation of platform issues to the engineering team
+
+To get started with Fleetbase Cloud, sign up at
+[console.fleetbase.io/onboard](https://console.fleetbase.io/onboard)
+— a 7-day free trial is available.
+
+## Enterprise Support
+
+For self-hosted or cloud deployments where uptime and response time guarantees matter, enterprise support plans are available. Features include:
+
+| Feature | Enterprise |
+| --- | --- |
+| **Dedicated contact** | Named engineer, direct Slack/email channel |
+| **SLA response time** | Defined response windows for critical, high, and normal issues |
+| **Architecture reviews** | Sessions with the core team to review your deployment, extensions, and integrations |
+| **Priority bug fixes** | Critical bugs impacting your deployment are prioritised in the core roadmap |
+| **Commercial license** | Included — use Fleetbase in proprietary products without AGPL-3.0 obligations |
+| **Onboarding assistance** | Guided setup for complex deployments and custom extension development |
+
+Enterprise plans are scoped and priced based on deployment size, number of instances, and required SLA levels.
+
+## Get in Touch
+
+To discuss support options or get a quote:
+
+* **Email**
+  —
+  [hello@fleetbase.io](mailto:hello@fleetbase.io)
+* **Contact form**
+  —
+  [fleetbase.io/contact](https://fleetbase.io/contact)
+
+When reaching out, include a brief description of your deployment (self-hosted or cloud, scale, and any time-sensitive requirements) to help us recommend the right plan.

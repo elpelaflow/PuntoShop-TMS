@@ -1,0 +1,145 @@
+---
+title: "Fixed Rate"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-rates/fixed-rate
+module: fleet-ops
+---
+
+Service Rates
+
+# Fixed Rate
+
+Charge a flat fee per distance band — define the maximum distance you serve and Fleet-Ops generates one fee tier per unit, so you can price 0–1, 1–2, 2–3 km independently.
+
+# Fixed Rate
+
+**Fixed Rate**
+prices an order from a table of
+**distance bands**
+— each band covers a 1-unit slice of distance and has its own flat fee. The band the order's distance falls into determines the service fee. (In the API this method is identified as
+`fixed_meter`
+; the legacy value
+`fixed_rate`
+also works.)
+
+Use this when your pricing is
+**banded by distance**
+but doesn't scale linearly — for example "any delivery under 5 km is $5, anything under 10 km is $8, anything further is $12". The bands are whole-unit distance steps capped at the maximum distance you set.
+
+![Fixed Rate form — max distance, unit, and the auto-generated distance/fee table](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-fixed-rate.97c65f05.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## How it works
+
+1. You set the
+   **Maximum Distance**
+   you serve and the
+   **Max Distance Unit**
+   (km or mi).
+2. Fleet-Ops generates one row in the band table for each whole-unit step from 0 up to your maximum. Each row covers a 1-unit band (e.g. 0–1, 1–2, 2–3 …).
+3. You set the fee for each band individually.
+4. At quote time, the route's distance is matched against the bands. The smallest band whose upper bound covers the order's distance wins. If the distance exceeds every band, the largest band's fee is used.
+5. The matched band's fee is added to the
+   **Base Fee**
+   to produce the service fee.
+
+> **Service fee = Base Fee + the matched band's fee**
+
+If you change the maximum distance, the band table is updated automatically: new rows are added for the distances you've just added, and any rows beyond the new maximum are removed.
+
+## API reference
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `rate_calculation_method` | yes | Set to `fixed_meter` . |
+| `max_distance` | yes | The largest distance this rate supports, in `max_distance_unit` . Must be at least 1. |
+| `max_distance_unit` | yes | `km` or `mi` . |
+| `base_fee` | optional | Added to the matched band's fee. |
+| `currency` | yes | Currency for all fees on the rate. |
+| `rateFees[]` | auto | The band table — one entry per unit of distance, each with a `distance` (the lower bound of the band) and a `fee` . Generated automatically; edit fees inline in the form. |
+
+## Worked example
+
+> *"Up to 10 km: $5. Up to 20 km: $8. Up to 30 km: $12."*
+
+| Maximum Distance | Unit | Bands |
+| --- | --- | --- |
+| 30 | km | 0–10 km: $5 (bands 0 through 9). 10–20 km: $8 (bands 10 through 19). 20–30 km: $12 (bands 20 through 29). |
+
+For a route of:
+
+* **3 km**
+  → matches the 0–10 km group → service fee = Base Fee + $5.
+* **14 km**
+  → matches the 10–20 km group → service fee = Base Fee + $8.
+* **35 km**
+  → exceeds the largest band, falls back to the 20–30 km group → service fee = Base Fee + $12.
+
+Because every whole-unit step gets its own row, you can also price each individual kilometer differently if you need finer granularity — for example a true per-km step ladder rather than a banded one.
+
+## Configuration workflow
+
+Create or open a service rate in
+**Fleet-Ops → Operations → Service Rates**
+.
+
+Set
+**Rate Calculation Method**
+to
+**Fixed Rate**
+.
+
+Set
+**Maximum Distance**
+and
+**Max Distance Unit**
+(km or mi). The form will populate the band table with one row per unit from 0 up to the maximum.
+
+Set the
+**Fee**
+for each band. Bands that should share a price can be set to the same value.
+
+*Optional:*
+Set a
+**Base Fee**
+that adds on top of the matched band's fee.
+
+*Optional:*
+Configure
+**COD Fees**
+and
+**Peak Hours**
+— these surcharges apply on top of the service fee the same way they do for any rate type.
+
+Save and test by generating a quote for a sample order. Check the
+**Quote**
+section on the order detail to see the matched band and the calculated amount.
+
+## Limitations
+
+* **Whole-unit bands only.**
+  Bands are always 1 unit wide and start on whole numbers. If you need half-unit bands, switch to a finer unit, or use
+  [Per Meter](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-meter)
+  for true linear pricing.
+* **No banding by zone.**
+  Bands apply globally to the rate. If you need different distance prices in different geographies, use
+  [Multi-zone Distance](https://fleetbase.io/docs/fleet-ops/operations/service-rates/multi-zone-distance)
+  instead.
+* **Reducing the maximum distance is destructive.**
+  Bands beyond the new maximum are removed automatically and can't be recovered.
+
+## Related Pages
+
+* [Service Rates Overview](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  — all calculation methods and rate scoping
+* [Per Meter](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-meter)
+  — linear distance pricing
+* [Multi-zone Distance](https://fleetbase.io/docs/fleet-ops/operations/service-rates/multi-zone-distance)
+  — distance pricing that varies by geography
+* [Service Quotes](https://fleetbase.io/docs/fleet-ops/operations/service-quotes/overview)
+  — how the calculated rate becomes a quote on an order
+
+[Per Meter
+
+Charge a flat rate per unit of distance — meters, kilometers, feet, yards, or miles. The simplest linear distance-based pricing model.](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-meter)
+[Per Drop-off
+
+Price an order by the number of stops on the route. Define min/max ranges and a flat fee for each band — ideal for multi-stop courier and batch deliveries.](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-drop)

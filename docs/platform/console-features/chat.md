@@ -1,0 +1,101 @@
+---
+title: "Chat"
+url: https://fleetbase.io/docs/platform/console-features/chat
+module: platform
+---
+
+# Chat
+
+Real-time messaging built into the Fleetbase Console — create channels, message team members, and share files without leaving the platform.
+
+# Chat
+
+Fleetbase includes a real-time chat system built into the console. Dispatchers and team members can message each other directly, create group channels, and share files — all from a persistent chat tray in the top navigation bar.
+
+Chat is powered by the SocketCluster WebSocket layer and delivers messages in real time without polling.
+
+## The Chat Tray
+
+Click the
+**message icon**
+in the top navigation bar to open the Chat Tray.
+
+![Chat Tray — Start Chat button, channel list with name, unread badge, avatar, and last message preview](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-chat-tray.fd6bffd1.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+The tray shows:
+
+* An
+  **unread count badge**
+  on the message icon when you have unread messages
+* A list of your open channels, each showing the channel name, last message preview, sender avatar, and unread count
+* A
+  **Start Chat**
+  button to create a new conversation
+
+Click any channel to open its chat window. If you created the channel, a
+**delete**
+button also appears on its tray entry.
+
+## Chat Windows
+
+Each open channel renders as a
+**floating chat window**
+anchored to the bottom of the screen. Multiple windows can be open simultaneously, stacked side by side.
+
+![Chat window — channel name with pencil, participant avatar strip with online indicators, message feed, and Send button](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-chat-window.48126238.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+### Window Controls
+
+| Control | Description |
+| --- | --- |
+| **Channel name + pencil** | Click the pencil to rename the channel |
+| **Add participant dropdown** | Lists all users in your organization with online/offline status indicators. Click a user to add them. |
+| **✕** | Close the window. Does not delete the channel. |
+
+### Participants
+
+Participant avatars appear in a strip below the window header. Each avatar has a colour dot — green for online, grey for offline. Hover for the participant's name.
+
+If you have permission, a small
+**✕**
+appears on participant avatars. Click it to remove that user from the channel.
+
+### Sending Messages
+
+Type in the textarea at the bottom and press
+**Enter**
+or click
+**Send**
+. The Send button is disabled while the input is empty.
+
+### Attachments
+
+Click
+**Add Attachment**
+(paperclip icon) to attach files to your message. Multiple files can be selected at once. An upload progress indicator with a percentage shows while files upload. Pending files appear as chips above the input area — click ✕ on a chip to remove it before sending.
+
+Supported file types:
+
+| Category | Formats |
+| --- | --- |
+| Images | JPEG, PNG, GIF, WebP |
+| Documents | PDF, Word (.docx / .doc), Excel (.xlsx), PowerPoint (.pptx) |
+| Video | MP4, QuickTime, AVI, FLV, WMV |
+| Audio | MP3 |
+| Archives | ZIP, TAR |
+
+## Starting a New Chat
+
+Click
+**Start Chat**
+in the Chat Tray. Search for users in your organization to add as participants and give the channel a name. The channel opens as a floating window immediately.
+
+## Real-Time Behaviour
+
+The chat service listens on two socket channels simultaneously:
+
+* `user.{your-user-id}`
+  — events like being added to or removed from a channel
+* Each joined channel's own feed — for new messages
+
+When a message arrives while the tray is closed, a notification sound plays and the unread badge on the message icon updates automatically.

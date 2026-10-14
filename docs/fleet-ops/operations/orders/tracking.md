@@ -1,0 +1,145 @@
+---
+title: "Tracking"
+url: https://fleetbase.io/docs/fleet-ops/operations/orders/tracking
+module: fleet-ops
+---
+
+Orders
+
+# Tracking
+
+Track live order progress, driver position, and ETA from the order detail view and live map.
+
+# Tracking
+
+Fleet-Ops provides real-time tracking of order progress and driver location from the moment an order is dispatched until delivery is confirmed. Tracking is visible to operators in the console and optionally to customers via a public tracking link.
+
+## Live Map
+
+The live map (
+**Fleet-Ops → Live Map**
+or the map visible from the dashboard) shows:
+
+* **Driver markers**
+  — real-time position of all active drivers, updated continuously via the Navigator app or telematics devices
+* **Order routes**
+  — the calculated route for each active order, shown as a polyline
+* **Pickup and dropoff markers**
+  — origin and destination pins for active orders
+* **Waypoint markers**
+  — intermediate stop markers for multi-drop orders
+
+Click a driver marker to see:
+
+* Driver name, photo, and status
+* Current speed and heading
+* Active order assignment
+* ETA to next stop
+
+![Live map — driver markers, active route polylines, pickup and dropoff pins](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-vehicle-positions.3f9d43cb.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Order Detail Tracking
+
+From the order detail panel, the tracking section shows:
+
+| Field | Description |
+| --- | --- |
+| **Driver Location** | Real-time map with driver position |
+| **ETA** | Estimated time of arrival at the next stop |
+| **Distance Remaining** | Distance from driver to dropoff |
+| **Status** | Current order status |
+| **Activity Timeline** | All status transitions with timestamps and locations |
+
+The activity timeline records every event with:
+
+* The event — both system-status transitions (
+  `dispatched`
+  ,
+  `started`
+  ,
+  `completed`
+  ,
+  `canceled`
+  ) and any activities defined in the order's
+  [activity flow](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows)
+  (e.g.
+  *picked up*
+  ,
+  *in transit*
+  ,
+  *arrived at dropoff*
+  )
+* The timestamp
+* The driver's GPS coordinates at the time of the event
+* Any attached proof (photo, signature)
+
+## Tracking Number & Customer Tracking
+
+Every order has a
+**Tracking Number**
+(e.g.
+`FO-XXXXXXXX`
+) that customers can use on a public tracking page to view the order's current status without logging in.
+
+![Public order tracking page — tracking number, activity timeline, and live map for the customer](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-order-tracking.ba27f4e5.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+The tracking page shows:
+
+* Current status and recent activity
+* Estimated delivery time
+* Map with current driver position (when active)
+* Proof of delivery once completed
+
+The public tracking URL is
+`/~/track-order?order={tracking_number}`
+. Customers can also visit
+`/~/track-order`
+with no query parameter and enter a tracking number into the form.
+
+On Fleetbase Cloud the full URLs are:
+
+* Direct deep link:
+  `https://console.fleetbase.io/~/track-order?order={tracking_number}`
+* Manual entry:
+  `https://console.fleetbase.io/~/track-order`
+
+For self-hosted instances, replace
+`console.fleetbase.io`
+with your console hostname.
+
+## Entity-Level Tracking
+
+Each
+**entity**
+(item) in an order has its own tracking number and status. For orders with multiple items, each item's status is tracked independently — so you can see which items have been picked up, which are in transit, and which have been delivered, even within a single order.
+
+This is particularly useful for partial delivery scenarios where some items are delivered but others fail or require return.
+
+## WebSocket Real-Time Updates
+
+For custom applications, driver location and order status updates are available in real time via the SocketCluster WebSocket channel.
+
+Subscribe to
+`company.{company_id}`
+to receive:
+
+| Event | Payload |
+| --- | --- |
+| `driver.location_changed` | Current driver coordinates, speed, heading |
+| `order.dispatched` | Order dispatched to driver |
+| `order.started` | Driver began the order |
+| `order.completed` | Order's completion activity fired |
+| `order.canceled` | Order canceled |
+| `order.activity_changed` | Any custom activity from the order's activity flow fired |
+
+See
+[Socket Events](https://fleetbase.io/docs/platform/developer-console/socket-events)
+for subscription details and payload schemas.
+
+## Position History
+
+For historical analysis, Fleet-Ops stores all driver position data. You can view a driver's position history in
+**Fleet-Ops → Resources → Drivers → [Driver] → Positions**
+— or use the position replay feature to re-watch a past route on the map.
+
+Position data includes: latitude, longitude, heading, speed, altitude, and timestamp per reading.

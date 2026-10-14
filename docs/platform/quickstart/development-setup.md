@@ -1,0 +1,468 @@
+---
+title: "Development Setup"
+url: https://fleetbase.io/docs/platform/quickstart/development-setup
+module: platform
+---
+
+# Development Setup
+
+Set up a Fleetbase development environment — mount live source, link packages, and work on extensions with hot reload.
+
+# Development Setup
+
+This guide is for contributors and extension developers who need to work directly on Fleetbase source code or link a local package into a running instance. If you just want to run Fleetbase locally without modifying its internals, see
+[Running Locally](https://fleetbase.io/docs/platform/quickstart/running-locally)
+instead.
+
+## Prerequisites
+
+* **Docker**
+  v20.10+ and
+  **Docker Compose**
+  v2.0+
+* **Git**
+  with submodule support
+* **Node.js**
+  v18+ and
+  **pnpm**
+  — for running the console locally outside Docker
+* **PHP**
+  8.1+ and
+  **Composer**
+  — for backend package work outside Docker
+
+## Clone with Submodules
+
+The Fleetbase repository uses Git submodules for its packages. Development setup requires pulling all submodules so the
+`packages/`
+directory contains live source:
+
+```
+git clone https://github.com/elpelaflow/PuntoShop-TMS.git
+cd PuntoShop-TMS
+git submodule update --init --recursive
+```
+
+This populates
+`packages/`
+with the source for the core TMS extensions (Fleet-Ops, Ledger, Dev Engine, and IAM Engine). Each package contains two directories:
+
+| Directory | Contents |
+| --- | --- |
+| `addon/` | Ember.js frontend addon code |
+| `server/` | Laravel backend package (service provider, models, routes, migrations) |
+
+## Package Linking
+
+Fleetbase includes a development linker in the repository so you do not have to hand-edit
+`console/package.json`
+,
+`api/composer.json`
+, and
+`console/pnpm-workspace.yaml`
+every time you switch extension work. Use it when you want a local package under
+`packages/`
+to replace the published registry package.
+
+The linker manages both sides of an extension:
+
+* the Ember engine used by Console
+* the Laravel package used by the API
+* shared frontend packages such as
+  `ember-core`
+  ,
+  `ember-ui`
+  , and
+  `fleetops-data`
+* backend-only shared packages such as
+  `core-api`
+
+Install it once from the Fleetbase repository root:
+
+```
+npm link
+```
+
+After linking, the
+`flb-package-linker`
+command is available globally:
+
+```
+flb-package-linker --help
+flb-package-linker list
+flb-package-linker status
+```
+
+If you do not want to install the command globally, run it directly:
+
+```
+node scripts/package-linker.mjs status
+```
+
+### Link Fleet-Ops for Development
+
+Fleet-Ops development usually needs the Fleet-Ops extension plus the shared Ember packages it depends on. From the repository root:
+
+```
+flb-package-linker enable fleetops --shared ember-core ember-ui fleetops-data
+flb-package-linker install fleetops
+```
+
+This updates the local manifests and prints the install commands it would run:
+
+```
+cd console && pnpm install
+cd api && composer update fleetbase/fleetops-api --with-dependencies
+```
+
+Use
+`--install`
+if you want the linker to run those commands immediately:
+
+```
+flb-package-linker enable fleetops --shared ember-core ember-ui fleetops-data --install
+```
+
+### Link Multiple Extensions
+
+Pass more than one extension name to enable or disable them together:
+
+```
+flb-package-linker enable fleetops ledger --shared ember-core ember-ui fleetops-data
+flb-package-linker install fleetops ledger
+```
+
+The install command combines backend Composer packages into one update:
+
+```
+cd api && composer update fleetbase/fleetops-api fleetbase/ledger-api --with-dependencies
+```
+
+### Link Shared Packages
+
+When working on shared Ember packages, link them through the root Console workspace instead of editing every extension manually:
+
+```
+flb-package-linker enable-shared ember-core ember-ui fleetops-data
+flb-package-linker install
+```
+
+The linker adds those packages to
+`console/pnpm-workspace.yaml`
+, sets
+`linkWorkspacePackages: deep`
+, enables workspace preference, and writes pnpm workspace overrides. This matters because Ember engines can otherwise resolve their own nested copy of a shared package, which makes local changes appear to be ignored.
+
+For backend-only package work, link Core API the same way:
+
+```
+flb-package-linker enable-shared core-api
+flb-package-linker install core-api
+```
+
+### Inspect and Undo Links
+
+Check the current local-link state:
+
+```
+flb-package-linker status
+flb-package-linker doctor
+```
+
+`doctor`
+verifies the installed symlinks and reports duplicate Fleetbase package versions in the pnpm lockfile.
+
+If you only want to undo specific links, disable them by name:
+
+```
+flb-package-linker disable fleetops ledger
+flb-package-linker disable-shared ember-core ember-ui fleetops-data core-api
+flb-package-linker install fleetops ledger core-api
+```
+
+To fully clear every development link managed by the linker, use
+`reset`
+:
+
+```
+flb-package-linker reset --dry-run
+flb-package-linker reset
+flb-package-linker install
+```
+
+The dry run previews the manifest changes first. The real reset restores linked extensions and shared packages back to their saved registry ranges, removes Composer path repositories, removes local pnpm workspace entries and overrides, and deletes
+`.fleetbase-dev-links.json`
+once it is empty.
+
+The linker stores original dependency ranges in
+`.fleetbase-dev-links.json`
+so the changes are reversible. That file is for local development state and should stay out of commits.
+
+The commands above expect the current monorepo layout where
+`console/`
+,
+`api/`
+, and
+`packages/`
+sit beside each other. Run
+`flb-package-linker list`
+to see which packages are recognized as extensions and which shared development dependencies can be linked.
+
+## Backend Development
+
+### Mount Source into Docker
+
+To work on the API or packages with live source, add volume mounts in
+`docker-compose.override.yml`
+so your local files are used directly by the running containers:
+
+```
+services:
+  application:
+    environment:
+      ENVIRONMENT: "development"
+      APP_DEBUG: "true"
+    volumes:
+      - ./api:/fleetbase/api
+      - ./packages:/fleetbase/packages
+```
+
+After updating the override file, restart the stack:
+
+```
+docker compose up -d
+```
+
+### Manual Backend Package Links
+
+The package linker is the recommended workflow, but the underlying Composer setup is simple. To develop a backend package locally by hand, add a
+`path`
+repository entry in
+`api/composer.json`
+for each package. Composer will symlink the local directory into the vendor tree:
+
+```
+{
+  "repositories": [
+    { "type": "path", "url": "../packages/fleetops", "options": { "symlink": true } },
+    { "type": "path", "url": "../packages/ledger", "options": { "symlink": true } },
+    { "type": "path", "url": "../packages/core-api", "options": { "symlink": true } }
+  ]
+}
+```
+
+Then run Composer inside the application container to resolve the links:
+
+```
+docker compose exec application composer install
+```
+
+After Composer installs, run the deploy script to apply any new migrations from the linked packages:
+
+```
+docker compose exec application bash -c "./deploy.sh"
+```
+
+### Octane and PHP Changes
+
+Fleetbase runs Laravel Octane, which keeps the application in memory for performance.
+**PHP file changes are not picked up automatically.**
+After editing any PHP file, reload the Octane worker:
+
+```
+docker compose exec application php artisan octane:reload
+```
+
+If you add new migrations, run them directly:
+
+```
+docker compose exec application php artisan migrate
+```
+
+## Frontend Development
+
+There are two paths for frontend development: running the Ember dev server inside Docker, or running it locally on your machine. Both give you hot module replacement and live reload on file changes.
+
+### Path A — Docker (Dockerfile.server-build)
+
+`Dockerfile.server-build`
+runs
+`ember serve`
+inside a container instead of doing a production build. This is useful if you want to keep everything in Docker without installing Node locally.
+
+Override the console service in
+`docker-compose.override.yml`
+to build from the dev Dockerfile and mount your local source:
+
+```
+services:
+  console:
+    build:
+      context: ./console
+      dockerfile: Dockerfile.server-build
+    volumes:
+      - ./console:/console
+      - /console/node_modules
+    ports:
+      - "4200:4200"
+```
+
+Then rebuild and start the console container:
+
+```
+docker compose up -d --build console
+```
+
+The console will be available at
+`http://localhost:4200`
+with live reload on changes inside
+`./console/`
+.
+
+### Path B — Local Ember Dev Server
+
+Stop the console container and run the Ember dev server directly on your machine:
+
+```
+docker compose stop console
+cd console
+pnpm install
+pnpm start:dev
+```
+
+The console will be available at
+`http://localhost:4200`
+. This is the fastest iteration path — the dev server watches
+`console/`
+,
+`packages/*/addon/`
+, and any
+`link:`
+-ed addons, and live-reloads on changes.
+
+Make sure
+`console/environments/.env.development`
+has
+`API_HOST`
+pointing at your running API container before starting:
+
+```
+API_HOST=http://localhost:8000
+```
+
+### Manual Frontend Package Links
+
+The package linker is the recommended workflow for frontend packages too. If you need to make the change manually, open
+`console/package.json`
+and add a
+`link:`
+entry pointing to the package's root directory. The
+`link:`
+protocol tells the package manager to use your local filesystem copy instead of the published version:
+
+```
+{
+  "dependencies": {
+    "@fleetbase/fleetops-engine": "link:../packages/fleetops",
+    "@fleetbase/ledger-engine": "link:../packages/ledger"
+  }
+}
+```
+
+When working on shared packages such as
+`@fleetbase/ember-ui`
+,
+`@fleetbase/ember-core`
+, or
+`@fleetbase/fleetops-data`
+, prefer
+`flb-package-linker enable-shared`
+instead of manual
+`link:`
+entries. The linker configures pnpm workspace overrides and deep workspace linking so extension dependencies also resolve to the local package.
+
+Then install dependencies in the console to resolve the links. Inside the console container (Path A):
+
+```
+docker compose exec console pnpm install
+```
+
+Or locally (Path B):
+
+```
+cd console
+pnpm install
+```
+
+## Working on a Package
+
+With volumes mounted and packages linked, the typical workflow for editing an extension package is:
+
+**Backend changes**
+(PHP —
+`packages/your-package/server/`
+)
+
+Edit the PHP files directly. After saving, reload Octane so the worker picks up the changes:
+
+```
+docker compose exec application php artisan octane:reload
+```
+
+If you add new migrations, run them directly:
+
+```
+docker compose exec application php artisan migrate
+```
+
+**Frontend changes**
+(Ember —
+`packages/your-package/addon/`
+)
+
+The Ember dev server (either Docker or local) watches linked addons and live-reloads automatically. No additional steps needed.
+
+## Building a New Extension
+
+To scaffold a new extension from scratch, use the Fleetbase CLI:
+
+```
+npm install -g @fleetbase/cli
+flb scaffold
+```
+
+The CLI runs interactively and prompts for the extension name, description, author, PHP namespace, and repository URL. It generates a new package with the correct structure (
+`addon/`
+,
+`server/`
+,
+`package.json`
+,
+`composer.json`
+) ready to link using the steps above.
+
+You can also pass options directly to skip the prompts:
+
+```
+flb scaffold --name my-extension --namespace "MyCompany\\MyExtension"
+```
+
+See the
+[flb scaffold command reference](https://fleetbase.io/docs/cli/extension-development/scaffold)
+for all available flags, and the
+[Extension Development Quickstart](https://fleetbase.io/docs/extension-development/getting-started/quickstart)
+for a full walkthrough of building and registering a new extension.
+
+## Licensing
+
+Fleetbase is licensed under the
+**GNU Affero General Public License v3 (AGPL-3.0)**
+. If you modify Fleetbase or build extensions that run as part of a networked service, the AGPL requires that you make your modified source code publicly accessible to users of that service.
+
+If you intend to keep your modifications or extensions private — for example, as part of a commercial product or internal platform — you will need a
+**commercial license**
+.
+[Book a call](https://cal.com/shivthakker/enquiry)
+to discuss licensing options, or visit the
+[Licensing page](https://fleetbase.io/licensing)
+for further information.

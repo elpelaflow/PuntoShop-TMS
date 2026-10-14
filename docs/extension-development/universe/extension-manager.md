@@ -1,0 +1,276 @@
+---
+title: "Extension Manager"
+url: https://fleetbase.io/docs/extension-development/universe/extension-manager
+module: extension-development
+---
+
+# Extension Manager
+
+Lazy-load engines on demand, react to engine load events, share host services and components into engines, and inspect installed-extension state.
+
+# Extension Manager
+
+The
+**extension manager**
+(
+`universe/extension-manager`
+) is the engine-aware sub-service. While the menu, registry, widget, and hook services manage data, the extension manager manages
+**engines themselves**
+— when they boot, when their setup callbacks fire, and what state they're in.
+
+You'll mostly reach it through the
+[`UniverseService`
+façade](https://fleetbase.io/docs/extension-development/universe/overview)
+(
+`universe.whenEngineLoaded(…)`
+) — but the underlying service has more surface for advanced cases like cross-engine service sharing.
+
+## Resolving the Service
+
+```
+const extensionManager = universe.getService('extension-manager');
+// or
+const extensionManager = universe.extensionManager;
+```
+
+## Boot Lifecycle
+
+The extension manager drives the boot sequence:
+
+1. **Load the install list.**
+   `loadExtensions(application)`
+   calls the API, gets the list of installed extensions for this organization, and populates
+   `application.extensions`
+   and
+   `application.engines`
+   . Resolves
+   `extensionsLoadedPromise`
+   .
+2. **Set up each extension.**
+   For every extension in the list,
+   `setupExtensions()`
+   dynamically
+   `import()`
+   s
+   `addon/extension.js`
+   and runs:
+   * `setupExtension(app, universe)`
+     synchronously (or awaited if async)
+   * Stores
+     `onEngineLoaded(engine, universe, app)`
+     to fire later when that engine actually loads
+3. **Run boot callbacks.**
+   `universe.executeBootCallbacks()`
+   runs anything queued via
+   `universe.afterBoot(…)`
+   .
+4. **Mark boot complete.**
+   `finishBoot()`
+   resolves
+   `bootPromise`
+   . From this point
+   `whenEngineLoaded(…)`
+   callbacks fire as soon as the named engine boots.
+
+Engines themselves load
+**lazily**
+— only when the user navigates into a route mounted on that engine, or when something explicitly calls
+`ensureEngineLoaded(name)`
+.
+
+## whenEngineLoaded(engineName, callback)
+
+Run a callback once the named engine boots. If the engine is already loaded, the callback runs immediately.
+
+```
+// addon/extension.js — VROOM registering itself with Fleet-Ops
+export default {
+    setupExtension(app, universe) {
+        universe.whenEngineLoaded('@fleetbase/fleetops-engine', this.registerVroom);
+    },
+
+    async registerVroom(fleetopsEngine, universe) {
+        const vroomEngine = await universe.extensionManager.ensureEngineLoaded('@fleetbase/vroom-engine');
+        const routeOptimization = fleetopsEngine.lookup('service:route-optimization');
+        const vroom = vroomEngine.lookup('service:vroom');
+        if (routeOptimization && vroom) {
+            routeOptimization.register('vroom', vroom);
+        }
+    },
+};
+```
+
+Callback signature:
+`(engineInstance, universe, applicationInstance) => void | Promise<void>`
+.
+
+Real example:
+`vroom/addon/extension.js:6`
+— VROOM waits for Fleet-Ops, loads its own engine, and plugs its routing implementation into the Fleet-Ops route-optimization service.
+
+### setupExtension vs. onEngineLoaded vs. whenEngineLoaded
+
+`addon/extension.js`
+can export an object with
+**two**
+lifecycle hooks. Knowing when each runs:
+
+| Hook | When it fires |
+| --- | --- |
+| `setupExtension(app, universe)` | During boot, before any engine is loaded — for menu items, registry slots, widgets, hooks |
+| `onEngineLoaded(engine, universe, app)` | The first time **your own** engine loads — for setup that needs the engine instance |
+| `universe.whenEngineLoaded(other, cb)` | Called from `setupExtension` when you need to wait for **another** engine to load |
+
+```
+export default {
+    setupExtension(app, universe) {
+        // synchronous setup — registries, menus, widgets
+    },
+
+    onEngineLoaded(engine, universe, app) {
+        // engine.lookup('service:my-service'), etc.
+    },
+};
+```
+
+## ensureEngineLoaded(engineName)
+
+Force-load an engine and return its instance. Idempotent — returns the cached instance if already loaded, joins the in-flight promise if it's mid-load.
+
+```
+const fleetopsEngine = await universe.extensionManager.ensureEngineLoaded('@fleetbase/fleetops-engine');
+const dispatchService = fleetopsEngine.lookup('service:dispatch');
+```
+
+The engine boots fully (its
+`Engine#boot()`
+resolves) before the promise resolves, so any
+`onEngineLoaded`
+hooks have already fired.
+
+## preloadEngines(engineNames)
+
+Preload a list of engines in parallel — useful for engines you know the user is about to need:
+
+```
+await universe.extensionManager.preloadEngines([
+    '@fleetbase/fleetops-engine',
+    '@fleetbase/ledger-engine',
+]);
+```
+
+## Inspecting Extension & Engine State
+
+| Method | Returns |
+| --- | --- |
+| `getExtensions()` | All registered extensions (metadata from package.json) |
+| `getExtension(name)` | One extension's metadata |
+| `isExtensionInstalled(name)` | Boolean — extension exists in the install list |
+| `isEngineLoaded(name)` | Boolean — engine boot has completed |
+| `isEngineLoading(name)` | Boolean — engine is mid-load |
+| `getEngineInstance(name)` | The `EngineInstance` if loaded, else `null` |
+| `getEngineMountPoint(name)` | Resolved mount path (e.g. `'console.fleet-ops.'` ) |
+| `getStats()` | `{ isBooting, extensionsLoaded, loadedCount, loadingCount, registeredCount, loadedEngines, loadingEngines }` |
+
+Aliases for
+`isExtensionInstalled`
+(kept for compatibility):
+`isEngineInstalled`
+,
+`isInstalled`
+,
+`hasExtensionIndexed`
+,
+`isExtensionSetup`
+,
+`hasExtensionSetup`
+.
+
+## Sharing Services & Components Across Engines
+
+Engines run in their own DI containers — they don't see services from other engines unless you explicitly share them. The extension manager has helpers for this:
+
+```
+import MyDeviceSelect from '../components/my-device-select';
+
+// Make a component from this engine available inside fleet-ops
+universe.extensionManager.registerComponentIntoEngine(
+    '@fleetbase/fleetops-engine',
+    'my-device-select',
+    MyDeviceSelect
+);
+```
+
+| Method | Description |
+| --- | --- |
+| `registerServiceIntoEngine(engineName, serviceName, class, options?)` | Register a service into one engine |
+| `registerComponentIntoEngine(engineName, componentName, class, options?)` | Register a component into one engine |
+| `registerServiceIntoAllEngines(serviceName, class, options?)` | Register into every loaded engine — returns the list of engines where it succeeded |
+| `registerComponentIntoAllEngines(componentName, class, options?)` | Register into every loaded engine |
+
+The target engine must already be loaded — wrap calls in
+`whenEngineLoaded`
+to avoid races.
+
+For most cross-engine integrations the cleaner pattern is to register a renderable component via the registry service:
+
+```
+registryService.registerRenderableComponent(
+    'fleet-ops:component:order:details',
+    new ExtensionComponent('@fleetbase/ledger-engine', 'order-invoice')
+);
+```
+
+That avoids touching the target engine's container at all. See
+[Registry Service](https://fleetbase.io/docs/extension-development/universe/registry-service)
+.
+
+## Waiting for Boot
+
+When a route runs before extensions have finished registering, you can pause it:
+
+```
+import Route from '@ember/routing/route';
+import { inject as service } from '@ember/service';
+
+export default class ApplicationRoute extends Route {
+    @service('universe/extension-manager') extensionManager;
+
+    async beforeModel() {
+        await this.extensionManager.waitForBoot();
+    }
+}
+```
+
+| Method | Resolves when |
+| --- | --- |
+| `waitForExtensionsLoaded()` | API extension list has loaded |
+| `waitForBoot()` | All `setupExtension` calls have finished |
+
+## Unloading
+
+Rare, but available for memory-sensitive apps:
+
+```
+universe.extensionManager.unloadEngine('@fleetbase/some-engine');
+```
+
+This calls the engine instance's
+`destroy()`
+and removes it from the loaded map.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/services/universe/extension-manager.js` | `ExtensionManagerService` |
+| `addon/contracts/extension-boot-state.js` | Shared boot-state singleton |
+| `vroom/addon/extension.js` | `whenEngineLoaded` + `ensureEngineLoaded` |
+| `valhalla/addon/extension.js` | Same pattern — routing-engine integration |
+
+[Resource View Service
+
+Register columns, row actions, bulk actions and buttons into any engine's table and details views, and merge them into your own — the full API of universe.getService('resource-view').](https://fleetbase.io/docs/extension-development/universe/resource-view-service)
+[Introduction
+
+Resource views are the table and details screens of Fleet-Ops, Ledger, IAM and Developers. Your extension can add columns, actions, buttons and tabs to them without changing the engine that owns them.](https://fleetbase.io/docs/extension-development/resource-views)

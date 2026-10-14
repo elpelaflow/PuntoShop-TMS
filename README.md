@@ -8,10 +8,10 @@
     <a href="https://trendshift.io/repositories/1160?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-1160" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/1160" alt="fleetbase%2Ffleetbase | Trendshift" width="250" height="55"/></a>
   </p>
   <p align="center" dir="auto">
-    <a href="https://github.com/fleetbase/fleetbase/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/fleetbase/fleetbase" alt="License"></a>
-    <a href="https://github.com/fleetbase/fleetbase/releases"><img src="https://img.shields.io/github/v/release/fleetbase/fleetbase" alt="Latest Release"></a>
+    <a href="https://github.com/elpelaflow/PuntoShop-TMS/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/fleetbase/fleetbase" alt="License"></a>
+    <a href="https://github.com/elpelaflow/PuntoShop-TMS/releases"><img src="https://img.shields.io/github/v/release/fleetbase/fleetbase" alt="Latest Release"></a>
     <a href="https://codecov.io/gh/fleetbase/fleetbase"><img src="https://codecov.io/gh/fleetbase/fleetbase/branch/main/graph/badge.svg" alt="Coverage"></a>
-    <a href="https://github.com/fleetbase/fleetbase/stargazers"><img src="https://img.shields.io/github/stars/fleetbase/fleetbase?style=social" alt="GitHub Stars"></a>
+    <a href="https://github.com/elpelaflow/PuntoShop-TMS/stargazers"><img src="https://img.shields.io/github/stars/fleetbase/fleetbase?style=social" alt="GitHub Stars"></a>
     <a href="https://discord.gg/V7RVWRQ2Wm"><img src="https://img.shields.io/discord/699834923032248430?logo=discord&label=Discord" alt="Discord"></a>
   </p>
   <p align="center" dir="auto">
@@ -76,16 +76,12 @@ Fleetbase is made up of modules that install into the console as extensions. Eac
 
 | Module | What it does |
 |--------|--------------|
-| [Fleet&#8209;Ops](https://www.fleetbase.io/docs/fleet-ops) | Fleet management and dispatch: orders, drivers, vehicles, live tracking, route optimization, configurable workflows, and maintenance. |
-| [Storefront](https://www.fleetbase.io/docs/storefront) | Headless commerce for on-demand businesses, with multi-vendor marketplaces and native Fleet-Ops delivery. |
-| [Pallet](https://www.fleetbase.io/docs/pallet) | Warehouse management for inventory, pick lists, cycle counts, and fulfilment. |
+| [Fleet&#8209;Ops](https://www.fleetbase.io/docs/fleet-ops) | Fleet management and dispatch: orders, drivers, vehicles, live tracking, route optimization, telematics, and maintenance. |
 | [Ledger](https://www.fleetbase.io/docs/ledger) | Invoicing, payments, wallets, and accounting for logistics operators. |
-| [Customer&nbsp;Portal](https://github.com/fleetbase/customer-portal) | A self-service workspace for your customers to place and track orders, get quotes and pay, view invoices, manage documents, and open support tickets. |
-| [AI](https://fleetbase.io/platform/ai) | Natural-language order creation, operational queries, and order insights powered by OpenAI or Claude. |
 | [IAM](https://www.fleetbase.io/docs/platform/identity-and-access/users) | Identity and access management: users, groups, roles, policies, and two-factor authentication across your organization. |
 | [Developers](https://www.fleetbase.io/docs/platform/developer-console) | The developer console: API keys, webhooks, socket and system events, and request logs, with separate test and live environments. |
-| [Navigator&nbsp;App](https://github.com/fleetbase/navigator-app) | Open-source driver app for iOS and Android with real-time dispatch, navigation, and proof of delivery. |
-| [Storefront&nbsp;App](https://github.com/fleetbase/storefront-app) | Open-source iOS and Android app for launching your own shop or marketplace. |
+| [Routing Engines](https://www.fleetbase.io/docs/fleet-ops) | Real-world distance calculations and vehicle routing optimization powered by Valhalla and Vroom. |
+| **Navigator&nbsp;App** | Open-source driver app for iOS and Android with real-time dispatch, navigation, and proof of delivery. |
 
 ## Features
 
@@ -131,18 +127,8 @@ Fleetbase is made up of modules that install into the console as extensions. Eac
       <p align="center"><strong>Service Zones & Geofences</strong><br>Define service areas and zones, and watch geofence events as they happen.</p>
     </td>
     <td width="50%" valign="top">
-      <img src="https://fleetbase.io/images/screenshots/storefront/storefront-products-list.webp" alt="Storefront product catalog" width="100%" />
-      <p align="center"><strong>Storefront</strong><br>Manage products, catalogs, and orders for your shop or marketplace.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
       <img src="https://fleetbase.io/images/screenshots/ledger/ledger-dashboard.webp" alt="Ledger financial dashboard" width="100%" />
       <p align="center"><strong>Ledger</strong><br>Track revenue, invoices, receivables, and wallet balances.</p>
-    </td>
-    <td width="50%" valign="top">
-      <img src="https://fleetbase.io/images/screenshots/extensions/extensions-browse.webp" alt="Extensions marketplace" width="100%" />
-      <p align="center"><strong>Extensions</strong><br>Browse and install free and paid extensions from the marketplace.</p>
     </td>
   </tr>
 </table>
@@ -170,20 +156,18 @@ The [running locally guide](https://www.fleetbase.io/docs/platform/quickstart/ru
 
 ## Extensions
 
-Extensions add features, integrate external systems, or change how Fleetbase behaves. Browse and install them from the console or with the [Fleetbase CLI](https://www.fleetbase.io/docs/cli), and publish your own to the marketplace as free or paid extensions.
+Extensions add features, integrate external systems, or change how Fleetbase behaves. Build and install your own extensions to tailor the platform:
 
-- [Browse and install extensions](https://www.fleetbase.io/docs/platform/extensions/browsing-and-installing)
-- [Build your first extension](https://www.fleetbase.io/docs/extension-development/getting-started/quickstart)
-- [Extension architecture](https://www.fleetbase.io/docs/extension-development/architecture/overview)
+- **[Extension architecture](https://www.fleetbase.io/docs/extension-development/architecture/overview)**: understand the extension lifecycle
+- **[Build your first extension](https://www.fleetbase.io/docs/extension-development/getting-started/quickstart)**: create and register an extension
 
 ## Roadmap
 
 | Feature | Status | Expected Release | Description |
 |---------|--------|------------------|-------------|
-| **Pallet (WMS)** | In development | Q4 2026 | Inventory and warehouse management extension |
 | **Dynamic Rules** | Planned | 2027 | Rule builder to trigger events, tasks, and jobs |
 
-Want to influence the roadmap? [Join the discussion](https://github.com/orgs/fleetbase/discussions).
+Want to influence the roadmap? [Join the discussion](https://github.com/elpelaflow/PuntoShop-TMS/discussions).
 
 ## Documentation
 
@@ -198,19 +182,19 @@ Want to influence the roadmap? [Join the discussion](https://github.com/orgs/fle
 ## Community & Support
 
 - **Discord**: Chat with maintainers and other users on [Discord](https://discord.gg/V7RVWRQ2Wm).
-- **Discussions**: Ask questions and share ideas in [GitHub Discussions](https://github.com/orgs/fleetbase/discussions).
-- **Bugs**: Search the [issue tracker](https://github.com/fleetbase/fleetbase/issues) first, then [open a new issue](https://github.com/fleetbase/fleetbase/issues/new).
+- **Discussions**: Ask questions and share ideas in [GitHub Discussions](https://github.com/elpelaflow/PuntoShop-TMS/discussions).
+- **Bugs**: Search the [issue tracker](https://github.com/elpelaflow/PuntoShop-TMS/issues) first, then [open a new issue](https://github.com/elpelaflow/PuntoShop-TMS/issues/new).
 - **Security**: Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 - **Support plans**: See [community, cloud, and enterprise support options](https://www.fleetbase.io/docs/community/support-plans).
-- **Releases**: Read changelogs on the [Releases](https://github.com/fleetbase/fleetbase/releases) page and announcements on the [Fleetbase blog](https://www.fleetbase.io/blog).
+- **Releases**: Read changelogs on the [Releases](https://github.com/elpelaflow/PuntoShop-TMS/releases) page and announcements on the [Fleetbase blog](https://www.fleetbase.io/blog).
 - **X**: Follow [@fleetbase_io](https://x.com/fleetbase_io).
 
 ## Contributing
 
 We welcome contributions from the community.
 
-- **Report bugs**: [Open an issue](https://github.com/fleetbase/fleetbase/issues/new)
-- **Suggest features**: [Start a discussion](https://github.com/orgs/fleetbase/discussions)
+- **Report bugs**: [Open an issue](https://github.com/elpelaflow/PuntoShop-TMS/issues/new)
+- **Suggest features**: [Start a discussion](https://github.com/elpelaflow/PuntoShop-TMS/discussions)
 - **Submit pull requests**: Read the [Contributing Guide](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md)
 - **Translate**: Add or improve a language by following [TRANSLATING.md](TRANSLATING.md)
 - **Write documentation**: Help improve the [docs](https://www.fleetbase.io/docs)

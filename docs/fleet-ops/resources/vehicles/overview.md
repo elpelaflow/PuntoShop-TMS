@@ -1,0 +1,148 @@
+---
+title: "Vehicles"
+url: https://fleetbase.io/docs/fleet-ops/resources/vehicles/overview
+module: fleet-ops
+---
+
+Vehicles
+
+# Vehicles
+
+Register and manage your vehicle fleet — details, assignments, capacity, tracking, and maintenance history.
+
+# Vehicles
+
+**Vehicles**
+are powered fleet assets assigned to carry out orders. Each vehicle record stores physical details, capacity specifications, real-time location, and links to the driver, maintenance schedules, connected devices, directly attached equipment, and currently connected Trailers.
+
+![Vehicles list — plate, make and model, status badge, online indicator, and assigned driver](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-vehicles-list.3ba9798b.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+![Vehicle position playback — a vehicle's recent route on the live map with timeline scrubber](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-vehicle-positions.3f9d43cb.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Vehicle Attributes
+
+| Field | Description |
+| --- | --- |
+| **Name** | Display name for the vehicle (e.g. *Van 01* ) |
+| **Internal ID** | Your external reference ID for the vehicle |
+| **Description** | Free-text description |
+| **Make / Model / Model Type / Year** | Manufacturer information |
+| **Color** | Vehicle color |
+| **Trim / Transmission** | Trim level and transmission type |
+| **Body Type / Body Sub-type / Class / Type** | Vehicle classification (e.g. *Sedan / 4-Door / Passenger / car* ) |
+| **Plate Number** | License plate |
+| **VIN** | Vehicle Identification Number |
+| **VIN Data** | Decoded VIN information (from the VIN lookup service) |
+| **Call Sign** | Radio or dispatch call sign |
+| **Serial Number** | Manufacturer serial number, when applicable |
+| **Usage Type** | Commercial, personal, etc. |
+| **Ownership Type** | Owned, leased, financed |
+| **Fuel Type** | Petrol, diesel, electric, hybrid, etc. |
+| **Fuel Volume Unit** | Unit used in fuel reports (litres, gallons) |
+| **Odometer / Odometer Unit / Odometer at Purchase** | Current and starting mileage with unit |
+| **Measurement System** | Metric or imperial — drives unit interpretation across the record |
+| **Payload Capacity** | Maximum payload weight ( `payload_capacity` ). Unit follows the entity weight units you populate. |
+| **Payload Capacity Volume** | Maximum payload volume ( `payload_capacity_volume` ). Unit follows the entity dimensions you set. |
+| **Financing Status / Loan Number of Payments / Loan First Payment** | Financing details for leased or financed vehicles |
+| **Status** | active, inactive, maintenance, offline |
+| **Online** | Whether the vehicle is currently reporting location |
+| **Location / Speed / Heading / Altitude** | Real-time GPS position and motion data |
+| **Avatar URL / Photo** | Vehicle photo or icon |
+| **Vendor** | Carrier or vendor this vehicle belongs to (optional) |
+| **Category / Warranty** | Linked category and warranty records |
+
+## Vehicle Statuses
+
+| Status | Meaning |
+| --- | --- |
+| `active` | Available for assignment |
+| `inactive` | Not currently in service |
+| `maintenance` | Undergoing maintenance — excluded from Orchestrator |
+| `offline` | Not reporting location — may be out of service area |
+
+## Creating a Vehicle
+
+Navigate to
+**Fleet-Ops → Resources → Vehicles**
+.
+
+Click
+**+ New Vehicle**
+.
+
+Enter the vehicle details: name, make, model, year, plate number, and VIN.
+
+Set
+**`payload_capacity`**
+(weight) and
+**`payload_capacity_volume`**
+if you want the Orchestrator to enforce load limits. Use units consistent with how you populate entity weights and dimensions.
+
+Assign the vehicle to a
+**Driver**
+if there is a default driver for this vehicle.
+
+Upload a photo or select an avatar icon.
+
+Click
+**Save**
+.
+
+## Vehicle Detail Panel
+
+Click any vehicle row to open the detail panel, which includes:
+
+* **Overview**
+  — all vehicle attributes and current assignment
+* **Map**
+  — current real-time position
+* **Positions**
+  — historical GPS track with position replay
+* **Devices**
+  — connected GPS trackers, OBD-II scanners, cameras, sensors
+* **Trailers**
+  — active towed-asset connections, with attach and detach controls
+* **Equipment**
+  — auxiliary gear attached directly to the Vehicle
+* **Schedules**
+  — maintenance schedules linked to this vehicle
+* **Work Orders**
+  — open and completed work orders
+* **Maintenance**
+  — full maintenance history
+* **Inspections**
+  — every inspection filed against the vehicle, with its result and failed checks (see
+  [Inspections](https://fleetbase.io/docs/fleet-ops/maintenance/inspections/overview)
+  )
+
+## Fleet Assignment
+
+Vehicles can belong to one or more
+**Fleets**
+. Fleet membership determines which vehicles the Orchestrator considers when allocating orders for a specific fleet's work pool.
+
+To add a vehicle to a fleet:
+
+1. Open the Fleet record →
+   **Vehicles**
+   tab → click
+   **Add Vehicle**
+2. Or open the Vehicle record →
+   **Fleets**
+   tab → click
+   **Add to Fleet**
+
+## Related Pages
+
+* [Capacity & Payload](https://fleetbase.io/docs/fleet-ops/resources/vehicles/capacity-and-payload)
+  — configure weight and volume limits
+* [Tracking](https://fleetbase.io/docs/fleet-ops/resources/vehicles/tracking)
+  — real-time position and position history
+* [Trailers](https://fleetbase.io/docs/fleet-ops/resources/trailers/overview)
+  — first-class towed assets and connection history
+* [Maintenance](https://fleetbase.io/docs/fleet-ops/maintenance/overview)
+  — schedules and work orders
+* [Inspections](https://fleetbase.io/docs/fleet-ops/maintenance/inspections/overview)
+  — vehicle inspections and follow-up of failed checks
+* [Connectivity](https://fleetbase.io/docs/fleet-ops/connectivity/overview)
+  — telematics devices and sensors

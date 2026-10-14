@@ -1,0 +1,295 @@
+---
+title: "Routes & Controllers"
+url: https://fleetbase.io/docs/extension-development/backend/routes-and-controllers
+module: extension-development
+---
+
+# Routes & Controllers
+
+Define API routes with Fleetbase route macros, choose the right middleware group, and build resource controllers backed by HasApiControllerBehavior.
+
+# Routes & Controllers
+
+Routes for an extension live in
+**`server/src/routes.php`**
+(loaded by your service provider via
+`loadRoutesFrom`
+). Route definitions follow Laravel conventions — Fleetbase adds three macros that take care of the boilerplate.
+
+## The Routes File
+
+```
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::prefix(config('my-extension.api.routing.prefix', 'my-extension'))
+    ->namespace('MyOrg\MyExtension\Http\Controllers')
+    ->group(function ($router) {
+        // Public webhook callbacks — no auth
+        $router->post('webhooks/inbound', 'WebhookController@inbound');
+
+        // Internal console — session-authenticated
+        $router->group(['middleware' => ['fleetbase.protected']], function ($router) {
+            $router->fleetbaseRoutes('widgets');
+            $router->fleetbaseRoutes('reports', function ($router, $controller) {
+                $router->get('summary', $controller('summary'));
+                $router->post('export', $controller('export'));
+            });
+        });
+
+        // Public API — API-key authenticated
+        $router->group(['prefix' => 'v1', 'middleware' => ['fleetbase.api']], function ($router) {
+            $router->fleetbaseRestRoutes('widgets');
+        });
+    });
+```
+
+Real example:
+`fleetops/server/src/routes.php`
+.
+
+## Route Macros
+
+`fleetbase/core-api`
+defines three route macros via
+`src/Expansions/Route.php`
+:
+
+### fleetbaseRestRoutes($name, $controller = null, $options = [], $callback = null)
+
+Registers the seven REST routes for a resource:
+
+| Verb | Path | Action |
+| --- | --- | --- |
+| `GET` | `/widgets` | `index` |
+| `POST` | `/widgets` | `store` |
+| `GET` | `/widgets/{id}` | `show` |
+| `PUT/PATCH` | `/widgets/{id}` | `update` |
+| `DELETE` | `/widgets/{id}` | `destroy` |
+| `POST` | `/widgets/bulk-delete` | `bulkDelete` (Fleetbase extra) |
+| `GET` | `/widgets/export` | `export` (Fleetbase extra) |
+
+The controller defaults to
+`WidgetController`
+(singular-studly +
+`Controller`
+) when omitted.
+
+```
+$router->fleetbaseRestRoutes('widgets'); // → WidgetController
+$router->fleetbaseRestRoutes('widgets', 'CustomWidgetController');
+```
+
+### fleetbaseRoutes($name, $registerFn = null, $options = [], $controller = null)
+
+Same as
+`fleetbaseRestRoutes`
+but lets you nest extra routes under the same prefix and controller:
+
+```
+$router->fleetbaseRoutes('widgets', function ($router, $controller) {
+    $router->get('archived', $controller('archived'));
+    $router->post('{id}/duplicate', $controller('duplicate'));
+});
+// Registers: /widgets/archived, /widgets/{id}/duplicate, plus the standard REST routes
+```
+
+The
+`$controller`
+callback returns
+`'WidgetController@actionName'`
+strings.
+
+### fleetbaseAuthRoutes($authControllerClass = null, $registerFn = null, $registerProtectedFn = null)
+
+Registers the canonical auth route bundle (
+`/auth/login`
+,
+`/auth/sign-up`
+,
+`/auth/reset-password`
+, etc.). Use it when your extension provides an alternative authentication surface (e.g. driver portal, partner API).
+
+## Middleware Groups
+
+Pick a group based on
+**who calls the route**
+:
+
+| Group | Auth | When to use |
+| --- | --- | --- |
+| `fleetbase.protected` | Sanctum + session | Internal console — your engine UI calling its own backend |
+| `fleetbase.api` | API key (basic auth) | Public REST API consumed by external integrations |
+| (none) | Public | Webhooks, magic-link callbacks, anonymous endpoints |
+
+Both groups include throttling, request logging, and route binding.
+`fleetbase.protected`
+additionally runs
+`SetupFleetbaseSession`
+, the
+`AuthorizationGuard`
+, and presence tracking — defined in
+`CoreServiceProvider::$middleware`
+.
+
+## Controllers
+
+Three base classes ship with
+`core-api`
+:
+
+### Fleetbase\Http\Controllers\Controller
+
+Plain Laravel controller with
+`AuthorizesRequests`
+,
+`DispatchesJobs`
+,
+`ValidatesRequests`
+. Use this for ad-hoc endpoints that don't follow the REST resource pattern.
+
+### Fleetbase\Http\Controllers\FleetbaseController
+
+Abstract base that adds
+`HasApiControllerBehavior`
+— wires up the model and the JSON resource transformer:
+
+```
+namespace MyOrg\MyExtension\Http\Controllers;
+
+use Fleetbase\Http\Controllers\FleetbaseController;
+
+class WidgetController extends FleetbaseController
+{
+    public string $namespace = '\\MyOrg\\MyExtension';
+}
+```
+
+The
+`$namespace`
+property tells the trait where to find your
+`Models/Widget`
+and
+`Http/Resources/Widget`
+classes — set it once and
+`index/show/store/update/destroy`
+work automatically.
+
+### Extending FleetbaseController directly
+
+For a fully wired resource controller you usually don't write any actions yourself. Override hooks for custom behavior:
+
+```
+namespace MyOrg\MyExtension\Http\Controllers;
+
+use Fleetbase\Http\Controllers\FleetbaseController;
+use Illuminate\Http\Request;
+
+class WidgetController extends FleetbaseController
+{
+    public string $namespace = '\\MyOrg\\MyExtension';
+
+    public $resource = 'widget';
+    public $createRequest = \MyOrg\MyExtension\Http\Requests\WidgetRequest::class;
+    public $updateRequest = \MyOrg\MyExtension\Http\Requests\WidgetRequest::class;
+
+    public function onBeforeCreate(Request $request, array &$input)
+    {
+        $input['company_uuid'] = session('company');
+    }
+
+    public function onAfterUpdate($model, Request $request)
+    {
+        // dispatch a sync job, send a notification, etc.
+    }
+}
+```
+
+Real example:
+`ledger/server/src/Http/Controllers/Internal/v1/InvoiceController.php`
+.
+
+## Form Requests
+
+For validation, use Laravel form-request classes. Fleetbase ships a
+`Fleetbase\Http\Requests\FleetbaseRequest`
+base that adds session-aware authorization:
+
+```
+namespace MyOrg\MyExtension\Http\Requests;
+
+use Fleetbase\Http\Requests\FleetbaseRequest;
+
+class WidgetRequest extends FleetbaseRequest
+{
+    public function authorize(): bool
+    {
+        return $this->session()->has('user');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name'        => 'required|string|max:120',
+            'description' => 'nullable|string',
+            'metadata'    => 'array',
+        ];
+    }
+}
+```
+
+Reference these from your controller's
+`$createRequest`
+/
+`$updateRequest`
+properties.
+
+## Accessing the Authenticated User
+
+Inside a
+`fleetbase.protected`
+route,
+`$request->user()`
+returns the authenticated
+`Fleetbase\Models\User`
+. The active company is on the session:
+
+```
+$user      = $request->user();
+$companyId = session('company'); // string UUID
+```
+
+For API-key-authenticated routes (
+`fleetbase.api`
+), the auth context is the API credential —
+`$request->user()`
+resolves through Sanctum to the credential's owner user, and the company is set from the credential.
+
+## Route Resource Helpers — REST Registrar
+
+`fleetbaseRestRoutes`
+uses a custom
+`Fleetbase\Routing\RESTRegistrar`
+rather than Laravel's built-in
+`ResourceRegistrar`
+. The registrar normalizes ID parameters (always
+`{id}`
+), ensures dasherized URI segments, and wires the bulk operations.
+
+If you need a non-standard verb shape, drop down to plain
+`Route::get`
+/
+`Route::post`
+and skip the macro.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `src/Expansions/Route.php` | `fleetbaseRoutes` , `fleetbaseRestRoutes` , `fleetbaseAuthRoutes` |
+| `src/Routing/RESTRegistrar.php` | REST route generator |
+| `src/Http/Controllers/FleetbaseController.php` | Abstract resource controller base |
+| `src/Traits/HasApiControllerBehavior.php` | Trait that wires up the action methods |
+| `ledger/server/src/Http/Controllers/Internal/v1/InvoiceController.php` | Reference resource controller |
+| `fleetops/server/src/routes.php` | Reference routes file |

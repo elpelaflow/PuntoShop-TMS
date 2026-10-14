@@ -1,0 +1,124 @@
+---
+title: "Order Scheduling"
+url: https://fleetbase.io/docs/fleet-ops/operations/scheduler/order-scheduling
+module: fleet-ops
+---
+
+Scheduler
+
+# Order Scheduling
+
+Schedule orders onto driver timelines using the Scheduler — set pickup windows, assign to shifts, and manage scheduled order queues.
+
+# Order Scheduling
+
+Order scheduling lets you plan deliveries for future dates and assign them to specific driver shifts. Scheduled orders appear in the Scheduler calendar and are held in a waiting state until their scheduled window opens.
+
+## Scheduling an Order
+
+Orders can be scheduled at creation or updated to a scheduled date afterward.
+
+### During Order Creation
+
+1. Open the new order form (
+   **Operations → Orders → + New Order**
+   )
+2. Toggle
+   **Schedule Order**
+   on
+3. Set the
+   **Scheduled At**
+   date and time
+4. Optionally set a
+   **Time Window Start**
+   and
+   **Time Window End**
+   for the acceptable pickup range
+5. Save — the order is created with system status
+   **`created`**
+   and the
+   `scheduled_at`
+   field set; it is not dispatched until you choose to
+
+### After Creation
+
+1. Open an existing
+   `created`
+   order (one that hasn't been dispatched yet)
+2. Click
+   **Edit**
+3. Enable the schedule toggle and set the date/time
+4. Save
+
+## Scheduling from the Scheduler Calendar
+
+You can schedule and assign orders directly from the Scheduler calendar view:
+
+1. Open
+   **Operations → Scheduler**
+2. Find an unscheduled order in the order sidebar (right panel)
+3. Drag the order card onto a driver row on the target day
+4. Set the time if prompted
+5. Save — the order is scheduled and assigned to that driver
+
+![Scheduler calendar — unscheduled orders in the side list, scheduled orders placed on the calendar grid](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-scheduler-2.097d12eb.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Time Windows
+
+Each order can have a
+**time window**
+— an acceptable range for the pickup:
+
+| Field | Description |
+| --- | --- |
+| **Scheduled At** | The target pickup time (informational) |
+| **Time Window Start** | Earliest the pickup can occur |
+| **Time Window End** | Latest the pickup can occur |
+
+The Orchestrator treats time windows as
+**hard constraints**
+. An order with a window of 09:00–11:00 will only be assigned to a driver whose route can reach the pickup before 11:00.
+
+If a driver cannot fit the order within the time window, the order is returned to the unassigned pool with a
+`time_window_exceeded`
+reason.
+
+## Viewing Scheduled Orders
+
+Scheduled orders appear in multiple places:
+
+| View | Location |
+| --- | --- |
+| **Orders list** | **Scheduled** filter tab |
+| **Scheduler calendar** | On the assigned driver's row for the scheduled date |
+| **Order detail** | Shows the scheduled date and window in the header |
+
+## Rescheduling
+
+To move a scheduled order to a different date or time:
+
+1. In the Scheduler, drag the order card to the new day/driver row
+2. Or open the order, click Edit, and update the Scheduled At date
+
+Rescheduling a dispatched order requires cancelling the existing dispatch first.
+
+## Bulk Scheduling
+
+For large batches of orders, use the
+**Orchestrator**
+rather than scheduling individually:
+
+1. Run the Orchestrator with the orders pool filtered to the target date
+2. The Orchestrator respects time windows and shift schedules when assigning
+3. Commit the plan — all orders are scheduled and assigned in one operation
+
+See
+[Orchestrator Overview](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview)
+for bulk assignment details.
+
+[Scheduler Overview
+
+The Scheduler provides a fleet-wide calendar view of driver shifts, order assignments, and availability windows.](https://fleetbase.io/docs/fleet-ops/operations/scheduler/overview)
+[Driver Shift Schedules
+
+Set up and manage recurring driver shift schedules — define working hours, days, breaks, and HOS compliance rules.](https://fleetbase.io/docs/fleet-ops/operations/scheduler/driver-shift-schedules)

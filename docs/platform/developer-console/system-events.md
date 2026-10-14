@@ -1,0 +1,71 @@
+---
+title: "System Events"
+url: https://fleetbase.io/docs/platform/developer-console/system-events
+module: platform
+---
+
+# System Events
+
+Browse a searchable log of all API events emitted by your Fleetbase instance — useful for auditing and debugging integrations.
+
+# System Events
+
+System Events is a log of every API event emitted by your Fleetbase instance. Every time an action triggers an event — an order changes state, a driver is created, a webhook fires — that event is recorded here. Navigate to
+**Developers → System Events**
+.
+
+![System Events list — Event description, Code, ID, and Date columns](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdevelopers-events-list.23d092e3.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Event Table
+
+| Column | Description |
+| --- | --- |
+| **Event** | A human-readable description of what happened |
+| **Code** | The machine-readable event identifier (e.g. `order.dispatched` , `driver.created` ) — filterable |
+| **ID** | The unique event public ID — click to copy |
+| **Date** | When the event was emitted |
+
+## Searching and Filtering
+
+Use the
+**search**
+field in the header to search events by description or code. The
+**Filters**
+button exposes per-column filters:
+
+* **Code**
+  — select a specific event type from the list of all known events
+* **Date**
+  — filter to a date range
+
+Combine filters to narrow down exactly which events you are looking for.
+
+## Event Detail View
+
+Click any row to open the full event record.
+
+![System Event detail — Details panel with event metadata and Data panel with full JSON payload](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdevelopers-event-details.b3715cbb.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+The detail view has two panels:
+
+### Details
+
+Metadata about the event — its code, public ID, and the timestamp when it was emitted. Use the
+**Back**
+button in the header to return to the list.
+
+### Data
+
+The full JSON payload of the event. This is the same data that would be delivered to a webhook subscribed to this event code.
+
+## Relationship to Webhooks
+
+System Events and Webhooks are closely linked. The
+**Code**
+column in System Events matches the event strings you select when configuring a
+[Webhook](https://fleetbase.io/docs/platform/developer-console/webhooks)
+. If a webhook delivery fails, find the corresponding event here to inspect the payload that was (or should have been) delivered.
+
+## Data Retention
+
+Events are retained for a rolling window and are automatically pruned. If you need long-term event archiving, subscribe to the relevant events via a webhook and forward them to your own storage or logging service.

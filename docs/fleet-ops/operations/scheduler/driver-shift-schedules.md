@@ -1,0 +1,148 @@
+---
+title: "Driver Shift Schedules"
+url: https://fleetbase.io/docs/fleet-ops/operations/scheduler/driver-shift-schedules
+module: fleet-ops
+---
+
+Scheduler
+
+# Driver Shift Schedules
+
+Set up and manage recurring driver shift schedules — define working hours, days, breaks, and HOS compliance rules.
+
+# Driver Shift Schedules
+
+Driver shift schedules define when each driver is available to work. Shifts are used by the Orchestrator as time window constraints during order assignment, and they appear as blocks in the Scheduler calendar.
+
+## What a Shift Schedule Defines
+
+Each shift entry (ScheduleItem) defines:
+
+| Field | Description |
+| --- | --- |
+| **Day(s)** | Which days of the week this shift applies to |
+| **Start Time** | When the driver's shift begins |
+| **End Time** | When the driver's shift ends |
+| **Break** | Scheduled break duration (minutes) |
+| **Recurrence** | How the shift repeats: daily, weekly, specific dates |
+| **Timezone** | The timezone for the shift times |
+
+A driver can have multiple shift schedule entries — for example, a different start time on weekdays vs. weekends, or a part-time pattern with alternating days.
+
+## Managing Shift Schedules
+
+### From the Driver Record
+
+Navigate to
+**Fleet-Ops → Resources → Drivers**
+.
+
+Open a driver record and click the
+**Schedule**
+tab.
+
+Click
+**+ Add Shift**
+to create a new shift entry.
+
+Set the days, start time, end time, and recurrence pattern.
+
+Click
+**Save**
+. The shift appears in the Scheduler calendar for the driver.
+
+### From the Scheduler Calendar
+
+Navigate to
+**Fleet-Ops → Operations → Scheduler**
+.
+
+Click an empty time slot in a driver's row to add a shift for that day.
+
+Drag the shift block edges to adjust start/end times.
+
+Click a shift block to edit or delete it.
+
+## Shift Patterns
+
+Common shift patterns and how to configure them:
+
+### Standard 5-Day Week
+
+* Create one entry covering Monday–Friday, 09:00–17:00
+* Set recurrence to
+  **Weekly**
+
+### Split Shifts
+
+* Create two entries for the same day (morning: 07:00–12:00, afternoon: 14:00–19:00)
+* Both entries appear as separate blocks in the calendar
+
+### Rotating Roster
+
+* Create entries for specific dates rather than day-of-week patterns
+* Use
+  **Specific Date**
+  recurrence for irregular schedules
+
+### Part-Time (Alternate Days)
+
+* Create entries for Monday, Wednesday, Friday only
+* Or use two separate entries with different day selections
+
+## Driver Availability Windows
+
+The shift schedule's start and end times become the driver's
+**time window**
+— used by the Orchestrator when assigning orders. Specifically:
+
+* `time_window_start`
+  = shift start time
+* `time_window_end`
+  = shift end time
+
+The Orchestrator will not assign orders to a driver that cannot be completed before
+`time_window_end`
+. This prevents drivers from being assigned orders that would run past their scheduled end time.
+
+## HOS (Hours of Service) Compliance
+
+For drivers regulated by HOS rules (commercial transport, freight), Fleet-Ops tracks:
+
+* **Daily driving hours**
+  — alert when approaching the daily driving limit
+* **Weekly hours**
+  — alert when approaching the weekly hours cap
+* **Required rest periods**
+  — flag when the driver needs a mandatory break or rest period
+
+HOS limits and break requirements are configured in
+**Fleet-Ops → Settings → Scheduling**
+.
+
+When a driver's HOS status shows they cannot take additional orders, they are excluded from the Orchestrator's resource pool for that run.
+
+## Bulk Schedule Management
+
+To set shifts for multiple drivers at once:
+
+1. Go to
+   **Fleet-Ops → Operations → Scheduler**
+2. Use the
+   **Bulk Edit**
+   option in the toolbar
+3. Select multiple drivers
+4. Apply a shift template — a pre-defined shift pattern saved in Settings
+
+## Leave and Unavailability
+
+To mark a driver as unavailable for a specific day (sick leave, vacation):
+
+1. Open the driver's record →
+   **Schedule**
+   tab
+2. Click
+   **+ Add Absence**
+   for the relevant dates
+3. Set the absence type (annual leave, sick leave, training, etc.)
+4. The driver appears as unavailable in the Scheduler and is excluded from Orchestrator runs during that period

@@ -1,0 +1,112 @@
+---
+title: "Why Fleetbase"
+url: https://fleetbase.io/docs/platform/getting-started/why-fleetbase
+module: platform
+---
+
+# Why Fleetbase
+
+Why logistics and supply chain operations choose Fleetbase — ownership, transparency, and freedom from the constraints of closed enterprise software.
+
+# Why Fleetbase
+
+Logistics operations run on software that was never really built for them. Enterprise platforms built for large carriers don't fit the way a regional courier or on-demand delivery business actually works. Lightweight SaaS tools hit ceilings the moment operations get complex. And the pricing models of closed platforms — per-driver, per-order, per-seat — treat your growth as a liability.
+
+Fleetbase is a different kind of logistics platform. It's open-source, self-hostable, and built to be shaped around how your operation actually works — not the other way around.
+
+## You Own Your Platform
+
+Closed logistics software is built on a single premise: you rent access to someone else's system. That means your workflows, your data, your integrations, and your operational continuity are all tied to a vendor's decisions — their pricing, their roadmap, their acquisition, their uptime.
+
+Fleetbase is open-source under
+**AGPL-3.0**
+. The complete source code is publicly available. You can inspect it, run it on your own infrastructure, modify it, and keep it running forever regardless of what any company decides to do. There are no licensing tiers that unlock features, no per-driver fees that scale against you, no vendor with the power to raise prices or shut down access.
+
+For organisations that need to keep proprietary modifications private, a
+[commercial licence](https://fleetbase.io/licensing)
+is available.
+
+## Your Data Stays Where You Put It
+
+In most logistics SaaS platforms, your operational data — order history, driver location trails, customer addresses, route patterns, delivery performance — lives on a third-party server in a data centre you've never seen, governed by a privacy policy you didn't negotiate.
+
+With Fleetbase, you choose where your data lives. Deploy it on AWS, Azure, GCP, DigitalOcean, your own data centre, or in a private cloud environment with no outbound internet access at all. Your logistics data is yours — not a liability on someone else's balance sheet.
+
+This matters especially for:
+
+* Enterprises operating under
+  **data residency requirements**
+  (GDPR, local data sovereignty laws)
+* Government and defence logistics operations that cannot use shared cloud infrastructure
+* Operations handling sensitive cargo, trade data, or customer information that must stay internal
+
+## A Platform That Adapts to Your Operation
+
+Every logistics business is different. Different order types, different driver assignment logic, different proof of delivery requirements, different integrations with ERP, WMS, or accounting systems. Closed platforms give you configuration options — Fleetbase gives you a platform you can actually change.
+
+Extensions add new capabilities to both the API and the console UI without modifying the core. You can build a custom order type specific to your freight, integrate directly with your ERP at the data layer, add a dispatch board that matches exactly how your team works, or publish internal tools for your operations team — all within the same platform your dispatchers are already using.
+
+This isn't a developer feature. It's what makes Fleetbase a viable long-term platform for a serious logistics operation, rather than something you outgrow and replace.
+
+## First-Class Capabilities, Out of the Box
+
+Fleetbase isn't a framework you assemble from parts. It ships with the operational capabilities logistics businesses need:
+
+* **Real-time fleet tracking**
+  — Live driver location on maps, powered by a WebSocket event engine
+* **Order management**
+  — Full lifecycle from creation through dispatch, in-transit tracking, and proof of delivery
+* **Multi-stop routing and optimisation**
+  — Integrated with OSRM and configurable routing engines
+* **Dispatch tools**
+  — Kanban-style order boards, driver assignment, and activity feeds
+* **Driver communication**
+  — In-platform chat, push notifications via the Navigator mobile app
+* **Proof of delivery**
+  — Photo capture, digital signature, QR code, and barcode scanning
+* **Identity and access control**
+  — Roles, permissions, and multi-organisation support for complex team structures
+* **API and webhook platform**
+  — Every operation available via REST API; every event subscribable via webhook
+
+These aren't add-ons you unlock at a higher pricing tier. They're part of the platform.
+
+## How Fleetbase Compares
+
+|  | Closed SaaS | Fleetbase |
+| --- | --- | --- |
+| **Source code access** | No | Full access (AGPL-3.0) |
+| **Data location** | Vendor's servers | Your infrastructure |
+| **Pricing** | Per-driver / per-order / per-seat | Infrastructure cost only |
+| **Customisation** | Config options and API limits | Modify anything, extend everything |
+| **Vendor dependency** | High — pricing, roadmap, uptime | None |
+| **Real-time tracking** | Included (black box) | Included (open source) |
+| **Deployment options** | SaaS only | Cloud, on-premise, offline, hybrid |
+| **Extension marketplace** | Proprietary or none | Community-driven, open |
+| **Audit and compliance** | Opaque | Full source transparency |
+
+## Who Uses Fleetbase
+
+**Courier and last-mile delivery operations**
+that dispatch drivers, manage order queues, and need real-time tracking — and want a platform they control rather than one they rent indefinitely.
+
+**On-demand and hyperlocal delivery platforms**
+running consumer-facing ordering apps, multi-vendor marketplaces, or same-day delivery networks where the operational backbone needs to be reliable, scalable, and adaptable.
+
+**Supply chain and field service operations**
+managing complex multi-stop workflows, service zones, vehicle fleets, and inventory — where rigid SaaS templates don't fit the reality of daily operations.
+
+**Enterprises with compliance and data sovereignty requirements**
+— in regulated industries, government logistics, or markets where data residency isn't optional.
+
+**Logistics operations scaling out of smaller tools**
+that have hit the ceiling of per-seat pricing, API rate limits, or customisation constraints that closed platforms impose.
+
+## Next Steps
+
+* [Platform Overview](https://fleetbase.io/docs/platform/getting-started/overview)
+  — see what's included in the platform
+* [Architecture](https://fleetbase.io/docs/platform/getting-started/architecture)
+  — understand how Fleetbase is structured
+* [Cloud Quickstart](https://fleetbase.io/docs/platform/quickstart/cloud-quickstart)
+  — get running in minutes on Fleetbase Cloud

@@ -1,0 +1,361 @@
+---
+title: "Core Concepts"
+url: https://fleetbase.io/docs/ledger/getting-started/core-concepts
+module: ledger
+---
+
+# Core Concepts
+
+The foundational concepts of Ledger — double-entry bookkeeping, accounts, journal entries, wallets, invoices, transactions, and how it all fits together.
+
+# Core Concepts
+
+Ledger implements proper double-entry bookkeeping. Understanding the core accounting model helps you use the system correctly and interpret your financial reports.
+
+## The Accounting Equation
+
+Everything in Ledger follows this fundamental rule:
+
+```
+Assets = Liabilities + Equity
+```
+
+Every financial event is recorded as a
+**journal entry**
+that debits one account and credits another — the equation always stays balanced.
+
+## Account Types
+
+Ledger uses five standard account types. Account
+`code`
+values in Ledger are
+**alphanumeric tags**
+(e.g.
+`CASH-DEFAULT`
+,
+`WALLET-POOL`
+,
+`REVENUE-DELIVERY`
+), not numeric ranges.
+
+| Type | Normal Balance | Seeded examples |
+| --- | --- | --- |
+| **Asset** | Debit | Cash, Bank Account, Accounts Receivable, Stripe Clearing |
+| **Liability** | Credit | Accounts Payable, Wallet Liability Pool, Driver Earnings Payable, Tax Payable |
+| **Equity** | Credit | Owner's Equity, Retained Earnings |
+| **Revenue** | Credit | Delivery Revenue, Service Fee Revenue, Subscription Revenue, Other Revenue |
+| **Expense** | Debit | Driver Payout Expense, Payment Gateway Fees, Refunds & Chargebacks, Other Operating Expenses |
+
+**Debit-normal**
+accounts (Assets, Expenses): debits increase the balance; credits decrease it.
+**Credit-normal**
+accounts (Liabilities, Equity, Revenue): credits increase the balance; debits decrease it.
+
+See
+[Chart of Accounts](https://fleetbase.io/docs/ledger/accounting/chart-of-accounts)
+for the complete seeded list.
+
+## Journal Entries
+
+Every financial event creates one journal entry with:
+
+* A
+  **debit account**
+  and a
+  **credit account**
+* An
+  **amount**
+  in the account's currency (stored as integer minor units)
+* A
+  **type**
+  — system-written types include
+  `general`
+  (default),
+  `manual_entry`
+  ,
+  `revenue_recognition`
+  ,
+  `invoice_payment`
+  ,
+  `gateway_payment`
+  , and
+  `order_settlement`
+  . The form picker for manual entries also offers
+  `standard`
+  ,
+  `adjusting`
+  ,
+  `closing`
+  ,
+  `reversing`
+  , and
+  `opening`
+* A
+  **status**
+  — currently only
+  `posted`
+  is produced by the system; there is no built-in reversal or void action
+* An
+  **`is_system_entry`**
+  flag —
+  `true`
+  for automated entries,
+  `false`
+  for manual ones
+
+Journal entry numbers follow the format
+`JE-00001`
+(5-digit zero-padded).
+
+Example — customer pays an invoice:
+
+```
+DEBIT  Cash (Asset)               +$100
+CREDIT Accounts Receivable (Asset) +$100  ← decreases the AR balance
+```
+
+(AR is debit-normal, so the credit reduces the customer's outstanding balance.)
+
+## Wallets
+
+A
+**Wallet**
+is a digital balance tracked in Ledger. Wallets are polymorphic —
+`subject_uuid`
++
+`subject_type`
+point at the entity that owns the balance:
+
+| Wallet Type | Subject | Use Case |
+| --- | --- | --- |
+| **Driver** | Fleet-Ops Driver | Track earnings from completed deliveries |
+| **Customer** | Fleet-Ops Customer / Shipper | Prepaid freight credit or billing deposit |
+| **Company** | Your organization | Operating account, platform revenue |
+| **User** | Individual user | Personal account |
+
+Wallet operations:
+
+* **Credit**
+  — manual credit, no gateway charge
+* **Top-Up**
+  — gateway-charged top-up via GNU Taler, Stripe, or QPay
+* **Transfer**
+  — move funds between two wallets — produces two transactions (
+  `transfer_out`
+  and
+  `transfer_in`
+  ) and one journal entry between the two wallet liability accounts
+* **Payout**
+  — debit the wallet (e.g., driver earnings payout)
+* **Freeze / Unfreeze**
+  — toggle status. The
+  `is_frozen`
+  attribute is a
+  **computed accessor**
+  derived from
+  `status === 'frozen'`
+* **Recalculate**
+  — recompute the balance from completed transactions
+
+Every wallet operation automatically creates a journal entry:
+
+```
+Top-up:    DEBIT Cash → CREDIT Wallet Liability
+Payout:    DEBIT Wallet Liability → CREDIT Cash
+Transfer:  DEBIT Wallet A's liability → CREDIT Wallet B's liability   (direct, no intermediate)
+```
+
+Each wallet has its own ledger account auto-created with code
+`WALLET-{wallet_uuid}`
+. See
+[Wallets](https://fleetbase.io/docs/ledger/payments/wallets)
+.
+
+## Invoices
+
+An
+**Invoice**
+is a formal payment request with a lifecycle:
+
+```
+draft → sent → viewed → partial / paid / overdue / cancelled / refunded / void
+```
+
+| Status | Meaning |
+| --- | --- |
+| `draft` | Created, not yet sent |
+| `sent` | Marked as sent |
+| `viewed` | Customer opened the public URL |
+| `partial` | Some payment received |
+| `paid` | Fully paid ( `balance = 0` ) |
+| `overdue` | Past due date, not yet paid (set by the `ledger:update-overdue-invoices` console command) |
+| `cancelled` | User-cancelled |
+| `refunded` | Set when a gateway refund is processed |
+| `void` | Set programmatically when a draft invoice is superseded by a new one (e.g., from Fleet-Ops auto-invoicing) |
+
+Key invoice fields:
+
+* **Number**
+  — auto-generated, format
+  `INV-`
+  plus a 6-digit random integer (e.g.,
+  `INV-004821`
+  ); not sequential
+* **Customer**
+  — polymorphic reference (
+  `customer_uuid`
+  +
+  `customer_type`
+  ); supports Fleetbase contacts, vendors, drivers, and users
+* **Line Items**
+  — description, quantity, unit price, tax\_rate (decimal 0–100); subtotal, tax, total are computed
+* **Totals**
+  —
+  `subtotal`
+  ,
+  `tax`
+  ,
+  `total_amount`
+  ,
+  `amount_paid`
+  ,
+  `balance`
+  (all computed)
+* **Due Date**
+  — auto-set from the
+  `due_date_offset_days`
+  invoice setting (only when non-zero)
+* **Order link**
+  — optional
+  `order_uuid`
+  linking back to a Fleet-Ops order
+* **Transaction link**
+  — optional
+  `transaction_uuid`
+  linking to the wallet transaction that paid it
+
+When an invoice is created from a Fleet-Ops PurchaseRate, a
+`revenue_recognition`
+journal entry is posted (DEBIT Accounts Receivable → CREDIT Revenue).
+
+When payment is recorded, an
+`invoice_payment`
+journal entry is posted (DEBIT Cash → CREDIT Accounts Receivable).
+
+## Transactions
+
+A
+**Transaction**
+is the immutable record of money moving relative to a wallet. Transactions are never edited or deleted — they are the audit trail.
+
+Key fields:
+
+* `direction`
+  —
+  `credit`
+  (money in) or
+  `debit`
+  (money out)
+* `status`
+  — currently the system only produces
+  `completed`
+  (the model also supports
+  `pending`
+  ,
+  `failed`
+  ,
+  `voided`
+  ,
+  `reversed`
+  ,
+  `expired`
+  timestamps if you write them yourself)
+* `type`
+  — types written by the system are
+  `deposit`
+  ,
+  `withdrawal`
+  ,
+  `transfer_in`
+  ,
+  `transfer_out`
+  ,
+  `earning`
+  ,
+  `payout`
+  , and
+  `invoice_payment`
+* `amount`
+  ,
+  `fee_amount`
+  ,
+  `tax_amount`
+  ,
+  `net_amount`
+  — full cost breakdown
+* `gateway`
+  — the payment processor that handled this, if any
+* `subject`
+  /
+  `payer`
+  /
+  `payee`
+  /
+  `initiator`
+  /
+  `context`
+  — polymorphic relationships capturing who/what was involved
+
+See
+[Transactions](https://fleetbase.io/docs/ledger/payments/transactions)
+.
+
+## Payment Gateways
+
+**Gateways**
+are payment processors with encrypted credentials. Ledger ships with four drivers:
+
+| Driver | Capabilities |
+| --- | --- |
+| `taler` | purchase, refund, wallet payment URI, refund URI, webhooks, diagnostics, settlement checks, sandbox |
+| `stripe` | purchase, refund, tokenization, setup\_intent, checkout\_session, webhooks, sandbox, recurring |
+| `qpay` | purchase, refund, webhooks, sandbox |
+| `cash` | purchase, refund |
+
+Every gateway interaction creates a
+`GatewayTransaction`
+audit record — used for idempotency (duplicate webhook protection via the
+`isProcessed()`
+check) and debugging.
+
+Third-party drivers can be registered via the
+`PaymentGatewayManager::extend()`
+API.
+
+## How It All Connects
+
+Fleet-Ops:
+
+```
+Fleet-Ops Order → PurchaseRate created
+  → Ledger PurchaseRateObserver creates a draft Invoice
+    → Customer pays via gateway (or you record payment manually)
+      → invoice_payment journal entry posted
+        → Invoice marked paid; AR Aging cleared
+```
+
+Direct Transport Settlement:
+
+```
+Direct Transport Order completes (order.type === 'transport')
+  → Ledger OrderObserver creates an order_settlement journal entry
+    DEBIT Cash → CREDIT Revenue
+  (For instant settlement orders without an invoice)
+```
+
+Wallet flows:
+
+```
+Customer top-up via GNU Taler, Stripe, or QPay → GatewayTransaction logged → Wallet Transaction (deposit, credit) → Journal entry (DEBIT Cash → CREDIT Wallet Liability)
+Driver earning payout → Wallet Transaction (payout, debit) → Journal entry (DEBIT Wallet Liability → CREDIT Cash)
+```

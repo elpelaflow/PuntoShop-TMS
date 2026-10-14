@@ -1,0 +1,105 @@
+---
+title: "Navigation"
+url: https://fleetbase.io/docs/platform/console-features/navigation
+module: platform
+---
+
+# Navigation
+
+How the Fleetbase console navigation works — the top navbar, extension menu, sidebar, and user controls.
+
+# Navigation
+
+The Fleetbase Console uses a two-part navigation structure: a
+**top navigation bar**
+and a
+**contextual sidebar**
+. Together they give quick access to every installed extension and the console's built-in features.
+
+![Fleetbase Console — top navbar with extension menu, sidebar, and main content area](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-navigation-sidebar.45f7e821.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Top Navigation Bar
+
+The top bar is always visible. From left to right it contains:
+
+### Logo
+
+Clicking the Fleetbase logo returns you to the home dashboard from anywhere in the console.
+
+### Sidebar Toggle
+
+The collapse/expand button next to the logo hides or shows the sidebar. The sidebar can also be resized by dragging the gutter on its right edge.
+
+### Extension Navigation Menu
+
+Installed extensions register themselves as items in the navigation menu. The menu uses a
+**Priority+ overflow**
+pattern — up to
+**5 extensions**
+are shown inline. If more are installed, a
+**More (⋯)**
+button collects the rest into a dropdown.
+
+![Top navbar — extension items inline with the More (⋯) overflow dropdown open](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-navigation-extensions-menu.1c7b8d80.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+#### Customising the Navigation
+
+Click the
+**sliders**
+icon (visible when extensions are registered) to open the navigation customiser panel.
+
+![Navigation customiser panel — Pinned to bar column with drag handles and Available extensions column](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-navigation-customize.5787ad23.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+| Column | Description |
+| --- | --- |
+| **Pinned to bar** | Extensions currently shown inline in the header. Drag to reorder. |
+| **Available** | Installed extensions not currently pinned. Click to pin to the bar. |
+
+You can pin up to the maximum visible limit (default 5). Preferences are saved per user and persist across sessions.
+
+### Right Side Controls
+
+The right side of the header contains, left to right:
+
+| Control | Description |
+| --- | --- |
+| **Globe icon** | Language / locale selector — see [Internationalization](https://fleetbase.io/docs/platform/console-features/internationalization) |
+| **Inbox icon** | Notification tray — see [Notifications](https://fleetbase.io/docs/platform/console-features/notifications) |
+| **Message icon** | Chat tray — see [Chat](https://fleetbase.io/docs/platform/console-features/chat) |
+| **Org badge** | Shows your current organization name. Click to switch organization or access organization settings |
+| **User avatar** | Opens the user menu — links to Your profile, Auth, Organizations, and Sign out |
+
+## Sidebar
+
+The sidebar is contextual — its contents change based on which section of the console is active. Each extension registers its own sidebar links via the Ember Wormhole pattern, so links for Fleet-Ops appear only when Fleet-Ops is active, links for the IAM section appear when IAM is active, and so on.
+
+Common sidebar patterns:
+
+* **Single items**
+  — a direct link to a route (e.g. Orders, Drivers, Vehicles)
+* **Panels**
+  — collapsible groups of related links (e.g. IAM with Users, Roles, Policies, Groups, Organizations)
+
+The sidebar is resizable. Drag the right-edge gutter to adjust its width.
+
+## User Menu
+
+Click your avatar in the top-right corner to open the user menu. From here you can:
+
+* Navigate to
+  **Your profile**
+  (name, photo, phone, country)
+* Navigate to the
+  **Auth**
+  tab (password change, 2FA settings, and
+  [connected accounts](https://fleetbase.io/docs/platform/identity-and-access/oauth-sign-in)
+  )
+* View and manage your
+  **Organizations**
+* **Sign out**
+
+![Your profile — photo upload, name, email, phone, date of birth and timezone, with the Profile, Auth and Organizations tabs on the left](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-account.679c73ab.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Mobile
+
+On mobile viewports the top navbar adapts to a compact layout. The locale selector, notification tray, and chat tray switch to full-width dropdowns anchored to the top of the screen. The extension navigation menu is hidden on mobile.

@@ -1,0 +1,125 @@
+---
+title: "Extensions"
+url: https://fleetbase.io/docs/contributing/extensions
+module: contributing
+---
+
+# Extensions
+
+How to build, publish, and contribute extensions for the Fleetbase Marketplace.
+
+# Extension contributions
+
+The biggest single way to contribute to Fleetbase is building an
+**extension**
+— a packaged module that other operators can install from the marketplace.
+
+Extensions can:
+
+* Add a new module to the Console (custom screens, settings, dashboards)
+* Integrate with a third-party service (mapping, payments, telematics, ERPs)
+* Add new order types, workflows, or business logic
+* Provide industry-specific functionality (medical delivery, container freight, food trucks)
+
+Extensions are full-stack — a Laravel backend package and an Ember.js frontend engine — registered through the Fleetbase extension system.
+
+## Where to start
+
+This page is a contribution-flow overview. The full developer guide for building extensions lives in its own section:
+
+Read that section first if you've never built an extension before. The notes below cover
+**contributing**
+— getting your extension into the wider Fleetbase ecosystem.
+
+## Two kinds of extension contributions
+
+### 1. Publish your own extension
+
+You build an extension to solve your own operational need. You publish it to the marketplace. Other operators install it.
+
+You retain ownership and control:
+
+* You set the price (or make it free)
+* You handle support
+* You decide when to update
+* You keep all revenue (minus marketplace fees)
+
+The marketplace handles distribution, licensing, and payment infrastructure on your behalf.
+
+See
+[Building Extensions](https://fleetbase.io/docs/extension-development)
+for the developer flow, and the
+[Marketplace developer dashboard](https://console.fleetbase.io)
+for publishing.
+
+### 2. Contribute to a Fleetbase-published extension
+
+The first-party extensions (Fleet-Ops, Ledger, IAM) are open-source and accept community contributions. You can:
+
+* Fix bugs in the extension
+* Add features that fit the extension's scope
+* Improve the docs for the extension
+* Translate the extension into your language
+
+These follow the same flow as core code contributions. See
+[Code →](https://fleetbase.io/docs/contributing/code)
+for the PR conventions, and the relevant extension's repo:
+
+* `fleetops`
+* `ledger`
+* `iam-engine`
+
+## What makes a good extension
+
+Whether you're publishing your own or contributing to a Fleetbase-published one:
+
+* **Solves a real problem**
+  — built for an operator's actual workflow, not a hypothetical one
+* **Scoped narrowly**
+  — does one thing well; doesn't try to replace a separate extension
+* **Stable**
+  — doesn't crash on edge cases, handles offline/unauthenticated states gracefully
+* **Documented**
+  — has clear setup instructions, screenshots, and an example use case
+* **Localised**
+  — supports multiple locales (or at least leaves the door open for translations)
+* **Tested**
+  — has automated tests for critical paths
+
+## Where to ask questions
+
+* **Building your first extension?**
+  Start in
+  `#extension-development`
+  on
+  [Discord](https://fleetbase.io/docs/community/discord)
+* **CLI or package tooling questions?**
+  [`fleetbase/fleetbase-cli`](https://github.com/elpelaflow/PuntoShop-TMS-cli)
+  issues
+* **Specific to a first-party extension?**
+  Open an issue on that extension's repo
+
+## What you'll need
+
+Before you start building anything publishable:
+
+* A
+  **developer account**
+  on the Fleetbase Marketplace (
+  [sign up](https://console.fleetbase.io/onboard)
+  )
+* The
+  **Fleetbase CLI**
+  installed:
+  `npm install -g @fleetbase/cli`
+* A
+  **local Fleetbase instance**
+  for development (see
+  [System Setup](https://fleetbase.io/docs/platform/system-setup)
+  )
+* **Stripe Connect**
+  if you plan to charge for the extension
+
+Continue to
+[Extension Development](https://fleetbase.io/docs/extension-development)
+for the full developer guide.

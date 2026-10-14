@@ -1,0 +1,228 @@
+---
+title: "Navigator App Setup"
+url: https://fleetbase.io/docs/fleet-ops/getting-started/navigator-app-setup
+module: fleet-ops
+---
+
+# Navigator App Setup
+
+Install the Navigator driver app, link it to your Fleet-Ops instance, and get a driver logged in before their first dispatch.
+
+# Navigator App Setup
+
+**Navigator**
+is the React Native mobile app drivers use to receive dispatched orders, navigate routes, fire activity steps, capture proof of delivery, report issues, and submit fuel reports. It is open source — the source lives at
+`navigator-app`
+— and ships as both an iOS and Android app.
+
+## 1. Install Navigator
+
+Drivers install Navigator from the public app stores:
+
+* **iOS**
+  —
+  [App Store](https://apps.apple.com/app/fleetbase-navigator/id1562987952)
+* **Android**
+  —
+  [Google Play](https://play.google.com/store/apps/details?id=com.fleetbase.navigator)
+
+For white-labeled deployments, fork the source and publish under your own branding with a commercial license.
+
+## 2. Link the App to Your Fleetbase Instance
+
+Navigator needs to know which Fleetbase instance to talk to. Fleet-Ops generates a
+**shareable deep link**
+that, when opened on a phone with Navigator installed, configures the app to connect to your instance automatically — no manual hostname entry required.
+
+### Get the link from the console
+
+In the Fleetbase console, navigate to
+**Admin → Fleet-Ops Config → Navigator App**
+. Click
+**Get App Link**
+to retrieve a unique URL for your instance.
+
+The link is rendered as a tappable QR code — drivers scan it with their phone camera, the device opens Navigator, and the app is configured.
+
+### How the deep link works
+
+The link points at the Fleet-Ops
+`link-app`
+endpoint:
+
+```
+GET /int/v1/fleet-ops/navigator/link-app
+```
+
+When opened on a phone, the endpoint:
+
+1. Detects the platform (iOS or Android) from the User-Agent
+2. Generates a deep-link URL with the instance's API key, hostname, and SocketCluster connection details:
+   * **iOS**
+     →
+     `flbnavigator://configure?key=...&host=...&socketcluster_host=...&socketcluster_port=...&socketcluster_secure=...`
+   * **Android**
+     →
+     `intent://configure?...#Intent;scheme=flbnavigator;package=io.fleetbase.navigator;end`
+3. Redirects the phone to the deep link, which Navigator handles and uses to populate its configuration
+
+The URL is also returned as JSON via
+`GET /int/v1/fleet-ops/navigator/get-link-app`
+if you want to embed it into onboarding flows or print it on driver welcome documents.
+
+The deep link includes credentials. Treat it like an API key — only share with drivers you've already onboarded, and regenerate the underlying API credential if a phone is lost.
+
+### Manual configuration (fallback)
+
+If a driver can't open the deep link (older device, sandboxed browser, etc.), Navigator also accepts manual server configuration: tap the
+**Settings**
+icon on the login screen and enter your hostname and API credentials.
+
+## 3. Create a Driver Account
+
+Before a driver can log in, they need a driver record in the console.
+
+### Open Fleet-Ops → Resources → Drivers
+
+In the Fleetbase console, navigate to
+**Fleet-Ops → Resources → Drivers**
+.
+
+### Click New Driver
+
+Click
+**+ New Driver**
+and fill in:
+
+| Field | Notes |
+| --- | --- |
+| **Name** | Driver's full name |
+| **Phone** | Mobile number — used for SMS login |
+| **Email** | Optional, used for account notifications |
+| **Vendor** | Optional — link to a specific vendor / carrier |
+| **Vehicle** | Optional — assign a default vehicle |
+| **Skills** | Skills the Orchestrator can match against orders |
+
+### Save the driver
+
+Click
+**Save**
+. The driver record is created and ready to log in to Navigator.
+
+Optionally enable
+**Driver Onboard from App**
+in
+[Navigator App Settings](https://fleetbase.io/docs/fleet-ops/settings/navigator-app)
+if you'd rather have drivers self-register and upload required documents from the login screen.
+
+## 4. Driver Login
+
+Drivers log in with their phone number and an SMS verification code.
+
+### Enter phone number
+
+On the login screen the driver enters the mobile number registered against their driver record.
+
+### Enter the verification code
+
+Fleetbase sends a 6-digit code by SMS. The driver enters it in Navigator to complete login.
+
+Self-hosted instances can configure a bypass code via the
+`NAVIGATOR_BYPASS_VERIFICATION_CODE`
+env variable for development and QA.
+
+### Grant location permissions
+
+Navigator requires
+*Always Allow*
+location access to broadcast position to the console while the app is backgrounded. The app prompts for this on first login.
+
+Background location access is required for real-time tracking on the live map. If a driver denies background location, their position will not update while the app is in the background.
+
+## What Drivers Can Do in Navigator
+
+Once logged in, Navigator supports the full driver workflow:
+
+* **Receive dispatched orders**
+  — push notifications + active job list
+* **Navigate routes**
+  — turn-by-turn through the device's native maps
+* **Fire activity steps**
+  — advance the order through its
+  [activity flow](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows)
+  , capturing POD where required
+* **Capture POD**
+  —
+  `scan`
+  ,
+  `signature`
+  ,
+  `photo`
+  , or
+  `sms`
+  per the activity's
+  `pod_method`
+* **Report issues**
+  — submit issues from the
+  *Issues*
+  screen (
+  [reference](https://fleetbase.io/docs/fleet-ops/resources/issues/overview)
+  )
+* **Submit fuel reports**
+  — submit and edit fuel reports from the
+  *Fuel Reports*
+  screen (
+  [reference](https://fleetbase.io/docs/fleet-ops/resources/fuel-reports/overview)
+  )
+* **Edit entity fields**
+  — when enabled per Order Configuration (
+  [Navigator App Settings](https://fleetbase.io/docs/fleet-ops/settings/navigator-app)
+  )
+
+## Supported Android Devices
+
+Navigator runs on
+**Android 6.0 (Marshmallow, SDK 23) and newer**
+, on phones, tablets, Chromebooks running Android apps, and Android TV / Automotive form factors. The full compatibility list — pulled from the Google Play Console — covers
+**16,700+ distinct brand-and-model combinations**
+across all major OEMs. The list is shipped as a CSV so you can search it offline by device, brand, or chipset.
+
+### Highlights
+
+| Form factor | Devices on the list |
+| --- | --- |
+| Phone | 12,120 |
+| Tablet | 6,181 |
+| Chromebook | 11 |
+| Android TV | 5 |
+| Android Automotive | 1 |
+
+The most-represented OEM brand families: Samsung, Vivo, OPPO, TECNO, ZTE, Realme, Blackview, BLU, Infinix, TCL, DOOGEE, Motorola, Lenovo, OUKITEL, Sony, Itel, Teclast, Redmi, Ulefone, HONOR, Xiaomi, Nokia.
+
+### Download the full list
+
+[Download supported devices CSV (2.8 MB · 18,325 rows)](https://fleetbase.io/data/navigator-app-supported-devices.csv)
+
+The CSV columns are: Brand, Device, Manufacturer, Model Name, RAM (TotalMem), Form Factor, System on Chip, GPU, Screen Sizes, Screen Densities, ABIs, Android SDK Versions, OpenGL ES Versions, Install base, User-perceived ANR rate, User-perceived crash rate, Excessive battery usage. Open it in any spreadsheet tool (Numbers, Excel, Sheets) and use Find to confirm a specific device is supported.
+
+The list is a snapshot from the Google Play Console's compatibility export. Newer Android devices typically work via Android's forward compatibility — if a model isn't on the list but runs Android 6.0+, it will almost always still work. Use the list as a confirmation tool, not as a strict allow-list.
+
+## Test the Connection
+
+Once a driver is logged in:
+
+1. Their record shows
+   **Online**
+   in
+   **Fleet-Ops → Resources → Drivers**
+2. Their marker appears on the live map
+3. Create a test order and dispatch it — the driver receives a push notification in Navigator and can accept
+
+## Next Steps
+
+* [Quickstart](https://fleetbase.io/docs/fleet-ops/getting-started/quickstart)
+  — create and dispatch your first order
+* [Drivers](https://fleetbase.io/docs/fleet-ops/resources/drivers/overview)
+  — manage driver records, schedules, and skills
+* [Navigator App Settings](https://fleetbase.io/docs/fleet-ops/settings/navigator-app)
+  — entity-field editing and self-onboarding configuration

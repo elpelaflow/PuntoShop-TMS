@@ -1,0 +1,225 @@
+---
+title: "Adding an Integrated Vendor"
+url: https://fleetbase.io/docs/extension-development/recipes/adding-an-integrated-vendor
+module: extension-development
+---
+
+# Adding an Integrated Vendor
+
+Wire a third-party logistics provider into Fleet-Ops as a selectable IntegratedVendor — credentials form, API bridge, lifecycle callbacks, and webhook routing.
+
+# Adding an Integrated Vendor
+
+Fleet-Ops's
+**IntegratedVendor**
+system lets users connect external delivery providers (Lalamove, etc.) and dispatch orders to them as if they were internal vendors. The integration consists of:
+
+1. A
+   **bridge class**
+   — wraps the third-party API
+2. **Optional service-type and country bridges**
+   — for selectable services and regional routing
+3. A
+   **descriptor entry**
+   registered with the platform — credentials schema, callbacks, branding
+
+Out of the box, Fleet-Ops ships Lalamove. New vendors plug in by registering a descriptor that points at your bridge class.
+
+## 1. Build the Bridge
+
+The bridge is an injectable PHP class that talks to the third-party API. It must accept its credentials via constructor injection — that's how the platform supplies user-entered API keys at runtime.
+
+```
+<?php
+// server/src/Integrations/AcmeDispatch/AcmeDispatch.php
+
+namespace MyOrg\MyExtension\Integrations\AcmeDispatch;
+
+use Fleetbase\FleetOps\Models\IntegratedVendor;
+use Illuminate\Support\Facades\Http;
+
+class AcmeDispatch
+{
+    protected ?IntegratedVendor $vendor = null;
+
+    public function __construct(
+        protected string $apiKey,
+        protected string $apiSecret,
+        protected bool $sandbox = false,
+        protected ?string $market = null,
+    ) {}
+
+    public function setIntegratedVendor(IntegratedVendor $vendor): static
+    {
+        $this->vendor = $vendor;
+        return $this;
+    }
+
+    protected function host(): string
+    {
+        return $this->sandbox
+            ? 'https://sandbox.acme-dispatch.com/'
+            : 'https://api.acme-dispatch.com/';
+    }
+
+    public function quote(array $params): array
+    {
+        return Http::withBasicAuth($this->apiKey, $this->apiSecret)
+            ->baseUrl($this->host())
+            ->post('v1/quotes', $params)
+            ->throw()
+            ->json();
+    }
+
+    public function createDelivery(array $params): array
+    {
+        return Http::withBasicAuth($this->apiKey, $this->apiSecret)
+            ->baseUrl($this->host())
+            ->post('v1/deliveries', $params)
+            ->throw()
+            ->json();
+    }
+
+    /** Lifecycle callback wired in the descriptor below. */
+    public function setWebhook(string $webhookUrl): void
+    {
+        Http::withBasicAuth($this->apiKey, $this->apiSecret)
+            ->baseUrl($this->host())
+            ->post('v1/webhooks', ['url' => $webhookUrl]);
+    }
+
+    public function cancelFromFleetbaseOrder(): void
+    {
+        // Cancel any in-flight delivery the vendor is tracking
+    }
+}
+```
+
+## 2. Register the Descriptor
+
+In your service provider's
+`boot()`
+, append a descriptor to
+`IntegratedVendors::$supported`
+:
+
+```
+<?php
+// server/src/Providers/MyExtensionServiceProvider.php
+
+use Fleetbase\FleetOps\Support\IntegratedVendors;
+use MyOrg\MyExtension\Integrations\AcmeDispatch\AcmeDispatch;
+
+public function boot()
+{
+    parent::boot();
+
+    IntegratedVendors::$supported[] = [
+        'name'             => 'Acme Dispatch',
+        'code'             => 'acme-dispatch',
+        'host'             => 'https://api.acme-dispatch.com/',
+        'sandbox'          => 'https://sandbox.acme-dispatch.com/',
+        'namespace'        => 'v1',
+        'bridge'           => AcmeDispatch::class,
+        // Optional — list of credential fields the user fills out
+        'credentialParams' => [
+            ['key' => 'api_key'],
+            ['key' => 'api_secret'],
+        ],
+        // Optional — additional config the user sets
+        'optionParams' => [
+            ['key' => 'market', 'options' => [
+                ['code' => 'us', 'key' => 'United States'],
+                ['code' => 'mx', 'key' => 'Mexico'],
+            ], 'optionValue' => 'code', 'optionLabel' => 'key'],
+        ],
+        // Maps user-saved values onto your bridge's constructor args
+        'bridgeParams' => [
+            'apiKey'    => 'credentials.api_key',
+            'apiSecret' => 'credentials.api_secret',
+            'sandbox'   => 'sandbox',
+            'market'    => 'options.market',
+        ],
+        // Lifecycle callbacks — methods to call on the bridge at vendor lifecycle events
+        'callbacks' => [
+            'onCreated'  => ['setWebhook' => ['webhook_url']],
+            'onUpdated'  => ['setWebhook' => ['webhook_url']],
+            'onCanceled' => ['cancelFromFleetbaseOrder' => []],
+        ],
+    ];
+}
+```
+
+### Descriptor Fields
+
+| Field | Purpose |
+| --- | --- |
+| `name` / `code` | Display name + URL-safe machine code |
+| `host` / `sandbox` | Base URLs for production / sandbox |
+| `bridge` | FQCN of your bridge class |
+| `svc_bridge` | Optional — class providing `::all()` for selectable service types |
+| `iso2cc_bridge` | Optional — class providing `::codes()` for regional codes |
+| `credentialParams` | Form fields rendered when adding the vendor |
+| `optionParams` | Additional non-credential config fields |
+| `bridgeParams` | Maps `IntegratedVendor` attribute paths to your bridge constructor args |
+| `callbacks` | Methods to invoke on the bridge at `onCreated` , `onUpdated` , `onDeleted` , `onCanceled` |
+
+`bridgeParams`
+paths are resolved against the live
+`IntegratedVendor`
+model —
+`'credentials.api_key'`
+reads
+`$vendor->credentials['api_key']`
+,
+`'sandbox'`
+reads
+`$vendor->sandbox`
+, etc.
+
+## 3. Add a Vendor Logo
+
+Upload a PNG named
+`<your-code>.png`
+to the platform's
+`integrated-vendors/`
+asset directory (used by
+`ResolvedIntegratedVendor::logo`
+). For self-hosted instances, place it in
+`assets/integrated-vendors/<code>.png`
+.
+
+## 4. Test the Integration
+
+The frontend "Add Integrated Vendor" UI now lists your vendor. Adding it persists an
+`IntegratedVendor`
+record; from there:
+
+```
+use Fleetbase\FleetOps\Support\IntegratedVendors;
+
+$vendor = IntegratedVendor::find('iv_xxx');
+$bridge = IntegratedVendors::bridgeFromIntegratedVendor($vendor);
+
+$quote = $bridge->quote(['pickup' => $pickup, 'dropoff' => $dropoff]);
+```
+
+Or from the order dispatch flow, Fleet-Ops will route orders assigned to this vendor through your bridge automatically.
+
+## Reference
+
+* `fleetops/server/src/Support/IntegratedVendors.php`
+  — descriptor registry +
+  `bridgeFromIntegratedVendor`
+  helper
+* `fleetops/server/src/Integrations/Lalamove/`
+  — full reference bridge with service types, market codes, and webhook handling
+* `fleetops/server/src/Models/IntegratedVendor.php`
+  — the persisted model
+
+[Registering a Report Schema
+
+Expose your extension's tables in the platform's report builder by registering a ReportSchema. Users can then build custom reports against your data through the standard reporting UI.](https://fleetbase.io/docs/extension-development/recipes/registering-a-report-schema)
+[Adding a Payment Gateway Driver
+
+Plug a new payment gateway (PayPal, Razorpay, etc.) into Ledger by extending AbstractGatewayDriver and registering it with the PaymentGatewayManager.](https://fleetbase.io/docs/extension-development/recipes/adding-a-payment-gateway-driver)

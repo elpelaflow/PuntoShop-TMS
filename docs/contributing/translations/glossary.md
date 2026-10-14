@@ -1,0 +1,192 @@
+---
+title: "Glossary"
+url: https://fleetbase.io/docs/contributing/translations/glossary
+module: contributing
+---
+
+Translations
+
+# Glossary
+
+Brand names, technical terms, and domain vocabulary that should — and shouldn't — be translated.
+
+# Translation glossary
+
+A reference for terms that come up repeatedly in Fleetbase translations. The default rule: translate everything that has a clear local equivalent. The exceptions below are documented because they tend to cause confusion.
+
+## Brand names — never translate
+
+These are proper nouns. They stay in their original spelling in every locale.
+
+| Term | Notes |
+| --- | --- |
+| **Fleetbase** | Always one word, capital F |
+| **Fleet-Ops** | The fleet management extension. Always hyphenated in display text. The unhyphenated `FleetOps` appears in older copy and in code — package names, namespaces such as `Fleetbase\FleetOps\…` , and the `fleetbase/fleetops` repository — and must be left as-is there |
+| **Ledger** | The finance extension |
+| **Navigator** | The driver mobile app |
+| **IAM** | Identity & Access Management module |
+
+When the surrounding sentence needs a translatable noun, treat the brand as a proper noun:
+
+> ✅ "Fleetbase ist eine Open-Source-Logistikplattform." (German)
+> ✅ "プラットフォームのFleetbaseは…" (Japanese)
+> ❌ "Base de flotte est une plateforme…" (translates the brand)
+
+## Technical terms — usually keep in English
+
+Most logistics and software industries use these terms in English globally. Translating them adds friction for users who are already familiar with the technical vocabulary.
+**Default to keeping them in English**
+unless your locale has a strongly established equivalent.
+
+| English term | Default | Translate when... |
+| --- | --- | --- |
+| **API** | Keep | Never — universally English |
+| **Webhook** | Keep | Never — no good local equivalent in most languages |
+| **Token** | Keep | If your locale has an established cryptography term |
+| **OAuth** , **JWT** , **HMAC** | Keep | Never — security standards |
+| **WebSocket** | Keep | Never |
+| **Endpoint** | Keep | If a clear API/networking term exists |
+| **Geofence** | Keep | If your locale has a GIS term in common use |
+| **Waypoint** | Translate | Most languages have a navigation term |
+| **Dispatch** | Translate | Has clear equivalents in every language |
+| **Dropoff / Pickup** | Translate | Has clear equivalents in every language |
+| **POD** (Proof of Delivery) | Spell out as "Proof of Delivery" then translate | The acronym is opaque in most languages |
+| **SDK** | Keep | Universally English |
+| **CLI** | Keep | Universally English |
+
+## Logistics vocabulary — translate, but consistently
+
+These are domain terms with clear local equivalents — but they need to be
+**consistent across the locale**
+. Pick one translation and use it everywhere.
+
+| English | Notes for translators |
+| --- | --- |
+| **Order** | The unit of work. Pick the local term you'd use on a freight invoice. |
+| **Driver** | The person operating the vehicle. Distinct from "operator" (which means the platform user). |
+| **Dispatcher** | The person assigning orders. Often distinct from "driver" — make sure your translation preserves the distinction. |
+| **Fleet** | A group of vehicles. |
+| **Vehicle** | The physical asset. Should not be translated as "car" — it can be a truck, van, motorbike, etc. |
+| **Route** | The path between waypoints. |
+| **Stop** | A single waypoint on a route. |
+| **Manifest** | The list of orders/items on a vehicle for a given trip. |
+| **Tracking number** | Unique identifier for an order. Don't translate the field name; "tracking number" is universal. |
+
+## Statuses — match your locale's conventions
+
+Order statuses appear constantly. They need to be short, clear, and consistent.
+
+| English | Convention |
+| --- | --- |
+| **Created** | Initial status, "just made" |
+| **Preparing** | Pre-dispatch state |
+| **Dispatched** | Assigned to a driver |
+| **In Progress** | Driver actively working |
+| **Completed** | Successfully delivered/finished |
+| **Canceled** | Cancelled before completion (US spelling — `Cancelled` with two L's also acceptable) |
+
+Use the past-tense or stative form your locale would naturally use on a status badge — short labels, not full sentences.
+
+## Tone
+
+Fleetbase aims for a
+**professional but plain**
+tone — not corporate-stiff, not casual.
+
+* **Formal vs. informal "you"**
+  : most locale files default to the polite form (German
+  `Sie`
+  , French
+  `vous`
+  , Spanish
+  `usted`
+  ). Stick with this — operators are often using Fleetbase in a workplace context.
+* **No slang or regional idioms**
+  : copy that reads naturally in Singaporean English shouldn't lose meaning when read by a Mexican operator. Translation is similar — pick the version that's universally understandable in your locale's main reading region.
+* **Imperative for buttons**
+  :
+  `Save`
+  ,
+  `Cancel`
+  ,
+  `Delete`
+  — short, direct verbs. Mirror this in your locale.
+
+## Capitalization
+
+Match your locale's natural capitalization rules:
+
+* **English**
+  : Title Case for headings (
+  `New Order`
+  ), sentence case for descriptions
+* **German**
+  : Capitalize all nouns — including in mid-sentence
+* **French / Spanish / Italian**
+  : Sentence case for headings (only the first word + proper nouns)
+* **CJK**
+  : No case, but match spacing/punctuation conventions of the script
+
+Don't transliterate English title-case rules — translate as your language would naturally write the phrase on a UI.
+
+## Numbers, currencies, and dates
+
+These are formatted programmatically — don't translate them, don't change them, don't reformat:
+
+* **Numbers**
+  :
+  `{count}`
+  ,
+  `{total}`
+  — passed through
+  `Intl.NumberFormat`
+* **Currencies**
+  :
+  `{amount}`
+  — formatted at runtime based on the user's locale
+* **Dates**
+  :
+  `{date}`
+  — formatted via
+  `Intl.DateTimeFormat`
+
+If you see a literal date or currency in
+`en-us.yaml`
+(e.g.,
+`January 2024`
+,
+`$100`
+), translate it normally. Programmatic formatting uses placeholders, not literals.
+
+## Edge cases
+
+### "Order" vs. "command" / "purchase"
+
+In some languages, the word for "delivery order" (logistics) overlaps with "command" or "purchase". When in doubt, pick the term most associated with
+**freight or delivery contexts**
+, not retail purchases.
+
+### "Driver" in places where the term is gendered
+
+Use the neutral form your locale defaults to in professional UI. Most locale files default to a gender-neutral or masculine-as-default convention — match what's already in your locale.
+
+### "Customer" vs. "client" vs. "contact"
+
+Fleetbase has all three:
+
+* **Customer**
+  — customer account or end recipient
+* **Client**
+  — business/shipper relationship in Fleet-Ops
+* **Contact**
+  — generic person/organisation record
+
+Preserve the distinction. Don't collapse them into the same word.
+
+## Got a term not on this list?
+
+Open a discussion in
+`#translations`
+on
+[Discord](https://fleetbase.io/docs/community/discord)
+or comment on your PR — the maintainers will help you settle on the right call and add it here.

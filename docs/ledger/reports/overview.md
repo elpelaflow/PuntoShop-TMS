@@ -1,0 +1,111 @@
+---
+title: "Financial Reports"
+url: https://fleetbase.io/docs/ledger/reports/overview
+module: ledger
+---
+
+# Financial Reports
+
+Generate standard financial reports — balance sheet, income statement, cash flow, trial balance, AR aging, and wallet summary.
+
+# Financial Reports
+
+The
+**Reports**
+module generates standard financial statements from your Ledger data. Reports are computed on-the-fly from posted journal entries — always current and accurate. No pre-computation required.
+
+Navigate to
+**Ledger → Reports**
+to access all reports.
+
+![Ledger dashboard — KPI cards, revenue trend chart, recent journal entries](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-dashboard.98b061ae.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Available Reports
+
+| Report | What it shows |
+| --- | --- |
+| Dashboard | KPIs and trend chart |
+| [Balance Sheet](https://fleetbase.io/docs/ledger/reports/balance-sheet) | Assets, liabilities, and equity at a point in time |
+| [Income Statement](https://fleetbase.io/docs/ledger/reports/income-statement) | Revenue, expenses, and net income for a period |
+| [Cash Flow Statement](https://fleetbase.io/docs/ledger/reports/cash-flow) | Operating, financing, and investing cash flows |
+| [Trial Balance](https://fleetbase.io/docs/ledger/reports/trial-balance) | All accounts with debit/credit totals — verifies books balance |
+| [AR Aging](https://fleetbase.io/docs/ledger/reports/ar-aging) | Outstanding invoices bucketed by how overdue they are |
+| [Wallet Summary](https://fleetbase.io/docs/ledger/reports/wallet-summary) | Wallet counts, period stats, and top wallets |
+| General Ledger | Master journal entry list |
+
+## Dashboard KPIs
+
+The
+**Ledger Dashboard**
+(home screen) shows key metrics at a glance:
+
+* **Total Revenue**
+  — sum of revenue account credits for the period, with
+  **previous-period**
+  comparison (period-over-period of equal length,
+  **not**
+  year-over-year)
+* **Total Expenses**
+  — sum of expense account debits
+* **Net Income**
+  — Revenue − Expenses
+* **Outstanding AR**
+  — total unpaid invoice balance
+* **Overdue AR**
+  — unpaid invoices past due date
+* **Invoice Status Counts**
+  — breakdown by status
+* **Revenue Trend**
+  — daily revenue chart
+* **Recent Journal Entries**
+  — last 10 entries
+
+## Date Filtering
+
+Reports come in two flavours —
+**point-in-time**
+(use an "as of" date) and
+**period-bounded**
+(use a start/end range):
+
+| Report | Date input | Default |
+| --- | --- | --- |
+| Balance Sheet | As-of date | today |
+| Trial Balance | As-of date | today |
+| AR Aging | As-of date | today |
+| Income Statement | Start / end date | start of current month → today |
+| Cash Flow | Start / end date | start of current month → today |
+| Wallet Summary | Start / end date | start of current month → today (period stats only — wallet counts are all-time) |
+
+## Money Format
+
+All monetary values returned by reports are integer
+**minor currency units**
+(cents for USD, etc.). Format on the client according to the response's
+`currency`
+field.
+
+## How Reports Are Generated
+
+All reports draw from posted journal entries:
+
+* **Balance Sheet**
+  — aggregates asset, liability, and equity account balances as of a date
+* **Income Statement**
+  — sums revenue and expense accounts for a period
+* **Cash Flow**
+  — derives from movement on the Cash account (
+  `CASH-DEFAULT`
+  ) classified into operating / financing / investing
+* **Trial Balance**
+  — lists all accounts with their total debits and credits as of a date
+* **AR Aging**
+  — groups open invoices by days past due, excluding
+  `paid`
+  ,
+  `cancelled`
+  , and
+  `void`
+  invoices
+* **Wallet Summary**
+  — aggregates wallet counts by subject type and currency, with period-bounded credit/debit totals

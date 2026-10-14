@@ -1,0 +1,112 @@
+---
+title: "AR Aging Report"
+url: https://fleetbase.io/docs/ledger/reports/ar-aging
+module: ledger
+---
+
+# AR Aging Report
+
+Monitor outstanding receivables — invoices bucketed by how many days overdue to prioritize collections.
+
+# AR Aging Report
+
+The
+**Accounts Receivable Aging**
+report categorizes all unpaid invoices by how long they have been outstanding. It helps you identify which customers are overdue and by how much, so you can prioritize collections and manage cash flow.
+
+Navigate to
+**Ledger → Reports → AR Aging**
+.
+
+![AR aging — invoice list with current / 1-30 / 31-60 / 61-90 / 90+ buckets](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-report-ar-aging.8755c804.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Report Structure
+
+Invoices are bucketed based on how far past their due date they are:
+
+| Bucket | Invoices in this range |
+| --- | --- |
+| **Current** | Not yet due (due date is today or in the future) |
+| **1–30 days** | 1 to 30 days past due date |
+| **31–60 days** | 31 to 60 days past due date |
+| **61–90 days** | 61 to 90 days past due date |
+| **90+ days** | More than 90 days past due date |
+
+For each row, the report shows:
+
+* Customer name
+* Invoice number and original invoice date
+* Invoice total and outstanding balance
+* Which bucket the outstanding balance falls into
+
+At the bottom:
+**totals per bucket**
+and a
+**grand total of all outstanding AR**
+.
+
+## Excluded Invoices
+
+The report only counts invoices with
+`balance > 0`
+(i.e. still owing). The following statuses are excluded entirely:
+
+* `paid`
+* `cancelled`
+* `void`
+
+`refunded`
+,
+`draft`
+,
+`sent`
+,
+`viewed`
+,
+`partial`
+, and
+`overdue`
+invoices with positive balances all appear in the report.
+
+## Using the AR Aging Report
+
+* **Weekly collections review**
+  — run the report every week to see which invoices moved into the 30+ day buckets
+* **Cash flow forecasting**
+  — current-bucket invoices are expected soon; 60+ buckets may need collection escalation
+* **Bad debt provisioning**
+  — invoices in the 90+ bucket are candidates for bad debt write-off
+
+## Overdue Invoice Automation
+
+Run the
+`ledger:update-overdue-invoices`
+console command on a schedule (e.g., daily via cron) to transition invoice statuses to
+`overdue`
+once the due date passes:
+
+```
+php artisan ledger:update-overdue-invoices
+```
+
+The command only transitions invoices currently in
+`sent`
+or
+`viewed`
+status. Overdue invoices appear in the AR aging report and on the Ledger dashboard's KPI section.
+
+## Setting the Report Date
+
+Navigate to
+**Ledger → Reports → AR Aging**
+.
+
+Set the
+**As of Date**
+— outstanding invoices are bucketed relative to this date.
+
+Click
+**Generate**
+.
+
+The default is today.

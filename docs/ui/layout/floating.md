@@ -1,0 +1,67 @@
+---
+title: "Floating"
+url: https://fleetbase.io/docs/ui/layout/floating
+module: ui
+---
+
+# Floating
+
+<Floating> renders content in a floating layer using @floating-ui — the lower-level positioning primitive behind <Attach::Tooltip>, <Attach::Popover>, and dropdowns.
+
+# <Floating>
+
+`<Floating>`
+is a low-level utility for rendering an element in a floating layer (typically a portal) and positioning it relative to a trigger. It's used internally by tooltips, popovers, and dropdowns — most extension authors won't reach for it directly, but it's available if you need a custom positioning solution.
+
+## Basic Usage
+
+```
+<button {{on "click" this.toggle}}>Show details</button>
+
+{{#if this.isOpen}}
+  <Floating @placement="bottom-start">
+    <div class="bg-white p-4 shadow rounded">
+      Floating content
+    </div>
+  </Floating>
+{{/if}}
+```
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@placement` | string | Initial placement — `top` , `bottom` , `left` , `right` , plus `-start` / `-end` variants |
+| `@arrow` | boolean | Render an arrow pointing at the reference |
+| `@renderInPlace` | boolean | Render in DOM order instead of via a portal |
+| `@ariaRole` | string | ARIA role for the floating element |
+
+Any additional
+`...attributes`
+are forwarded to the floating element.
+
+## When to Use
+
+For most positioning needs, prefer the higher-level components:
+
+* [`<Attach::Tooltip>`](https://fleetbase.io/docs/ui/layout/attach-tooltip)
+  — tooltips on hover (shows on
+  `mouseenter focus`
+  )
+* [`<Attach::Popover>`](https://fleetbase.io/docs/ui/layout/attach-popover)
+  — popovers on click or hover, supports interactive content
+* [`<DropdownButton>`](https://fleetbase.io/docs/ui/navigation/dropdown-button)
+  — button + menu combo
+
+Reach for
+`<Floating>`
+directly only when those higher-level components don't fit.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/floating.hbs` | Template — renders into a portal via `{{in-element}}` |
+| `addon/components/floating.js` | Class — handles parent finding and positioning |
+| `addon/components/portal/` | The portal helper used for non-in-place rendering |
+| `addon/components/attach/` | Higher-level Tooltip / Popover wrappers |

@@ -1,0 +1,86 @@
+---
+title: "Connectivity Overview"
+url: https://fleetbase.io/docs/fleet-ops/connectivity/overview
+module: fleet-ops
+---
+
+# Connectivity Overview
+
+Connect Fleet-Ops to external hardware — telematics modems, GPS devices, IoT sensors, and third-party data providers.
+
+# Connectivity Overview
+
+The
+**Connectivity**
+section of Fleet-Ops manages the integration of physical hardware and external data providers. This includes telematics modems installed in vehicles, GPS and IoT devices, environmental sensors, and the raw data events they produce.
+
+![Fleet-Ops connectivity sidebar — Telematics, Devices, Sensors, Events](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-telematics-flespi.e7fdfb77.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## What's in Connectivity
+
+| Section | Purpose |
+| --- | --- |
+| [**Telematics**](https://fleetbase.io/docs/fleet-ops/connectivity/telematics/overview) | Telematics modems — hardware devices that send GPS, OBD-II, and sensor data from vehicles |
+| [**Devices**](https://fleetbase.io/docs/fleet-ops/connectivity/devices/overview) | GPS trackers, OBD-II scanners, cameras, and other connected devices |
+| [**Sensors**](https://fleetbase.io/docs/fleet-ops/connectivity/sensors/overview) | Environmental sensors — temperature, humidity, door, pressure, motion |
+| [**Events**](https://fleetbase.io/docs/fleet-ops/connectivity/events/overview) | Raw data events received from devices and telematics providers |
+
+## The Connectivity Architecture
+
+```
+Telematics Provider (Flespi / Geotab / Samsara)
+        │
+        │  Push telemetry data
+        ▼
+Fleet-Ops Ingest API
+        │
+        ├─► DeviceEvent (raw data point)
+        ├─► Position (driver/vehicle location update)
+        ├─► Sensor reading (temperature, humidity, etc.)
+        └─► Live map update (via SocketCluster broadcast)
+```
+
+## Supported Telematics Providers
+
+Fleet-Ops integrates with:
+
+* **Flespi**
+  — raw GPS and OBD-II data via MQTT and REST API
+* **Geotab**
+  — enterprise telematics with vehicle diagnostics
+* **Samsara**
+  — fleet operations platform with real-time GPS and video
+* **Custom**
+  — generic webhook/REST ingestion for other providers
+
+## How It Works in Practice
+
+1. A telematics modem (e.g., Flespi IMEI device) is installed in a vehicle
+2. The device sends GPS position, speed, and OBD-II data to the telematics provider's cloud
+3. Fleet-Ops connects to the provider via API credentials set in
+   **Connectivity → Telematics**
+4. The provider streams data to Fleet-Ops — positions are stored and broadcast to the live map
+5. Sensor readings (if available) are stored as DeviceEvents
+6. Maintenance alerts (e.g., engine fault codes) can be surfaced via Issues
+
+## Benefits Over Navigator App Tracking
+
+Telematics devices provide more reliable tracking than the Navigator app alone:
+
+| Feature | Telematics Device | Navigator App |
+| --- | --- | --- |
+| **Works without driver phone** | ✅ Yes | ❌ No |
+| **OBD-II diagnostics** | ✅ Yes | ❌ No |
+| **Battery/power monitoring** | ✅ Yes | ❌ No |
+| **Sensor data (temp, door)** | ✅ Yes | ❌ No |
+| **Tamper detection** | ✅ Yes | ❌ No |
+| **Driver app integration** | ❌ No | ✅ Yes (POD, navigation) |
+
+For most production fleets, both are used together — telematics for continuous vehicle data, Navigator for driver workflow.
+
+[Parts
+
+Track parts inventory used in fleet maintenance — log parts used in work orders, manage supplier info, and track costs.](https://fleetbase.io/docs/fleet-ops/maintenance/parts/overview)
+[Telematics
+
+Connect telematics providers to Fleet-Ops, map devices to Vehicles or Trailers, and receive live telemetry data.](https://fleetbase.io/docs/fleet-ops/connectivity/telematics/overview)

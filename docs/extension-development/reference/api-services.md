@@ -1,0 +1,405 @@
+---
+title: "API Services"
+url: https://fleetbase.io/docs/extension-development/reference/api-services
+module: extension-development
+---
+
+# API Services
+
+Backend support classes shipped by fleetbase/core-api — SmsService, the Support\Http and Support\Find/Resolve helpers, NotificationRegistry, and the SocketCluster broadcaster.
+
+# API Services
+
+`fleetbase/core-api`
+ships a set of support classes you can rely on instead of rebuilding them per extension. This page surveys the most important ones and shows the canonical usage. Source files for each are linked at the bottom.
+
+For frontend host services (the
+`fetch`
+,
+`store`
+,
+`notifications`
+, etc. you inject in your engine), see
+[Ember Services](https://fleetbase.io/docs/extension-development/reference/ember-services)
+.
+
+All of these are available once your service provider extends
+`Fleetbase\Providers\CoreServiceProvider`
+— see
+[Service Provider](https://fleetbase.io/docs/extension-development/backend/service-provider)
+.
+
+## Fleetbase\Services\SmsService
+
+Multi-provider SMS sender with phone-prefix-based routing rules. Resolved from the Laravel container as a singleton; you'll typically inject it or use
+`app()`
+.
+
+### Resolving
+
+```
+use Fleetbase\Services\SmsService;
+
+$sms = app(SmsService::class);
+```
+
+### Sending
+
+```
+$sms->send(
+    to: '+15551234567',
+    text: 'Your verification code is 123456',
+    options: [
+        'from' => '+18005550000',          // optional sender ID
+    ],
+    provider: SmsService::PROVIDER_TWILIO  // optional override
+);
+```
+
+Auto-routing applies based on
+`config('sms.routing_rules')`
+— the default ships with
+`'+976' → CallPro`
+(Mongolia). Override per-call by passing the
+`$provider`
+argument or globally by editing the routing config.
+
+### Adding a Provider
+
+Drop a new service class beside
+`SmsService`
+and
+`CallProSmsService`
+, register it in your service provider, and add a constant + routing entry to
+`SmsService`
+(or, if you want to be non-invasive, expose your provider via the SMS config and let users opt in). See the
+[Adding a SMS Provider](https://fleetbase.io/docs/extension-development/recipes/adding-a-sms-provider)
+recipe.
+
+### Source
+
+`src/Services/SmsService.php`
+·
+`src/Services/CallProSmsService.php`
+
+---
+
+## Fleetbase\Support\Http
+
+Static helpers for inspecting the current HTTP request. Extends Laravel's
+[`Http`](https://laravel.com/api/11.x/Http/Client/Factory.html)
+facade so you also get the standard HTTP-client methods.
+
+### Methods
+
+| Method | Returns |
+| --- | --- |
+| `Http::isInternalRequest($request?)` | `true` for routes under the `int/` prefix or namespaced `Internal\\` |
+| `Http::isPublicRequest($request?)` | `true` for routes under `v1/` |
+| `Http::useSort($sort)` | Parses `?sort=-name` style params into `['param', 'direction']` |
+| `Http::trace($key?)` | Request tracing data — useful for distributed-trace logging |
+| `Http::isPublicIp($ip?)` / `Http::isPrivateIp($ip?)` | IP type checks |
+| `Http::lookupIp($ip?)` | GeoIP lookup |
+| `Http::action($verb?)` | Resolves the controller action verb ( `'index'` , `'store'` , etc.) |
+
+### Example
+
+```
+use Fleetbase\Support\Http;
+
+if (Http::isInternalRequest()) {
+    // Console-side request — load the internal resource transformer
+}
+
+[$sortField, $direction] = Http::useSort($request->input('sort'));
+$query->orderBy($sortField, $direction);
+```
+
+### Source
+
+`src/Support/Http.php`
+
+---
+
+## Fleetbase\Support\Find
+
+Resolves the
+**class names**
+for the HTTP resource, request, and filter classes that correspond to a given Eloquent model. Used by
+`HasApiControllerBehavior`
+to look up the right transformer for
+`index`
+,
+`show`
+, etc.
+
+### Methods
+
+| Method | Returns |
+| --- | --- |
+| `Find::httpResourceForModel($model, $namespace?, $version?)` | Class name of the matching `JsonResource` |
+| `Find::httpRequestForModel($model, $namespace?, $version?)` | Class name of the matching `FormRequest` |
+| `Find::httpFilterForModel($model, $namespace?, $version?)` | Class name of the matching filter |
+| `Find::getModelPackage($model)` | The package namespace prefix ( `'FleetOps'` , `'Ledger'` , etc.) |
+
+### Behavior
+
+For a
+`MyOrg\MyExtension\Models\Widget`
+model on an internal request,
+`Find`
+walks namespaces in this order, falling back to the next on
+`class_exists`
+miss:
+
+1. `MyOrg\MyExtension\Http\Resources\Internal\v1\Widget`
+2. `MyOrg\MyExtension\Http\Resources\v1\Widget`
+3. `MyOrg\MyExtension\Http\Resources\Widget`
+4. `Fleetbase\Http\Resources\FleetbaseResource`
+   (universal fallback)
+
+This is why a basic resource at
+`Http/Resources/Widget.php`
+is enough to start — the platform finds and uses it without explicit registration.
+
+### Source
+
+`src/Support/Find.php`
+
+---
+
+## Fleetbase\Support\Resolve
+
+A thin layer above
+`Find`
+— instead of returning class names,
+`Resolve`
+**instantiates**
+the matching resource/request and returns the live object.
+
+### Methods
+
+| Method | Returns |
+| --- | --- |
+| `Resolve::httpResourceForModel($model, $namespace?, $version?)` | A `JsonResource` instance wrapping the model |
+| `Resolve::httpRequestForModel($model, $namespace?, $version?)` | A `FormRequest` instance |
+| `Resolve::httpFilterForModel($model, $request, $version?)` | A filter instance |
+| `Resolve::resourceForMorph($type, $id, $resourceClass?)` | Resolves a polymorphic relation to a resource |
+| `Resolve::instance($class, $args?)` | Generic instantiator with constructor-arg passing |
+
+### Example
+
+```
+use Fleetbase\Support\Resolve;
+
+public function show(Widget $widget)
+{
+    return Resolve::httpResourceForModel($widget);
+    // → returns the right JsonResource for the request context
+}
+```
+
+Most controllers won't call
+`Resolve`
+directly —
+`HasApiControllerBehavior`
+handles it for you. Reach for it when you need the resolved transformer in a custom action (e.g., a callback endpoint that returns a model wrapped in its proper resource).
+
+### Source
+
+`src/Support/Resolve.php`
+
+---
+
+## Fleetbase\Support\NotificationRegistry
+
+The platform-wide registry for notifications. Notifications you register here are surfaced in the user's notification preferences UI, dispatchable via the standard
+[Laravel notifications](https://laravel.com/docs/11.x/notifications)
+channels (mail, SMS, broadcast, database, push).
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `NotificationRegistry::register($notificationClassOrArray, $options?)` | Register one or many notification classes |
+| `NotificationRegistry::registerNotifiable($notifiableClass)` | Register a class that can receive notifications (default: `User` , `Group` , `Role` , `Company` ) |
+| `NotificationRegistry::getNotificationsByPackage($package)` | Filter to a single package's notifications |
+| `NotificationRegistry::getNotifiables()` / `getNotifiablesForCompany($companyId)` | List recipients available for opt-in |
+| `NotificationRegistry::notify($notificationClass, ...$params)` | Send to all registered recipients who have opted in |
+| `NotificationRegistry::notifyUsingDefinitionName($class, $name, ...$params)` | Same, but selectable by registered name |
+
+### Registering from Your Service Provider
+
+```
+// server/src/Providers/MyExtensionServiceProvider.php
+public function boot()
+{
+    parent::boot();
+    $this->registerExpansionsFrom(__DIR__ . '/../Expansions');
+    $this->loadRoutesFrom(__DIR__ . '/../routes.php');
+    $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
+
+    NotificationRegistry::register([
+        \MyOrg\MyExtension\Notifications\WidgetCreated::class,
+        \MyOrg\MyExtension\Notifications\WidgetExpired::class,
+    ]);
+}
+```
+
+Each notification class declares its own
+`name`
+,
+`description`
+, and
+`package`
+properties so the UI can group it correctly. See the
+[Registering Notifications](https://fleetbase.io/docs/extension-development/recipes/registering-notifications)
+recipe for the full pattern.
+
+### Source
+
+`src/Support/NotificationRegistry.php`
+
+---
+
+## SocketCluster Broadcasting
+
+The platform ships a custom Laravel
+[broadcasting](https://laravel.com/docs/11.x/broadcasting)
+driver wired to a SocketCluster instance. This is what powers the frontend
+`socket`
+service's real-time channels.
+
+### Setup (already done by core)
+
+`SocketClusterServiceProvider`
+extends Laravel's
+`Broadcast`
+facade with a
+`'socketcluster'`
+driver. With
+`BROADCAST_DRIVER=socketcluster`
+in your
+`.env`
+, every
+`broadcast(new MyEvent(...))`
+call lands on the configured SocketCluster instance.
+
+### Publishing from Your Backend
+
+For application-level events that should reach the browser, define a Laravel event with
+`ShouldBroadcast`
+:
+
+```
+namespace MyOrg\MyExtension\Events;
+
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+
+class WidgetCreated implements ShouldBroadcast
+{
+    use Dispatchable;
+
+    public function __construct(public array $payload) {}
+
+    public function broadcastOn(): Channel
+    {
+        return new Channel('company.' . $this->payload['company_uuid']);
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'my-extension.widget.created';
+    }
+}
+```
+
+```
+// Anywhere in your code:
+broadcast(new WidgetCreated($widget->toArray()));
+```
+
+The frontend
+[`socket`
+service](https://fleetbase.io/docs/extension-development/reference/ember-services#socket)
+listening on
+`company.{uuid}`
+receives
+`event.type === 'my-extension.widget.created'`
+with the broadcast payload.
+
+### Direct Publish (without an Event class)
+
+For ad-hoc messages, use the
+`SocketClusterService`
+singleton directly:
+
+```
+use Fleetbase\Support\SocketCluster\SocketClusterService;
+
+SocketClusterService::publish('company.' . $companyUuid, [
+    'type' => 'my-extension.refresh-needed',
+    'data' => ['reason' => 'config-changed'],
+]);
+```
+
+### Source
+
+`src/Providers/SocketClusterServiceProvider.php`
+·
+`src/Support/SocketCluster/SocketClusterService.php`
+· upstream
+[SocketCluster docs](https://socketcluster.io/docs)
+
+---
+
+## Other Useful Support Classes
+
+The
+`src/Support/`
+directory contains a number of smaller helpers worth knowing about:
+
+| Class | Purpose |
+| --- | --- |
+| `Fleetbase\Support\Auth` | Auth state helpers — current user/company resolution |
+| `Fleetbase\Support\ApiModelCache` | Per-request model cache to avoid duplicate queries |
+| `Fleetbase\Support\Utils` | General utilities — `classExists` , `classBasename` , slugification, etc. |
+| `Fleetbase\Support\PushNotification` | Cross-platform push notification dispatcher |
+| `Fleetbase\Support\ParsePhone` | Phone number normalization (libphonenumber wrapper) |
+| `Fleetbase\Support\IdempotencyManager` | Idempotency-key handling for safely retryable POST endpoints |
+| `Fleetbase\Support\QueryOptimizer` | Heuristics for pre-loading relations to avoid N+1 |
+| `Fleetbase\Support\Reporting\ReportSchemaRegistry` | Register a report schema — see the [recipe](https://fleetbase.io/docs/extension-development/recipes/registering-a-report-schema) |
+| `Fleetbase\Services\TemplateRenderService` | Variable-substitution renderer for templates (PDFs, emails) |
+| `Fleetbase\Services\FileResolverService` | File URL/path resolver across S3 / disk / data URLs |
+
+Browse the full directory at
+`src/Support/`
+and
+`src/Services/`
+.
+
+## See Also
+
+* [Service Provider](https://fleetbase.io/docs/extension-development/backend/service-provider)
+  — how
+  `CoreServiceProvider`
+  wires these in
+* [Expansions & Observers](https://fleetbase.io/docs/extension-development/backend/expansions-and-observers)
+  — patterns for extending model behavior
+* [Calling Your Extension's API](https://fleetbase.io/docs/extension-development/recipes/calling-your-extension-api)
+  and other
+  [recipes](https://fleetbase.io/docs/extension-development/recipes/calling-your-extension-api)
+  — concrete tutorials using these services
+* [Laravel Service Container](https://laravel.com/docs/11.x/container)
+  — for resolving services from the container
+* [Laravel Broadcasting](https://laravel.com/docs/11.x/broadcasting)
+  — the framework backend behind SocketCluster integration
+
+[Ember Services
+
+Reference for the host services your extension consumes — fetch, store, current-user, session, abilities, intl, notifications, socket, crud, chat, theme, modalsManager, events, app-cache, language, hostRouter, and more.](https://fleetbase.io/docs/extension-development/reference/ember-services)
+[Calling Your Extension's API
+
+Make authenticated requests from your engine to your extension's backend by passing the right namespace to the fetch service.](https://fleetbase.io/docs/extension-development/recipes/calling-your-extension-api)

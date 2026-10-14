@@ -1,0 +1,101 @@
+---
+title: "Vehicle Allocation"
+url: https://fleetbase.io/docs/fleet-ops/operations/orchestrator/vehicle-allocation
+module: fleet-ops
+---
+
+Orchestrator
+
+# Vehicle Allocation
+
+How the Orchestrator matches vehicles to orders — availability, location proximity, and driver assignment.
+
+# Vehicle Allocation
+
+Vehicle allocation is what happens during a phase running in
+`assign_vehicles`
+mode (or the legacy
+`allocate`
+mode) in the Orchestrator. The active engine —
+`greedy`
+,
+`vroom`
+, or any extension-registered engine — evaluates each available vehicle against the orders in the pool and produces a vehicle-to-order assignment as part of the phase's output.
+
+## How Vehicle Allocation Works
+
+For every order in the phase's input set, the engine considers each available vehicle:
+
+1. **Availability check**
+   — vehicle must have
+   `status = active`
+   and
+   `online = true`
+2. **Driver link**
+   — if a driver is already paired with the vehicle, the vehicle goes with that driver
+3. **Location**
+   — the vehicle's current location is the starting point for distance and time calculations
+4. **Capacity**
+   — when the phase has
+   *Respect Capacity*
+   enabled and orders have weight/volume data, the vehicle's
+   `payload_capacity`
+   and
+   `payload_capacity_volume`
+   are used to enforce load limits
+
+## Vehicle Attributes Used in Allocation
+
+| Attribute | Effect on allocation |
+| --- | --- |
+| `status` | Only `active` vehicles are eligible |
+| `online` | Only online vehicles are considered |
+| `location` | Route starting point for distance/time calculations |
+| `payload_capacity` | Maximum weight load — enforced when orders have weight values |
+| `payload_capacity_volume` | Maximum volume load — enforced when orders have volume values |
+| `vehicle_assigned_uuid` (driver) | Vehicle is pre-paired with its assigned driver |
+
+## Assigning Vehicles to Drivers
+
+For predictable allocation results, link vehicles to drivers before running a phase:
+
+1. Open
+   **Fleet-Ops → Resources → Drivers**
+2. Open a driver record and set their
+   **Vehicle**
+   to a specific vehicle
+3. Phases that touch this driver will route the driver+vehicle pair together
+
+If a driver has no vehicle assigned, an
+`assign_drivers`
+phase can pair them with an unassigned vehicle in the same run, or the phase can run driver-only assignment without capacity enforcement.
+
+## Fleet-Based Scoping
+
+In the Orchestrator Workbench, you can scope vehicle allocation to a specific
+**Fleet**
+. Only vehicles that belong to the selected fleet will be included in the resource pool. This is useful for running separate optimization passes for different operational zones or service types.
+
+## Online Vehicle Status
+
+Vehicles become "online" when their assigned driver goes online in the Navigator app, or when a connected telematics device reports active. The Orchestrator's resource panel shows:
+
+* **Online vehicles**
+  — available for allocation
+* **Offline vehicles**
+  — excluded from the current run
+* **In-use vehicles**
+  — already assigned to an active order (excluded from new allocation)
+
+## Manual Vehicle Override
+
+Even after an Orchestrator run, vehicle assignments can be changed manually. In the Workbench results panel, click an assigned order and use the
+**Vehicle**
+dropdown to select a different vehicle before committing. In the order detail panel, you can also reassign the vehicle directly on any order.
+
+## Next Steps
+
+* [Payload & Capacity Allocation](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/payload-capacity-allocation)
+  — configuring weight and volume constraints
+* [Orchestrator Settings](https://fleetbase.io/docs/fleet-ops/settings/orchestrator)
+  — set the default engine and global allocation constraints

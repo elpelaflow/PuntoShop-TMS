@@ -1,0 +1,287 @@
+---
+title: "Connecting Models to Your Extension API"
+url: https://fleetbase.io/docs/extension-development/recipes/connecting-models-to-your-api
+module: extension-development
+---
+
+# Connecting Models to Your Extension API
+
+Wire Ember Data models to your extension's API by extending ApplicationAdapter with the right namespace, then point each model at the right adapter.
+
+# Connecting Models to Your Extension API
+
+Ember Data drives most CRUD interactions in the console —
+`store.findRecord`
+,
+`store.query`
+,
+`record.save()`
+. When you load records from your
+**own**
+API instead of the console's default namespace, you do it once at the
+**adapter**
+layer rather than passing options on every call.
+
+## Why an Adapter?
+
+Without an adapter, the store calls hit the console's API:
+
+```
+// Hits: GET /int/v1/widgets/123  ← wrong API
+this.store.findRecord('widget', '123');
+```
+
+With a per-extension adapter, the store hits your API:
+
+```
+// Hits: GET /my-extension/int/v1/widgets/123  ← your API
+this.store.findRecord('widget', '123');
+```
+
+You write the adapter once; every store call against your models routes correctly.
+
+## 1. Create a Base Adapter for Your Extension
+
+Extend
+`@fleetbase/ember-core/adapters/application`
+and override
+`namespace`
+:
+
+```
+// addon/adapters/my-extension.js
+import ApplicationAdapter from '@fleetbase/ember-core/adapters/application';
+
+export default class MyExtensionAdapter extends ApplicationAdapter {
+    namespace = 'my-extension/int/v1';
+}
+```
+
+The base
+`ApplicationAdapter`
+already handles auth headers (bearer token), the active organization header, the
+`X-Fleetbase-Sandbox`
+header, and JSON content negotiation. You're only changing where the requests go.
+
+For the public API namespace (consumed by external integrations), use
+`my-extension/v1`
+. For internal console-only endpoints, the platform convention is
+`my-extension/int/v1`
+.
+
+## 2. Point Each Model at the Adapter
+
+Ember Data resolves adapters per model name —
+`widget`
+looks for
+`adapter:widget`
+, falling back to
+`adapter:application`
+. The cleanest pattern is a one-line stub per model that re-exports the base adapter:
+
+```
+// addon/adapters/widget.js
+export { default } from './my-extension';
+```
+
+```
+// addon/adapters/widget-category.js
+export { default } from './my-extension';
+```
+
+```
+// addon/adapters/widget-template.js
+export { default } from './my-extension';
+```
+
+Now
+`store.findRecord('widget', id)`
+,
+`store.query('widget-category', ...)`
+, etc. all hit your API.
+
+## 3. Models and Serializers
+
+Models stay vanilla Ember Data — no adapter awareness needed:
+
+```
+// addon/models/widget.js
+import Model, { attr, belongsTo } from '@ember-data/model';
+
+export default class WidgetModel extends Model {
+    /** @ids */
+    @attr('string') company_uuid;
+    @attr('string') created_by_uuid;
+
+    /** @relationships */
+    @belongsTo('user', { async: false }) createdBy;
+
+    /** @attributes */
+    @attr('string') public_id;
+    @attr('string') name;
+    @attr('string') description;
+    @attr('string') status;
+    @attr('raw') meta;
+
+    /** @dates */
+    @attr('date') created_at;
+    @attr('date') updated_at;
+}
+```
+
+If your API embeds related records inline (the platform's REST convention), use a serializer with
+`EmbeddedRecordsMixin`
+:
+
+```
+// addon/serializers/widget.js
+import ApplicationSerializer from '@fleetbase/ember-core/serializers/application';
+import { EmbeddedRecordsMixin } from '@ember-data/serializer/rest';
+
+export default class WidgetSerializer extends ApplicationSerializer.extend(EmbeddedRecordsMixin) {
+    get attrs() {
+        return {
+            template: { embedded: 'always' },
+            categories: { embedded: 'always' },
+        };
+    }
+}
+```
+
+Mirror serializers per model if needed, or share one across many with re-exports.
+
+## 4. Backend Resource Shape
+
+For the adapter to deserialize correctly, your backend resources need to match Ember Data's expected envelope. The platform's
+`FleetbaseController`
++
+`JsonResource`
+pattern handles this for you — see
+[Routes & Controllers](https://fleetbase.io/docs/extension-development/backend/routes-and-controllers#controllers)
+. The
+`index`
+action returns:
+
+```
+{
+    "widgets": [
+        { "id": "widget_a1b2", "name": "...", "status": "active", ... },
+        ...
+    ]
+}
+```
+
+`show`
+returns:
+
+```
+{
+    "widget": { "id": "widget_a1b2", "name": "...", ... }
+}
+```
+
+The root key is the dasherized, pluralized (or singular for
+`show`
+) model name. If you're using a custom resource transformer, make sure
+`wrap()`
+returns the right shape.
+
+## 5. Use the Store
+
+With adapters in place, the standard Ember Data API just works:
+
+```
+import { inject as service } from '@ember/service';
+
+export default class WidgetsRoute extends Route {
+    @service store;
+
+    model() {
+        return this.store.query('widget', { status: 'active' });
+    }
+}
+```
+
+```
+@service store;
+
+async create() {
+    const widget = this.store.createRecord('widget', {
+        name: 'New Widget',
+        status: 'active',
+    });
+    await widget.save();  // POST /my-extension/int/v1/widgets
+    return widget;
+}
+
+async load(id) {
+    return this.store.findRecord('widget', id);  // GET /my-extension/int/v1/widgets/:id
+}
+
+async list() {
+    return this.store.query('widget', { limit: 50 });  // GET /my-extension/int/v1/widgets?limit=50
+}
+```
+
+## When to Use the Store vs. fetch
+
+| Use the store | Use `fetch` |
+| --- | --- |
+| CRUD on your own resources | One-off action endpoints ( `/widgets/{id}/duplicate` ) |
+| Records you'll display in tables, forms, detail panels | Aggregates, dashboards, exports |
+| Anything you want to track for dirty-state, optimistic updates, or relationship caching | Anything that doesn't fit the REST resource pattern |
+
+For an action endpoint that returns the full record, you can hybrid: use
+`fetch`
+for the call, then
+`store.pushPayload(...)`
+to merge the result into the store.
+
+```
+@service fetch;
+@service store;
+
+async duplicate(widget) {
+    const payload = await this.fetch.post(
+        `widgets/${widget.id}/duplicate`,
+        {},
+        { namespace: 'my-extension/int/v1', normalizeToEmberData: true }
+    );
+    this.store.pushPayload('widget', payload);
+}
+```
+
+`{ normalizeToEmberData: true }`
+tells
+`fetch`
+to push the response into the store before resolving, so you get a live
+`WidgetModel`
+back.
+
+## Reference
+
+* [Calling Your Extension's API](https://fleetbase.io/docs/extension-development/recipes/calling-your-extension-api)
+  — the
+  `fetch`
+  companion to this recipe
+* `addon/adapters/application.js`
+  — base adapter source
+* `addon/serializers/application.js`
+  — base serializer source
+* `packages/fleetops/addon/adapters/fleetops.js`
+  — reference per-extension adapter
+* `packages/fleetops/addon/adapters/`
+  — re-export pattern across many models
+* [Ember Data Adapter](https://api.emberjs.com/ember-data/release/modules/@ember-data%2Fadapter)
+  — upstream API docs
+* [RESTAdapter](https://api.emberjs.com/ember-data/release/classes/RESTAdapter)
+  — what
+  `ApplicationAdapter`
+  extends
+
+[Calling Your Extension's API
+
+Make authenticated requests from your engine to your extension's backend by passing the right namespace to the fetch service.](https://fleetbase.io/docs/extension-development/recipes/calling-your-extension-api)
+[Registering a Report Schema
+
+Expose your extension's tables in the platform's report builder by registering a ReportSchema. Users can then build custom reports against your data through the standard reporting UI.](https://fleetbase.io/docs/extension-development/recipes/registering-a-report-schema)

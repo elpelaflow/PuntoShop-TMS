@@ -1,0 +1,145 @@
+---
+title: "Installation"
+url: https://fleetbase.io/docs/ui/getting-started/installation
+module: ui
+---
+
+# Installation
+
+@fleetbase/ember-ui is bundled into every Fleetbase extension by default — this page covers what's installed automatically and how to add it manually if needed.
+
+# Installation
+
+In nearly every case
+**you don't need to install
+`@fleetbase/ember-ui`
+manually**
+. Every extension scaffolded with
+[`flb scaffold`](https://fleetbase.io/docs/cli/extension-development/scaffold)
+already includes the library as a dependency, alongside the engine wiring needed to load it.
+
+```
+// package.json (excerpt from a freshly scaffolded extension)
+{
+  "dependencies": {
+    "@fleetbase/ember-ui": "^0.3.29",
+    // …
+  }
+}
+```
+
+After scaffolding,
+`pnpm install`
+(run automatically in the console workspace) pulls in ember-ui and you can use any component immediately.
+
+## Adding It to an Existing Extension
+
+If you're working with an older extension that pre-dates the modern starter, add ember-ui via pnpm:
+
+```
+cd /path/to/your-extension
+pnpm add @fleetbase/ember-ui
+```
+
+The Ember addon system auto-merges ember-ui's components, helpers, modifiers, and services into the host application — no manual import statement is needed for individual components.
+
+## Using a Component
+
+Once ember-ui is a dependency, every component is available
+**angle-bracket**
+in any template:
+
+```
+<Button @type="primary" @text="Save" @onClick={{this.save}} />
+```
+
+You don't need to
+`import`
+components in JavaScript — Ember resolves them from the addon automatically.
+
+## Using a Helper
+
+Helpers are likewise globally available in templates:
+
+```
+{{format-currency 1500 "USD"}}    {{!-- $15.00 --}}
+{{format-bytes 1024}}              {{!-- 1 KB --}}
+{{is-uuid this.id}}                {{!-- true / false --}}
+```
+
+## Using a Service
+
+Services are injected like any Ember service:
+
+```
+import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
+
+export default class MyComponent extends Component {
+  @service modalsManager;
+  @service sidebar;
+
+  openModal() {
+    this.modalsManager.show('my-modal-template', {
+      title: 'Confirm',
+      body: 'Are you sure?',
+      acceptButtonText: 'Yes',
+    });
+  }
+}
+```
+
+## Using a Modifier
+
+Modifiers attach to elements with
+`{{modifier-name args}}`
+:
+
+```
+<div {{set-height "400px"}}>
+  Container with a fixed height
+</div>
+
+<input {{imask "phone"}} type="text" />
+```
+
+## Verify Your Install
+
+Once added, run
+`pnpm install`
+and start the console:
+
+```
+cd /path/to/fleetbase/console
+pnpm install
+pnpm start
+```
+
+Open any of your extension's templates and use a component:
+
+```
+<Spinner /> Loading…
+```
+
+If the component renders, your install is wired up correctly.
+
+## Updating
+
+When new ember-ui versions ship:
+
+```
+pnpm update @fleetbase/ember-ui
+```
+
+Check the release notes for breaking changes — the package is on
+`0.x`
+and APIs occasionally evolve.
+
+## Next Steps
+
+* [Core Concepts](https://fleetbase.io/docs/ui/getting-started/core-concepts)
+  — components, helpers, modifiers, services explained
+* [Layout](https://fleetbase.io/docs/ui/layout/overview)
+  — structure your pages
+* [Forms & Inputs](https://fleetbase.io/docs/ui/inputs/input-group)
+  — build forms

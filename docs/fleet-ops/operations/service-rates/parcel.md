@@ -1,0 +1,180 @@
+---
+title: "Parcel Rate"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-rates/parcel
+module: fleet-ops
+---
+
+Service Rates
+
+# Parcel Rate
+
+Charge per parcel based on its size and weight — define tier thresholds (small, medium, large, x-large), and Fleet-Ops sums the right fee for every parcel in the order.
+
+# Parcel Rate
+
+**Parcel Rate**
+scales the service fee with the
+**number and physical characteristics of the parcels**
+in the order. You define a tier table by size category — each tier has length, width, height, and weight thresholds, plus a fee — and every parcel on the order is matched against the table and charged the matching tier's fee. (In the API this method is identified as
+`parcel`
+.)
+
+Use this for parcel and e-commerce delivery where pricing depends on physical attributes, not route distance. If you want to combine parcel pricing with distance, use
+[Algorithm](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+with
+`{parcels}`
+, or place a parcel rate alongside a distance rate on different services.
+
+![Parcel Rate form — size tiers with length, width, height, weight, and fee](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-parcel.543542f0.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## How it works
+
+A parcel rate is a table of
+**size tiers**
+. Each tier defines a maximum length, width, height, and weight that a parcel must fit within, plus the fee charged when it does.
+
+At quote time, for
+**each parcel**
+in the order:
+
+1. The parcel's dimensions and weight are read.
+2. The tiers are checked in order. The first tier the parcel fits within wins.
+3. If the parcel exceeds every tier's thresholds, it's matched to the
+   **largest tier**
+   (highest fee) as a fallback.
+4. The matched tier's fee is added to the running parcel total.
+
+After every parcel has been priced, the parcel total is added to the
+**Base Fee**
+:
+
+> **Service fee = Base Fee + sum of every parcel's matched tier fee**
+
+The quote's line items include one entry per parcel, labeled with the matched tier's size (e.g.
+*"Medium parcel fee"*
+), so you can see exactly how the total was built.
+
+## API reference
+
+When you switch to
+**Parcel Rate**
+, Fleet-Ops seeds the table with four default tiers — Small, Medium, Large, and X-Large — that you can edit. Each tier supports the following fields:
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `size` | yes | Size category label — `small` , `medium` , `large` , `x-large` . Used on quote line items. |
+| `length` / `width` / `height` | yes | The maximum dimensions for this tier, in `dimensions_unit` . A parcel must fit within all three to match. |
+| `dimensions_unit` | yes | Unit for the dimensions. One of: `cm` , `in` , `ft` , `mm` , `m` , `yd` . |
+| `weight` | yes | Maximum weight for this tier, in `weight_unit` . |
+| `weight_unit` | yes | Unit for the weight. One of: `g` , `oz` , `lb` , `kg` . |
+| `fee` | yes | The fee charged for each parcel that matches this tier, in the rate's currency. |
+| `currency` | yes | Currency for the fee. |
+
+The defaults Fleet-Ops seeds:
+
+| Size | Length × Width × Height | Weight | Fee |
+| --- | --- | --- | --- |
+| Small | 34 × 18 × 10 cm | 2 kg | $0.00 |
+| Medium | 34 × 32 × 10 cm | 4 kg | $0.00 |
+| Large | 34 × 32 × 18 cm | 8 kg | $0.00 |
+| X-Large | 34 × 32 × 34 cm | 13 kg | $0.00 |
+
+Set the fees to match your pricing and adjust the dimensions or weight thresholds as needed.
+
+## Worked example
+
+> *"Small: $3. Medium: $5. Large: $8. X-Large: $14."*
+
+With the default size thresholds, an order containing:
+
+* 2 small parcels (each within 34 × 18 × 10 cm and under 2 kg)
+* 1 medium parcel (within 34 × 32 × 10 cm and under 4 kg)
+* 1 large parcel (within 34 × 32 × 18 cm and under 8 kg)
+
+Would be priced as:
+
+| Parcel | Matched tier | Fee |
+| --- | --- | --- |
+| Parcel 1 | Small | $3.00 |
+| Parcel 2 | Small | $3.00 |
+| Parcel 3 | Medium | $5.00 |
+| Parcel 4 | Large | $8.00 |
+| **Subtotal** |  | **$19.00** |
+
+Plus the
+**Base Fee**
+, so a $2 base would make the total
+**$21.00**
+.
+
+A parcel measuring 50 × 40 × 40 cm and weighing 20 kg — beyond every tier's thresholds — would fall back to the largest tier (X-Large) and be charged $14.00.
+
+## Configuration workflow
+
+Create or open a service rate in
+**Fleet-Ops → Operations → Service Rates**
+.
+
+Set
+**Rate Calculation Method**
+to
+**Parcel Rate**
+. The form will seed the table with four default size tiers.
+
+For each tier (Small, Medium, Large, X-Large) set the
+**Length**
+,
+**Width**
+,
+**Height**
+, and
+**Weight**
+thresholds, the
+**Dimensions Unit**
+and
+**Weight Unit**
+, and the
+**Additional Fee**
+.
+
+*Optional:*
+Set a
+**Base Fee**
+that applies once per order (independent of the per-parcel fees).
+
+*Optional:*
+Configure
+**COD Fees**
+and
+**Peak Hours**
+— these surcharges apply on top of the parcel total.
+
+Save and test by generating a quote for an order whose payload includes a mix of parcel sizes. Confirm each parcel gets the right line item.
+
+## Limitations
+
+* **Parcels only.**
+  Only payload items marked as parcels are priced. Other payload items contribute $0 to the parcel fee — they may still be priced via the Base Fee or via separate rate methods.
+* **All three dimensions must fit.**
+  A parcel matches a tier only if its length, width,
+  **and**
+  height are all within the tier's thresholds. If any one dimension exceeds the tier, the parcel falls through to the next tier.
+* **Tier order matters.**
+  Tiers should be defined from smallest to largest. Out-of-order tiers will produce unexpected matches.
+* **No distance component.**
+  Parcel rates ignore route distance entirely. Combine with
+  [Algorithm](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+  if you want both.
+* **No volumetric weight.**
+  The lookup uses literal dimensions and weight independently — there's no dimensional-weight calculation. If you need that, use
+  [Algorithm](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+  .
+
+## Related Pages
+
+* [Service Rates Overview](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  — all calculation methods and rate scoping
+* [Algorithm Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+  — combine parcel count with distance, time, or stop surcharges
+* [Service Quotes](https://fleetbase.io/docs/fleet-ops/operations/service-quotes/overview)
+  — how the calculated rate becomes a quote on an order

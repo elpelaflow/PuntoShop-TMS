@@ -1,0 +1,70 @@
+{{#if this.docsPanel.isOpen}}
+    <Overlay
+        @isOpen={{this.docsPanel.isOpen}}
+        @position="right"
+        @fullHeight={{true}}
+        @isResizable={{false}}
+        @width={{this.docsPanel.panelWidth}}
+        @onClose={{this.close}}
+        @overlayClass="fleetbase-docs-panel-overlay"
+    >
+        <Overlay::Header @title={{this.docsPanel.title}} @hideStatusDot={{true}}>
+            <:actions>
+                <div class="flex flex-1 justify-end items-center gap-2">
+                    <Button
+                        @type="default"
+                        @size="xs"
+                        @text={{this.langBadgeText}}
+                        @helpText={{this.langToggleHelpText}}
+                        @onClick={{this.toggleLang}}
+                        class="font-semibold text-xs px-2 py-1"
+                    />
+                    <Button
+                        @type="default"
+                        @icon={{if this.docsPanel.isExpanded "compress" "expand"}}
+                        @size="xs"
+                        @helpText={{if this.docsPanel.isExpanded "Contraer panel" "Ampliar panel"}}
+                        @onClick={{this.toggleExpand}}
+                    />
+                    <Button
+                        @type="default"
+                        @icon="times"
+                        @size="xs"
+                        @helpText="Cerrar documentación"
+                        @onClick={{this.close}}
+                    />
+                </div>
+            </:actions>
+        </Overlay::Header>
+        <Overlay::Body class="no-padding" @wrapperClass="fleetbase-docs-panel-body overflow-y-auto">
+            {{#if this.docsPanel.isLoading}}
+                <div class="flex h-64 flex-col items-center justify-center gap-3 p-6 text-center">
+                    <Spinner @iconClass="text-sky-500 fa-spin-800ms text-2xl" />
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Cargando guía...</span>
+                </div>
+            {{else if this.docsPanel.error}}
+                <div class="flex h-64 flex-col items-center justify-center gap-3 p-6 text-center">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300">
+                        <FaIcon @icon="exclamation-circle" />
+                    </div>
+                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {{this.docsPanel.error}}
+                    </div>
+                    <Button
+                        @type="primary"
+                        @size="sm"
+                        @text="Reintentar"
+                        @onClick={{this.retry}}
+                    />
+                </div>
+            {{else}}
+                <div
+                    class="docs-content p-6 max-w-none text-gray-800 dark:text-gray-200"
+                    {{on "click" this.handleContentClick}}
+                >
+                    {{this.renderedHtml}}
+                </div>
+            {{/if}}
+        </Overlay::Body>
+    </Overlay>
+{{/if}}

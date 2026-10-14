@@ -1,0 +1,582 @@
+---
+title: "Architecture"
+url: https://fleetbase.io/docs/platform/getting-started/architecture
+module: platform
+---
+
+# Architecture
+
+How Fleetbase is structured — the API backend, Ember.js console, real-time engine, extension system, and infrastructure requirements.
+
+# Architecture
+
+Fleetbase follows a
+**modular, API-first architecture**
+with a clear separation between the backend API layer, the frontend console, and the real-time event system. Extensions plug into both the backend and frontend simultaneously, making each module a first-class part of the platform rather than an external integration.
+
+## High-Level Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  Fleetbase Console (Ember.js)               │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌─────────┐  │
+│  │ FleetOps  │  │  Ledger   │  │    IAM    │  │  Dev    │  │
+│  │  Engine   │  │  Engine   │  │  Engine   │  │ Console │  │
+│  └───────────┘  └───────────┘  └───────────┘  └─────────┘  │
+│         Ember Engines — isolated, lazy-loaded modules       │
+└────────────────────────┬────────────────────────────────────┘
+                         │ REST API + WebSocket
+┌────────────────────────▼────────────────────────────────────┐
+│                  Fleetbase API (Laravel/PHP)                 │
+│  ┌─────────────┐  ┌────────────┐  ┌─────────────────────┐  │
+│  │ core-api    │  │fleetops-api│  │     ledger-api      │  │
+│  │  (package)  │  │ (package)  │  │      (package)      │  │
+│  └─────────────┘  └────────────┘  └─────────────────────┘  │
+│         Laravel Service Providers — registered per package  │
+└──────────┬────────────────────────────────────┬────────────┘
+           │                                    │
+     ┌─────▼──────┐   ┌──────────────┐   ┌────▼──────────┐
+     │  MySQL 8.0 │   │  Redis       │   │ S3 Storage    │
+     │ (database) │   │ (cache/queue)│   │ (files/media) │
+     └────────────┘   └──────────────┘   └───────────────┘
+```
+
+The console communicates with the API exclusively over HTTP and WebSocket — there is no shared memory or direct database access between the two tiers. This means the API can be scaled independently, and alternative frontends (mobile apps, custom dashboards) can consume the same API endpoints.
+
+## Backend — Laravel API
+
+The Fleetbase backend is a
+**Laravel PHP application**
+structured as a Composer monorepo. The core platform and each extension are distributed as separate Composer packages that are installed into a single Laravel application.
+
+### Core Package: fleetbase/core-api
+
+The
+`core-api`
+package is the foundation. It provides:
+
+* **Authentication**
+  — Token-based API authentication. Every request authenticates via an API key (generated in the Developer Console) or a session token
+* **Multi-tenancy**
+  — All platform models are organisation-scoped at the query level. No data from one organisation is ever accessible to another, enforced at the Eloquent model layer
+* **REST API conventions**
+  — Consistent resource modeling, filtering, pagination, and relationship handling across all entities
+* **Webhook engine**
+  — Event subscription management, reliable delivery with retry logic, signature verification, and delivery logs
+* **Background job processing**
+  — Redis-backed queue system for async operations (webhook delivery, notifications, report generation)
+* **WebSocket integration**
+  — SocketCluster channel management for real-time event publishing
+* **IAM**
+  — Users, roles, permissions, groups, organisations, and policy management
+* **Developer Console API**
+  — Endpoints for API key management, request log storage, and event monitoring
+
+### Extension Packages
+
+Each first-party extension adds its own Laravel package that registers via a Service Provider:
+
+| Package | Provides |
+| --- | --- |
+| `fleetbase/fleetops-api` | Orders, drivers, vehicles, fleets, routes, tracking events, proof of delivery |
+| `fleetbase/ledger-api` | Invoices, billing, ledger entries, financial records, transaction settlements |
+| `fleetbase/dev-engine` | API keys, webhooks, developer logs, and integration utilities |
+| `fleetbase/iam-engine` | Multi-organization tenancy, users, roles, permissions, and security |
+
+Each package follows the same pattern: a Service Provider that registers routes, models, policies, and event listeners into the host Laravel application.
+
+### API Structure
+
+```
+api/
+├── app/                   # Core application bootstrapping
+├── config/                # Environment-driven configuration
+├── database/migrations/   # Core platform migrations
+└── public/index.php       # Entry point (served by Caddy/Nginx)
+```
+
+The API is served by
+**Laravel Octane on a Caddy web server**
+in production, which provides high-performance persistent PHP workers that eliminate cold-start overhead on each request.
+
+Planning a self-hosted or on-premise production deployment? See
+[Infrastructure Sizing](https://fleetbase.io/docs/platform/quickstart/infrastructure-sizing)
+for the recommended HA topology, bill of quantities, workload profiles, and storage formulas.
+
+### Authentication
+
+All API requests authenticate using one of two mechanisms:
+
+* **API Key**
+  — A public/secret key pair generated per organisation in the Developer Console. Use the secret key for server-to-server requests; the public key for browser/app requests with limited scope.
+* **Session Token**
+  — Browser-session tokens issued at console login, used for console-to-API communication.
+
+Console users sign in with a password or, when an administrator has configured it, with a Google, Microsoft, GitHub, or Apple account — see
+[OAuth Sign-in](https://fleetbase.io/docs/platform/system-setup/oauth-sign-in)
+. Either way the console ends up holding a session token.
+
+Never expose your secret API key in client-side code or public repositories. Rotate keys immediately if they are compromised.
+
+## Frontend — Ember.js Console
+
+The Fleetbase Console is built with
+**Ember.js**
+— a JavaScript framework optimised for ambitious, long-running web applications. The console uses a modular architecture where each extension is mounted as an
+**Ember Engine**
+.
+
+### Core Libraries
+
+| Package | Role |
+| --- | --- |
+| `@fleetbase/ember-core` | Core services, adapters, utilities, and the Universe Service |
+| `@fleetbase/ember-ui` | Shared component library — buttons, tables, modals, forms, maps |
+
+### Ember Engines
+
+An Ember Engine is a self-contained Ember application that runs inside the host console. Each extension ships its frontend as an engine:
+
+* **Isolated routing**
+  — Each engine defines its own routes under its own namespace (e.g.,
+  `/console/fleet-ops/...`
+  )
+* **Shared services**
+  — Engines declare which host services they need (
+  `store`
+  ,
+  `fetch`
+  ,
+  `universe`
+  ,
+  `notifications`
+  ) and receive them from the console at mount time
+* **Lazy loading**
+  — Engines are loaded on demand when a user navigates to that extension, keeping the initial bundle small
+
+The console directory structure:
+
+console/
+
+app/
+
+environments/
+
+lib/
+
+fleetbase.config.json
+
+ember-cli-build.js
+
+tailwind.config.js
+
+package.json
+
+### The Universe Service
+
+The
+**Universe Service**
+(
+`@fleetbase/ember-core`
+) is the central extensibility registry for the console. When an extension engine initialises, it calls the Universe Service to register its UI elements:
+
+* Sidebar menu items and panel links
+* Dashboard widgets
+* Settings sections
+* Custom components and template helpers
+* Hooks into lifecycle events
+
+This is what allows extensions to appear seamlessly inside the console without modifying the core application. See the
+[Extension Development documentation](https://fleetbase.io/docs/extension-development/universe/overview)
+for full details.
+
+## Real-Time Engine — SocketCluster
+
+Fleetbase uses
+**SocketCluster**
+— a WebSocket framework for Node.js — to power all real-time features: live driver tracking, order status updates, chat messages, and push-notification triggers.
+
+### Channel Naming
+
+Channels follow the pattern
+`{resource_type}.{resource_id}`
+. Fleetbase resource IDs are prefixed with the resource type, so a full channel name looks like:
+
+```
+driver.driver_d389234         # Driver location and status updates
+order.order_ghs8432           # Order status and activity updates
+vehicle.vehicle_k219asd       # Vehicle telemetry updates
+chat.chat_room_xp23lq         # Chat room messages
+organization.organization_9kd2   # Org-wide system events
+```
+
+### Common Events
+
+| Channel | Event | Payload |
+| --- | --- | --- |
+| `driver.driver_{id}` | `driver.location_changed` | `{ latitude, longitude, heading, speed }` |
+| `order.order_{id}` | `order.status_updated` | `{ status, updated_at, updated_by }` |
+| `order.order_{id}` | `order.driver_assigned` | `{ driver_id, driver_name }` |
+| `driver.driver_{id}` | `driver.assigned` | `{ order_id, pickup, dropoff }` |
+
+You can subscribe to these channels using the Fleetbase JS SDK or any SocketCluster-compatible client. The socket server listens on port
+`38000`
+and is accessible at the path
+`/socketcluster/`
+. Configure and monitor active subscriptions in the
+[Developer Console → Socket Events](https://fleetbase.io/docs/platform/developer-console/socket-events)
+.
+
+## Extension System
+
+Every Fleetbase extension has a
+**dual architecture**
+— a backend package and a frontend engine that work together. This is the pattern followed by all first-party extensions and enforced by the Extension Development scaffolding.
+
+**Backend package (Laravel)**
+
+The server-side of an extension lives in a
+`server/`
+directory. It is a standard Composer package that:
+
+* Registers a Laravel Service Provider into the host application
+* Defines database migrations and Eloquent models
+* Exposes API routes under the extension's namespace (e.g.,
+  `/fleet-ops/v1/...`
+  )
+* Registers event listeners and background jobs
+
+```
+server/
+├── src/
+│   ├── Providers/ExtensionServiceProvider.php
+│   ├── Http/Controllers/
+│   ├── Models/
+│   └── routes.php
+└── composer.json
+```
+
+**Frontend engine (Ember)**
+
+The UI side of an extension lives in an
+`addon/`
+directory. It is an Ember Engine that:
+
+* Mounts into the console under its own route namespace
+* Declares service dependencies from the host console
+* Calls the Universe Service in its
+  `setupExtension()`
+  function to register sidebar links, dashboard widgets, and settings pages
+* Uses
+  `@fleetbase/ember-ui`
+  components for consistent styling
+
+```
+addon/
+├── components/
+├── controllers/
+├── routes/
+├── templates/
+├── engine.js      # Engine entry point + setupExtension()
+└── routes.js      # Route definitions
+```
+
+**Installation and registration**
+
+Extensions are installed via the Fleetbase CLI (
+`flb install`
+) or directly from the Extensions browser in the console. On install:
+
+* The Composer package is added to the API and its Service Provider is auto-discovered
+* The npm package is added to the console and the engine is registered in the build
+* The extension appears in the console sidebar on next load
+
+## Infrastructure
+
+### Required Services
+
+A Fleetbase deployment requires three external services in addition to the application containers:
+
+| Service | Role | Recommended |
+| --- | --- | --- |
+| **MySQL 8.0+** | Primary relational database | AWS RDS, Azure Database for MySQL, Cloud SQL, self-hosted |
+| **Redis** | Cache backend and job queue | AWS ElastiCache, Azure Cache for Redis, Memorystore, self-hosted |
+| **S3-compatible storage** | File uploads, documents, media | AWS S3, Azure Blob Storage, GCS, Cloudflare R2, MinIO |
+
+An SMTP service is required for transactional email (account verification, notifications). A push notification service (FCM/APNs) is required for mobile push notifications to the Navigator driver app.
+
+### Cloud Deployment
+
+Fleetbase runs on any cloud that supports Docker containers. Below is a guide to deploying on the four most common cloud providers using their managed services.
+
+AWS
+
+Azure
+
+GCP
+
+DigitalOcean
+
+AWS is well-suited for Fleetbase deployments of any scale, from a single EC2 instance to a fully managed, highly available container architecture.
+
+**Services used:**
+
+* **EC2 or ECS Fargate**
+  — Run the API and console containers. For smaller deployments, a single EC2 instance with Docker Compose works well. For production at scale, ECS Fargate removes the need to manage EC2 instances entirely.
+* **RDS for MySQL**
+  — Managed MySQL 8.0 with automated backups, point-in-time recovery, and optional Multi-AZ failover for high availability.
+* **ElastiCache for Redis**
+  — Managed Redis cluster for cache and job queues, with automatic failover.
+* **S3**
+  — Object storage for file uploads, driver photos, proof of delivery, and documents.
+* **Application Load Balancer + ACM**
+  — HTTPS termination with AWS-managed SSL certificates, routing traffic to the API and console containers.
+* **Route 53**
+  — DNS management pointing your domain to the load balancer.
+
+For a straightforward single-server deployment, provision an EC2 instance (t3.medium or larger), install Docker, clone the Fleetbase repository, and run the interactive install script:
+
+```
+bash scripts/docker-install.sh
+```
+
+Point your RDS and ElastiCache endpoints in the configuration when prompted, and use an ALB in front for HTTPS.
+
+Need help deploying on AWS? The
+[Fleetbase Installation Service](https://fleetbase.io/services/installation)
+handles the full architecture, deployment, and launch for you.
+
+Azure provides a complete set of managed services that map cleanly to Fleetbase's infrastructure requirements.
+
+**Services used:**
+
+* **Azure Container Instances or AKS**
+  — Run the API and console as containers. ACI is the simplest for smaller deployments; AKS (Kubernetes) is the right choice for larger operations requiring auto-scaling and high availability.
+* **Azure Database for MySQL — Flexible Server**
+  — Fully managed MySQL 8.0 with automated backups, high availability zone redundancy, and read replicas.
+* **Azure Cache for Redis**
+  — Managed Redis for cache and background job queues.
+* **Azure Blob Storage**
+  — S3-compatible object storage (use the Azure SDK or a MinIO gateway for S3 API compatibility with Fleetbase's storage driver).
+* **Azure Application Gateway or Front Door**
+  — HTTPS load balancing with Azure-managed TLS certificates and WAF capabilities.
+* **Azure DNS**
+  — Domain management and routing.
+
+For a single-server setup, provision an Azure Linux VM (Standard\_D2s\_v3 or larger), install Docker, and run the Fleetbase install script with your Azure managed service endpoints configured when prompted.
+
+Need help deploying on Azure? The
+[Fleetbase Installation Service](https://fleetbase.io/services/installation)
+handles the full architecture, deployment, and launch for you.
+
+Google Cloud Platform offers strong managed database and container options for Fleetbase deployments.
+
+**Services used:**
+
+* **Cloud Run or GKE**
+  — Cloud Run is the simplest path for containerised Fleetbase — it runs containers in a serverless environment with automatic scaling. GKE (Kubernetes Engine) is the right choice for operations that need fine-grained control over container orchestration.
+* **Cloud SQL for MySQL**
+  — Fully managed MySQL 8.0 with automated backups, high availability, and cross-region replication.
+* **Memorystore for Redis**
+  — Managed Redis for cache and job queues.
+* **Cloud Storage**
+  — Object storage for files and media, with S3-interoperability enabled for use with Fleetbase's S3 storage driver.
+* **Cloud Load Balancing**
+  — Global HTTPS load balancing with Google-managed SSL certificates.
+* **Cloud DNS**
+  — Domain routing to your load balancer.
+
+For a Compute Engine VM deployment, provision a machine (e2-standard-2 or larger), install Docker, and run the install script pointing at your Cloud SQL and Memorystore endpoints.
+
+Need help deploying on GCP? The
+[Fleetbase Installation Service](https://fleetbase.io/services/installation)
+handles the full architecture, deployment, and launch for you.
+
+DigitalOcean is a straightforward and cost-effective platform for self-hosted Fleetbase deployments, particularly for small-to-medium operations.
+
+**Services used:**
+
+* **Droplet**
+  — A Linux VPS (4 GB RAM / 2 vCPUs minimum; 8 GB recommended for production). Run the full Fleetbase Docker Compose stack directly on the Droplet.
+* **Managed MySQL**
+  — DigitalOcean's managed database cluster for MySQL 8.0, with daily backups and standby nodes for high availability.
+* **Managed Redis**
+  — A managed caching cluster for job queues and session storage.
+* **Spaces**
+  — S3-compatible object storage for file uploads and media. Fleetbase's S3 driver works directly with Spaces using the Spaces endpoint and access keys.
+* **Load Balancer**
+  — DigitalOcean's managed load balancer handles HTTPS termination with Let's Encrypt certificates and routes traffic to your Droplet.
+
+Provision a Droplet, SSH in, install Docker, clone the repository, and run the install script:
+
+```
+bash scripts/docker-install.sh
+```
+
+Configure your Managed MySQL and Managed Redis endpoints when prompted. Point a DigitalOcean Load Balancer at the Droplet for HTTPS.
+
+Need help deploying on DigitalOcean? The
+[Fleetbase Installation Service](https://fleetbase.io/services/installation)
+handles the full setup, configuration, and launch for you.
+
+### Environment Configuration
+
+Fleetbase is configured via environment variables written to
+`docker-compose.override.yml`
+by the install script. The configuration is split between the
+**backend API**
+, the
+**socket server**
+, and the
+**frontend console**
+.
+
+#### Backend (API container)
+
+| Variable | Description | Example |
+| --- | --- | --- |
+| `APP_KEY` | Auto-generated base64 application secret — generated by the install script | `base64:abc123...` |
+| `APP_NAME` | Display name for the installation | `Fleetbase` |
+| `APP_URL` | Public URL of the API server | `https://api.yourdomain.com` |
+| `CONSOLE_HOST` | Public URL of the console | `https://console.yourdomain.com` |
+| `APP_DEBUG` | Set to `false` in production | `false` |
+| `DATABASE_URL` | MySQL connection string | `mysql://user:pass@host/fleetbase` |
+| `SESSION_DOMAIN` | Cookie domain for sessions | `yourdomain.com` |
+| `FRONTEND_HOSTS` | Additional CORS origins (comma-separated) | `app.yourdomain.com` |
+
+**Mail**
+— set
+`MAIL_MAILER`
+to one of:
+`smtp`
+,
+`mailgun`
+,
+`postmark`
+,
+`sendgrid`
+,
+`resend`
+,
+`ses`
+, or
+`log`
+. Then provide the driver-specific variables:
+
+| Variable | Used by |
+| --- | --- |
+| `MAIL_HOST` , `MAIL_PORT` , `MAIL_USERNAME` , `MAIL_PASSWORD` | `smtp` |
+| `MAIL_FROM_ADDRESS` , `MAIL_FROM_NAME` | All drivers |
+| `MAILGUN_DOMAIN` , `MAILGUN_SECRET` | `mailgun` |
+| `POSTMARK_TOKEN` | `postmark` |
+| `SENDGRID_API_KEY` | `sendgrid` |
+| `RESEND_KEY` | `resend` |
+
+**File storage**
+— set
+`FILESYSTEM_DRIVER`
+to
+`s3`
+,
+`gcs`
+, or
+`public`
+(local disk, dev only):
+
+| Variable | Used by |
+| --- | --- |
+| `AWS_ACCESS_KEY_ID` , `AWS_SECRET_ACCESS_KEY` , `AWS_DEFAULT_REGION` , `AWS_BUCKET` | `s3` |
+| `AWS_URL` | S3-compatible providers (Cloudflare R2, DigitalOcean Spaces, MinIO) |
+| `AWS_USE_PATH_STYLE_ENDPOINT` | Set to `true` for MinIO and path-style S3 providers |
+| `GOOGLE_CLOUD_PROJECT_ID` , `GOOGLE_CLOUD_STORAGE_BUCKET` , `GOOGLE_CLOUD_KEY_FILE` | `gcs` |
+
+**Third-party integrations**
+— all optional:
+
+| Variable | Purpose |
+| --- | --- |
+| `IPINFO_API_KEY` | IP-based geolocation (ipinfo.io) |
+| `GOOGLE_MAPS_API_KEY` | Google Maps rendering and geocoding |
+| `GOOGLE_MAPS_LOCALE` | Maps locale (default: `us` ) |
+| `TWILIO_SID` , `TWILIO_TOKEN` , `TWILIO_FROM` | SMS notifications via Twilio |
+
+#### Socket Server
+
+The
+`socket`
+service has its own environment block:
+
+| Variable | Description | Example |
+| --- | --- | --- |
+| `SOCKETCLUSTER_OPTIONS` | JSON string restricting allowed WebSocket origins | `{"origins":"https://console.yourdomain.com"}` |
+
+In production, always restrict
+`SOCKETCLUSTER_OPTIONS`
+origins to your console's exact URL. The install script sets this automatically based on the host you provide.
+
+#### Frontend (Console)
+
+The console is configured via two files written by the install script:
+
+**`console/fleetbase.config.json`**
+— runtime config loaded by the Ember app:
+
+```
+{
+  "API_HOST": "https://api.yourdomain.com",
+  "SOCKETCLUSTER_HOST": "yourdomain.com",
+  "SOCKETCLUSTER_PORT": "38000",
+  "SOCKETCLUSTER_SECURE": "true"
+}
+```
+
+**`console/environments/.env.production`**
+— build-time environment:
+
+```
+API_HOST=https://api.yourdomain.com
+API_NAMESPACE=int/v1
+API_SECURE=true
+SOCKETCLUSTER_PATH=/socketcluster/
+SOCKETCLUSTER_HOST=yourdomain.com
+SOCKETCLUSTER_SECURE=true
+SOCKETCLUSTER_PORT=38000
+OSRM_HOST=https://router.project-osrm.org
+```
+
+`API_NAMESPACE`
+is always
+`int/v1`
+— this is the internal API namespace used by the console.
+`OSRM_HOST`
+points to the routing engine used for route calculations; you can self-host OSRM or use the public default.
+
+See
+[System Setup](https://fleetbase.io/docs/platform/system-setup/services)
+for the complete configuration reference.
+
+## Summary
+
+| Layer | Technology | Key Package / Tool |
+| --- | --- | --- |
+| **Console UI** | Ember.js + Ember Engines | `@fleetbase/ember-core` , `@fleetbase/ember-ui` |
+| **API Backend** | Laravel / PHP | `fleetbase/core-api` |
+| **Real-Time** | SocketCluster | Built into the API container |
+| **Database** | MySQL 8.0 | External managed or self-hosted |
+| **Cache & Queue** | Redis | External managed or self-hosted |
+| **File Storage** | S3-compatible | AWS S3, Cloudflare R2, Azure Blob, GCS, MinIO |
+| **Extension Backend** | Laravel Service Provider | Per-extension Composer package |
+| **Extension Frontend** | Ember Engine | Per-extension npm package |
+
+## Next Steps
+
+* [Cloud Quickstart](https://fleetbase.io/docs/platform/quickstart/cloud-quickstart)
+  — get a working Fleetbase instance running now
+* [Running Locally](https://fleetbase.io/docs/platform/quickstart/running-locally)
+  — run the full stack with Docker Compose in minutes
+* [Deploy in Cloud](https://fleetbase.io/docs/platform/quickstart/deploy-in-cloud)
+  — self-host on your own infrastructure
+* [System Setup](https://fleetbase.io/docs/platform/system-setup/services)
+  — configure your deployment for production
+* [Extension Development](https://fleetbase.io/docs/extension-development/getting-started/quickstart)
+  — start building your own extensions

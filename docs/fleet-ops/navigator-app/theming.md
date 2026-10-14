@@ -1,0 +1,329 @@
+---
+title: "Theming & Branding"
+url: https://fleetbase.io/docs/fleet-ops/navigator-app/theming
+module: fleet-ops
+---
+
+# Theming & Branding
+
+Customize colors, themes, app icon, splash screen, and display names for the Navigator App.
+
+# Theming & Branding
+
+The Navigator App uses
+[Tamagui](https://tamagui.dev)
+for theming. The setup combines a Tailwind-style color palette with named themes, plus runtime overrides via env vars for fast brand work without touching code.
+
+## How Themes Work
+
+Theming source:
+`tamagui.config.ts`
+at the project root.
+
+### Bases
+
+The app defines two semantic
+**bases**
+—
+`lightBase`
+and
+`darkBase`
+— and every screen consumes tokens from these. The token set includes:
+
+* `background`
+  ,
+  `surface`
+  ,
+  `subsurface`
+  ,
+  `color`
+* `textPrimary`
+  ,
+  `textSecondary`
+  ,
+  `textPlaceholder`
+* `primary`
+  ,
+  `primaryBorder`
+  ,
+  `primaryText`
+* `secondary`
+  ,
+  `secondaryBorder`
+* `borderColor`
+  ,
+  `borderColorWithShadow`
+  ,
+  `shadowColor`
+  ,
+  `borderActive`
+* `default`
+  ,
+  `defaultBorder`
+  ,
+  `defaultText`
+* `success`
+  ,
+  `successBorder`
+  ,
+  `successText`
+* `error`
+  ,
+  `errorBorder`
+  ,
+  `errorText`
+* `warning`
+  ,
+  `warningBorder`
+  ,
+  `warningText`
+* `info`
+  ,
+  `infoBorder`
+  ,
+  `infoText`
+* `tabIconBlur`
+
+### Override Layers
+
+The bases are extended in this order — later layers win:
+
+1. `globalColors`
+   —
+   `transparent`
+   ,
+   `white`
+   ,
+   `black`
+2. `CUSTOM_COLORS`
+   env — universal token overrides applied to both light and dark
+3. `CUSTOM_COLORS_LIGHT`
+   or
+   `CUSTOM_COLORS_DARK`
+   env — mode-specific overrides
+4. Flattened Tailwind palette (
+   `gray`
+   ,
+   `red`
+   ,
+   `blue`
+   ,
+   `green`
+   ,
+   `yellow`
+   ,
+   `orange`
+   ,
+   `indigo`
+   ,
+   `purple`
+   ,
+   `pink`
+   ) — every shade 50–900, available as
+   `$gray-500`
+   ,
+   `$blue-700`
+   , etc.
+
+### Named Themes
+
+`tamagui.config.ts`
+exports these themes via
+`createTheme()`
+:
+
+* **Light**
+  :
+  `lightBlue`
+  ,
+  `lightRed`
+  ,
+  `lightGreen`
+  ,
+  `lightIndigo`
+  ,
+  `lightOrange`
+* **Dark**
+  :
+  `darkBlue`
+  ,
+  `darkRed`
+  ,
+  `darkGreen`
+  ,
+  `darkIndigo`
+  ,
+  `darkOrange`
+
+The active theme is computed at runtime as
+`${userColorScheme}${capitalize(APP_THEME)}`
+— so
+`APP_THEME=indigo`
+plus the device in dark mode resolves to
+`darkIndigo`
+.
+
+The driver can flip light / dark from inside the app. The choice persists via the
+`useStorage`
+hook under the key
+`app_theme`
+(see
+`src/hooks/use-app-theme.ts`
+).
+
+## Quickly Recolor with CUSTOM\_COLORS
+
+For most brand work you don't need to touch code — set environment variables:
+
+```
+APP_THEME=blue
+
+# Universal tokens (applied to both light and dark bases)
+CUSTOM_COLORS=primary:#FF3A44,primaryBorder:#FF3A44,primaryText:#FFFFFF
+
+# Different overrides per mode
+CUSTOM_COLORS_LIGHT=background:#FFFFFF,surface:#F7F7F7
+CUSTOM_COLORS_DARK=background:#0A0A0A,surface:#171717
+```
+
+Format:
+`tokenName:#hex`
+separated by commas. The parser lives at
+`src/utils/tamagui.js`
+(
+`parseConfigObjectString`
+) — audit the exact accepted format there if you need edge cases.
+
+The merged result is wired into both
+`lightBase`
+and
+`darkBase`
+, so a custom token (e.g.
+`primary`
+) is available consistently across light and dark themes.
+
+## Add a Brand Theme
+
+If env overrides aren't enough — for example you want a fully custom palette on top of every Tailwind-style shade — add new theme entries directly in
+`tamagui.config.ts`
+. Navigator defines all brand themes in this configuration file.
+
+Open
+`tamagui.config.ts`
+and add your brand palette to the
+`colors`
+object. Keep the same shape — keys
+`50`
+through
+`900`
+— if you want full
+`$brand-300`
+-style token access.
+
+Add
+`lightAcme`
+and
+`darkAcme`
+entries to the
+`themes`
+map, mirroring the existing
+`lightBlue`
+/
+`darkBlue`
+shape. Override
+`primary`
+,
+`primaryBorder`
+, and
+`primaryText`
+(and any other tokens you want to rebrand).
+
+Set
+`APP_THEME=acme`
+in
+`.env`
+.
+
+Restart Metro / Webpack and rebuild — the Tamagui Babel plugin reads the config at build time, so theme additions require a fresh bundle.
+
+## Branding Assets
+
+| Asset | Source file | How to apply |
+| --- | --- | --- |
+| **App icon** | `assets/app-icon.png` (1024×1024 PNG, no transparency, no rounded corners — the stores round it themselves) | Replace, then `yarn generate:app-icon` — fans out to `ios/NavigatorApp/Images.xcassets/AppIcon.appiconset` and `android/app/src/main/res/mipmap-*` |
+| **Splash screen** | `assets/splash-screen.png` | Replace, then `yarn generate:launch-screen` — runs `react-native-bootsplash` with `--background=#111827 --logo-width=100 --flavor=main` |
+| **Login background color** | — | Set `LOGIN_BG_COLOR=#111827` (or any hex) — read at runtime by the setup screens |
+
+### Generating App Icon and Splash
+
+```
+# After replacing assets/app-icon.png:
+yarn generate:app-icon
+
+# After replacing assets/splash-screen.png:
+yarn generate:launch-screen
+```
+
+`yarn generate:launch-screen`
+defaults to
+`--background=#111827 --logo-width=100 --flavor=main`
+. Edit the script in
+`package.json`
+if you want a different background, logo width, or flavor.
+
+## Native Display Names
+
+`app.json`
+only controls the React Native registry name. The user-visible app name is set natively:
+
+* **iOS**
+  :
+  `ios/NavigatorApp/Info.plist`
+  →
+  `CFBundleDisplayName`
+  is
+  `$(APP_NAME)`
+  , driven by xcconfig from your
+  `.env`
+  .
+* **Android**
+  :
+  `android/app/src/main/res/values/strings.xml`
+  →
+  `<string name="app_name">NavigatorApp</string>`
+  .
+
+If you fully rebrand, also update:
+
+* `ios/NavigatorApp.xcodeproj`
+  (Xcode project name)
+* `android/app/build.gradle`
+  namespace and
+  `applicationId`
+  (typically also set via
+  `APP_IDENTIFIER`
+  )
+* `app.json`
+  `name`
+  and
+  `displayName`
+
+See
+[Build & Release](https://fleetbase.io/docs/fleet-ops/navigator-app/build-and-release)
+for the rename workflow.
+
+## Tamagui Static Extraction
+
+The build runs Tamagui's Babel plugin (
+`@tamagui/babel-plugin`
+) per
+`babel.config.js`
+, which extracts and optimizes Tamagui styles at compile time. On the web target, the Webpack config additionally runs
+`tamagui-loader`
+for static CSS extraction.
+
+In development, extraction is disabled (
+`disableExtraction: process.env.NODE_ENV === 'development'`
+) so theme edits hot-reload — but production bundles always go through extraction. You usually don't need to think about this — if a Tamagui upgrade breaks builds, the plugin config in
+`babel.config.js`
+is the place to look.

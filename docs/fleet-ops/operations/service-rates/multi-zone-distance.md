@@ -1,0 +1,234 @@
+---
+title: "Multi-zone Distance"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-rates/multi-zone-distance
+module: fleet-ops
+---
+
+Service Rates
+
+# Multi-zone Distance
+
+Charge different per-distance rates in different geographies — define a rate per zone or service area, set a fallback for unmatched segments, and Fleet-Ops splits the route across them at quote time.
+
+# Multi-zone Distance
+
+**Multi-zone Distance**
+splits the route's distance across
+**geographic rules**
+— each rule covers a Zone or Service Area and has its own per-distance rate. The portion of the route inside each rule's geography is priced with that rule's rate; an optional
+**fallback rule**
+picks up any distance that falls outside every defined geography. (In the API this method is identified as
+`multi_zone_distance`
+.)
+
+This unlocks pricing models like:
+
+* *"Downtown Singapore Zone: $2.00/km. Singapore Service Area: $1.25/km."*
+* *"Within service area: $1.20/km. Anywhere else: $3.00/km."*
+* *"Zone A and Zone B priced separately, with Zone A taking priority where they overlap."*
+
+If you only need one rate everywhere, use
+[Per Meter](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-meter)
+instead. For pricing that bands by
+**distance**
+rather than
+**geography**
+, use
+[Fixed Rate](https://fleetbase.io/docs/fleet-ops/operations/service-rates/fixed-rate)
+.
+
+![Multi-zone Distance form — geographic rules with priority and fallback row](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-multi-zone-distance.b3f7b9b1.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+![Detail view of the rules table with rule labels, geography selection, priority, and rate per unit](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-multi-zone-distance-details.04bb2339.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## How it works
+
+A Multi-zone Distance rate is a list of
+**geographic rules**
+. Each rule is one of:
+
+* A
+  **Zone rule**
+  — applies to the portion of the route that runs through a chosen
+  [Zone](https://fleetbase.io/docs/fleet-ops/resources/places/overview)
+  .
+* A
+  **Service Area rule**
+  — applies to the portion of the route that runs through a chosen Service Area.
+* A
+  **Fallback rule**
+  — applies to any part of the route that doesn't fall inside any of the rules' geographies.
+
+At quote time:
+
+1. Fleet-Ops ranks the rules by priority (highest first). Where two geographies overlap, the higher-priority rule wins.
+2. Fleet-Ops walks the route and, for each segment, checks which rule's geography contains it.
+3. The distance inside each rule's geography is added up. Anything that doesn't fall inside a defined geography goes to the fallback rule, if you've added one.
+4. Each rule's fee is
+   **its distance × its rate**
+   (in that rule's distance unit).
+5. All the rule fees are summed and added to the
+   **Base Fee**
+   to produce the service fee.
+
+The quote's line items include one entry per rule that contributed distance, labeled with the Zone or Service Area name, so customers and dispatchers can see exactly how the total was assembled.
+
+**Need to know.**
+Fleet-Ops figures out which segments fall inside each geography automatically — as long as your Zones and Service Areas have accurate boundaries drawn on the map, the split happens at quote time. You do not need to manually break up the order or pre-assign distance to zones.
+
+## Rule settings
+
+Each row in the rules table has the following settings:
+
+| Setting | Required | Description |
+| --- | --- | --- |
+| **Label** | optional | A human-readable name for the rule (e.g. "Downtown", "Rural fallback"). Shown on quote line items if the Zone or Service Area name isn't available. |
+| **Geography Type** | yes | Choose **Zone** or **Service Area** (or **Fallback** for unmatched route distance). |
+| **Geography** | conditional | The specific Zone or Service Area this rule prices. Required for Zone or Service Area rules. |
+| **Priority** | optional | A whole number. When geographies overlap, higher priority wins. Defaults to 0. |
+| **Rate** | yes | The per-distance rate for this rule, in the service rate's currency. |
+| **Unit** | yes | The distance unit the rate is denominated in (km, mi, m, ft, or yd). Each rule can use a different unit. |
+
+A rate can have
+**at most one fallback rule**
+. If you want a flat charge for out-of-zone distance, set the fallback rule's rate; if you'd rather refuse out-of-zone orders entirely, omit the fallback and that distance will be priced at $0.
+
+## Worked example
+
+> *"Singapore Zonal rate — $2.00 base fee, Downtown Singapore Zone: $2.00/km, Singapore Service Area: $1.25/km elsewhere."*
+
+This is the configuration shown in the screenshots above — a service rate called "Singapore Zonal" with one Zone rule for downtown and one Service Area rule covering greater Singapore.
+
+| Label | Geography Type | Geography | Priority | Rate | Unit |
+| --- | --- | --- | --- | --- | --- |
+| Downtown Singapore | Zone | Downtown Singapore Zone | 10 | $2.00 | km |
+| Singapore | Service Area | Singapore Service Area | 5 | $1.25 | km |
+
+Consider a route with four waypoints that starts and ends inside the broader Singapore Service Area but passes through the Downtown Singapore Zone partway. The Downtown rule wins inside the downtown boundary because it has a higher priority; the Service Area rule prices everything else.
+
+For an order whose route distance breaks down as
+**12.41 km inside Downtown**
+and
+**15.99 km inside the rest of the Singapore Service Area**
+:
+
+| Segment | Matched rule | Distance | Rate | Line item |
+| --- | --- | --- | --- | --- |
+| Downtown leg | Downtown Singapore | 12.41 km | $2.00 | **$24.81** |
+| Singapore leg | Singapore | 15.99 km | $1.25 | **$19.98** |
+| **Subtotal** |  |  |  | **$44.79** |
+| Base Fee |  |  |  | **$2.00** |
+| **Total** |  |  |  | **$46.79** |
+
+The quote breakdown matches what you see on the order detail in Fleet-Ops:
+
+* *Downtown Singapore distance charge (12.41 km × $2.00)*
+  — $24.81
+* *Singapore distance charge (15.99 km × $1.25)*
+  — $19.98
+
+If you wanted to charge for distance that goes
+**outside the Singapore Service Area entirely**
+(e.g. into neighbouring regions), you would add a
+**fallback rule**
+with its own rate; any unmatched segments would then accumulate against that rule instead of being priced at $0.
+
+![Quote breakdown showing the route split across zones with one line item per matched rule](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-multi-zone-distance-example.3bcd65c2.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Configuration workflow
+
+Make sure the
+[Zones](https://fleetbase.io/docs/fleet-ops/resources/places/overview)
+and/or Service Areas you want to price by already exist and have valid boundaries drawn on the map.
+
+Create or open a service rate in
+**Fleet-Ops → Operations → Service Rates**
+.
+
+Set
+**Rate Calculation Method**
+to
+**Multi-zone Distance**
+.
+
+Click
+**Add Rule**
+for each Zone or Service Area you want to price. For each rule:
+
+* Enter a
+  **Label**
+  (optional but useful on quote line items)
+* Select the
+  **Geography Type**
+  (Zone or Service Area)
+* Pick the specific
+  **Geography**
+  from the dropdown
+* Set the
+  **Priority**
+  if you have overlapping geographies (higher wins)
+* Set the
+  **Rate**
+  and
+  **Unit**
+  for that rule
+
+*Optional:*
+Click
+**Add Fallback**
+to add a rule for distance that doesn't match any defined geography. Set the fallback's rate and unit the same way.
+
+*Optional:*
+Set a
+**Base Fee**
+that applies once per order, on top of the multi-zone total.
+
+*Optional:*
+Configure
+**COD Fees**
+and
+**Peak Hours**
+— these surcharges apply on top of the multi-zone result.
+
+Save and test by generating a quote for an order whose route crosses one of your zones. The quote's line items will show one row per rule that contributed distance, with the distance and per-unit rate inline.
+
+## How priority resolves overlaps
+
+If two geographies overlap, the higher-priority rule wins for the overlapping region — the other rule does not get any distance from that area. This is useful for:
+
+* **Carve-outs**
+  : a city-wide rate at priority 0, plus a high-priority Downtown rule at priority 10 that takes precedence inside the downtown boundary.
+* **Express zones**
+  : a base Service Area at priority 0, with a "fast lane" Zone at priority 10 priced higher.
+* **Promotional zones**
+  : a low-rate promo Zone at high priority temporarily layered over your normal pricing.
+
+The fallback rule's priority is not used for matching — it only applies to distance that no other rule matched.
+
+## Limitations
+
+* **Boundaries must be drawn.**
+  Each Zone or Service Area you reference must have a boundary drawn on the map. Rules pointing at geographies without boundaries are skipped.
+* **One calculation method per rate.**
+  A rate uses one calculation method only. To layer a flat-per-km charge under multi-zone pricing, set the same flat amount as the
+  **fallback rule's**
+  rate.
+* **One fallback rule per rate.**
+  Multi-zone rates support exactly one fallback. If you need multiple "outside" tiers (e.g. by distance from city), combine multi-zone pricing with an
+  [Algorithm](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+  rate via separate quotes.
+* **Geographies must actually be on the route.**
+  If you add a rule for a Zone but the order's route doesn't actually pass through it, that rule contributes $0 and a fallback (if defined) picks up the entire distance.
+
+## Related Pages
+
+* [Service Rates Overview](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  — all calculation methods and rate scoping
+* [Service Areas & Zones](https://fleetbase.io/docs/fleet-ops/resources/places/overview)
+  — how to define the geographies used by multi-zone rules
+* [Per Meter](https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-meter)
+  — single-rate linear distance pricing
+* [Algorithm Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+  — combine with other surcharges in a custom expression
+* [Service Quotes](https://fleetbase.io/docs/fleet-ops/operations/service-quotes/overview)
+  — how the calculated rate becomes a quote on an order

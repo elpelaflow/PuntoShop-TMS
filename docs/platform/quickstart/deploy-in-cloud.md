@@ -1,0 +1,653 @@
+---
+title: "Deploy in Cloud"
+url: https://fleetbase.io/docs/platform/quickstart/deploy-in-cloud
+module: platform
+---
+
+# Deploy in Cloud
+
+Self-host Fleetbase on AWS, GCP, DigitalOcean, or any Linux server — Docker Compose deployment, Nginx reverse proxy, and SSL setup.
+
+# Deploy in Cloud
+
+This guide covers deploying Fleetbase to infrastructure you control — a VM on AWS, GCP, DigitalOcean, or any Linux server with Docker installed.
+
+Prefer not to manage infrastructure yourself? Our
+**[Managed Installation Service](https://fleetbase.io/services/installation)**
+handles provisioning, deployment, SSL, and ongoing maintenance — fully configured and production-ready on your preferred cloud provider.
+
+For larger self-hosted or on-premise deployments, including Kubernetes HA, storage growth, disaster recovery, and enterprise production sizing, see
+[Infrastructure Sizing](https://fleetbase.io/docs/platform/quickstart/infrastructure-sizing)
+.
+
+## Infrastructure Requirements
+
+### Minimum Server Spec
+
+| Resource | Minimum | Recommended |
+| --- | --- | --- |
+| **CPU** | 2 cores | 4+ cores |
+| **RAM** | 4 GB | 8–16 GB |
+| **Storage** | 40 GB SSD | 100 GB+ SSD |
+| **OS** | Ubuntu 22.04 LTS | Ubuntu 22.04 LTS |
+
+### Recommended External Services
+
+For production, use managed instances of the backing services rather than running them in Docker on the same machine:
+
+| Service | Purpose |
+| --- | --- |
+| **MySQL 8.0+** | Primary database |
+| **Redis** | Cache and job queue |
+| **S3-compatible storage** | File uploads and media |
+| **SMTP** | Transactional email |
+
+## Deployment
+
+AWS
+
+GCP
+
+DigitalOcean
+
+VPS / Linux
+
+The recommended architecture on AWS uses managed services for the database, cache, and storage, with Fleetbase running on an EC2 instance.
+
+**Recommended AWS services**
+
+| Component | AWS Service |
+| --- | --- |
+| Database | RDS MySQL 8.0 |
+| Cache & queues | ElastiCache Redis |
+| File storage | S3 |
+| Email | SES or SendGrid |
+| VM | EC2 (t3.medium or larger) |
+
+### Provision managed services
+
+Before deploying, create the following in your AWS account:
+
+* **RDS MySQL 8.0**
+  — enable automated backups and set the instance to your preferred region
+* **ElastiCache Redis**
+  — single-node is sufficient for most workloads
+* **S3 bucket**
+  — create a bucket for file uploads; note the bucket name and region
+* **IAM user**
+  — create an IAM user with
+  `AmazonS3FullAccess`
+  (scoped to your bucket) and generate access keys
+
+Note the connection strings for RDS and ElastiCache — you'll need them in the next step.
+
+### Launch an EC2 instance
+
+Launch an EC2 instance running Ubuntu 22.04. A
+`t3.medium`
+(2 vCPU / 4 GB) is the minimum;
+`t3.large`
+or larger is recommended for production.
+
+In the security group, allow inbound traffic on ports
+**22**
+(SSH),
+**80**
+(HTTP), and
+**443**
+(HTTPS). Keep all other ports closed — Nginx will proxy to the Docker containers internally.
+
+### Install Docker
+
+SSH into your instance and install Docker:
+
+```
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### Clone and configure
+
+```
+git clone https://github.com/elpelaflow/PuntoShop-TMS.git
+cd PuntoShop-TMS
+```
+
+Create
+`docker-compose.override.yml`
+and configure your environment variables, pointing to your managed RDS, ElastiCache, and S3 resources:
+
+```
+services:
+  application:
+    environment:
+      APP_KEY: "base64:your-generated-key"
+      APP_URL: "https://api.yourdomain.com"
+      CONSOLE_HOST: "https://console.yourdomain.com"
+      APP_ENV: "production"
+      APP_DEBUG: "false"
+      DATABASE_URL: "mysql://user:password@your-rds-endpoint/fleetbase"
+      REDIS_HOST: "your-elasticache-endpoint"
+      CACHE_DRIVER: "redis"
+      QUEUE_CONNECTION: "redis"
+      SESSION_DRIVER: "redis"
+      FILESYSTEM_DRIVER: "s3"
+      AWS_BUCKET: "your-bucket"
+      AWS_DEFAULT_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "..."
+      AWS_SECRET_ACCESS_KEY: "..."
+  socket:
+    environment:
+      SOCKETCLUSTER_OPTIONS: '{"origins":"https://console.yourdomain.com"}'
+```
+
+Generate an application key:
+
+```
+docker run --rm fleetbase/fleetbase-api:latest php artisan key:generate --show
+```
+
+### Start the stack and run migrations
+
+```
+docker compose up -d
+docker compose exec application bash -c "./deploy.sh"
+```
+
+Once the stack is running, continue to the
+[Nginx](#nginx-reverse-proxy)
+and
+[SSL](#ssl-certificates)
+sections below.
+
+The recommended architecture on GCP uses managed services for the database, cache, and storage, with Fleetbase running on a Compute Engine instance.
+
+**Recommended GCP services**
+
+| Component | GCP Service |
+| --- | --- |
+| Database | Cloud SQL (MySQL 8.0) |
+| Cache & queues | Memorystore for Redis |
+| File storage | Cloud Storage (GCS) |
+| Email | SendGrid or Mailgun |
+| VM | Compute Engine (e2-medium or larger) |
+
+### Provision managed services
+
+In your GCP project:
+
+* **Cloud SQL**
+  — create a MySQL 8.0 instance; note the connection string and enable the Cloud SQL Admin API
+* **Memorystore for Redis**
+  — create a Basic tier instance in the same region as your VM
+* **Cloud Storage bucket**
+  — create a bucket for file uploads and create a service account with
+  `Storage Object Admin`
+  access; download the key JSON file
+
+### Create a Compute Engine instance
+
+Create a VM running Ubuntu 22.04. An
+`e2-medium`
+(2 vCPU / 4 GB) is the minimum. In the firewall rules, allow inbound traffic on ports
+**80**
+and
+**443**
+only — Nginx handles routing internally.
+
+### Install Docker
+
+```
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### Clone and configure
+
+```
+git clone https://github.com/elpelaflow/PuntoShop-TMS.git
+cd PuntoShop-TMS
+```
+
+Create
+`docker-compose.override.yml`
+pointing to your Cloud SQL, Memorystore, and GCS resources:
+
+```
+services:
+  application:
+    environment:
+      APP_KEY: "base64:your-generated-key"
+      APP_URL: "https://api.yourdomain.com"
+      CONSOLE_HOST: "https://console.yourdomain.com"
+      APP_ENV: "production"
+      APP_DEBUG: "false"
+      DATABASE_URL: "mysql://user:password@your-cloud-sql-ip/fleetbase"
+      REDIS_HOST: "your-memorystore-ip"
+      CACHE_DRIVER: "redis"
+      QUEUE_CONNECTION: "redis"
+      SESSION_DRIVER: "redis"
+      FILESYSTEM_DRIVER: "gcs"
+      GOOGLE_CLOUD_PROJECT_ID: "your-project-id"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "your-bucket"
+      GOOGLE_CLOUD_KEY_FILE: "/run/secrets/gcp-key.json"
+  socket:
+    environment:
+      SOCKETCLUSTER_OPTIONS: '{"origins":"https://console.yourdomain.com"}'
+```
+
+### Start the stack and run migrations
+
+```
+docker compose up -d
+docker compose exec application bash -c "./deploy.sh"
+```
+
+Once the stack is running, continue to the
+[Nginx](#nginx-reverse-proxy)
+and
+[SSL](#ssl-certificates)
+sections below.
+
+The simplest path on DigitalOcean is a Droplet running Docker Compose, backed by DigitalOcean's managed database and cache services.
+
+**Recommended DigitalOcean services**
+
+| Component | DigitalOcean Service |
+| --- | --- |
+| Database | Managed MySQL 8 |
+| Cache & queues | Managed Redis |
+| File storage | Spaces (S3-compatible) |
+| Email | SendGrid or Mailgun |
+| VM | Droplet (s-2vcpu-4gb or larger) |
+
+### Provision managed services
+
+In your DigitalOcean account:
+
+* **Managed MySQL**
+  — create a MySQL 8 database cluster in your preferred region; create a database named
+  `fleetbase`
+  and a user
+* **Managed Redis**
+  — create a Redis cluster in the same region
+* **Spaces**
+  — create a Space (bucket) for file uploads; generate a Spaces access key from API settings
+
+### Create a Droplet
+
+Create an Ubuntu 22.04 Droplet —
+`s-2vcpu-4gb`
+is the minimum;
+`s-4vcpu-8gb`
+is recommended. Add your SSH key during creation. In the Droplet's firewall (or DigitalOcean Cloud Firewall), allow inbound on ports
+**22**
+,
+**80**
+, and
+**443**
+only.
+
+Place the Droplet in the same region as your managed database and Redis cluster so they can communicate over the private network.
+
+### Install Docker
+
+```
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### Clone and configure
+
+```
+git clone https://github.com/elpelaflow/PuntoShop-TMS.git
+cd PuntoShop-TMS
+```
+
+Create
+`docker-compose.override.yml`
+pointing to your managed database, Redis, and Spaces:
+
+```
+services:
+  application:
+    environment:
+      APP_KEY: "base64:your-generated-key"
+      APP_URL: "https://api.yourdomain.com"
+      CONSOLE_HOST: "https://console.yourdomain.com"
+      APP_ENV: "production"
+      APP_DEBUG: "false"
+      DATABASE_URL: "mysql://user:password@your-db-host/fleetbase"
+      REDIS_HOST: "your-redis-host"
+      CACHE_DRIVER: "redis"
+      QUEUE_CONNECTION: "redis"
+      SESSION_DRIVER: "redis"
+      FILESYSTEM_DRIVER: "s3"
+      AWS_BUCKET: "your-space-name"
+      AWS_DEFAULT_REGION: "nyc3"
+      AWS_ACCESS_KEY_ID: "your-spaces-key"
+      AWS_SECRET_ACCESS_KEY: "your-spaces-secret"
+      AWS_URL: "https://your-space-name.nyc3.digitaloceanspaces.com"
+      AWS_USE_PATH_STYLE_ENDPOINT: "false"
+  socket:
+    environment:
+      SOCKETCLUSTER_OPTIONS: '{"origins":"https://console.yourdomain.com"}'
+```
+
+> DigitalOcean Spaces is S3-compatible, so Fleetbase uses the S3 driver. Set
+> `AWS_DEFAULT_REGION`
+> to your Space's region slug (e.g.
+> `nyc3`
+> ,
+> `sgp1`
+> ,
+> `ams3`
+> ).
+
+### Start the stack and run migrations
+
+```
+docker compose up -d
+docker compose exec application bash -c "./deploy.sh"
+```
+
+Once the stack is running, continue to the
+[Nginx](#nginx-reverse-proxy)
+and
+[SSL](#ssl-certificates)
+sections below.
+
+This path works on any Linux server — Hetzner, Linode, OVH, or a bare-metal machine. You can run MySQL and Redis in Docker alongside the application, or point to managed services from any provider.
+
+### Install Docker
+
+On a fresh Ubuntu 22.04 server:
+
+```
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### Clone the repository
+
+```
+git clone https://github.com/elpelaflow/PuntoShop-TMS.git
+cd PuntoShop-TMS
+```
+
+### Configure environment variables
+
+Create
+`docker-compose.override.yml`
+with your production settings:
+
+```
+services:
+  application:
+    environment:
+      APP_KEY: "base64:your-generated-key"
+      APP_NAME: "Fleetbase"
+      APP_URL: "https://api.yourdomain.com"
+      CONSOLE_HOST: "https://console.yourdomain.com"
+      APP_ENV: "production"
+      APP_DEBUG: "false"
+      DATABASE_URL: "mysql://fleetbase:password@database/fleetbase"
+      SESSION_DOMAIN: "yourdomain.com"
+      MAIL_MAILER: "smtp"
+      MAIL_HOST: "smtp.sendgrid.net"
+      MAIL_PORT: "587"
+      MAIL_USERNAME: "apikey"
+      MAIL_PASSWORD: "your-sendgrid-api-key"
+      MAIL_FROM_ADDRESS: "noreply@yourdomain.com"
+      MAIL_FROM_NAME: "Fleetbase"
+  socket:
+    environment:
+      SOCKETCLUSTER_OPTIONS: '{"origins":"https://console.yourdomain.com"}'
+```
+
+Generate a secure application key:
+
+```
+docker run --rm fleetbase/fleetbase-api:latest php artisan key:generate --show
+```
+
+Paste the output into
+`APP_KEY=`
+in your override file.
+
+### Start the stack and run migrations
+
+```
+docker compose up -d
+docker compose exec application bash -c "./deploy.sh"
+```
+
+Once the stack is running, continue to the
+[Nginx](#nginx-reverse-proxy)
+and
+[SSL](#ssl-certificates)
+sections below.
+
+## Nginx Reverse Proxy
+
+Nginx acts as the public-facing reverse proxy, handles SSL termination, and routes traffic to the API and console containers.
+
+```
+sudo apt-get update && sudo apt-get install -y nginx
+sudo nano /etc/nginx/sites-available/fleetbase
+```
+
+Paste the following, replacing
+`yourdomain.com`
+with your actual domain:
+
+```
+# HTTP → HTTPS redirect
+server {
+    listen 80;
+    listen [::]:80;
+    server_name console.yourdomain.com api.yourdomain.com;
+    return 301 https://$host$request_uri;
+}
+
+# Console (Ember.js UI)
+server {
+    listen 443 ssl http2;
+    server_name console.yourdomain.com;
+
+    ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    client_max_body_size 100M;
+
+    location / {
+        proxy_pass http://localhost:4200;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# API (Laravel)
+server {
+    listen 443 ssl http2;
+    server_name api.yourdomain.com;
+
+    ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    client_max_body_size 100M;
+
+    location / {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /socketcluster/ {
+        proxy_pass         http://localhost:38000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade    $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+        proxy_set_header   Host       $host;
+    }
+}
+```
+
+Enable the site and test:
+
+```
+sudo ln -s /etc/nginx/sites-available/fleetbase /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+## SSL Certificates
+
+Use Certbot with Let's Encrypt for free, auto-renewing certificates:
+
+```
+sudo apt-get install -y certbot python3-certbot-nginx
+
+sudo certbot --nginx \
+  -d console.yourdomain.com \
+  -d api.yourdomain.com \
+  --non-interactive \
+  --agree-tos \
+  -m admin@yourdomain.com
+```
+
+Verify renewal works:
+
+```
+sudo certbot renew --dry-run
+```
+
+## Keeping Fleetbase Updated
+
+Pull the latest images and restart the stack:
+
+```
+cd PuntoShop-TMS
+git pull
+docker compose pull
+docker compose up -d
+docker compose exec application bash -c "./deploy.sh"
+docker compose up -d
+```
+
+Always run
+`./deploy.sh`
+after pulling a new release. It handles migrations, cache clearing, and any other steps required by the release.
+
+## Production Hardening
+
+### Firewall
+
+Restrict inbound traffic to only what Nginx needs to expose:
+
+```
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 22/tcp    # SSH
+sudo ufw allow 80/tcp    # HTTP (redirects to HTTPS)
+sudo ufw allow 443/tcp   # HTTPS
+sudo ufw enable
+```
+
+Docker containers communicate internally on their own network — you do not need to open ports 4200, 8000, or 38000 to the public internet.
+
+### Automated Backups
+
+If you're running MySQL in Docker rather than a managed service, set up automated backups:
+
+```
+# /usr/local/bin/fleetbase-backup.sh
+#!/bin/bash
+BACKUP_DIR="/backups/fleetbase"
+DATE=$(date +%Y%m%d_%H%M%S)
+mkdir -p $BACKUP_DIR
+
+docker compose -f /path/to/fleetbase/docker-compose.yml \
+  exec -T database \
+  mysqldump -u root fleetbase > $BACKUP_DIR/fleetbase_${DATE}.sql
+
+gzip $BACKUP_DIR/fleetbase_${DATE}.sql
+find $BACKUP_DIR -mtime +30 -delete
+```
+
+Make it executable and schedule it daily:
+
+```
+chmod +x /usr/local/bin/fleetbase-backup.sh
+echo "0 2 * * * root /usr/local/bin/fleetbase-backup.sh" | sudo tee /etc/cron.d/fleetbase-backup
+```
+
+## Post-Deployment Checklist
+
+* Console loads at
+  `https://console.yourdomain.com`
+* API responds at
+  `https://api.yourdomain.com`
+* SSL certificate is valid (no browser warnings)
+* Admin account created and login works
+* API key generated in Developer Console
+* Test API call returns a valid response
+* Mail delivery working (send a test from System Setup → Mail)
+* OAuth callback URLs registered with each provider, if you offer provider sign-in
+* File upload working (upload a test file in the console)
+* Firewall rules confirmed (
+  `ufw status`
+  )
+* Automated backups scheduled and tested
+* Docker containers set to restart on reboot (
+  `restart: unless-stopped`
+  in compose)
+
+## Troubleshooting
+
+**Console shows a blank screen after deploy**
+Check that
+`CONSOLE_HOST`
+in your override matches the exact URL the console is served from, including the protocol (
+`https://`
+). A mismatch causes the API client in the console to point at the wrong host.
+
+**API returns 500 errors**
+Run
+`docker compose logs -f application`
+to see the Laravel error log. The most common causes are a missing
+`APP_KEY`
+, incorrect database credentials, or a failed migration.
+
+**WebSocket connections fail**
+Confirm that
+`SOCKETCLUSTER_OPTIONS`
+in your override includes your console's origin. A misconfigured origin list causes the SocketCluster server to reject WebSocket upgrade requests.
+
+**Provider sign-in fails with a redirect URI mismatch**
+The callback URL Fleetbase builds must match the one registered with the provider exactly. Behind a proxy or load balancer whose public URL differs from
+`APP_URL`
+, set
+`OAUTH_REDIRECT_BASE`
+to the API's public origin, then copy the Callback URL shown in
+**Admin → Auth Config → OAuth Sign-in**
+. See
+[OAuth Sign-in](https://fleetbase.io/docs/platform/system-setup/oauth-sign-in)
+.
+
+**Migrations fail on deploy**
+Check
+`docker compose logs -f application`
+for the SQL error. Most migration failures are caused by a version mismatch between the code and the database — ensure you're pulling from the correct tag and running
+`git pull`
+before deploying.

@@ -1,0 +1,116 @@
+---
+title: "Translations"
+url: https://fleetbase.io/docs/contributing/translations
+module: contributing
+---
+
+Translations
+
+# Translations
+
+Help translate Fleetbase Console and extensions into more languages — overview, what to translate, and how to get started.
+
+# Translating Fleetbase
+
+Fleetbase ships with translation infrastructure across the Console and every extension. New languages are contributed by community translators — operators, drivers, and developers who use Fleetbase in their region and want it to speak their language.
+
+This guide walks through the full process: how the system is structured, where the files live, how to translate them well, and how to submit your work.
+
+## Why translation matters
+
+Fleetbase is used in 40+ countries. The interface a driver, dispatcher, or warehouse worker sees in a language they don't fully understand becomes a tax on their work — slower training, more errors, worse adoption. A complete translation in a single locale can change whether Fleetbase is usable at all in a market.
+
+We treat translations as first-class contributions. Translators are credited, language coverage is tracked publicly, and translation PRs go through the same review process as code.
+
+## How translations are structured
+
+Fleetbase is modular. The Console (the main app shell) and every extension (Fleet-Ops, Ledger, IAM, etc.) ship their own translation files. To deliver a complete experience in a language, you typically need to contribute to multiple repos — but you can start with just one.
+
+| Layer | What it covers | Repository |
+| --- | --- | --- |
+| **Console shell** | Navigation, settings, account, auth, shared UI | `fleetbase/fleetbase` (path: `console/translations/` ) |
+| **Extension UIs** | Each extension's own screens, forms, dashboards | Individual extension repos (path: `translations/` ) |
+
+The full repository list with paths lives in
+[Repositories →](https://fleetbase.io/docs/contributing/translations/repositories)
+.
+
+## The base language
+
+Every translation file is derived from American English (
+`en-us.yaml`
+). When you add a new language, you:
+
+1. Copy
+   `en-us.yaml`
+2. Rename it to your locale code (e.g.
+   `fr-fr.yaml`
+   ,
+   `es-mx.yaml`
+   ,
+   `zh-cn.yaml`
+   )
+3. Translate the values, leaving the keys untouched
+
+When
+`en-us.yaml`
+changes (new keys added), existing language files fall behind. Updating them — porting new keys from English into your language — is just as valuable as adding a new language from scratch.
+
+## What you'll do, end-to-end
+
+### Set up your environment
+
+Fork the relevant repository, clone it locally, and find the translation files. See
+[Setup →](https://fleetbase.io/docs/contributing/translations/setup)
+.
+
+### Understand the file format
+
+Translation files are YAML. There are conventions for placeholders, pluralization, and what to translate. See
+[File format →](https://fleetbase.io/docs/contributing/translations/file-format)
+.
+
+### Translate
+
+Either copy
+`en-us.yaml`
+to a new locale file, or update an existing locale file to match the latest English keys.
+
+### Check the glossary
+
+Some terms shouldn't be translated (brand names, technical terms). See
+[Glossary →](https://fleetbase.io/docs/contributing/translations/glossary)
+.
+
+### Submit a PR
+
+Open a pull request following the conventions in
+[Submitting →](https://fleetbase.io/docs/contributing/translations/submitting)
+.
+
+## Adding a new language vs. updating an existing one
+
+| Goal | Steps |
+| --- | --- |
+| **Add a new language** | Copy `en-us.yaml` → `<locale>.yaml` , translate every value, submit |
+| **Update an existing language** | Diff the locale file against `en-us.yaml` , port new/changed keys, submit |
+| **Fix a bad translation** | Edit the value in place with your correction, note the reason in the PR |
+
+You don't have to translate everything in one go. A partial update with 200 new keys translated is more useful than an empty PR you never finish.
+
+## Get help
+
+* **Stuck on a key's meaning?**
+  Ask in
+  `#translations`
+  on
+  [Discord](https://fleetbase.io/docs/community/discord)
+  — the original author or another translator can clarify.
+* **Disagreement on phrasing?**
+  Open a PR and discuss it inline. Translation reviews are conversations, not gatekeeping.
+* **Want to coordinate with other translators?**
+  Discord has language-specific threads where translators self-organise.
+
+Ready? Start with
+[Setup →](https://fleetbase.io/docs/contributing/translations/setup)
+.

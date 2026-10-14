@@ -1,0 +1,178 @@
+---
+title: "Button"
+url: https://fleetbase.io/docs/ui/actions/button
+module: ui
+---
+
+# Button
+
+<Button> is the standard button component. Supports types, sizes, icons, loading state, permission gating, tooltips, and analytics events.
+
+# <Button>
+
+The standard button used everywhere in the Fleetbase Console. Supports semantic types, sizes, icons, loading state, built-in permission checks, tooltips, and analytics events.
+
+## Basic Usage
+
+```
+<Button @text="Save" @onClick={{this.save}} />
+
+<Button @type="primary" @icon="save" @text="Save Changes" @onClick={{this.save}} />
+
+<Button @type="danger" @icon="trash" @text="Delete" @onClick={{this.delete}} />
+```
+
+## Arguments
+
+### Visual
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@type` | string | `default` | Visual variant — `default` , `primary` , `secondary` , `success` , `warning` , `danger` , `magic` |
+| `@size` | string | `sm` | `xs` , `sm` , `md` , `lg` , `xl` |
+| `@text` | string | — | Button label |
+| `@outline` | boolean | `false` | Render the outline variant |
+| `@responsive` | boolean | `false` | Hide the text on small screens (icon-only on `sm:` ) |
+| `@wrapperClass` | string | — | Extra classes on the outer wrapper |
+| `@textClass` | string | — | Extra classes on the text span |
+| `@buttonType` | string | `button` | The native `type` attribute — `button` , `submit` , `reset` |
+
+### Icon
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@icon` | string | — | FontAwesome icon name (e.g. `save` , `trash` , `plus` ) |
+| `@iconPrefix` | string | — | FontAwesome prefix — `fas` , `far` , `fab` , etc. |
+| `@iconSize` | string | — | Forwarded to `<FaIcon>` ( `xs` , `sm` , `lg` , `2x` , etc.) |
+| `@iconRotation` | number | — | 90 / 180 / 270 |
+| `@iconFlip` | string | — | `horizontal` / `vertical` / `both` |
+| `@iconSpin` | boolean | — | Spin the icon |
+| `@iconClass` | string | — | Extra classes on the icon |
+
+### Loading State
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@isLoading` | boolean | `false` | Show a spinner instead of the icon and disable the button |
+| `@loaderWidth` | number | `14` | Spinner width in px |
+| `@loaderHeight` | number | `14` | Spinner height in px |
+
+### Disabled / Visibility
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@disabled` | boolean | `false` | Disable the button |
+| `@visible` | boolean | `true` | When `false` , nothing renders |
+
+### Permissions
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@permission` | string | If the current user lacks this ability, the button is auto-disabled and a "Unauthorized" tooltip is shown. Uses `ember-can` |
+
+### Tooltip
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@helpText` | string | — | Tooltip text shown on hover |
+| `@exampleText` | string | — | Optional example shown beneath the help text |
+| `@tooltipPlacement` | string | `top` | `top` , `bottom` , `left` , `right` |
+
+### Callbacks
+
+| Argument | Signature | Description |
+| --- | --- | --- |
+| `@onClick` | `(event)` | Called on click. Skipped when the button is disabled or loading |
+| `@onInsert` | `()` | Called once after the button is inserted into the DOM |
+
+### Analytics
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@eventName` | string | If set, calls `events.trackEvent(eventName, ...eventArgs)` on click before invoking `@onClick` |
+| `@eventArgs` | array | Args to pass to `trackEvent` |
+
+## Permission Gating
+
+Pass
+`@permission`
+to gate the button on an
+`ember-can`
+ability:
+
+```
+<Button
+  @type="danger"
+  @icon="trash"
+  @text="Delete"
+  @permission="fleet-ops delete-driver"
+  @onClick={{this.delete}}
+/>
+```
+
+If the current user can't delete drivers, the button renders disabled with a "Unauthorized" tooltip — your
+`@onClick`
+will not fire even if disabling is somehow bypassed.
+
+## Loading State
+
+```
+<Button
+  @type="primary"
+  @icon="save"
+  @text="Save"
+  @isLoading={{this.isSaving}}
+  @onClick={{this.save}}
+/>
+```
+
+While loading, the icon is replaced with a spinner, the button is disabled, and clicks are ignored.
+
+## Yielding Custom Content
+
+If
+`@text`
+is not enough — e.g. you need an icon between two pieces of text — yield a block:
+
+```
+<Button @type="primary" @onClick={{this.send}}>
+  Send
+  <FaIcon @icon="paper-plane" class="ml-2" />
+</Button>
+```
+
+## Real-World Examples
+
+```
+{{!-- Standard primary save button --}}
+<Button @type="primary" @icon="save" @text="Save" @isLoading={{this.isSaving}} @onClick={{this.save}} />
+
+{{!-- Destructive action with permission check --}}
+<Button
+  @type="danger"
+  @icon="trash"
+  @text="Delete"
+  @permission="fleet-ops delete-driver"
+  @helpText="Permanently delete this driver"
+  @onClick={{this.confirmDelete}}
+/>
+
+{{!-- Submit button inside a form --}}
+<Button @buttonType="submit" @type="primary" @text="Submit" />
+
+{{!-- Icon-only "Add" button --}}
+<Button @type="primary" @icon="plus" @size="xs" @onClick={{this.addRow}} />
+
+{{!-- Responsive button — full text on desktop, icon-only on mobile --}}
+<Button @type="primary" @icon="filter" @text="Filters" @responsive={{true}} @onClick={{this.openFilters}} />
+
+{{!-- Outline variant --}}
+<Button @type="primary" @outline={{true}} @text="Cancel" @onClick={{this.cancel}} />
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/button.hbs` | Template |
+| `addon/components/button.js` | Class |

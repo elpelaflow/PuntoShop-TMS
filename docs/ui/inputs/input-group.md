@@ -1,0 +1,171 @@
+---
+title: "InputGroup"
+url: https://fleetbase.io/docs/ui/inputs/input-group
+module: ui
+---
+
+# InputGroup
+
+<InputGroup> wraps a label, an input, and helper text into a single form field. The most-used component in @fleetbase/ember-ui — every form is built from these.
+
+# <InputGroup>
+
+`<InputGroup>`
+is the canonical way to lay out a labeled form field. It renders a label, an input, optional help text, and supports any custom input via a yielded block.
+
+It is the most-used component in
+`@fleetbase/ember-ui`
+— practically every form in the Fleetbase Console is composed from these.
+
+## Basic Usage
+
+```
+<InputGroup @name="Email" @value={{this.email}} @type="email" @required={{true}} />
+```
+
+This renders:
+
+* A label with the text
+  `Email`
+  (and a required-marker if
+  `@required`
+  )
+* An
+  `<input type="email">`
+  bound to
+  `this.email`
+  with
+  `placeholder="Email"`
+
+## With a Custom Input
+
+When you yield a block, the default
+`<Input>`
+is replaced with whatever you put inside. The block receives
+`(id, name)`
+as positional yields:
+
+```
+<InputGroup @name="Vehicle" as |id|>
+  <ModelSelect
+    @modelName="vehicle"
+    @selectedModel={{this.vehicle}}
+    @onChange={{fn (mut this.vehicle)}}
+    id={{id}}
+  />
+</InputGroup>
+```
+
+This is how you compose
+`InputGroup`
+with
+`Select`
+,
+`ModelSelect`
+,
+`PhoneInput`
+,
+`DatePicker`
+,
+`MoneyInput`
+, and any other custom input — preserving the uniform label + spacing.
+
+## Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@name` | string | — | The label text. Also used as the default `placeholder` |
+| `@value` | any | — | Bound to the underlying `<Input>` (only when no block is given) |
+| `@type` | string | `text` | HTML input type — `text` , `email` , `number` , `password` , etc. |
+| `@placeholder` | string | falls back to `@name` | Input placeholder |
+| `@required` | boolean | `false` | Adds the required marker to the label and `required` attribute on the input |
+| `@disabled` | boolean | `false` | Disables the input |
+| `@autocomplete` | string | — | Forwarded to the input |
+| `@autofill` | string | — | Forwarded to the input |
+| `@helpText` | string | — | Tooltip text shown next to the label |
+| `@hideLabel` | boolean | `false` | Render the field without a visible label |
+| `@inputClass` | string | — | Extra classes on the `<input>` |
+| `@labelClass` | string | — | Extra classes on the `<label>` |
+| `@labelWrapperClass` | string | — | Extra classes on the label wrapper |
+| `@wrapperClass` | string | — | Extra classes on the outer `<div>` |
+
+Any additional
+`...attributes`
+on
+`<InputGroup>`
+are forwarded to the underlying
+`<Input>`
+element.
+
+## Yielded Values
+
+When you provide a block,
+`<InputGroup>`
+yields:
+
+| Position | Value | Use |
+| --- | --- | --- |
+| 1 | `id` | Auto-generated unique ID — set on your custom input so the label's `for=` resolves |
+| 2 | `@name` | The label text — useful as a placeholder |
+
+```
+<InputGroup @name="Description" as |id name|>
+  <textarea id={{id}} placeholder={{name}} class="form-input"></textarea>
+</InputGroup>
+```
+
+## Hidden Label (Inline Forms)
+
+For dense forms where every field has an obvious context:
+
+```
+<InputGroup @name="Search" @hideLabel={{true}} @value={{this.q}} placeholder="Search drivers…" />
+```
+
+## With Help Text
+
+The help text is shown as a tooltip next to the label:
+
+```
+<InputGroup
+  @name="Vehicle Plate"
+  @value={{this.plate}}
+  @helpText="Use the registered plate on file with the DMV"
+  @required={{true}}
+/>
+```
+
+## Real-World Examples
+
+```
+{{!-- Simple text field --}}
+<InputGroup @name="First Name" @value={{this.driver.first_name}} @required={{true}} />
+
+{{!-- Number field --}}
+<InputGroup
+  @name="Maximum Capacity (kg)"
+  @type="number"
+  @value={{this.vehicle.max_capacity}}
+/>
+
+{{!-- Wrapping a Select --}}
+<InputGroup @name="Status">
+  <Select
+    @value={{this.driver.status}}
+    @options={{this.statusOptions}}
+    @onSelect={{fn (mut this.driver.status)}}
+  />
+</InputGroup>
+
+{{!-- Wrapping a custom widget --}}
+<InputGroup @name="Available Hours" as |id|>
+  <ScheduleManager id={{id}} @value={{this.hours}} />
+</InputGroup>
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/input-group.hbs` | Template |
+| `addon/components/input-group.js` | Class |

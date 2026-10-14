@@ -1,0 +1,122 @@
+---
+title: "Orders Overview"
+url: https://fleetbase.io/docs/fleet-ops/operations/orders/overview
+module: fleet-ops
+---
+
+Orders
+
+# Orders Overview
+
+Learn how orders work in Fleet-Ops — creation, payload structure, assignment, dispatch, and completion.
+
+# Orders Overview
+
+An
+**Order**
+is the fundamental unit of work in Fleet-Ops. It represents a delivery task, a service job, or any dispatched activity your fleet needs to complete. Orders are created in the console (or via API), assigned to drivers, dispatched to the Navigator app, and completed with proof of delivery.
+
+![Orders list — status filter tabs, search bar, order rows with status badges](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orders-list.285cf95b.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Order Structure
+
+Every order has:
+
+* **Order Config**
+  — the template that defines the workflow, entity fields, and POD method
+* **Payload**
+  — the pickup location, dropoff location, items (entities), and optional waypoints
+* **Driver**
+  — the driver assigned to execute the order
+* **Vehicle**
+  — the vehicle assigned to the order
+* **Status**
+  — the current lifecycle stage
+* **Tracking Number**
+  — a unique identifier (with barcode and QR code) for the order
+* **Proof of Delivery**
+  — evidence captured when the order is completed
+
+### Payload Structure
+
+The payload attached to an order contains:
+
+| Component | Description |
+| --- | --- |
+| **Pickup** | Origin location where items are collected |
+| **Dropoff** | Primary delivery destination |
+| **Return** | Optional return-to-sender address if delivery fails |
+| **Entities** | Individual items being transported (each with its own tracking number) |
+| **Waypoints** | Intermediate stops for multi-drop routes |
+| **COD Amount** | Cash to collect from recipient on delivery |
+| **Payment Method** | Payment terms for the order |
+
+### Entities
+
+Entities are the individual parcels or items inside a payload. Each entity supports:
+
+* **Description**
+  and
+  **SKU/barcode**
+  for item identification
+* **Dimensions**
+  (length, width, height) and
+  **weight**
+* **Destination override**
+  — for multi-stop orders, route a specific item to a specific waypoint
+* **Custom fields**
+  — defined by the Order Configuration
+* **Activity tracking**
+  — each entity tracks its own activities (e.g.
+  *picked up*
+  ,
+  *in transit*
+  ,
+  *delivered*
+  ) defined by the order's activity flow
+* **Proof attachment**
+  — photo or signature per item
+
+## Order List
+
+The orders list (
+**Operations → Orders**
+) shows all orders with:
+
+* Status filter tabs for the system statuses:
+  **All, Created, Dispatched, Started, Completed, Canceled**
+* Search by order ID, customer, driver, or address
+* Sort by date, status, or driver
+* Bulk actions (assign, dispatch, cancel, export)
+
+Click any order row to open the detail panel.
+
+## Order Detail Panel
+
+The order detail panel shows the full order information:
+
+* Customer and facilitator
+* Pickup and dropoff map
+* Assigned driver and vehicle with current location
+* Activity timeline (each status step with timestamp)
+* Entities list with individual statuses
+* Proof of delivery files (signatures, photos)
+* Service quote and transaction details
+* Route and ETA information
+
+From the detail panel you can: edit the order, assign/reassign a driver, dispatch, cancel, or add notes.
+
+## Related Pages
+
+* [Order Lifecycle](https://fleetbase.io/docs/fleet-ops/operations/orders/order-lifecycle)
+  — the five system statuses and how the activity flow runs inside them
+* [Managing Orders](https://fleetbase.io/docs/fleet-ops/operations/orders/managing-orders)
+  — create, edit, assign, and dispatch
+* [Scheduling Orders](https://fleetbase.io/docs/fleet-ops/operations/orders/scheduling-orders)
+  — schedule for a specific date and time
+* [Proof of Delivery](https://fleetbase.io/docs/fleet-ops/operations/orders/proof-of-delivery)
+  — signature, photo, and QR capture
+* [Tracking](https://fleetbase.io/docs/fleet-ops/operations/orders/tracking)
+  — live map and ETA tracking
+* [Kanban Board](https://fleetbase.io/docs/fleet-ops/operations/orders/kanban-board)
+  — visual status-column view

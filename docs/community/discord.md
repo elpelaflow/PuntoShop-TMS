@@ -1,0 +1,81 @@
+---
+title: "Discord Community"
+url: https://fleetbase.io/docs/community/discord
+module: community
+---
+
+# Discord Community
+
+Join the Fleetbase Discord server to get help, share what you've built, and connect with the core team and other operators.
+
+# Discord Community
+
+The Fleetbase Discord server is the fastest way to get help, share what you're building, and connect with the core team and other operators running Fleetbase in production.
+
+**[Join the Fleetbase Discord →](https://discord.com/invite/V7RVWRQ2Wm)**
+
+## Channels
+
+| Channel | Purpose |
+| --- | --- |
+| `#announcements` | Major releases, platform updates, and important notices — read-only |
+| `#general` | General discussion about Fleetbase, logistics, and supply chain tech |
+| `#help` | Installation, configuration, deployment, and API questions |
+| `#development` | Extension development, Universe Service, and contributing to the core platform |
+| `#showcase` | Share what you've built with Fleetbase — screenshots, demos, and launches welcome |
+
+## Getting the Best Help in #help
+
+When posting a question in
+`#help`
+, include as much context as possible so others can help without going back and forth:
+
+Search Discord and the
+[FAQ](https://fleetbase.io/docs/community/faq)
+before posting — your question may already have an answer.
+
+A good help request includes:
+
+* **What you're trying to do**
+  — the goal, not just the symptom
+* **What you've already tried**
+* **Error messages or logs**
+  — paste from
+  `docker compose logs -f application`
+* **Your setup**
+  — Fleetbase version, deployment type (Docker self-hosted, cloud, local dev), and OS
+* **Code or config**
+  — relevant snippets, not full files
+
+## Community Guidelines
+
+To keep the community welcoming and productive:
+
+1. **Be respectful**
+   — treat everyone with respect. Harassment or toxic behaviour will not be tolerated and will result in a permanent ban.
+2. **Search before asking**
+   — use Discord's search or check the
+   [FAQ](https://fleetbase.io/docs/community/faq)
+   first.
+3. **Stay on topic**
+   — use the right channel for your question.
+4. **No spam or self-promotion**
+   — do not post promotional content or unsolicited links.
+5. **No DMs without permission**
+   — do not DM core team members unsolicited for support. Post in
+   `#help`
+   so the whole community benefits from the answer.
+
+## When to Use GitHub Discussions Instead
+
+Discord is great for real-time conversation, but messages get buried. For questions or proposals that benefit from a permanent, searchable record — use
+[GitHub Discussions](https://github.com/elpelaflow/PuntoShop-TMS/discussions)
+instead. Good candidates for Discussions rather than Discord:
+
+* Feature proposals that need community input over time
+* Architecture questions with nuanced answers
+* Anything you'd want to find via search weeks later
+
+See
+[GitHub Discussions](https://fleetbase.io/docs/community/github-discussions)
+for more.

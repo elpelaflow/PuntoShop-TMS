@@ -1,0 +1,169 @@
+---
+title: "Chart of Accounts"
+url: https://fleetbase.io/docs/ledger/accounting/chart-of-accounts
+module: ledger
+---
+
+# Chart of Accounts
+
+Define and manage your chart of accounts — the structured list of accounts used to record all financial transactions.
+
+# Chart of Accounts
+
+The
+**Chart of Accounts**
+is the structured list of all accounts used by your organization to record financial transactions. It is the foundation of your accounting system — every financial event is categorized into one of these accounts.
+
+Navigate to
+**Ledger → Accounting → Accounts**
+.
+
+![Chart of Accounts — name, code, type, currency, balance and status for every account](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-accounts-list.97699745.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Default (Seeded) Chart
+
+When your Fleetbase company is created, Ledger seeds the following accounts. They are flagged
+`is_system_account: true`
+and protected from deletion.
+
+### Assets
+
+| Code | Name |
+| --- | --- |
+| `CASH-DEFAULT` | Cash |
+| `BANK-DEFAULT` | Bank Account |
+| `AR-DEFAULT` | Accounts Receivable |
+| `STRIPE-CLEARING` | Stripe Clearing Account |
+| `GATEWAY-CLEARING` | Payment Gateway Clearing |
+| `PREPAID-DEFAULT` | Prepaid Expenses |
+
+### Liabilities
+
+| Code | Name |
+| --- | --- |
+| `AP-DEFAULT` | Accounts Payable |
+| `WALLET-POOL` | Wallet Liability Pool |
+| `DRIVER-PAYABLE` | Driver Earnings Payable |
+| `CUSTOMER-CREDIT` | Customer Credit Liability |
+| `TAX-PAYABLE` | Tax Payable |
+| `STRIPE-FEES-PAYABLE` | Stripe Fees Payable |
+| `DEFERRED-REVENUE` | Deferred Revenue |
+
+### Equity
+
+| Code | Name |
+| --- | --- |
+| `EQUITY-DEFAULT` | Owner's Equity |
+| `RETAINED-EARNINGS` | Retained Earnings |
+
+### Revenue
+
+| Code | Name |
+| --- | --- |
+| `REVENUE-DELIVERY` | Delivery Revenue |
+| `REVENUE-SERVICE-FEE` | Service Fee Revenue |
+| `REVENUE-SUBSCRIPTION` | Subscription Revenue |
+| `REVENUE-OTHER` | Other Revenue |
+
+### Expenses
+
+| Code | Name |
+| --- | --- |
+| `EXPENSE-DRIVER-PAYOUT` | Driver Payout Expense |
+| `EXPENSE-GATEWAY-FEES` | Payment Gateway Fees |
+| `EXPENSE-REFUNDS` | Refunds & Chargebacks |
+| `EXPENSE-WALLET` | Wallet Expenses |
+| `EXPENSE-OTHER` | Other Operating Expenses |
+
+In addition, every wallet auto-creates its own per-wallet liability account with code
+`WALLET-{wallet_uuid}`
+— these don't appear in the seeded list above but show up alongside it.
+
+## Account Attributes
+
+| Field | Description |
+| --- | --- |
+| **Name** | Descriptive account name |
+| **Code** | Short alphanumeric identifier ( `AR-DEFAULT` , `REVENUE-DELIVERY` , etc.). Unique per company |
+| **Type** | `asset` , `liability` , `equity` , `revenue` , or `expense` |
+| **Currency** | ISO 4217 code from the picker's fixed list of 35 currencies |
+| **Status** | `active` , `inactive` , or `archived` |
+| **Description** | Optional notes about the account's purpose |
+| **Balance** | Computed from posted journal entries; updated automatically |
+| **Is System Account** | `true` for seeded accounts; protected from deletion |
+| **Meta** | Arbitrary key/value JSON |
+
+The auto-generated
+`public_id`
+follows the format
+`account_<10 hex chars>`
+.
+
+## Creating an Account
+
+Navigate to
+**Ledger → Accounting → Accounts**
+.
+
+Click
+**New Account**
+.
+
+Enter the
+**Name**
+,
+**Code**
+(free-form alphanumeric), and select the
+**Type**
+.
+
+Set the
+**Currency**
+(defaults to your company's base currency).
+
+Set the
+**Status**
+—
+`active`
+(default),
+`inactive`
+, or
+`archived`
+.
+
+Click
+**Save**
+.
+
+## Account Codes
+
+Account codes are
+**alphanumeric tags**
+, not numeric ranges. The seeded codes follow a
+`<TYPE>-<DETAIL>`
+pattern (e.g.,
+`REVENUE-DELIVERY`
+,
+`EXPENSE-GATEWAY-FEES`
+) but you are free to use any naming scheme that fits your business — codes only need to be unique per company.
+
+## Balance Calculation
+
+Account balances are computed from the sum of all posted journal entries:
+
+* **Asset & Expense accounts**
+  (debit-normal):
+  `Balance = Total Debits - Total Credits`
+* **Liability, Equity & Revenue accounts**
+  (credit-normal):
+  `Balance = Total Credits - Total Debits`
+
+You can force a balance recalculation from the account detail panel by clicking
+**Recalculate Balance**
+.
+
+## Viewing the Account Ledger
+
+Click any account in the chart to open its
+**Account Ledger**
+— a chronological list of all journal entries for that account with a running balance column. Filter by date range to scope the view to a specific period.

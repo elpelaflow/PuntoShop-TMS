@@ -1,0 +1,115 @@
+---
+title: "TemplateBuilder"
+url: https://fleetbase.io/docs/ui/builders/template-builder
+module: ui
+---
+
+# TemplateBuilder
+
+<TemplateBuilder> is a drag-and-drop layout editor for HTML templates with variable interpolation. Used by Ledger invoice templates and any template-driven feature.
+
+# <TemplateBuilder>
+
+`<TemplateBuilder>`
+is a complete drag-and-drop editor for designing templates that mix static layout with dynamic variables. It's the engine behind Ledger's invoice templates and is reusable for any template-driven feature.
+
+The builder supports text, images, tables, lines, shapes, QR codes, and barcodes — each freely positioned, rotated, and styled. Variables (e.g.
+`{invoice.number}`
+,
+`{transaction.reference}`
+) are inserted via a variable picker that's powered by
+**context schemas**
+registered with the template render service.
+
+## Basic Usage
+
+```
+<TemplateBuilder
+  @template={{this.template}}
+  @contextSchemas={{this.contextSchemas}}
+  @isSaving={{this.isSaving}}
+  @onSave={{this.saveTemplate}}
+  @onPreview={{this.previewTemplate}}
+  @onClose={{this.exitBuilder}}
+/>
+```
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@template` | model | The template record being edited |
+| `@contextSchemas` | array | Schemas describing the variables available — typically supplied by the host extension |
+| `@isSaving` | boolean | Drives the save button's loading state |
+| `@onSave` | `() => Promise` | Save callback |
+| `@onPreview` | `() => void` | Preview callback (renders against sample data) |
+| `@onClose` | `() => void` | Optional — back/exit button callback |
+| `@closeIcon` | string | Default `chevron-left` |
+| `@closeLabel` | string | Optional close button label |
+
+## Element Types
+
+The toolbar lets the user drop the following onto the canvas:
+
+| Type | Description |
+| --- | --- |
+| **Text** | Static or variable-driven text with font, size, color, alignment |
+| **Image** | Logo, photo, or arbitrary image URL |
+| **Table** | Tabular layout for line-item style rendering |
+| **Line** | Horizontal or vertical separator |
+| **Shape** | Rectangle, circle, etc. |
+| **QR Code** | QR code generated from a value |
+| **Barcode** | Barcode generated from a value |
+
+## Tracked State
+
+The builder maintains:
+
+| Property | Default | Description |
+| --- | --- | --- |
+| `selectedElement` | — | Currently-selected element |
+| `zoom` | `1` | Canvas zoom level (range 0.25–3) |
+| `variablePickerOpen` | `false` | Whether the variable picker is open |
+| `_undoStack` / `_redoStack` | — | Up to 50 undo steps |
+| `leftPanelTab` | `layers` | `layers` or `queries` |
+
+## Paper Sizes
+
+A4, A3, A5, Letter, Legal — selectable from the canvas settings.
+
+## Real-World Example
+
+In Ledger, the invoice template editor wraps
+`<TemplateBuilder>`
+:
+
+```
+<TemplateBuilder
+  @template={{@template}}
+  @contextSchemas={{this.contextSchemas}}
+  @isSaving={{this.saveTemplate.isRunning}}
+  @onSave={{perform this.saveTemplate}}
+  @onPreview={{this.preview}}
+  @closeIcon="chevron-left"
+  @onClose={{transition-to "billing.invoice-templates"}}
+/>
+```
+
+Variables in the picker resolve at render time against the chosen invoice via
+`TemplateRenderService::registerContextType('invoice', { … })`
+on the server-provider side.
+
+## See Also
+
+* [Ledger Invoice Templates](https://fleetbase.io/docs/ledger/billing/invoice-templates)
+  — the canonical use case
+* [Template Builder Service](https://fleetbase.io/docs/ui/services/template-builder)
+  — the companion service for registering queryable resource types
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/template-builder.hbs` | Template |
+| `addon/components/template-builder.js` | Class — extensive JSDoc, start there for advanced extension |
+| `addon/components/template-builder/` | Subcomponents |

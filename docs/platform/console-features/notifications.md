@@ -1,0 +1,100 @@
+---
+title: "Notifications"
+url: https://fleetbase.io/docs/platform/console-features/notifications
+module: platform
+---
+
+# Notifications
+
+Real-time in-console notifications for platform events — view, mark as read, and manage from the notification tray or the full notifications page.
+
+# Notifications
+
+The Fleetbase Console delivers real-time notifications for platform events — order assignments, status changes, system alerts, and more. Notifications arrive via SocketCluster and appear immediately without requiring a page refresh.
+
+## The Notification Tray
+
+Click the
+**inbox icon**
+in the top navigation bar to open the Notification Tray.
+
+![Notification Tray — unread count badge, notification list with subject and preview, View all link](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-notification-tray.76395d96.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+The tray shows:
+
+* A
+  **count badge**
+  on the inbox icon for the number of unread notifications
+* A list of unread notifications, each showing its
+  **subject**
+  ,
+  **message preview**
+  , and
+  **time received**
+* A
+  **View all notifications**
+  link at the bottom
+
+Click any notification in the tray to mark it as read — the badge count decrements immediately.
+
+## Full Notifications Page
+
+Click
+**View all notifications**
+in the tray to open the full paginated notifications list.
+
+![Full Notifications page — Select All, Mark as Read, Delete buttons, and notification rows with checkbox, envelope, subject, and timestamp](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-notifications-list.3df57d9d.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+### Reading the List
+
+Each row shows:
+
+| Detail | Description |
+| --- | --- |
+| **Checkbox** | Select the notification for bulk actions |
+| **Envelope icon** | Closed = unread (lighter/white background row). Open = read (grey/muted background row) |
+| **Subject** | The notification title |
+| **Message** | A short description of the event |
+| **Received** | Relative time (e.g. "5 minutes ago") and the exact timestamp |
+
+### Header Actions
+
+| Button | Action |
+| --- | --- |
+| **Select All** | Selects all notifications on the current page |
+| **Mark as Read** | Marks all selected notifications as read |
+| **Delete** | Permanently deletes all selected notifications |
+
+Clicking an individual notification row marks it as read.
+
+### Pagination
+
+Notifications are paginated. Use the pagination bar at the bottom of the page to move between pages.
+
+## Real-Time Delivery
+
+The notification tray listens on two socket channels:
+
+* `user.{your-user-id}`
+  — notifications addressed to you personally
+* `company.{your-company-id}`
+  — notifications broadcast to your entire organization
+
+When a notification arrives, a sound plays and the badge count updates automatically. Both the tray and the full notifications page reflect the new notification in real time.
+
+## Notification Settings
+
+Organization administrators choose who is notified about each core event under
+**Organization settings → Notifications**
+. The same page configures an alphanumeric SMS sender ID, so outbound SMS can arrive from your organization's name instead of a phone number.
+
+![Organization Notifications settings — notifiable pickers for each core event, and SMS settings with the alphanumeric sender ID](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-organization-notifications.fa9aa379.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Notification Sources
+
+The events that trigger notifications depend on which extensions are installed. Common sources include:
+
+* Order lifecycle changes (created, dispatched, completed, cancelled)
+* Driver status updates
+* Webhook delivery failures
+* System messages from the instance administrator

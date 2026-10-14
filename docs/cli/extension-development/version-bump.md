@@ -1,0 +1,151 @@
+---
+title: "Version Bump"
+url: https://fleetbase.io/docs/cli/extension-development/version-bump
+module: cli
+---
+
+# Version Bump
+
+Increment the version of your extension across all manifest files using `flb version-bump`.
+
+# flb version-bump
+
+Bump your extension's version across
+**all three manifest files**
+in one step:
+
+* `extension.json`
+* `package.json`
+* `composer.json`
+
+Internally the CLI uses
+`semver.inc()`
+, so you get correct prerelease identifiers and SemVer-spec increments.
+
+```
+flb version-bump --patch     # Default — bumps 1.2.3 → 1.2.4
+flb version-bump --minor     # 1.2.3 → 1.3.0
+flb version-bump --major     # 1.2.3 → 2.0.0
+flb version-bump --pre-release rc   # 1.2.3 → 1.2.4-rc.0
+```
+
+If no flag is passed,
+`--patch`
+is used.
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-p, --path <path>` | Path to the extension directory (default: current directory) |
+| `--major` | Bump major version ( `1.2.3` → `2.0.0` ) |
+| `--minor` | Bump minor version ( `1.2.3` → `1.3.0` ) |
+| `--patch` | Bump patch version ( `1.2.3` → `1.2.4` ) — the default |
+| `--pre-release [identifier]` | Add a prerelease tag (e.g. `rc` , `beta` , `alpha` ) |
+
+## Examples
+
+### Patch release
+
+```
+flb version-bump --patch
+```
+
+```
+Updated extension.json to version 1.2.4
+Updated package.json to version 1.2.4
+Updated composer.json to version 1.2.4
+```
+
+### Minor release
+
+```
+flb version-bump --minor
+```
+
+### Major release
+
+```
+flb version-bump --major
+```
+
+### Release candidate
+
+```
+flb version-bump --patch --pre-release rc
+```
+
+This produces something like
+`1.2.4-rc.0`
+. Subsequent bumps with the same identifier produce
+`1.2.4-rc.1`
+,
+`1.2.4-rc.2`
+, etc.
+
+### Different directory
+
+```
+flb version-bump --minor --path ./extensions/vehicle-inspections
+```
+
+## Behavior
+
+* The CLI reads each manifest, increments the version, and writes it back. Other fields are untouched.
+* Files that don't exist or don't have a
+  `version`
+  field are silently skipped — so a project missing one of the three manifests still bumps the others.
+* An invalid version string (one
+  `semver.inc()`
+  can't parse) is logged as an error for that specific file and skipped:
+
+  ```
+  Invalid version in package.json: foo-bar
+  ```
+
+## When to Run This
+
+* **Before bundling**
+  — the bundle filename includes the version, so bump first if you want a new bundle name
+* **Before publishing**
+  — npm rejects publishing the same version twice; bump before each
+  `flb publish`
+
+## Versioning Strategy
+
+Stick to SemVer:
+
+* **Major**
+  — breaking changes (renamed config keys, dropped APIs, schema changes that need migrations)
+* **Minor**
+  — backward-compatible features
+* **Patch**
+  — bug fixes
+* **Prerelease**
+  —
+  `-rc.X`
+  ,
+  `-beta.X`
+  for testing before a stable release
+
+## Troubleshooting
+
+**Versions out of sync**
+— if
+`extension.json`
+says
+`1.2.0`
+,
+`package.json`
+says
+`1.1.5`
+, and
+`composer.json`
+says
+`1.2.0`
+,
+`flb version-bump --patch`
+increments each from its current value, leaving them still out of sync. Fix by manually setting all three to the same baseline first, then bumping.
+
+**Manifest file missing**
+— if you've intentionally removed one of the three manifests, the CLI skips it. No action needed.

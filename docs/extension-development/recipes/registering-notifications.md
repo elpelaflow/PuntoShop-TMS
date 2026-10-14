@@ -1,0 +1,266 @@
+---
+title: "Registering Notifications"
+url: https://fleetbase.io/docs/extension-development/recipes/registering-notifications
+module: extension-development
+---
+
+# Registering Notifications
+
+Define notification classes that show up in user notification preferences and dispatch via mail, SMS, push, broadcast, and database channels.
+
+# Registering Notifications
+
+The platform's
+`NotificationRegistry`
+is the
+**directory of opt-in notifications**
+users see in their settings. Each registered notification class can fire across mail, SMS, broadcast (real-time UI), database (in-app feed), FCM (Android push), and APN (iOS push) — and users pick which channels to receive each notification on.
+
+Without registration, your notification will still send (it's just a Laravel notification), but users won't see it in their preferences UI and won't be able to opt in or out.
+
+## 1. Define the Notification Class
+
+Extend Laravel's
+`Illuminate\Notifications\Notification`
+and add three static metadata properties —
+`$name`
+,
+`$description`
+,
+`$package`
+— used by the registry UI:
+
+```
+<?php
+// server/src/Notifications/WidgetCreated.php
+
+namespace MyOrg\MyExtension\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use MyOrg\MyExtension\Models\Widget;
+use NotificationChannels\Apn\ApnChannel;
+use NotificationChannels\Fcm\FcmChannel;
+
+class WidgetCreated extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    /** Display name shown in user notification preferences. */
+    public static string $name = 'Widget Created';
+
+    /** One-line description shown beside the name. */
+    public static string $description = 'Notify when a new widget is created.';
+
+    /** Extension slug — used to group notifications by source. */
+    public static string $package = 'my-extension';
+
+    public string $title;
+    public string $message;
+    public array $data = [];
+
+    public function __construct(public Widget $widget)
+    {
+        $this->title   = "Widget {$widget->name} created";
+        $this->message = "A new widget was created in your organization.";
+        $this->data    = ['id' => $widget->public_id, 'type' => 'widget_created'];
+    }
+
+    /** Channels — chosen at runtime per notifiable. */
+    public function via($notifiable): array
+    {
+        return ['broadcast', 'mail', 'database', FcmChannel::class, ApnChannel::class];
+    }
+
+    public function toMail($notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject($this->title)
+            ->line($this->message)
+            ->action('View Widget', url("/console/my-extension/widgets/{$this->widget->public_id}"));
+    }
+
+    public function toBroadcast($notifiable): array
+    {
+        return [
+            'id'    => $this->widget->public_id,
+            'title' => $this->title,
+            'body'  => $this->message,
+        ];
+    }
+
+    public function toArray($notifiable): array
+    {
+        return $this->data;
+    }
+}
+```
+
+The static
+`$name`
+,
+`$description`
+, and
+`$package`
+properties are read by
+`NotificationRegistry::register()`
+to populate the user-facing notification preferences UI. Make them descriptive — they show up directly in the settings panel.
+
+## 2. Register the Class in Your Service Provider
+
+Use a dedicated method that runs from
+`boot()`
+:
+
+```
+<?php
+// server/src/Providers/MyExtensionServiceProvider.php
+
+use Fleetbase\Providers\CoreServiceProvider;
+use Fleetbase\Support\NotificationRegistry;
+
+class MyExtensionServiceProvider extends CoreServiceProvider
+{
+    public function boot()
+    {
+        parent::boot();
+
+        $this->registerObservers();
+        $this->loadRoutesFrom(__DIR__ . '/../routes.php');
+        $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
+
+        $this->registerNotifications();
+    }
+
+    protected function registerNotifications(): void
+    {
+        NotificationRegistry::register([
+            \MyOrg\MyExtension\Notifications\WidgetCreated::class,
+            \MyOrg\MyExtension\Notifications\WidgetExpired::class,
+            \MyOrg\MyExtension\Notifications\WidgetShared::class,
+        ]);
+    }
+}
+```
+
+If your extension's notifications can target custom recipient types beyond
+`User`
+/
+`Group`
+/
+`Role`
+/
+`Company`
+(the defaults), also register them:
+
+```
+NotificationRegistry::registerNotifiable([
+    \MyOrg\MyExtension\Models\Recipient::class,
+    'dynamic:partner',  // dynamic recipient — resolved per-event by your code
+]);
+```
+
+## 3. Dispatch the Notification
+
+### Direct dispatch — picks all opted-in recipients automatically
+
+`NotificationRegistry::notify()`
+resolves to all recipients who have opted in for this notification class:
+
+```
+use Fleetbase\Support\NotificationRegistry;
+use MyOrg\MyExtension\Notifications\WidgetCreated;
+
+NotificationRegistry::notify(WidgetCreated::class, $widget);
+```
+
+### Direct Laravel dispatch — explicit recipient
+
+For known recipients, use Laravel's standard notification dispatch:
+
+```
+$user->notify(new WidgetCreated($widget));
+
+// Or for many recipients:
+\Notification::send($company->users, new WidgetCreated($widget));
+```
+
+This bypasses the registry's opt-in filtering — useful for transactional notifications (e.g. password reset) that aren't user-configurable.
+
+## 4. Auto-Dispatch from an Observer
+
+Most "X happened" notifications hang off a model observer:
+
+```
+<?php
+// server/src/Observers/WidgetObserver.php
+
+namespace MyOrg\MyExtension\Observers;
+
+use Fleetbase\Support\NotificationRegistry;
+use MyOrg\MyExtension\Models\Widget;
+use MyOrg\MyExtension\Notifications\WidgetCreated;
+
+class WidgetObserver
+{
+    public function created(Widget $widget): void
+    {
+        NotificationRegistry::notify(WidgetCreated::class, $widget);
+    }
+}
+```
+
+Wire the observer through your service provider's
+`$observers`
+array — see
+[Expansions & Observers](https://fleetbase.io/docs/extension-development/backend/expansions-and-observers#observers)
+.
+
+## 5. Verify in the User Settings
+
+Open the user notification preferences in the console — your notification appears under your
+`$package`
+group, with on/off toggles per channel. Adjust, then trigger the underlying event and verify the channels you opted into actually fire.
+
+## Channel Reference
+
+| Channel | Use for |
+| --- | --- |
+| `'mail'` | Email — implement `toMail($notifiable)` returning a `MailMessage` |
+| `'broadcast'` | Real-time UI push via SocketCluster — implement `toBroadcast($notifiable)` |
+| `'database'` | In-app notification feed — implement `toArray($notifiable)` |
+| `FcmChannel::class` | Android push (Firebase) |
+| `ApnChannel::class` | iOS push (Apple Push) |
+| `'sms'` (custom) | Wire through [`SmsService`](https://fleetbase.io/docs/extension-development/reference/api-services#fleetbase-services-smsservice) in a custom channel |
+
+See
+[Laravel Notifications](https://laravel.com/docs/11.x/notifications)
+for the full channel API.
+
+## Reference
+
+* `fleetops/server/src/Notifications/OrderAssigned.php`
+  — reference notification class with
+  `$name`
+  ,
+  `$description`
+  ,
+  `$package`
+* `fleetops/server/src/Providers/FleetOpsServiceProvider.php`
+  —
+  `registerNotifications()`
+  pattern
+* `fleetops/server/src/Notifications/`
+  — many notification examples
+* `core-api/src/Support/NotificationRegistry.php`
+  — registry implementation
+* [API Services → NotificationRegistry](https://fleetbase.io/docs/extension-development/reference/api-services#fleetbase-support-notificationregistry)
+
+[Adding a SMS Provider
+
+Plug a new SMS gateway into the platform's SmsService — implement a sender class, wire it through configuration, and route specific phone-number prefixes to it.](https://fleetbase.io/docs/extension-development/recipes/adding-a-sms-provider)
+[Extending a Resource View
+
+A complete example — add a filterable column with its own cell, a row action, a bulk action, a details button and a details menu item to the Fleet-Ops drivers views from a separate extension.](https://fleetbase.io/docs/extension-development/recipes/extending-a-resource-view)

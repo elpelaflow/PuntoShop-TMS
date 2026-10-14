@@ -1,0 +1,206 @@
+---
+title: "Reporting issues"
+url: https://fleetbase.io/docs/contributing/reporting-issues
+module: contributing
+---
+
+# Reporting issues
+
+How to file effective bug reports and feature requests for Fleetbase — what to include, where to file, and what happens next.
+
+# Reporting issues
+
+A good bug report makes the difference between a fix in days and a fix in months. This page covers how to file one well, where to file it, and what to expect after.
+
+## Bug reports
+
+### Before you file
+
+Check first:
+
+* **Is it actually a bug?**
+  Some behaviour is intentional. Skim the relevant docs section.
+* **Is it already reported?**
+  Search
+  [GitHub issues](https://github.com/elpelaflow/PuntoShop-TMS/issues)
+  for similar problems. Add a 👍 reaction or a comment with new info to existing issues rather than creating duplicates.
+* **Does it reproduce on a recent version?**
+  Bugs in old versions may already be fixed.
+* **Is it deployment-specific?**
+  Self-hosted issues vs. Fleetbase Cloud have different repros.
+
+### Where to file
+
+Different bugs go to different repos. Pick the one that owns the affected component:
+
+| Repository | What it covers | File issue |
+| --- | --- | --- |
+| [`elpelaflow/PuntoShop-TMS`](https://github.com/elpelaflow/PuntoShop-TMS) | Core platform — API, Console, IAM, Developer Console | [Open issue →](https://github.com/elpelaflow/PuntoShop-TMS/issues/new) |
+| [`PuntoShop-TMS (Fleet-Ops)`](https://github.com/elpelaflow/PuntoShop-TMS) | Fleet-Ops — orders, drivers, fleets, dispatch, live map | [Open issue →](https://github.com/elpelaflow/PuntoShop-TMS/issues/new) |
+| [`PuntoShop-TMS (Ledger)`](https://github.com/elpelaflow/PuntoShop-TMS) | Ledger — invoices, payments, accounting | [Open issue →](https://github.com/elpelaflow/PuntoShop-TMS/issues/new) |
+| [`Navigator App`](https://github.com/elpelaflow/PuntoShop-TMS) | Navigator driver mobile app | [Open issue →](https://github.com/elpelaflow/PuntoShop-TMS/issues/new) |
+| [`fleetbase/fleetbase-cli`](https://github.com/elpelaflow/PuntoShop-TMS-cli) | CLI tool | [Open issue →](https://github.com/elpelaflow/PuntoShop-TMS-cli/issues/new) |
+| [`fleetbase/fleetbase.io`](https://github.com/elpelaflow/PuntoShop-TMS.io) | This documentation site | [Open issue →](https://github.com/elpelaflow/PuntoShop-TMS.io/issues/new) |
+
+If you're not sure, file against
+`elpelaflow/PuntoShop-TMS`
+— maintainers will move it to the right repo.
+
+### What to include
+
+Copy this template into your issue:
+
+```
+## Summary
+One sentence describing what's wrong.
+
+## Expected behaviour
+What you expected to happen.
+
+## Actual behaviour
+What actually happened.
+
+## Steps to reproduce
+1. Step one
+2. Step two
+3. Step three
+4. Bug appears
+
+## Environment
+- Fleetbase version: (e.g. 1.4.2 — find via "About" in the Console)
+- Deployment: (Docker, Fleetbase Cloud, local dev)
+- Operating system: (e.g. macOS 14, Ubuntu 22.04)
+- Browser (if relevant): (Chrome 121, Safari 17, etc.)
+- Console URL pattern: (e.g. /fleet-ops/orders/order_xxx)
+
+## Logs / errors
+```paste relevant output here```
+
+## Screenshots / video
+(Attach if useful)
+
+## Additional context
+Anything else that might help — recent config changes, related extensions, scale of data, etc.
+```
+
+### What makes a great bug report
+
+* **Reproducible**
+  — your steps work on a fresh instance
+* **Minimal**
+  — the smallest scenario that triggers the bug
+* **Specific**
+  — exact error messages, exact URLs, exact dates and times
+* **Has logs**
+  —
+  `docker compose logs`
+  output for the relevant service if self-hosted
+* **No noise**
+  — strip secrets, personal info, and unrelated logs
+
+### What makes a poor bug report
+
+* "It doesn't work" with no other detail
+* "Sometimes orders disappear" with no repro path
+* A screenshot of an error message with no surrounding context
+* A list of 5 unrelated bugs in one issue (file separately)
+
+## Feature requests
+
+Feature requests go through
+[GitHub Discussions](https://github.com/elpelaflow/PuntoShop-TMS/discussions)
+, not Issues. Issues are for confirmed work; Discussions are for "should we?".
+
+### Template
+
+```
+## Problem
+What operational problem are you trying to solve? Be specific — describe the workflow, not the desired feature.
+
+## Proposed solution
+What you'd like Fleetbase to do.
+
+## Alternatives considered
+Other ways you've tried to solve this — workarounds, extensions, external tools.
+
+## Who else needs this
+If you've talked to other operators or seen similar requests, link them.
+
+## Willing to contribute?
+[ ] Yes, I'd like to build this myself with maintainer guidance
+[ ] No, just submitting the request
+```
+
+### What gets prioritized
+
+The maintainers triage requests on:
+
+* **Operator pain**
+  — how many operators hit this, how often, how badly
+* **Platform fit**
+  — does it belong in core, in an existing extension, or as a new extension
+* **Implementation cost**
+  — small wins ship fast; big lifts wait for a sponsor
+* **Strategic alignment**
+  — what's on the roadmap
+
+Requests that get
+**maintainer + community support**
+typically become issues with
+`accepted`
+labels and are picked up. Requests that don't fit may be redirected to "build an extension."
+
+## Security issues
+
+**Do not file security issues publicly.**
+Instead, email
+**[security@fleetbase.io](mailto:security@fleetbase.io)**
+with:
+
+* Description of the vulnerability
+* Steps to reproduce
+* Affected versions (if known)
+* Your name/handle for the security advisory credit (optional)
+
+The team responds within 48 hours and follows a coordinated disclosure process. See
+[`SECURITY.md`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/SECURITY.md)
+for full details.
+
+## After you file
+
+* **Triage**
+  : maintainers review new issues regularly. You'll usually see a response within a few business days.
+* **Labels**
+  : issues get labelled by area (
+  `fleet-ops`
+  ,
+  `console`
+  ,
+  `api`
+  ), severity (
+  `bug`
+  ,
+  `enhancement`
+  ), and status (
+  `accepted`
+  ,
+  `needs-info`
+  ,
+  `wontfix`
+  ).
+* **Discussion**
+  : maintainers may ask follow-up questions. Faster responses = faster fix.
+* **Fix**
+  : when an issue is fixed, the PR references the issue and closes it on merge. The fix lands in the next release.
+* **Release**
+  : see the
+  [changelog](https://fleetbase.io/docs/community/changelog)
+  for what's shipped.
+
+## Want to fix it yourself?
+
+If you've found a bug and want to fix it, comment on the issue saying you're picking it up — that signals to maintainers and other contributors. Then follow
+[Code →](https://fleetbase.io/docs/contributing/code)
+.
+
+Many of the best contributors started by reporting a bug, then fixing it themselves.

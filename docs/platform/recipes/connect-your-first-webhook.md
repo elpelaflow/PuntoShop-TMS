@@ -1,0 +1,296 @@
+---
+title: "Connect Your First Webhook"
+url: https://fleetbase.io/docs/platform/recipes/connect-your-first-webhook
+module: platform
+---
+
+# Connect Your First Webhook
+
+Set up a webhook endpoint to receive real-time event callbacks from Fleetbase — order created, driver assigned, status updated, and more.
+
+# Connect Your First Webhook
+
+Webhooks let Fleetbase push events to your backend the moment something happens — an order is dispatched, a driver's status changes, a contact is created. This recipe walks through building a receiver, registering it in the Developer Console, and verifying end-to-end delivery.
+
+## What You'll Build
+
+A simple HTTPS endpoint that receives Fleetbase webhook POST requests, logs the payload, and responds with
+`200 OK`
+. Then you'll register it in the Developer Console and watch events flow in.
+
+## Prerequisites
+
+* A Fleetbase account (self-hosted or
+  [Fleetbase Cloud](https://console.fleetbase.io/onboard)
+  )
+* A publicly reachable HTTPS endpoint — or
+  [ngrok](https://ngrok.com/)
+  for local development
+
+## Step 1 — Create the Receiver Endpoint
+
+Your endpoint must:
+
+* Accept
+  `POST`
+  requests
+* Return a
+  `2xx`
+  status code within a few seconds
+* Handle the request body as JSON
+
+Node.js (Express)
+
+Python (Flask)
+
+PHP
+
+```
+npm install express
+```
+
+```
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.post('/webhooks/fleetbase', (req, res) => {
+    const event = req.body;
+
+    console.log(`Received event: ${event.event}`);
+    console.log('Payload:', JSON.stringify(event.data, null, 2));
+
+    // Always respond quickly with 2xx
+    res.sendStatus(200);
+
+    // Do any slow processing after responding
+    handleEvent(event).catch(console.error);
+});
+
+async function handleEvent(event) {
+    switch (event.event) {
+        case 'order.dispatched':
+            // e.g. update your own database
+            console.log(`Order ${event.data.public_id} dispatched`);
+            break;
+        case 'order.completed':
+            console.log(`Order ${event.data.public_id} completed`);
+            break;
+        default:
+            console.log(`Unhandled event type: ${event.event}`);
+    }
+}
+
+app.listen(3000, () => console.log('Webhook receiver running on port 3000'));
+```
+
+```
+pip install flask
+```
+
+```
+from flask import Flask, request, jsonify
+import threading
+
+app = Flask(__name__)
+
+@app.route('/webhooks/fleetbase', methods=['POST'])
+def handle_webhook():
+    event = request.get_json()
+
+    print(f"Received event: {event['event']}")
+
+    # Respond immediately, process asynchronously
+    thread = threading.Thread(target=process_event, args=(event,))
+    thread.start()
+
+    return '', 200
+
+def process_event(event):
+    event_type = event.get('event')
+    data = event.get('data', {})
+
+    if event_type == 'order.dispatched':
+        print(f"Order {data.get('public_id')} dispatched")
+    elif event_type == 'order.completed':
+        print(f"Order {data.get('public_id')} completed")
+
+if __name__ == '__main__':
+    app.run(port=3000)
+```
+
+```
+<?php
+// webhook.php
+
+$payload = file_get_contents('php://input');
+$event   = json_decode($payload, true);
+
+// Log the event
+error_log('Received event: ' . $event['event']);
+
+// Respond with 200 immediately
+http_response_code(200);
+echo 'OK';
+flush();
+
+// Process after responding
+switch ($event['event']) {
+    case 'order.dispatched':
+        // Update your system...
+        error_log('Order ' . $event['data']['public_id'] . ' dispatched');
+        break;
+    case 'order.completed':
+        error_log('Order ' . $event['data']['public_id'] . ' completed');
+        break;
+}
+```
+
+## Step 2 — Expose Your Endpoint Publicly
+
+For local development, use
+[ngrok](https://ngrok.com/)
+to create a temporary public HTTPS URL:
+
+```
+ngrok http 3000
+```
+
+ngrok will output a URL like
+`https://a1b2c3d4.ngrok.io`
+. Your webhook endpoint URL will be:
+
+```
+https://a1b2c3d4.ngrok.io/webhooks/fleetbase
+```
+
+In production, deploy behind a real domain with a valid TLS certificate. Fleetbase only delivers to HTTPS endpoints.
+
+## Step 3 — Register the Webhook in the Developer Console
+
+### Open Webhooks
+
+Navigate to
+**Developers → Webhooks**
+in the Fleetbase Console sidebar. Click
+**New**
+.
+
+### Fill in the form
+
+| Field | Value |
+| --- | --- |
+| **Endpoint URL** | Your public HTTPS URL (e.g. `https://a1b2c3d4.ngrok.io/webhooks/fleetbase` ) |
+| **Description** | Optional — e.g. `Order status receiver` |
+| **API Credential** | Leave blank to receive events from all keys, or select a specific key |
+| **API Version** | Select the version your integration is built against |
+
+### Select events
+
+Use the
+**Events**
+picker to choose which events to subscribe to. Common starting events:
+
+| Event | Fires when |
+| --- | --- |
+| `order.created` | A new order is created |
+| `order.dispatched` | An order is assigned to a driver |
+| `order.driver_assigned` | A driver is linked to an order |
+| `order.completed` | An order is marked complete |
+| `order.cancelled` | An order is cancelled |
+| `driver.created` | A new driver account is created |
+
+Click individual events or
+**All events**
+to subscribe to everything. Click
+**Save**
+.
+
+## Step 4 — Trigger a Test Event
+
+With the webhook registered, trigger an event that you subscribed to:
+
+* In
+  **Fleet-Ops → Orders**
+  , create a new order
+* Open it and dispatch it to a driver
+
+Watch your receiver logs. You should see the event payload printed within a second or two.
+
+## Webhook Payload Format
+
+Every Fleetbase webhook POST contains a JSON body:
+
+```
+{
+  "id": "evt_01HXYZ123ABC",
+  "event": "order.dispatched",
+  "api_version": "v1",
+  "created_at": "2026-04-29T10:30:00Z",
+  "data": {
+    "id": "order_01HABC456DEF",
+    "public_id": "ORD-1001",
+    "status": "dispatched",
+    "driver_assigned": {
+      "id": "driver_01H...",
+      "name": "Alex Tan",
+      "phone": "+6591234567"
+    }
+  }
+}
+```
+
+## Step 5 — Inspect Deliveries
+
+In the Developer Console, click on your webhook URL to open its detail page. The
+**Attempts**
+panel shows every delivery attempt with the event name, HTTP response status, and timestamp.
+
+![Webhook detail view — Attempts log showing delivery history](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdevelopers-webhook-attempts.9c3a7ae8.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+If a delivery failed (
+`4xx`
+or
+`5xx`
+response, or no response), the attempt log tells you exactly what Fleetbase received back.
+
+## Handling Retries
+
+Fleetbase retries failed deliveries. Make your endpoint
+**idempotent**
+— processing the same event twice should not cause duplicate side effects.
+
+Use the
+`id`
+field (
+`evt_01HXYZ123ABC`
+) as a deduplication key. Before processing, check if you've already handled that event ID:
+
+```
+const processedEvents = new Set(); // Use a database in production
+
+app.post('/webhooks/fleetbase', (req, res) => {
+    const event = req.body;
+
+    // Deduplicate
+    if (processedEvents.has(event.id)) {
+        return res.sendStatus(200); // Acknowledge but skip
+    }
+    processedEvents.add(event.id);
+
+    res.sendStatus(200);
+    handleEvent(event).catch(console.error);
+});
+```
+
+## Next Steps
+
+* Explore all available events in
+  **Developers → System Events**
+* See
+  [Webhooks](https://fleetbase.io/docs/platform/developer-console/webhooks)
+  for the full reference on managing endpoints
+* See
+  [Build a Custom Integration](https://fleetbase.io/docs/platform/recipes/build-a-custom-integration)
+  to combine webhooks with API calls

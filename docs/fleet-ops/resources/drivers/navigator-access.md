@@ -1,0 +1,109 @@
+---
+title: "Navigator Access"
+url: https://fleetbase.io/docs/fleet-ops/resources/drivers/navigator-access
+module: fleet-ops
+---
+
+Drivers
+
+# Navigator Access
+
+Manage a driver's access to the Navigator app — login, device registration, permissions, and auth token management.
+
+# Navigator Access
+
+**Navigator Access**
+covers how drivers authenticate into the Navigator app, how their device is registered, and how you manage their app access from the console.
+
+## How Drivers Log In
+
+Drivers log into Navigator using their registered phone number. The app sends an SMS verification code to the number on file in their driver record.
+
+1. Driver opens the Navigator app and enters their phone number
+2. The app sends a 6-digit SMS code
+3. Driver enters the code to complete login
+4. Location permissions are requested and must be granted
+
+The phone number used for login must exactly match the phone number in the driver's record in
+**Fleet-Ops → Resources → Drivers**
+. International format is required (e.g., +6591234567).
+
+## Device Registration
+
+When a driver logs in for the first time, their device is registered in the system. Fleet-Ops stores:
+
+* Device token (for push notifications)
+* Device platform (iOS or Android)
+* App version
+* Auth token (for API authentication)
+
+If a driver switches phones or reinstalls the app, their device is re-registered automatically on next login. Old device tokens are invalidated.
+
+## Auth Tokens
+
+Each driver has an
+**auth token**
+— a long-lived bearer token used to authenticate API calls from the Navigator app. The auth token is automatically generated when the driver record is created and refreshed on each login.
+
+You can manually regenerate a driver's auth token from their detail panel:
+
+1. Open the driver record →
+   **Overview**
+   tab
+2. Click
+   **Regenerate Token**
+   (or similar action in the detail panel)
+3. The new token is sent to the driver's app on next sync
+
+Regenerating a driver's auth token will immediately invalidate their current session. They will need to log in again via SMS.
+
+## Revoking Access
+
+To prevent a driver from logging into Navigator:
+
+1. Open the driver record
+2. Change the driver
+   **Status**
+   to
+   `suspended`
+   or
+   `inactive`
+3. Inactive/suspended drivers cannot receive dispatch orders and their Navigator sessions are blocked
+
+For permanent revocation, delete the driver record entirely. This removes all access and deactivates the user account link.
+
+## Push Notifications
+
+Navigator uses push notifications to alert drivers when:
+
+* A new order is dispatched to them
+* An order is updated (rescheduled, cancelled, route changed)
+* A message is sent from the console
+
+Push notifications require the device token to be registered and the driver to have notification permissions enabled on their device.
+
+## Multi-Organization Support
+
+Drivers can belong to multiple Fleetbase organizations. In Navigator, they can switch between organizations using the
+**Switch Organization**
+option in the app menu. They must be registered as a driver in each organization they want to access.
+
+## Navigator App Settings
+
+Administrators can configure Navigator app behavior for all drivers from
+**Fleet-Ops → Settings → Navigator App**
+:
+
+![Navigator app settings — whether drivers may edit entity details, and whether drivers can onboard themselves from the app](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-navigator-app-settings.c6a620e6.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+| Setting | Description |
+| --- | --- |
+| **SMS Verification** | Enable/disable SMS code login |
+| **Allow Driver Registration** | Let drivers self-register without console setup |
+| **Order Acceptance Mode** | Auto-accept dispatches or require manual accept |
+| **Broadcast Frequency** | How often GPS location is sent (seconds) |
+| **Language** | Default language for the driver app UI |
+
+See
+[Settings → Navigator App](https://fleetbase.io/docs/fleet-ops/settings/navigator-app)
+for the full reference.

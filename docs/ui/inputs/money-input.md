@@ -1,0 +1,76 @@
+---
+title: "MoneyInput"
+url: https://fleetbase.io/docs/ui/inputs/money-input
+module: ui
+---
+
+# MoneyInput
+
+<MoneyInput> is a currency-aware money input — formats as the user types using AutoNumeric and shows the currency symbol on the left. Optional currency picker.
+
+# <MoneyInput>
+
+A currency-aware money input. Formats as the user types using
+`AutoNumeric`
+and shows the active currency on the left. Optionally lets the user pick a different currency via a built-in dropdown.
+
+## Basic Usage
+
+```
+<MoneyInput @value={{this.invoice.total}} @currency="USD" />
+```
+
+The currency symbol (
+`$`
+) is rendered to the left, and the input is auto-formatted (e.g.
+`1,234.56`
+).
+
+## With Currency Picker
+
+```
+<MoneyInput
+  @value={{this.amount}}
+  @currency={{this.currency}}
+  @canSelectCurrency={{true}}
+  @onCurrencyChange={{fn (mut this.currency)}}
+/>
+```
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@value` | number | string | Amount value |
+| `@currency` | string | ISO 4217 code (e.g. `USD` , `EUR` , `MNT` ) |
+| `@canSelectCurrency` | boolean | Show the currency picker dropdown |
+| `@onCurrencyChange` | `(currency)` | Called when the user picks a different currency |
+| `@wrapperClass` | string | Extra classes on the outer wrapper |
+
+Any additional
+`...attributes`
+are forwarded to the underlying
+`<input>`
+.
+
+## Inside an InputGroup
+
+```
+<InputGroup @name="Price">
+  <MoneyInput @value={{this.product.price}} @currency={{this.store.currency}} />
+</InputGroup>
+```
+
+## Format Conventions
+
+The displayed value is formatted with the currency's standard separator and decimal scheme. The bound
+`@value`
+is the raw number — what your model should store. Keep monetary values as integer minor units server-side (cents for USD, etc.) and convert on display if needed.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/money-input.hbs` | Template |
+| `addon/components/money-input.js` | Class |
+| `addon/components/money-input/` | `CurrencyHandle` and related subcomponents |

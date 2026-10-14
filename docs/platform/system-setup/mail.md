@@ -1,0 +1,119 @@
+---
+title: "Mail"
+url: https://fleetbase.io/docs/platform/system-setup/mail
+module: platform
+---
+
+# Mail
+
+Configure the outbound mail driver Fleetbase uses for notifications, invitations, order updates, and system alerts.
+
+# Mail
+
+Fleetbase sends transactional email for account invitations, password resets, order notifications, and system alerts. The Mail settings panel lets you choose and configure the mail driver that powers all outbound email. Navigate to
+**Admin → System Settings → Mail**
+to access these settings.
+
+![Mail settings — From Address, From Name, and Mailer configuration panel](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fadmin-mail-settings-smtp.df946ebc.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## From Address and Name
+
+These two fields apply regardless of which mailer is selected.
+
+| Field | Description |
+| --- | --- |
+| **From Address** | The email address Fleetbase sends from (e.g. `noreply@yourdomain.com` ) |
+| **From Name** | The display name shown to recipients (e.g. your company name) |
+
+## Mailer
+
+Select the mail transport to use. The form updates to show only the fields relevant to the selected driver.
+
+![Mail settings with the Amazon SES mailer selected and its credential fields](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fadmin-mail-settings-ses.b41d0da4.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+SMTP
+
+Mailgun
+
+Postmark
+
+SendGrid
+
+Resend
+
+Microsoft Graph
+
+Connects to any SMTP server — your own mail server, relay, or a hosted service that provides SMTP credentials.
+
+| Field | Description |
+| --- | --- |
+| **SMTP Host** | Hostname of your SMTP server (e.g. `smtp.mailgun.org` ) |
+| **SMTP Port** | Port number — typically `587` (STARTTLS) or `465` (SSL) |
+| **SMTP Encryption** | Toggle to enable TLS encryption (recommended) |
+| **SMTP Username** | Your SMTP authentication username |
+| **SMTP Password** | Your SMTP authentication password |
+| **SMTP Timeout** | Connection timeout in seconds (optional) |
+| **SMTP Auth Mode** | Authentication mode if required by your server (optional) |
+
+Uses the
+[Mailgun](https://mailgun.com/)
+API. Verify your sending domain in Mailgun via DNS before use.
+
+| Field | Description |
+| --- | --- |
+| **Mailgun Domain** | Your verified Mailgun sending domain (e.g. `mg.yourdomain.com` ) |
+| **Mailgun Endpoint** | `api.mailgun.net` for US regions, `api.eu.mailgun.net` for EU |
+| **Mailgun Secret** | Your Mailgun private API key |
+
+Uses the
+[Postmark](https://postmarkapp.com/)
+API. Create a Server in Postmark to get your token.
+
+| Field | Description |
+| --- | --- |
+| **Postmark Token** | Your Postmark Server API token |
+
+Uses the
+[SendGrid](https://sendgrid.com/)
+Web API v3. Verify a sender identity or domain in SendGrid before use.
+
+| Field | Description |
+| --- | --- |
+| **SendGrid API Key** | Your SendGrid API key with Mail Send permissions |
+
+Uses the
+[Resend](https://resend.com/)
+API. Verify your sending domain in the Resend dashboard before use.
+
+| Field | Description |
+| --- | --- |
+| **Resend API Key** | Your Resend API key |
+
+Sends email via the Microsoft Graph API using OAuth2 — suitable for Microsoft 365 or Exchange Online accounts.
+
+| Field | Description |
+| --- | --- |
+| **Client ID** | The Application (client) ID from your Azure app registration |
+| **Client Secret** | The client secret generated for your Azure app |
+| **Tenant ID** | Your Azure Active Directory tenant ID |
+| **Save to Sent Items** | Toggle to save sent emails to the sending account's Sent Items folder |
+
+Register an app in the
+[Azure portal](https://portal.azure.com/)
+with the
+`Mail.Send`
+Microsoft Graph API permission granted.
+
+## Testing
+
+Click
+**Test Config**
+to send a test email to the currently logged-in admin account using the settings currently entered in the form. Check your inbox to confirm delivery, then click
+**Save Changes**
+to persist the configuration.
+
+## Saving
+
+Click
+**Save Changes**
+to apply the configuration. The config cache is refreshed automatically — no restart is required.

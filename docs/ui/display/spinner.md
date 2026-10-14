@@ -1,0 +1,127 @@
+---
+title: "Spinner"
+url: https://fleetbase.io/docs/ui/display/spinner
+module: ui
+---
+
+# Spinner
+
+<Spinner> shows a small loading indicator. Used inside buttons, panels, and lists while async work is in flight.
+
+# <Spinner>
+
+A simple loading spinner. Use it inside buttons, panel headers, list rows, or anywhere you need to indicate pending work.
+
+`<Button>`
+already shows a spinner internally when you pass
+`@isLoading={{true}}`
+— you usually don't need
+`<Spinner>`
+directly inside buttons.
+
+## Basic Usage
+
+```
+<Spinner />
+```
+
+## With a Loading Message
+
+You can pass the message as
+`@text`
+,
+`@loadingMessage`
+, or
+`@message`
+, or yield it as a block:
+
+```
+<Spinner @text="Loading drivers…" />
+
+<Spinner>
+  Saving — please wait
+</Spinner>
+```
+
+## Sizing
+
+The spinner accepts either a preset size or explicit pixel dimensions.
+
+```
+{{!-- Preset sizes --}}
+<Spinner @size="xs" />   {{!-- 12x12 --}}
+<Spinner @size="sm" />   {{!-- 14x14 --}}
+<Spinner @size="md" />   {{!-- 16x16 (default) --}}
+<Spinner @size="lg" />   {{!-- 18x18 --}}
+<Spinner @size="xl" />   {{!-- 20x20 --}}
+<Spinner @size="2xl" />  {{!-- 22x22 --}}
+<Spinner @size="3xl" />  {{!-- 24x24 --}}
+
+{{!-- Numeric size — width and height both equal to the number, in px --}}
+<Spinner @size={{32}} />
+
+{{!-- Explicit width/height --}}
+<Spinner @width={{20}} @height={{20}} />
+```
+
+## Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@size` | string | number | — | Preset ( `xs` / `sm` / `md` / `lg` / `xl` / `2xl` / `3xl` ) or numeric pixel size — sets both width and height |
+| `@width` | number | `16` | Width in px (used if `@size` not set) |
+| `@height` | number | `16` | Height in px (used if `@size` not set) |
+| `@text` | string | — | Loading message text |
+| `@loadingMessage` | string | — | Alias for `@text` |
+| `@message` | string | — | Alias for `@text` |
+| `@wrapperClass` | string | — | Extra classes on the outer wrapper |
+| `@iconClass` | string | — | Extra classes on the spinner icon |
+| `@loadingMessageClass` | string | — | Extra classes on the loading message |
+
+Yielded content takes priority over
+`@text`
+/
+`@loadingMessage`
+/
+`@message`
+.
+
+## Real-World Examples
+
+```
+{{!-- Inline spinner next to a label --}}
+<div class="flex items-center">
+  <Spinner @size="xs" />
+  <span class="ml-2 text-sm">Updating…</span>
+</div>
+
+{{!-- Loading state for a section --}}
+{{#if this.isLoading}}
+  <div class="flex items-center justify-center py-12">
+    <Spinner @size="lg" @text="Loading orders…" />
+  </div>
+{{else}}
+  {{!-- ... --}}
+{{/if}}
+
+{{!-- Inside a table cell --}}
+{{#if row.processing}}
+  <Spinner @size="xs" />
+{{else}}
+  {{row.status}}
+{{/if}}
+```
+
+## See Also
+
+* [`<Button>`](https://fleetbase.io/docs/ui/actions/button)
+  — has built-in
+  `@isLoading`
+  that shows a spinner
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/spinner.hbs` | Template |
+| `addon/components/spinner.js` | Class |

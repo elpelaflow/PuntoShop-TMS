@@ -1,0 +1,77 @@
+---
+title: "GitHub Discussions"
+url: https://fleetbase.io/docs/community/github-discussions
+module: community
+---
+
+# GitHub Discussions
+
+Ask questions, propose features, and participate in longer-form community conversations about Fleetbase on GitHub Discussions.
+
+# GitHub Discussions
+
+[GitHub Discussions](https://github.com/elpelaflow/PuntoShop-TMS/discussions)
+is the home for longer-form community conversations about Fleetbase — feature proposals, architecture questions, integration ideas, and anything that benefits from a permanent, searchable record rather than a real-time chat message.
+
+**[Open a Discussion →](https://github.com/elpelaflow/PuntoShop-TMS/discussions/new/choose)**
+
+## Discussions vs Issues vs Discord
+
+| Use | Best place |
+| --- | --- |
+| Bug report with a clear reproduction | [GitHub Issues](https://github.com/elpelaflow/PuntoShop-TMS/issues) |
+| Question about installation or API usage (quick answer) | [Discord `#help`](https://fleetbase.io/docs/community/discord) |
+| Feature proposal or architectural question | [GitHub Discussions](https://github.com/elpelaflow/PuntoShop-TMS/discussions) |
+| Sharing something you built | [Discord `#showcase`](https://fleetbase.io/docs/community/discord) |
+| Anything that should be searchable and permanent | [GitHub Discussions](https://github.com/elpelaflow/PuntoShop-TMS/discussions) |
+
+## Discussion Categories
+
+GitHub Discussions are organised into categories. Choose the right one when opening a thread:
+
+| Category | When to use |
+| --- | --- |
+| **Q&A** | Questions where you're looking for a specific answer — others can mark replies as answered |
+| **Ideas** | Feature proposals and improvement suggestions — good for community voting and early feedback |
+| **Show and Tell** | Share extensions, integrations, or projects you've built on top of Fleetbase |
+| **General** | Anything that doesn't fit the other categories |
+| **Announcements** | Core team announcements — read-only for community members |
+
+## Before You Post
+
+Search existing discussions before opening a new one. The search bar at the top of the Discussions page searches both open and closed threads.
+
+Also check:
+
+* [FAQ](https://fleetbase.io/docs/community/faq)
+  for common questions
+* The relevant
+  [docs section](https://fleetbase.io/docs/platform)
+  for configuration and feature details
+* [GitHub Issues](https://github.com/elpelaflow/PuntoShop-TMS/issues)
+  for known bugs
+
+## Writing a Good Discussion Post
+
+**For Q&A:**
+
+* State what you're trying to achieve, not just what's failing
+* Include your deployment setup (Docker version, environment)
+* Paste relevant config or code snippets using fenced code blocks
+
+**For feature proposals (Ideas):**
+
+* Describe the problem you're solving — not just the feature you want
+* Explain how you currently work around it
+* Share rough ideas on implementation if you have them — maintainers are more likely to engage if you've thought it through
+
+**For Show and Tell:**
+
+* Briefly explain what you built and what problem it solves
+* Link to your repository or a demo if available
+
+## Repository-Specific Discussions
+
+Each major Fleetbase repository has its own Discussions page for topics specific to that component:
+
+* [PuntoShop TMS (Core, Fleet-Ops, Ledger)](https://github.com/elpelaflow/PuntoShop-TMS/discussions)

@@ -1,0 +1,202 @@
+---
+title: "Adding a SMS Provider"
+url: https://fleetbase.io/docs/extension-development/recipes/adding-a-sms-provider
+module: extension-development
+---
+
+# Adding a SMS Provider
+
+Plug a new SMS gateway into the platform's SmsService — implement a sender class, wire it through configuration, and route specific phone-number prefixes to it.
+
+# Adding a SMS Provider
+
+The platform's
+`Fleetbase\Services\SmsService`
+ships with Twilio (default) and CallPro. Both implement the same minimal contract: a constructor that reads config, plus a
+`send($to, $text, $options?)`
+method. Adding a third provider is a matter of writing the sender class, exposing it via config, and (if you want auto-routing) updating the routing rules.
+
+## 1. Implement the Provider Class
+
+Mirror
+`CallProSmsService`
+— a plain class with config-driven constructor and a public
+`send`
+method:
+
+```
+<?php
+// server/src/Services/MessageBirdSmsService.php
+
+namespace MyOrg\MyExtension\Services;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class MessageBirdSmsService
+{
+    protected string $apiKey;
+    protected string $from;
+    protected string $baseUrl;
+
+    public function __construct()
+    {
+        $this->apiKey  = config('services.messagebird.api_key', '');
+        $this->from    = config('services.messagebird.from', '');
+        $this->baseUrl = config('services.messagebird.base_url', 'https://rest.messagebird.com');
+    }
+
+    public function send(string $to, string $text, ?string $from = null): array
+    {
+        if (empty($this->apiKey)) {
+            throw new \Exception('MessageBird API key not configured.');
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => "AccessKey {$this->apiKey}",
+        ])->post("{$this->baseUrl}/messages", [
+            'originator' => $from ?? $this->from,
+            'recipients' => [$to],
+            'body'       => $text,
+        ]);
+
+        if (!$response->successful()) {
+            Log::error('MessageBird send failed', [
+                'status' => $response->status(),
+                'body'   => $response->json(),
+                'to'     => $to,
+            ]);
+            throw new \Exception('MessageBird SMS failed: ' . $response->body());
+        }
+
+        return [
+            'success'    => true,
+            'provider'   => 'messagebird',
+            'message_id' => $response->json('id'),
+            'response'   => $response->json(),
+        ];
+    }
+}
+```
+
+## 2. Add Configuration
+
+In your extension's
+`server/config/services.php`
+(or merge into Laravel's existing
+`config/services.php`
+):
+
+```
+return [
+    'messagebird' => [
+        'api_key'  => env('MESSAGEBIRD_API_KEY'),
+        'from'     => env('MESSAGEBIRD_FROM'),
+        'base_url' => env('MESSAGEBIRD_BASE_URL', 'https://rest.messagebird.com'),
+    ],
+];
+```
+
+Merge it from your service provider:
+
+```
+public function boot()
+{
+    parent::boot();
+    $this->mergeConfigFrom(__DIR__ . '/../../config/services.php', 'services');
+}
+```
+
+## 3. Wire the Provider into SmsService
+
+The cleanest pattern is to
+**extend**
+`SmsService`
+and add your provider — that keeps the core class untouched and lets users opt in.
+
+```
+<?php
+// server/src/Services/ExtendedSmsService.php
+
+namespace MyOrg\MyExtension\Services;
+
+use Fleetbase\Services\SmsService;
+
+class ExtendedSmsService extends SmsService
+{
+    public const PROVIDER_MESSAGEBIRD = 'messagebird';
+
+    public function send(string $to, string $text, array $options = [], ?string $provider = null): array
+    {
+        $provider ??= $this->resolveProvider($to);
+
+        if ($provider === self::PROVIDER_MESSAGEBIRD) {
+            return app(MessageBirdSmsService::class)->send($to, $text, $options['from'] ?? null);
+        }
+
+        return parent::send($to, $text, $options, $provider);
+    }
+}
+```
+
+Bind it in your service provider's
+`register()`
+:
+
+```
+public function register()
+{
+    parent::register();
+
+    $this->app->singleton(SmsService::class, ExtendedSmsService::class);
+    $this->app->singleton(MessageBirdSmsService::class);
+}
+```
+
+Now any code resolving
+`SmsService`
+from the container (
+`app(SmsService::class)`
+) gets your extended subclass.
+
+## 4. Configure Phone-Prefix Routing
+
+To auto-route specific country codes through MessageBird, extend the routing config. In your service provider's
+`boot()`
+:
+
+```
+config([
+    'sms.routing_rules' => array_merge(
+        config('sms.routing_rules', []),
+        ['+31' => ExtendedSmsService::PROVIDER_MESSAGEBIRD],   // Netherlands
+        ['+44' => ExtendedSmsService::PROVIDER_MESSAGEBIRD],   // United Kingdom
+    ),
+]);
+```
+
+Now
+`$smsService->send('+31612345678', 'Hello')`
+routes through MessageBird automatically. Calls to other prefixes still go through the default Twilio provider.
+
+## 5. Test
+
+```
+$sms = app(\Fleetbase\Services\SmsService::class);
+
+// Auto-routed (uses MessageBird because +31)
+$sms->send('+31612345678', 'Test message');
+
+// Forced provider
+$sms->send('+15551234567', 'Test', [], ExtendedSmsService::PROVIDER_MESSAGEBIRD);
+```
+
+## Reference
+
+* `core-api/src/Services/SmsService.php`
+  — base service with auto-routing
+* `core-api/src/Services/CallProSmsService.php`
+  — reference provider class
+* [API Services → SmsService](https://fleetbase.io/docs/extension-development/reference/api-services#fleetbase-services-smsservice)
+  — service overview
+* [Laravel container singleton binding](https://laravel.com/docs/11.x/container#binding-singletons)

@@ -1,0 +1,269 @@
+---
+title: "Routing"
+url: https://fleetbase.io/docs/extension-development/frontend/routing
+module: extension-development
+---
+
+# Routing
+
+How an extension's frontend Ember engine is structured — engine.js, routes.js, host service dependencies, and how routes are mounted into the Fleetbase console.
+
+# Routing
+
+The frontend half of an extension is an
+**Ember engine**
+mounted inside the Fleetbase console. The console handles top-level chrome (header, sidebar, auth) and routes any URL under
+`/console/<your-mount>/…`
+into your engine.
+
+## The Addon Layout
+
+```
+addon/
+├── extension.js          # Universe registration entry point
+├── engine.js             # Engine class + dependencies
+├── routes.js             # Engine route map
+├── routes/
+│   └── application.js    # Application route — runs on every entry
+├── controllers/
+├── components/
+├── templates/
+├── services/
+├── models/
+└── serializers/
+```
+
+## addon/engine.js
+
+The engine class declares which
+**host**
+services your engine pulls in from the console, and which external routes it links to. Reuse the canonical exports from
+`@fleetbase/ember-core`
+instead of hand-rolling the lists.
+
+```
+// addon/engine.js
+import Engine from '@ember/engine';
+import loadInitializers from 'ember-load-initializers';
+import Resolver from 'ember-resolver';
+import config from './config/environment';
+import { services, externalRoutes } from '@fleetbase/ember-core/exports';
+
+const { modulePrefix } = config;
+
+export default class MyExtensionEngine extends Engine {
+    modulePrefix = modulePrefix;
+    Resolver = Resolver;
+    dependencies = {
+        services,
+        externalRoutes,
+    };
+}
+
+loadInitializers(MyExtensionEngine, modulePrefix);
+```
+
+The exported
+`services`
+array includes
+`store`
+,
+`session`
+,
+`current-user`
+,
+`fetch`
+,
+`notifications`
+,
+`intl`
+,
+`abilities`
+,
+`universe`
+, the four universe sub-services, and a number of console utilities. The full list lives at
+`addon/exports/services.js`
+— start with the export, add your own only if you have something custom.
+
+`externalRoutes`
+is
+`['console', 'extensions']`
+— the host routes you can transition to with
+`transitionToExternal('console.…')`
+.
+
+**This file is no longer where extension wiring lives.**
+Universe registrations (menu items, widgets, hooks, registries) belong in
+`addon/extension.js`
+— see
+[Extension Registration](https://fleetbase.io/docs/extension-development/architecture/extension-registration)
+.
+`engine.js`
+only defines the engine itself.
+
+## addon/routes.js
+
+The engine's route map is built with
+`buildRoutes()`
+from
+`ember-engines`
+. Routes are relative to the engine's mount point — a route called
+`'orders'`
+maps to
+`/console/<mount>/orders`
+.
+
+```
+// addon/routes.js
+import buildRoutes from 'ember-engines/routes';
+
+export default buildRoutes(function () {
+    this.route('orders', function () {
+        this.route('index', { path: '/' });
+        this.route('new');
+        this.route('details', { path: '/:public_id' }, function () {
+            this.route('index', { path: '/' });
+            this.route('edit');
+        });
+    });
+
+    this.route('settings');
+
+    // virtual route — see Virtual Routes guide
+    this.route('virtual', { path: '/:section/:slug' });
+});
+```
+
+Real example:
+[`packages/fleetops/addon/routes.js`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/packages/fleetops/addon/routes.js)
+.
+
+## Mount Point
+
+The console derives your engine's mount point from the package name:
+`@my-org/my-extension-engine`
+mounts at
+`console.my-extension`
+. The
+`-engine`
+suffix is stripped, the org scope is dropped. A header menu item registered with route
+`console.my-extension`
+will land on the engine's index route.
+
+## The Application Route
+
+`addon/routes/application.js`
+runs once per engine boot and is your hook for engine-level setup that needs the engine instance itself. Most cross-engine wiring should live in
+`addon/extension.js`
+, but engine-local setup (theme classes, refresh tokens, polling) goes here.
+
+```
+// addon/routes/application.js
+import Route from '@ember/routing/route';
+import { inject as service } from '@ember/service';
+
+export default class ApplicationRoute extends Route {
+    @service theme;
+    @service session;
+
+    activate() {
+        this.theme.setRoutebodyClassNames(['my-extension']);
+    }
+}
+```
+
+## Linking Between Routes
+
+Inside engine templates, route names are relative to the engine:
+
+```
+<LinkTo @route="orders.details" @model={{order.public_id}}>
+    {{order.public_id}}
+</LinkTo>
+```
+
+To link out to the host console, use
+`LinkToExternal`
+:
+
+```
+<LinkToExternal @route="console.fleet-ops.operations.orders">
+    Open in Fleet-Ops
+</LinkToExternal>
+```
+
+Programmatically from a route or controller:
+
+```
+this.transitionToExternal('console.settings');
+```
+
+## Authenticated Routes
+
+The console's outer ApplicationRoute handles authentication — by the time your engine's routes run, the user is already authenticated and
+`session.currentUser`
+is available. You don't need to add
+`AuthenticatedRouteMixin`
+(it doesn't exist on Ember 5+ ESM anyway).
+
+For role-based gating, use the
+`abilities`
+service. Fleetbase permission strings always follow the form
+**`{extension} {action} {resource}`**
+— extension slug + verb + singular resource:
+
+```
+@service abilities;
+
+beforeModel() {
+    if (!this.abilities.can('fleet-ops view order')) {
+        return this.transitionToExternal('console');
+    }
+}
+```
+
+Examples of well-formed permission keys:
+
+| Permission | Meaning |
+| --- | --- |
+| `'fleet-ops view order'` | Read orders in Fleet-Ops |
+| `'fleet-ops create order'` | Create orders in Fleet-Ops |
+| `'ledger update invoice'` | Edit invoices in Ledger |
+| `'my-extension delete widget'` | Delete widgets in your extension |
+
+The
+`abilities`
+service is built on
+[ember-can](https://github.com/minutebase/ember-can#readme)
+— see its README for the full ability declaration API. Fleetbase wires the keys through to a per-user permission set on the backend.
+
+## Models, Serializers, Adapters
+
+Engine-local models live under
+`addon/models/`
+. The
+`store`
+service is shared from the host, so models registered in your engine are visible to it after boot. Adapters extend
+`@fleetbase/ember-core/adapters/application`
+, which already handles the API namespace, host, headers, and auth.
+
+```
+// addon/adapters/application.js
+import ApplicationAdapter from '@fleetbase/ember-core/adapters/application';
+
+export default class extends ApplicationAdapter {
+    namespace = 'my-extension/v1';
+}
+```
+
+See
+`@fleetbase/ember-core/adapters/application`
+for the base class.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/exports/services.js` | Canonical engine dependency exports |
+| [`packages/fleetops/addon/engine.js`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/packages/fleetops/addon/engine.js) | Reference engine class |
+| [`packages/fleetops/addon/routes.js`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/packages/fleetops/addon/routes.js) | Reference route map |

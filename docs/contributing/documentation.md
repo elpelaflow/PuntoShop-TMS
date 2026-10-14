@@ -1,0 +1,234 @@
+---
+title: "Documentation"
+url: https://fleetbase.io/docs/contributing/documentation
+module: contributing
+---
+
+# Documentation
+
+How to contribute to Fleetbase documentation — fixing typos, adding examples, capturing screenshots, and writing new pages.
+
+# Documentation contributions
+
+The documentation you're reading right now lives in the
+[`fleetbase/fleetbase.io`](https://github.com/elpelaflow/PuntoShop-TMS.io)
+repository. Every page is editable. If something is wrong, unclear, or missing — submit a PR.
+
+## Where the docs live
+
+```
+fleetbase.io/
+├── content/
+│   └── docs/
+│       ├── platform/         # Platform docs (this section)
+│       ├── fleet-ops/        # Fleet-Ops docs
+│       ├── ledger/           # Ledger docs
+│       ├── community/        # Community & support
+│       ├── contributing/     # ← you are here
+│       └── ...
+└── public/images/screenshots/
+    ├── fleet-ops/
+    └── ...
+```
+
+Each page is an
+`.mdx`
+file — Markdown with optional React component embeds.
+
+## Quick fixes
+
+For a typo, broken link, or small clarification — find the page on GitHub, click
+**Edit this file**
+, make the change, and submit a PR directly through the GitHub UI. No local setup required.
+
+Every docs page has an "Edit this page" link at the bottom that takes you straight to the right file.
+
+## Local setup for bigger changes
+
+For anything more substantial — adding a section, restructuring a page, capturing screenshots — clone the repo and run the site locally.
+
+### Clone the docs site
+
+```
+git clone https://github.com/elpelaflow/PuntoShop-TMS.io.git
+cd PuntoShop-TMS.io
+```
+
+### Install dependencies
+
+```
+pnpm install
+```
+
+### Run the dev server
+
+```
+pnpm dev
+```
+
+Open
+<http://localhost:3000/docs>
+and find the page you're editing. Hot reload is on — your changes appear as you save.
+
+### Edit the MDX
+
+Find the file under
+`content/docs/...`
+matching the URL of the page. Make your changes.
+
+### Verify it builds
+
+```
+pnpm build
+```
+
+A clean build means MDX, frontmatter, and links are all valid.
+
+## Writing conventions
+
+### Frontmatter
+
+Every page starts with frontmatter:
+
+```
+---
+title: Page Title
+description: One-sentence description used for SEO and the page header.
+sidebarTitle: Optional Short Title  # only if different from title
+---
+```
+
+The
+`description`
+should be a complete sentence — it appears under the page H1 and as meta-description for search.
+
+### Tone
+
+Match the existing tone:
+**direct, plain, factual**
+. Avoid:
+
+* Marketing fluff ("seamlessly", "powerful", "robust")
+* Hedging ("you might want to consider", "perhaps")
+* Sentence-padding ("In order to" → "To"; "due to the fact that" → "because")
+
+### Headings
+
+Use sentence case —
+**not Title Case**
+— for headings:
+
+> ✅ "Configuring custom fields"
+> ❌ "Configuring Custom Fields"
+
+Exception: H1 page titles can use either, but match the rest of the section you're in.
+
+### Code samples
+
+* Always specify the language for syntax highlighting:
+
+  ```
+  ```bash
+  pnpm install
+  ```
+  ```
+* Use realistic example values (
+  `order_a1b2c3`
+  , not
+  `order_xxxxx`
+  )
+* Include the language in the fence even for plain output
+
+### Links
+
+* Internal docs links use absolute paths from
+  `/docs/`
+  :
+  `[Fleet-Ops](/docs/fleet-ops)`
+* External links open in a new tab automatically — don't add
+  `target="_blank"`
+* Use descriptive link text — never "click here"
+
+### Images
+
+* Place screenshots under
+  `public/images/screenshots/<area>/<descriptive-name>.webp`
+* Use
+  `.webp`
+  format — convert from PNG with
+  `cwebp -q 85`
+* Reference with absolute paths:
+  `![Alt text](/images/screenshots/fleet-ops/fleet-ops-orders-list.webp)`
+* Include meaningful alt text describing what the screenshot shows
+
+## Capturing screenshots
+
+If you're adding screenshots:
+
+* **Resolution**
+  : capture at 1440×900 or higher; the site rescales for retina
+* **Window chrome**
+  : hide unless it adds context (status bar, etc.)
+* **Browser zoom**
+  : 100% — the docs site scales captures automatically
+* **Sensitive data**
+  : redact API keys, real customer names, real driver locations
+* **Theme**
+  : capture in dark mode for consistency with the existing screenshots, unless explicitly demonstrating light mode
+
+## API reference docs
+
+The
+`/docs/api/*`
+pages are
+**auto-generated**
+from the
+`postman` submodule
+. Don't edit them directly — your changes will be overwritten on the next build.
+
+To improve the API reference:
+
+* For
+  **endpoint docs, parameters, examples**
+  → edit the YAML files in
+  `postman`
+  and submit a PR there
+* For
+  **rendering, layout, sidebar nav**
+  → edit the components under
+  `src/components/api-reference/`
+  in this repo
+* For
+  **the introduction / authentication / errors narrative**
+  → edit
+  `content/docs/api/index.mdx`
+  (this one IS hand-authored)
+
+See
+[`scripts/README.md`](https://github.com/elpelaflow/PuntoShop-TMS.io/blob/main/scripts/README.md)
+in the docs repo for the full generator architecture.
+
+## What makes a good docs PR
+
+* **One page per PR**
+  is ideal — easier to review
+* **Screenshots**
+  for any UI walkthrough
+* **A test plan**
+  in the PR description: "I read through the page on localhost; the table of contents updates; the new screenshot loads; the link to /docs/fleet-ops works."
+* **No unrelated formatting changes**
+  — keep diffs focused
+
+## Submitting
+
+Follow the same PR conventions as code contributions — see
+[Code →](https://fleetbase.io/docs/contributing/code)
+for branching, commit messages, and PR description format. Use
+`docs(<area>): <what>`
+for the commit message:
+
+```
+docs(fleet-ops): add custom fields recipe
+docs(api): clarify webhook signature verification
+docs: fix broken links in community section
+```

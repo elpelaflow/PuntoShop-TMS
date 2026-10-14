@@ -1,0 +1,119 @@
+---
+title: "Payload & Capacity Allocation"
+url: https://fleetbase.io/docs/fleet-ops/operations/orchestrator/payload-capacity-allocation
+module: fleet-ops
+---
+
+Orchestrator
+
+# Payload & Capacity Allocation
+
+How the Orchestrator uses payload weight, volume, and entity data to enforce vehicle capacity constraints during assignment.
+
+# Payload & Capacity Allocation
+
+The Orchestrator uses
+**payload capacity**
+constraints to ensure that orders are assigned only to vehicles with sufficient load capacity. This prevents over-loading vehicles and ensures deliveries are physically feasible.
+
+## How Capacity Allocation Works
+
+When an order has entities with weight or volume values, the Orchestrator sums the total payload weight and volume across all entities in the order. It then matches the order to vehicles where:
+
+```
+sum(entity weights) ≤ vehicle.payload_capacity
+sum(entity volumes) ≤ vehicle.payload_capacity_volume
+```
+
+For a route with multiple orders assigned to the same vehicle, the cumulative load across all orders must remain within capacity.
+
+## Setting Payload Data on Orders
+
+Capacity allocation only applies when entities have weight and/or volume data. To populate this:
+
+1. When creating an order, add entities with
+   **Weight**
+   values (kg) and
+   **Dimensions**
+   (length × width × height in cm or m)
+2. The system automatically calculates volume from dimensions
+3. Or set
+   `weight_value`
+   ,
+   `height_value`
+   ,
+   `width_value`
+   ,
+   `length_value`
+   directly via the API
+
+## Setting Vehicle Capacity
+
+Set a vehicle's capacity in
+**Fleet-Ops → Resources → Vehicles → [Vehicle] → Edit**
+:
+
+| Field | Unit | Description |
+| --- | --- | --- |
+| `payload_capacity` | decimal(2) | Maximum weight the vehicle can carry — unit is whatever you populate consistently with entity weight units |
+| `payload_capacity_volume` | decimal(3) | Maximum cargo volume the vehicle can carry — unit follows the entity dimensions you set |
+
+If these fields are blank, the Orchestrator treats the vehicle as having unlimited capacity.
+
+## Allocation Behavior
+
+| Scenario | Orchestrator behavior |
+| --- | --- |
+| Order has no weight/volume data | Capacity constraints ignored for this order |
+| Vehicle has no capacity set | Order can be assigned to vehicle without restriction |
+| Order exceeds single vehicle capacity | Order flagged as unassignable in results |
+| Multiple orders fit within capacity | Bundled onto same vehicle route |
+| Mixed capacity and non-capacity orders | Capacity orders take priority for constrained vehicles |
+
+## Priority and Capacity
+
+Orders have an
+**Orchestrator Priority**
+field (0–100, where 100 is highest). When the Orchestrator cannot fit all orders within capacity constraints, higher-priority orders are assigned first. Lower-priority orders that don't fit are returned to the unassigned pool.
+
+Set priority on an order in the creation form, or via the API with the
+`orchestrator_priority`
+field.
+
+## Multi-Capacity Routes
+
+For complex scenarios where a driver makes multiple pickups before deliveries (hub-and-spoke, consolidated runs), the Orchestrator tracks cumulative load at each stop:
+
+* Load
+  **increases**
+  at pickup stops
+* Load
+  **decreases**
+  at delivery stops
+* The vehicle's capacity must never be exceeded at any point in the route
+
+The VROOM engine handles this natively. The Greedy engine uses a simpler bin-packing approach.
+
+## Capacity Reports
+
+After an Orchestrator run, the results panel shows per-driver utilization:
+
+* Total weight assigned vs. vehicle capacity
+* Total volume assigned vs. vehicle capacity
+* Utilization percentage
+
+This helps identify over- or under-utilized vehicles and adjust fleet allocation.
+
+## Configuration
+
+Capacity enforcement is set
+**per phase**
+in the Orchestrator Workbench's
+[Phase Builder](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/workbench)
+: toggle
+**Respect Capacity**
+on the phase to enable weight and volume checks for that phase.
+
+Global Orchestrator defaults (active engine, auto-allocate flags, max travel time, balance workload) live in
+[Orchestrator Settings](https://fleetbase.io/docs/fleet-ops/settings/orchestrator)
+.

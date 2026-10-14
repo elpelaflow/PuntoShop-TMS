@@ -1,0 +1,189 @@
+---
+title: "Core Concepts"
+url: https://fleetbase.io/docs/ui/getting-started/core-concepts
+module: ui
+---
+
+# Core Concepts
+
+How ember-ui is structured — components, helpers, modifiers, services, and the conventions that make every Fleetbase extension feel native.
+
+# Core Concepts
+
+`@fleetbase/ember-ui`
+is a standard Ember addon. If you're new to Ember, the four concepts below are the only ones you need before reading the rest of this section.
+
+## Components
+
+A
+**component**
+is a reusable piece of UI. Ember-ui exports 200+ components — from simple ones like
+`<Button>`
+and
+`<Spinner>`
+to complex builders like
+`<TemplateBuilder>`
+and
+`<ReportBuilder>`
+.
+
+You use components by their angle-bracket name in any
+`.hbs`
+template:
+
+```
+<Button @type="primary" @text="Save" @onClick={{this.save}} />
+```
+
+The
+`@`
+-prefixed values are the component's
+**arguments**
+— the equivalent of React props. Arguments are typed and named.
+
+Components can also yield content. The
+`<ContentPanel>`
+example below yields its body so you can put any markup inside:
+
+```
+<ContentPanel @title="Settings">
+  <p>Anything in here is rendered inside the panel body.</p>
+</ContentPanel>
+```
+
+Some components yield a curried subcomponent. For example,
+`<Tabs>`
+yields a
+`<Tab>`
+component so you can compose multiple:
+
+```
+<Tabs as |Tab|>
+  <Tab @title="Profile">Profile content</Tab>
+  <Tab @title="Security">Security content</Tab>
+</Tabs>
+```
+
+Each component's page in this section lists every argument, the default value, the yielded content, and example usage.
+
+## Helpers
+
+A
+**helper**
+is a function you call inside a template — usually to format a value:
+
+```
+{{format-currency 12500 "USD"}}      {{!-- $125.00 --}}
+{{format-bytes 1048576}}              {{!-- 1 MB --}}
+{{format-date-fns @order.created_at "PPpp"}}   {{!-- Jul 4, 2025 at 3:42 PM --}}
+{{is-uuid this.id}}                  {{!-- true / false --}}
+{{can-action "fleet-ops driver" "delete"}}     {{!-- permission check --}}
+```
+
+Helpers are pure functions — they take inputs and return values. They are globally available; no import needed.
+
+See
+[Formatting](https://fleetbase.io/docs/ui/helpers/formatting)
+,
+[Type Checking](https://fleetbase.io/docs/ui/helpers/type-checking)
+,
+[Permissions](https://fleetbase.io/docs/ui/helpers/permissions)
+, and
+[Data](https://fleetbase.io/docs/ui/helpers/data)
+for the full list.
+
+## Modifiers
+
+A
+**modifier**
+attaches behavior to an element. They look like helpers but apply to the element itself rather than producing a value:
+
+```
+<div {{set-height "400px"}}>fixed-height container</div>
+<input {{imask "phone"}} type="text" />
+<img {{fallback-img-src "/assets/placeholder.png"}} src={{this.url}} />
+```
+
+The modifier runs whenever the element renders or its inputs change. Use modifiers for things you'd otherwise do with
+`didInsertElement`
+hooks: setting heights, masks, fallback images, dimension constraints.
+
+See
+[Modifiers](https://fleetbase.io/docs/ui/helpers/modifiers)
+for the full list.
+
+## Services
+
+A
+**service**
+is a long-lived singleton you inject into your component, controller, or other service. Ember-ui exposes six services:
+
+| Service | What it does |
+| --- | --- |
+| `modals-manager` | Show, hide, and configure modals from JavaScript |
+| `sidebar` | Toggle the console sidebar; register sidebar items |
+| `dashboard` | Manage dashboard widgets and layouts |
+| `template-builder` | Manage templates for invoices, emails, etc. |
+| `resource-context-panel` | Manage the resource context panel (the right-hand drawer for selected records) |
+| `leaflet` | Shared map state for any component using Leaflet |
+
+Inject and use them like any Ember service:
+
+```
+import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
+import { action } from '@ember/object';
+
+export default class DriverActionsComponent extends Component {
+  @service modalsManager;
+
+  @action
+  confirmDelete() {
+    this.modalsManager.confirm({
+      title: 'Delete driver?',
+      body: 'This cannot be undone.',
+      acceptButtonText: 'Delete',
+      acceptButtonScheme: 'danger',
+      confirm: () => this.args.driver.destroyRecord(),
+    });
+  }
+}
+```
+
+## Where Things Live
+
+Inside the ember-ui package:
+
+```
+@fleetbase/ember-ui
+├── addon/
+│   ├── components/    ← every component (.hbs template + .js class)
+│   ├── helpers/       ← every helper
+│   ├── modifiers/     ← every modifier
+│   └── services/      ← every service
+├── app/               ← re-exports for the host application
+└── styles/            ← Tailwind-based stylesheet
+```
+
+Inside your extension, you don't touch any of the above directly — you just use the components, helpers, modifiers, and services in your own templates and classes.
+
+## How It Connects to the Console
+
+Every Fleetbase extension is loaded into the console as an Ember Engine. When the engine boots, it inherits the host application's resolver — and ember-ui's components are part of that resolver. That's why you can use
+`<Button>`
+in any extension template without importing anything.
+
+The same applies to extensions loading other extensions via the
+**Universe**
+registry — see
+[Extension Development](https://fleetbase.io/docs/extension-development/getting-started/quickstart)
+for that side of the story.
+
+## Next Steps
+
+* [Layout](https://fleetbase.io/docs/ui/layout/overview)
+  — structure your pages
+* [Inputs](https://fleetbase.io/docs/ui/inputs/input-group)
+  — build forms
+* [Modals](https://fleetbase.io/docs/ui/modals/overview)
+  — show modals from JavaScript or templates

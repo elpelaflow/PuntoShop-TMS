@@ -1,0 +1,83 @@
+---
+title: "Fleet-Ops Integration"
+url: https://fleetbase.io/docs/ledger/integrations/fleet-ops
+module: ledger
+---
+
+# Fleet-Ops Integration
+
+Ledger automatically creates draft invoices for Fleet-Ops orders so you don't have to bill each order by hand.
+
+# Fleet-Ops Integration
+
+Ledger and Fleet-Ops are wired together out of the box. The moment a Fleet-Ops order has its pricing locked in, Ledger automatically creates a
+**draft invoice**
+for that order and recognizes the revenue in your books.
+
+You don't need to copy line items by hand, type in customer details, or remember which orders haven't been invoiced yet — it all happens for you.
+
+## When Invoices Get Created
+
+The trigger is the moment an order is
+**priced**
+. In Fleet-Ops terms, that's when a service quote becomes the order's purchase rate (typically when the dispatcher accepts a quote, or when one is automatically assigned by an order configuration).
+
+It is
+**not**
+tied to the order being completed. Recognizing revenue at pricing time is the standard accrual-accounting practice — what your customer owes is established when you commit to a price, not when the driver finishes the run.
+
+## What Lands in Your Billing List
+
+Each automatically-created invoice arrives in
+**Ledger → Billing → Invoices**
+with:
+
+* Status:
+  **Draft**
+* Customer pulled from the Fleet-Ops order
+* Line items pulled from the service quote (or, if the quote is a single price, one summary line item)
+* Currency, due date (using your Invoice Settings), and a fresh invoice number
+
+You can edit anything before sending — change line item descriptions, add notes, adjust the tax rate, swap the template — it's a normal draft invoice from that point on.
+
+## When Pricing Changes
+
+Sometimes a quote gets re-priced — a route adjustment, a new service rate, an override by a dispatcher. When that happens, the old draft invoice is automatically marked
+**void**
+and a fresh draft takes its place. You won't end up with stale duplicates competing for the same order.
+
+If the old invoice was already past draft (sent, viewed, partial, or paid), it stays where it is — Ledger only replaces drafts.
+
+## Sending the Invoice
+
+Open the draft, review it, and click
+**Send**
+to email it to the customer. See
+[Invoices](https://fleetbase.io/docs/ledger/billing/invoices#sending-an-invoice)
+for the full flow.
+
+## What You See in Your Books
+
+When the draft invoice is created, Ledger posts a single journal entry recognizing the revenue:
+
+* **Accounts Receivable**
+  goes up — your customer now owes you this amount
+* **Revenue**
+  goes up — the income is recognized
+
+When the customer pays, a second entry is posted:
+
+* **Cash**
+  goes up — you've received the money
+* **Accounts Receivable**
+  goes down — the debt is cleared
+
+These post automatically. You'll see them in the
+[General Ledger](https://fleetbase.io/docs/ledger/accounting/general-ledger)
+and they roll up into your
+[Income Statement](https://fleetbase.io/docs/ledger/reports/income-statement)
+,
+[Balance Sheet](https://fleetbase.io/docs/ledger/reports/balance-sheet)
+, and
+[AR Aging](https://fleetbase.io/docs/ledger/reports/ar-aging)
+reports.

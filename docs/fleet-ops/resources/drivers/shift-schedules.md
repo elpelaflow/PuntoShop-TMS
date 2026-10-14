@@ -1,0 +1,120 @@
+---
+title: "Shift Schedules"
+url: https://fleetbase.io/docs/fleet-ops/resources/drivers/shift-schedules
+module: fleet-ops
+---
+
+Drivers
+
+# Shift Schedules
+
+View and manage an individual driver's shift schedule — set working hours, recurring patterns, and availability windows.
+
+# Driver Shift Schedules
+
+Each driver can have a
+**shift schedule**
+that defines when they are available to work. Shift schedules appear in the Scheduler calendar and are used by the Orchestrator as time window constraints during order assignment.
+
+## Viewing a Driver's Schedule
+
+1. Navigate to
+   **Fleet-Ops → Resources → Drivers**
+2. Click a driver row to open their detail panel
+3. Click the
+   **Schedule**
+   tab
+
+The schedule tab shows:
+
+* Current shift entries for the driver
+* A weekly calendar view of their availability
+* Assigned orders for upcoming shifts
+
+![Driver schedule tab — weekly calendar with shift blocks and assigned order cards](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-driver-schedule.8fea6477.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Adding a Shift Entry
+
+In the driver's
+**Schedule**
+tab, click
+**+ Add Shift**
+.
+
+Set the
+**Day(s)**
+this shift applies to. You can select individual days or a range.
+
+Set the
+**Start Time**
+and
+**End Time**
+in the driver's local timezone.
+
+Optionally set a
+**Break Duration**
+(minutes) for the scheduled break within the shift.
+
+Set the
+**Recurrence**
+pattern:
+
+* **Weekly**
+  — repeats on the same days each week
+* **Specific Date**
+  — a one-off shift on a specific calendar date
+
+Click
+**Save**
+. The shift appears in the Scheduler calendar for this driver.
+
+## Editing and Deleting Shifts
+
+Click any shift entry in the schedule list or calendar to edit its times or recurrence. Click
+**Delete**
+to remove the shift entirely.
+
+Deleting a recurring shift removes all future occurrences. Past shift records are retained for audit purposes.
+
+## How Shifts Affect the Orchestrator
+
+When the Orchestrator runs, it reads the driver's shift schedule to determine their
+**time window**
+:
+
+* `time_window_start`
+  — the driver's shift start time
+* `time_window_end`
+  — the driver's shift end time
+
+The Orchestrator will not assign orders to this driver whose routes cannot be completed before
+`time_window_end`
+. Orders that cannot fit within any available driver's time window are returned to the unassigned pool with a
+`time_window_exceeded`
+flag.
+
+## Marking Unavailability
+
+For planned absences (vacation, sick leave, training), add an
+**Absence**
+entry rather than deleting the shift:
+
+1. Click
+   **+ Add Absence**
+   in the schedule tab
+2. Set the date range and absence type (Annual Leave, Sick Leave, Training, Other)
+3. Save
+
+The driver appears as unavailable in the Scheduler calendar for those dates and is excluded from Orchestrator runs during the absence period.
+
+## Bulk Schedule Management
+
+To manage shift schedules for multiple drivers at once, use the
+**Scheduler**
+calendar in
+**Operations → Scheduler**
+. The fleet-wide calendar view lets you edit shifts across all drivers from a single screen.
+
+See
+[Scheduler Overview](https://fleetbase.io/docs/fleet-ops/operations/scheduler/overview)
+for details.

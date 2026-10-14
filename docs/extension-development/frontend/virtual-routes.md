@@ -1,0 +1,211 @@
+---
+title: "Virtual Routes"
+url: https://fleetbase.io/docs/extension-development/frontend/virtual-routes
+module: extension-development
+---
+
+# Virtual Routes
+
+How Fleetbase resolves dynamically-registered URLs against menu-item registries to render extension components without hardcoded routes.
+
+# Virtual Routes
+
+Fleetbase ships with a fixed set of console routes —
+`/console`
+,
+`/console/settings`
+,
+`/console/admin`
+,
+`/console/account`
+, etc. Extensions can't add to that route table at runtime.
+**Virtual routes**
+are how extensions register pages anyway: a menu item declares a
+`slug`
+plus a component, and a built-in
+`virtual`
+route on the host renders that component when the URL matches.
+
+There is no
+`_virtual: true`
+flag. Virtual is a property of the
+*route*
+the menu item targets, not the menu item itself.
+
+## The Built-in Virtual Routes
+
+The console defines four virtual routes — one for each registry that supports virtual rendering:
+
+| Route | Registry | Used by |
+| --- | --- | --- |
+| `console.virtual` (path `/:section/:slug` ) | `'console'` | Custom top-level pages registered via `menuService.registerMenuItem('console', …)` |
+| `console.settings.virtual` (path `/:slug` ) | `'console:settings'` | Settings pages — `menuService.registerSettingsMenuItem(…)` |
+| `console.admin.virtual` (path `/:slug` ) | `'console:admin'` | Admin pages — `menuService.registerAdminMenuItem(…)` |
+| `console.account.virtual` (path `/:slug` ) | `'console:account'` | Account-scoped pages |
+
+Each one's
+`model`
+hook calls
+`menuService.lookupMenuItem(registry, slug, view)`
+, returning the registered
+`MenuItem`
+. The route's template renders
+`@model.component`
+inside the standard chrome:
+
+```
+{{!-- console/templates/console/settings/virtual.hbs --}}
+<Layout::Section::Header @title={{@model.title}} />
+<Layout::Section::Body>
+    <LazyEngineComponent
+        @component={{@model.component}}
+        @params={{@model.componentParams}}
+    />
+</Layout::Section::Body>
+```
+
+`LazyEngineComponent`
+is what crosses the engine boundary — it loads the component's owning engine on demand and renders it inline.
+
+## Registering a Virtual Page
+
+Pick the right registrar for the registry you want. The
+`slug`
+becomes the URL segment;
+`component`
+is the
+`ExtensionComponent`
+that gets rendered.
+
+```
+// addon/extension.js
+import { MenuItem, ExtensionComponent } from '@fleetbase/ember-core/contracts';
+
+export default {
+    setupExtension(app, universe) {
+        const menuService = universe.getService('menu');
+
+        // Adds /console/settings/my-extension that renders the engine component
+        menuService.registerSettingsMenuItem(
+            new MenuItem({
+                title: 'My Extension',
+                icon: 'gear',
+                slug: 'my-extension',
+                view: 'index',
+                component: new ExtensionComponent(
+                    '@my-org/my-extension-engine',
+                    'my-extension-settings'
+                ),
+            })
+        );
+    },
+};
+```
+
+When the user clicks the menu item — or visits
+`/console/settings/my-extension`
+directly — the host's
+`console.settings.virtual`
+route resolves the slug against the
+`'console:settings'`
+registry, finds your menu item, and renders its component.
+
+## How route Maps to the Virtual Route
+
+Each registrar already wires the menu item's
+`route`
+to the matching virtual route, so you usually don't set it yourself:
+
+| Registrar | Default route |
+| --- | --- |
+| `registerSettingsMenuItem` | `console.settings.virtual` |
+| `registerAdminMenuItem` | `console.admin.virtual` |
+| `registerOrganizationMenuItem` | `console.account.virtual` |
+| `registerMenuItem('console', …)` | `console.virtual` |
+
+You can override
+`route`
+on the menu item if your extension owns a real engine route and you want the menu item to navigate there instead — but then the slug is ignored and there's no virtual rendering. That's a regular link, not a virtual route.
+
+## Programmatic Transition
+
+If you handle
+`onClick`
+yourself, use
+`console.settings.virtual`
+with the slug:
+
+```
+new MenuItem({
+    title: 'My Extension',
+    slug: 'my-extension',
+    component: new ExtensionComponent('@my-org/my-extension-engine', 'my-extension-settings'),
+    onClick: (menuItem) => {
+        const router = app.lookup('service:router');
+        return router.transitionTo('console.settings.virtual', menuItem.slug);
+    },
+});
+```
+
+The
+`transitionMenuItem(route, menuItem)`
+helper on
+`UniverseService`
+does this with awareness of
+`section`
+,
+`slug`
+, and
+`view`
+query params:
+
+```
+universe.transitionMenuItem('console.settings.virtual', menuItem);
+```
+
+## Engine-Owned Virtual Routes
+
+Some engines also expose their own virtual route. Fleet-Ops does this for order details so other extensions can attach a tab there:
+
+```
+// packages/fleetops/addon/routes.js
+this.route('orders', { path: '/' }, function () {
+    this.route('details', { path: '/:public_id' }, function () {
+        this.route('virtual', { path: '/:slug' });
+    });
+});
+```
+
+Other extensions then register a menu item on
+`'fleet-ops:component:order:details'`
+with
+`route: 'operations.orders.index.details.virtual'`
+, and Fleet-Ops's order-details template hosts the same
+`<LazyEngineComponent>`
+pattern. See
+`ledger/addon/extension.js:92`
+for an example of registering an "Invoice" tab on the Fleet-Ops order details virtual route.
+
+## Why Virtual Routes Exist
+
+Ember's router is built at compile time — once the console is bundled, no extension can add a new route. Virtual routes turn that around: there's a single open-ended slot per registry, and extensions register
+*what should render*
+in that slot keyed by slug. The menu item is both the navigation entry and the route data.
+
+Net effect: extensions add new pages to the console without forking the router, and deep links work because the URL is real Ember-router state, not a synthetic redirect.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| [`console/app/routes/console/settings/virtual.js`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/console/app/routes/console/settings/virtual.js) | Settings virtual route |
+| [`console/app/routes/console/admin/virtual.js`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/console/app/routes/console/admin/virtual.js) | Admin virtual route |
+| [`console/app/templates/console/settings/virtual.hbs`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/console/app/templates/console/settings/virtual.hbs) | Renders `<LazyEngineComponent>` |
+| `addon/services/universe/menu-service.js` | `lookupMenuItem` , default routes per registrar |
+
+[Templates & Components
+
+Build engine templates and Glimmer components using @fleetbase/ember-ui — layout primitives, common widgets, and how to render extension components inside other engines.](https://fleetbase.io/docs/extension-development/frontend/templates-and-components)
+[Service Provider
+
+The Laravel service provider is the entry point for your extension's backend. It loads routes, migrations, observers, expansions, middleware, and binds services into the container.](https://fleetbase.io/docs/extension-development/backend/service-provider)

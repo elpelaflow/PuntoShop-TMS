@@ -1,0 +1,147 @@
+---
+title: "Maintenance Schedules"
+url: https://fleetbase.io/docs/fleet-ops/maintenance/schedules/overview
+module: fleet-ops
+---
+
+Schedules
+
+# Maintenance Schedules
+
+Set up preventive maintenance rules for vehicles and equipment — trigger work orders automatically by mileage, engine hours, or calendar interval.
+
+# Maintenance Schedules
+
+**Maintenance Schedules**
+are preventive maintenance rules that monitor vehicles and equipment and automatically generate work orders when service is due. Each schedule defines a target (vehicle or equipment), an interval method, and thresholds — Fleet-Ops tracks usage and fires work orders when the threshold is reached.
+
+![Maintenance schedules list — vehicle, schedule name, interval type, next due date, status](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-maintenance-schedules-list.8d17a25a.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Schedule Attributes
+
+| Field | Description |
+| --- | --- |
+| **Name** | Description of the maintenance task (e.g., "Oil Change", "Brake Inspection") |
+| **Target** | The vehicle or equipment being maintained |
+| **Interval Method** | How the service interval is measured |
+| **Interval Type** | The specific trigger type within the method |
+| **Interval Value** | The threshold amount (e.g., 10,000 km, 90 days) |
+| **Last Service Date** | Date of the most recent service |
+| **Last Service Odometer** | Odometer reading at last service |
+| **Last Service Engine Hours** | Engine hours at last service |
+| **Next Due Date** | Calculated next service date |
+| **Next Due Odometer** | Calculated next odometer trigger |
+| **Default Priority** | Priority for auto-generated work orders |
+| **Default Assignee** | Who work orders are automatically assigned to |
+| **Instructions** | Specific instructions for the service task |
+| **Reminder Offsets** | Advance warning periods (e.g., 7 days before due) |
+| **Status** | active, paused, completed |
+
+## Interval Methods
+
+| Method | Triggers when |
+| --- | --- |
+| **Time-based** | A calendar interval elapses (e.g., every 90 days) |
+| **Mileage-based** | The odometer exceeds a threshold (e.g., every 10,000 km) |
+| **Engine Hours-based** | Engine hours exceed a threshold (e.g., every 250 hours) |
+| **Hybrid** | A combination of the above — triggers on whichever comes first |
+
+## Creating a Maintenance Schedule
+
+Navigate to
+**Fleet-Ops → Maintenance → Schedules**
+.
+
+Click
+**+ New Schedule**
+.
+
+Select the
+**Target**
+— a Vehicle or Equipment record.
+
+Enter a
+**Name**
+for the maintenance task.
+
+Select the
+**Interval Method**
+and set the
+**Interval Value**
+(e.g., 10,000 km or 90 days).
+
+Enter the
+**Last Service Date**
+and odometer/engine hours at last service. Fleet-Ops uses these to calculate the next due date immediately.
+
+Set the
+**Default Priority**
+and
+**Default Assignee**
+for auto-generated work orders.
+
+Add
+**Reminder Offsets**
+— e.g., send a reminder 7 days and 1 day before the due date.
+
+Add any
+**Instructions**
+the mechanic needs for this task.
+
+Click
+**Save**
+. Fleet-Ops starts monitoring the vehicle and will trigger a work order when the threshold is reached.
+
+## Automatic Work Order Generation
+
+When a schedule's threshold is reached:
+
+1. Fleet-Ops creates a
+   **Work Order**
+   automatically with the schedule's default priority and assignee
+2. The work order appears in
+   **Maintenance → Work Orders**
+   marked as open
+3. The designated assignee receives a notification
+4. The vehicle's status can be automatically set to
+   `maintenance`
+   (configurable)
+
+## Calendar Feed and iCal Export
+
+Maintenance schedules can be exported to a calendar:
+
+* **iCal Export**
+  — download an
+  `.ics`
+  file of all scheduled maintenance dates
+* **Calendar Feed URL**
+  — subscribe from Google Calendar, Outlook, or any calendar app using the feed URL
+
+This lets fleet managers track upcoming maintenance alongside other operations calendars.
+
+## Pausing and Resuming Schedules
+
+If a vehicle is taken out of service or sold:
+
+1. Open the schedule and click
+   **Pause**
+   — the schedule stops monitoring but is not deleted
+2. Click
+   **Resume**
+   when the vehicle returns to service
+
+Paused schedules do not generate work orders. The next due date is recalculated from the resume date.
+
+## Attaching Schedules to Vehicles
+
+Maintenance schedules can also be created directly from the vehicle record:
+
+1. Open
+   **Fleet-Ops → Resources → Vehicles → [Vehicle]**
+2. Click the
+   **Schedules**
+   tab
+3. Click
+   **+ Add Schedule**
+   — same form as above, with the vehicle pre-filled

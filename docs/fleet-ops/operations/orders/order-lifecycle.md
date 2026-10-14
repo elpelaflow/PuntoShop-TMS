@@ -1,0 +1,186 @@
+---
+title: "Order Lifecycle"
+url: https://fleetbase.io/docs/fleet-ops/operations/orders/order-lifecycle
+module: fleet-ops
+---
+
+Orders
+
+# Order Lifecycle
+
+Understand the system statuses every order moves through, how the activity flow runs inside the started phase, and how an order is completed.
+
+# Order Lifecycle
+
+Every order in Fleet-Ops moves through a small set of
+**system statuses**
+that drive dispatch, billing, reporting, and webhook events. Inside those statuses — particularly between
+`started`
+and the order's completion — the
+**activity flow**
+defined on the Order Configuration runs the detailed steps the driver moves through. The system-status backbone is the same for every order; the activity flow is what makes one order type different from another.
+
+## System Statuses
+
+| Status | Always present? | Meaning |
+| --- | --- | --- |
+| `created` | Yes | The order has been created and is awaiting dispatch |
+| `dispatched` | Yes | The order has been sent to a driver |
+| `started` | Yes | The driver has accepted and is working the order |
+| `canceled` | Yes | The order was cancelled before completion |
+| `completed` | Configurable | The order has been delivered |
+
+The first four are
+**static**
+— they exist on every order and cannot be removed. The
+`completed`
+status is configurable: any custom activity in the order's activity flow with its
+`complete`
+flag set to
+`true`
+will end the order. The default Order Configuration ships with a generic
+*Completed*
+activity, but a courier flow might use
+*Items Handed Over*
+, a service flow might use
+*Job Signed Off*
+, and so on. Whichever activity carries the flag is the one that completes the order.
+
+## Status Flow
+
+```
+created ──► dispatched ──► started ──► completed
+                                  │
+                            canceled (terminal at any point)
+```
+
+### Created
+
+A new order starts in
+**`created`**
+the moment it is saved. Created orders are visible in the operations console and in the Orchestrator's order pool, available for manual or automated assignment.
+
+### Dispatched
+
+When the order is sent to a driver — either by clicking
+**Dispatch**
+on the order, or as the result of an Orchestrator phase that auto-dispatches — the status moves to
+**`dispatched`**
+. The driver receives a push notification in the Navigator app and the order appears in their active job list.
+
+### Started
+
+When the driver accepts and begins working the order in Navigator, the status moves to
+**`started`**
+. From this point onward the driver's GPS position streams live to the console, geofence events fire as they arrive at and depart pickup/dropoff locations, and the
+**activity flow**
+(defined by the order's Order Configuration) begins running. Each activity step the driver completes is captured with a timestamp, the driver's location, and any required proof.
+
+### Completed
+
+The order is marked
+**`completed`**
+when the activity flow reaches an activity whose
+`complete`
+flag is set to
+`true`
+. That activity is whatever the Order Configuration defines —
+*Items Delivered*
+,
+*Signature Captured*
+,
+*Job Closed*
+, etc. Completion fires:
+
+* A webhook (
+  `order.completed`
+  )
+* Customer notifications, if configured
+* A final tracking-status entry with the driver's location
+
+### Canceled
+
+An order can move to
+**`canceled`**
+at any point before completion. Cancellation reasons can be recorded; canceled orders remain in the system for reporting and audit.
+
+## Activity Flow vs. System Status
+
+The system status (
+`created`
+,
+`dispatched`
+,
+`started`
+,
+`completed`
+,
+`canceled`
+) is the high-level lifecycle stage visible everywhere in the console and API. It's how Fleet-Ops decides
+*what stage of life*
+the order is in.
+
+![Update Order Activity dialog — the next activity the order's flow allows from its current step, or a custom activity with its own status, code, and details](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-order-update-activity.e5f53941.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+The
+**activity flow**
+, defined on the Order Configuration, is what runs
+*inside*
+the lifecycle — most importantly between
+`started`
+and the activity that completes the order. A simple courier flow might be:
+
+1. *Driver at pickup*
+2. *Items picked up*
+3. *In transit*
+4. *Arrived at dropoff*
+5. *Items delivered*
+   ←
+   `complete: true`
+   ends the order
+
+Each activity has its own conditions (when it can fire), events (what happens when it does), and an optional
+`complete`
+flag. Different order types can have completely different activity flows while still sharing the same five system statuses.
+
+See
+[Activity Flows](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows)
+for how to design and edit them.
+
+## Waypoint Lifecycle
+
+Multi-stop orders give each waypoint its own sub-lifecycle. The order's completion activity only fires once all waypoints have been visited and their required POD captured.
+
+Each waypoint can have:
+
+* Its own POD method (signature, photo, barcode, custom)
+* A time window (earliest and latest arrival)
+* A service-time estimate (how long the driver is expected to spend at the stop)
+
+## Webhook Events
+
+Each system-status transition fires a corresponding webhook event:
+
+| Status | Event |
+| --- | --- |
+| Driver assigned | `order.driver_assigned` |
+| `dispatched` | `order.dispatched` |
+| `started` | `order.started` |
+| `completed` | `order.completed` |
+| `canceled` | `order.canceled` |
+
+Activity-level changes also broadcast —
+`order.activity_changed`
+,
+`waypoint.activity_changed`
+,
+`entity.activity_changed`
+, plus
+`waypoint.completed`
+and
+`entity.completed`
+— so integrations can subscribe to fine-grained progress, not just the system-status transitions.
+
+See
+[Webhooks](https://fleetbase.io/docs/platform/developer-console/webhooks)
+for subscription details.

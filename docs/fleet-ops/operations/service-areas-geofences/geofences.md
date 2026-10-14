@@ -1,0 +1,198 @@
+---
+title: "Geofences"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/geofences
+module: fleet-ops
+---
+
+Service Areas & Geofences
+
+# Geofences
+
+How service areas and zones become live geofences — entry, exit, dwell, and speed-limit events, the detection engine, and the reports that surface them.
+
+# Geofences
+
+A
+**geofence**
+in Fleet-Ops is any
+[Service Area](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/service-areas)
+or
+[Zone](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/zones)
+that has at least one trigger enabled. Geofences detect when a driver or vehicle crosses a boundary and emit events that downstream features react to: auto-arrival, dwell-time SLAs, restricted-area alerts, and speed-limit reporting.
+
+Geofences are
+**not a separate object**
+in Fleet-Ops — they're the operational behavior of service areas and zones. Toggle the trigger fields and you have a geofence; clear them and the same polygon still defines pricing scope but doesn't emit events.
+
+## Triggers
+
+Every service area and zone exposes the same four trigger fields:
+
+| Field | Type | What it does |
+| --- | --- | --- |
+| `trigger_on_entry` | bool | Emit an `entered` event the first tick a subject is inside the boundary after being outside. |
+| `trigger_on_exit` | bool | Emit an `exited` event the first tick a subject is outside the boundary after being inside. |
+| `dwell_threshold_minutes` | integer | Schedule a `dwelled` event N minutes after entry, only if the subject has remained inside continuously. |
+| `speed_limit_kmh` | integer | Recorded for the boundary. Combined with vehicle telematics to flag speed-limit violations inside it. |
+
+Entry / exit / dwell are evaluated on every driver and vehicle location update. Speed-limit violation evaluation is driven by the telematics integration when speed data is reported.
+
+## How Detection Works
+
+Geofence detection lives in
+`GeofenceIntersectionService`
+(
+`server/src/Support/GeofenceIntersectionService.php`
+). On every location update for a driver or vehicle:
+
+**Bounding-box prefilter.**
+A
+`MBRContains`
+query uses the MySQL spatial index to quickly narrow the candidate set of zones and service areas whose minimum bounding rectangle contains the new point. This is fast — milliseconds — even with thousands of geofences per company.
+
+**Precise containment check.**
+For each candidate, a
+`ST_Contains`
+query runs over the actual polygon to confirm or reject the point. This is the authoritative containment test.
+
+**State comparison.**
+The result is compared against the subject's last-known state in
+`driver_geofence_states`
+/
+`vehicle_geofence_states`
+(per-geofence rows tracking
+`is_inside`
+,
+`entered_at`
+,
+`dwell_job_id`
+).
+
+**Emit transitions.**
+Each detected transition writes a row to
+`geofence_events_log`
+with
+`event_type`
+(
+`entered`
+,
+`exited`
+, or
+`dwelled`
+), the subject UUID, the geofence UUID, and
+`geofence_type`
+(
+`zone`
+or
+`service_area`
+).
+
+**Dispatch events.**
+Laravel events fire (e.g.
+`DriverArrivedAtGeofence`
+), so webhooks, notifications, and automations can react.
+
+Because the prefilter uses the spatial index and the precise check only runs on the narrowed set, this scales well — adding more geofences increases candidate evaluation linearly, but spatial-index lookups stay sublinear.
+
+## Dwell Detection
+
+Dwell is implemented as a deferred job, not as a per-tick check:
+
+1. On
+   `entered`
+   , a queued job is scheduled to run after
+   `dwell_threshold_minutes`
+   .
+2. The job's UUID is stored on the state row as
+   `dwell_job_id`
+   .
+3. When the job fires, it confirms the subject is still inside before emitting the
+   `dwelled`
+   event.
+4. If the subject exits before the threshold elapses, the
+   `exited`
+   handler cancels the pending dwell job.
+
+This means a
+`dwell_threshold_minutes`
+change applies to
+*new*
+entries after the change — already-in-flight dwell jobs use whatever threshold was active when the entry happened. To re-evaluate existing entries with the new threshold, exit and re-enter the geofence.
+
+## Events Emitted
+
+| Event | Fires when |
+| --- | --- |
+| `DriverArrivedAtGeofence` | A driver enters a geofence with `trigger_on_entry = true` . |
+| `DriverLeftGeofence` | A driver exits a geofence with `trigger_on_exit = true` . |
+| `DriverDwelledAtGeofence` | A driver has remained inside for `dwell_threshold_minutes` . |
+| `VehicleEntered/Left/DwelledAtGeofence` | Same set, but for vehicles when vehicle telematics are wired up. |
+
+Subscribe via webhooks (
+**Console → Developers → Webhooks**
+) or via Laravel event listeners in a server-side extension. The webhook payload includes the geofence UUID, public ID, name, type discriminator (
+`zone`
+or
+`service_area`
+), and the subject's location at the time of the event.
+
+## Common Use Cases
+
+| Use case | Configuration |
+| --- | --- |
+| **Auto-arrival at pickup / dropoff** | Set a small zone (a few hundred meters) around each known facility with `trigger_on_entry = true` . Wire `DriverArrivedAtGeofence` to advance the order's activity flow automatically. |
+| **Restricted-area alerts** | Mark sensitive areas (no-fly zones, customer-prohibited yards) as geofences with `trigger_on_entry = true` and route the event to an alert channel. |
+| **Dwell-time SLA** | For pickup points where drivers should be in and out fast, set `dwell_threshold_minutes` to the SLA. The `dwelled` event becomes a dispatcher escalation signal. |
+| **Speed-limit reporting** | Set `speed_limit_kmh` on areas with known limits (school zones, depots). The Violations report aggregates breaches over time. |
+| **Service-area billing reconciliation** | Use entry/exit events to confirm a delivery actually crossed into the billed service area, in case of after-the-fact disputes. |
+
+## Reporting
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /geofence-events` | Raw event history. Filter by subject, geofence, type, date range. |
+| `GET /dwell-report` | Aggregated dwell durations per geofence per subject, for SLA analytics. |
+| `GET /geofence-violations` | Aggregated speed-limit and restricted-area violations, surfaced by the **Violations** dashboard widget. |
+
+All three power the geofence widgets on the Fleet-Ops
+**Analytics → Reports**
+dashboards.
+
+## Configuration Workflow
+
+In the console, geofence triggers are part of the service-area / zone edit modal — there is no separate "Geofences" page in the UI. To turn an existing polygon into a geofence, go to
+**Fleet-Ops → Dashboard → Map**
+tab and:
+
+1. Right-click the service-area or zone polygon on the map (or open the map toolbar's service-areas panel and pick the area from the list).
+2. Choose
+   **Edit**
+   from the contextual menu.
+3. In the
+   **Geofence Triggers**
+   section of the modal, toggle entry / exit and set the dwell or speed-limit value.
+4. Save. Subsequent location updates immediately respect the new configuration — there's no separate deploy step.
+
+To remove a geofence, clear the trigger fields. The polygon stays in place for pricing and visualization, but no new events fire.
+
+## Permissions
+
+Geofence configuration follows standard Fleet-Ops role-based access:
+
+* **Manage service areas / zones**
+  to edit trigger fields (typically operations admin role).
+* **View geofence events**
+  to access the events and violations reports.
+
+See
+[Identity & Access](https://fleetbase.io/docs/identity-access/overview)
+for how to assign these permissions.
+
+## See Also
+
+* [Service Areas](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/service-areas)
+  — the larger polygons most geofences are built on.
+* [Zones](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/zones)
+  — finer-grained polygons for tight geofences.
+* [Service Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  — pricing scoped to the same polygons.

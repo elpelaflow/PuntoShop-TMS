@@ -1,0 +1,788 @@
+---
+title: "Ember Services"
+url: https://fleetbase.io/docs/extension-development/reference/ember-services
+module: extension-development
+---
+
+# Ember Services
+
+Reference for the host services your extension consumes — fetch, store, current-user, session, abilities, intl, notifications, socket, crud, chat, theme, modalsManager, events, app-cache, language, hostRouter, and more.
+
+# Ember Services
+
+Your engine inherits a tree of Ember services from
+`@fleetbase/ember-core/exports`
+. Each is built on Ember's
+[Service](https://api.emberjs.com/ember/release/classes/Service)
+base class and is injectable via Ember's
+[@service](https://api.emberjs.com/ember/release/classes/Service/methods/inject?anchor=inject)
+decorator from any route, controller, component, or service in your engine:
+
+```
+import { inject as service } from '@ember/service';
+
+export default class extends Component {
+    @service fetch;
+    @service notifications;
+    @service currentUser;
+}
+```
+
+This page is the canonical reference. For the back-end side of the platform, see
+[API Services](https://fleetbase.io/docs/extension-development/reference/api-services)
+.
+
+## fetch
+
+The authenticated HTTP client. Wraps the browser's
+[Fetch API](https://guides.emberjs.com/release/services)
+and automatically attaches the session token, the active organization header, the API namespace, and JSON content negotiation.
+
+### Methods
+
+| Method | Returns |
+| --- | --- |
+| `get(path, query?, options?)` | Promise — GET request, query serialized into URL |
+| `post(path, data?, options?)` | Promise — POST with JSON body |
+| `put(path, data?, options?)` | Promise |
+| `patch(path, data?, options?)` | Promise |
+| `delete(path, data?, options?)` | Promise |
+| `request(path, method, data?, options?)` | Lower-level — promise from any verb |
+| `upload(path, files[], options?)` | Multipart upload — returns the uploaded `file` records |
+| `download(path, query?, options?)` | Triggers a file download with the right MIME handling |
+| `cachedGet(path, query?, options?)` | GET, reads from local cache when fresh |
+| `flushRequestCache(path)` | Invalidate the cache for `path` |
+| `setNamespace(ns)` / `setHost(h)` | Mutate defaults for subsequent requests |
+
+### Targeting Your Extension's API — the namespace Option
+
+Every extension exposes its API under a prefix, declared in the routes file via
+`Route::prefix(...)`
+. By default
+`fetch`
+uses the
+**console's**
+namespace (
+`int/v1`
+), so calling
+`fetch.get('widgets')`
+hits the console API, not yours.
+
+Pass
+`options.namespace`
+to redirect a single call to your own API:
+
+```
+// Hits /my-extension/widgets, not /int/v1/widgets
+this.fetch.get('widgets', {}, { namespace: 'my-extension' });
+
+// With versioning
+this.fetch.post('widgets', { name: 'New' }, { namespace: 'my-extension/v1' });
+```
+
+If most calls in a controller hit the same API, set the namespace once on a wrapper service or service initializer rather than passing the option per-call:
+
+```
+// addon/services/my-extension-api.js
+import Service, { inject as service } from '@ember/service';
+
+export default class MyExtensionApi extends Service {
+    @service fetch;
+
+    namespace = 'my-extension/v1';
+
+    get(path, query) {
+        return this.fetch.get(path, query, { namespace: this.namespace });
+    }
+
+    post(path, data) {
+        return this.fetch.post(path, data, { namespace: this.namespace });
+    }
+    // …etc
+}
+```
+
+See the
+[Calling Your Extension's API](https://fleetbase.io/docs/extension-development/recipes/calling-your-extension-api)
+recipe for the full pattern.
+
+### Common Options
+
+| Option | Description |
+| --- | --- |
+| `namespace` | API path prefix to target (e.g. `'my-extension/v1'` ) |
+| `host` | Override the API host (rare — usually only for cross-region testing) |
+| `externalRequest: true` | Treat `path` as an absolute URL, skip host/namespace prefixing |
+| `fromCache: true` | Use the local cache (delegates to `cachedGet` ) |
+| `normalizeToEmberData: true` | Push response into the store before resolving |
+| `onSuccess(response)` / `onError(error)` | Per-call callbacks |
+| `rawError: true` | Resolve with the raw `Error` instead of `errors[0]` |
+
+### Source
+
+`addon/services/fetch.js`
+
+---
+
+## store
+
+Standard
+[Ember Data Store](https://api.emberjs.com/ember-data/release/modules/@ember-data%2Fstore)
+, pre-configured to talk to the Fleetbase API. Use it for resources you've defined as Ember Data models in your engine.
+
+```
+this.store.findRecord('widget', '123');
+this.store.query('widget', { status: 'active' });
+this.store.createRecord('widget', { name: 'New Widget' }).save();
+```
+
+The application adapter (
+`addon/adapters/application.js`
+) handles auth + the API base URL. To point models at your extension's API, extend it with your namespace:
+
+```
+// addon/adapters/my-extension.js
+import ApplicationAdapter from '@fleetbase/ember-core/adapters/application';
+
+export default class extends ApplicationAdapter {
+    namespace = 'my-extension/int/v1';
+}
+```
+
+See
+[Connecting Models to Your Extension API](https://fleetbase.io/docs/extension-development/recipes/connecting-models-to-your-api)
+for the full per-model setup.
+
+---
+
+## current-user
+
+Tracked properties for the logged-in user, their active company, and a snapshot of their permissions. Backed by the
+`users/me`
+API endpoint, cached for the session.
+
+### Properties
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `id` | string | User UUID |
+| `name` , `email` , `phone` | string | Profile fields |
+| `avatarUrl` | string | Avatar URL |
+| `isAdmin` | boolean | Is platform admin |
+| `companyId` , `companyName` | string | Active org |
+| `permissions` | array | Permission keys ( `'fleet-ops view order'` , etc.) |
+| `organizations` | array | All org memberships |
+| `locale` | string | Active locale ( `'en-us'` , `'fr-fr'` , …) |
+| `user` | model | The full Ember Data record |
+| `userSnapshot` | object | Plain object — usable in templates without async |
+
+### Common Patterns
+
+```
+// Permission gating
+if (this.currentUser.permissions.includes('my-extension view widget')) { … }
+
+// Organization-scoped fetch
+this.fetch.get(`my-extension/widgets?company_id=${this.currentUser.companyId}`);
+
+// React to user changes
+this.events.subscribe('user:changed', () => { /* refresh local state */ });
+```
+
+### Source
+
+`addon/services/current-user.js`
+
+---
+
+## session
+
+Standard
+`ember-simple-auth`
+session. The Fleetbase authenticator stores the bearer token and user UUID under
+`session.data.authenticated`
+.
+
+```
+this.session.isAuthenticated;          // boolean
+this.session.data.authenticated;       // { token, user, type, … }
+this.session.data.authenticated.type;  // 'user' | 'customer' | 'driver'
+
+await this.session.invalidate();       // log out
+await this.session.authenticate('authenticator:fleetbase', { email, password });
+this.session.requireAuthentication(transition, 'auth.login');
+```
+
+### Source
+
+`addon/services/session.js`
++ ember-simple-auth's
+[SessionService](https://api.emberjs.com/ember/release/classes/SessionService)
+.
+
+---
+
+## abilities
+
+Permission gating built on
+[ember-can](https://github.com/minutebase/ember-can#readme)
+. Permission strings always follow the format
+**`{extension} {action} {resource}`**
+— extension slug + verb + singular resource:
+
+```
+if (this.abilities.can('fleet-ops view order')) { … }
+if (this.abilities.cannot('ledger delete invoice')) { … }
+```
+
+From templates:
+
+```
+{{#if (can "fleet-ops view order")}}
+    …
+{{/if}}
+```
+
+Examples of well-formed permission keys:
+
+| Permission | Meaning |
+| --- | --- |
+| `'fleet-ops view order'` | Read orders in Fleet-Ops |
+| `'ledger update invoice'` | Edit invoices in Ledger |
+| `'my-extension delete widget'` | Delete widgets in your extension |
+
+The keys map to
+`currentUser.permissions`
+, populated from the user's role assignments on the backend.
+
+---
+
+## intl
+
+`ember-intl`
+for translations. Drop locale files under
+`addon/translations/`
+(e.g.
+`en-us.yaml`
+) and they're auto-loaded.
+
+```
+this.intl.t('my-extension.widgets.created');
+```
+
+```
+{{t "my-extension.widgets.created"}}
+{{t "my-extension.widgets.created-by-name" name=user.name}}
+```
+
+Pair with the
+`language`
+service below to switch the active locale.
+
+---
+
+## notifications
+
+Toast notifications, plus a Fleetbase-specific
+`serverError`
+helper. Built on
+`ember-cli-notifications`
+.
+
+```
+this.notifications.success('Saved!');
+this.notifications.error('Could not save');
+this.notifications.info('Heads up.');
+this.notifications.warning('Are you sure?');
+this.notifications.clearAll();
+
+// Unpacks { errors: [] } payloads, native Errors, or plain strings
+try { … } catch (err) {
+    this.notifications.serverError(err, 'Default message if no errors[]');
+}
+
+// Programmatic dispatch by type
+this.notifications.invoke('success', 'Saved');
+```
+
+### Options
+
+```
+this.notifications.success('Saved', {
+    autoClear: true,
+    clearDuration: 3000,
+    cssClasses: 'my-toast',
+});
+```
+
+`serverError`
+unpacks
+`{ errors: ['msg', …] }`
+payloads, native
+`Error`
+instances, and string messages — use it for any backend-call catch block.
+
+### Source
+
+`addon/services/notifications.js`
+
+---
+
+## socket
+
+WebSocket client (SocketCluster) for real-time pub/sub. Channel names are arbitrary — Fleetbase uses
+`company.{uuid}`
+,
+`user.{uuid}`
+, and
+`api-credential.{uuid}`
+for the standard event streams.
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `instance()` | Returns the underlying SocketCluster client |
+| `listen(channelId, callback)` | Subscribe to a channel; `callback(event)` fires per event |
+| `closeChannels()` | Close all channels owned by this service instance |
+
+### Example
+
+```
+import { inject as service } from '@ember/service';
+
+export default class ActivityFeed extends Component {
+    @service socket;
+    @service currentUser;
+
+    constructor() {
+        super(...arguments);
+        this.socket.listen(`company.${this.currentUser.companyId}`, (event) => {
+            if (event.type === 'my-extension.widget.created') {
+                this.handleNewWidget(event.data);
+            }
+        });
+    }
+
+    willDestroy() {
+        super.willDestroy(...arguments);
+        this.socket.closeChannels();
+    }
+}
+```
+
+The platform broadcasts model lifecycle events on the company channel; backend code dispatches them via the
+[SocketCluster integration in
+`core-api`](https://fleetbase.io/docs/extension-development/reference/api-services#socketcluster-broadcasting)
+.
+
+### Source
+
+`addon/services/socket.js`
+— see also
+[SocketCluster client docs](https://socketcluster.io/docs)
+.
+
+---
+
+## crud
+
+Modal-driven helpers for the standard create/update/delete/import/export operations on Ember Data records. Wraps
+`modalsManager`
++
+`notifications`
++
+`events`
+so you don't repeat the same
+`confirm()`
++
+`try/catch`
++ toast dance per resource.
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `delete(record, options?)` | Confirm-and-delete one record |
+| `bulkDelete(selected[], options?)` | Confirm-and-delete an array of records |
+| `bulkAction(verb, selected[], options?)` | Generic confirm-and-bulk-do for any verb |
+| `export(modelName, options?)` | Open the export modal (CSV/XLSX) |
+| `import(modelName, options?)` | Open the import modal with a queue |
+
+### Example
+
+```
+@service crud;
+
+@action removeWidget(widget) {
+    this.crud.delete(widget, {
+        title: `Delete ${widget.name}?`,
+        onSuccess: () => this.refreshList(),
+        onError: (err) => console.error(err),
+    });
+}
+
+@action removeAllSelected() {
+    this.crud.bulkDelete(this.selected, {
+        modelName: 'widget',
+        onSuccess: () => this.clearSelection(),
+    });
+}
+```
+
+### Options
+
+| Option | Description |
+| --- | --- |
+| `title` , `body` , `acceptButtonText` | Modal copy |
+| `successNotification` | Success toast text |
+| `modelName` | Override the auto-derived model name |
+| `onTrigger` , `onSuccess` , `onError` , `callback` | Lifecycle callbacks |
+
+### Source
+
+`addon/services/crud.js`
+
+---
+
+## chat
+
+Real-time chat client backed by the platform's
+`chat-channel`
+and
+`chat-message`
+models. Used by the in-app chat tray and customer-driver messaging.
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `openChannel(channelRecord)` | Open a channel into the active chats list |
+| `closeChannel(channelRecord)` | Close it |
+| `getOpenChannels()` | Currently-open channels |
+| `createChatChannel(name)` | Create a new channel |
+| `deleteChatChannel(channelRecord)` | Delete a channel |
+| `rememberOpenedChannel(channelRecord)` / `forgetOpenedChannel(...)` / `restoreOpenedChats()` | Persist the open-channel set across sessions |
+
+Chat events stream through the
+`socket`
+service on the channel ID — listen on
+`chat.{channel_uuid}`
+for messages.
+
+### Source
+
+`addon/services/chat.js`
+
+---
+
+## theme
+
+Light/dark mode + body-class management. Engines call
+`setRoutebodyClassNames`
+from their application route to namespace the
+`<body>`
+for engine-specific CSS.
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `set activeTheme(name)` | Switch to a registered theme ( `'light'` , `'dark'` ) |
+| `toggleTheme()` | Flip light/dark |
+| `setRoutebodyClassNames(classes[])` | Apply classes to `<body>` while this route is active |
+| `removeConsoleLoader()` | Hide the boot-time loader (if your route owns the lifecycle) |
+| `resetScroll()` | Scroll to top |
+| `setEnvironment()` | Apply environment classes (development/sandbox indicators) |
+
+### Pattern
+
+```
+// addon/routes/application.js
+import Route from '@ember/routing/route';
+import { inject as service } from '@ember/service';
+
+export default class ApplicationRoute extends Route {
+    @service theme;
+
+    activate() {
+        this.theme.setRoutebodyClassNames(['my-extension', 'sidebar-collapsed']);
+    }
+}
+```
+
+### Source
+
+`addon/services/theme.js`
+
+---
+
+## modalsManager
+
+Imperative modal API. For declarative modals, prefer
+`<Modal>`
+from
+`ember-ui`
+.
+
+```
+this.modalsManager.confirm({
+    title: 'Delete Widget',
+    body: 'This cannot be undone.',
+    confirm: async (modal) => {
+        await widget.destroyRecord();
+        modal.done();
+    },
+});
+```
+
+---
+
+## events
+
+App-wide event bus. Sibling to the
+[hook service](https://fleetbase.io/docs/extension-development/universe/hook-service)
+but for live, in-process events instead of lifecycle hooks.
+
+```
+this.events.publish('my-extension:thing-changed', payload);
+this.events.subscribe('my-extension:thing-changed', (payload) => { … });
+```
+
+---
+
+## app-cache
+
+Browser-storage-backed cache for cross-session preferences (collapsed panels, recently-used filters, last-selected tab, etc.). Keys are automatically scoped to
+`${userId}:${companyId}:`
+so caches don't leak between users or organizations.
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `set(key, value)` | Store a value (auto-serialized) |
+| `get(key, defaultValue?)` | Retrieve, with fallback |
+| `has(key)` / `doesntHave(key)` | Existence checks (single key or array) |
+| `setEmberData(key, record, except?)` | Cache an Ember Data record |
+| `getEmberData(key, modelName)` | Restore a cached record into the store |
+
+### Example
+
+```
+@service appCache;
+
+setLastTab(tab) {
+    this.appCache.set('my-extension:last-tab', tab);
+}
+
+get lastTab() {
+    return this.appCache.get('my-extension:last-tab', 'overview');
+}
+```
+
+Use a colon-prefixed namespace on your cache keys to avoid collisions with core caches.
+
+### Source
+
+`addon/services/app-cache.js`
+
+---
+
+## language
+
+i18n locale management. Locales are loaded from
+`addon/translations/`
+(e.g.
+`en-us.yaml`
+) by
+`ember-intl`
+and selectable per user.
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `setLocale(localeCode)` | Switch the active locale (also persists to user profile) |
+| `getLanguage(name, options?)` | Look up a known language by name |
+| `hasLanguage(name, options?)` | Check whether a language is registered |
+| `availableLocales` | Object — supported locales |
+
+### Pattern
+
+```
+@service language;
+@service intl;
+
+await this.language.setLocale('fr-fr');
+this.intl.t('my-extension.widget.created'); // now resolves from fr-fr.yaml
+```
+
+For most translation work, use the
+`intl`
+service directly —
+`language`
+is for switching the active locale.
+
+### Source
+
+`addon/services/language.js`
+
+---
+
+## resource-action
+
+The base service the platform extends for
+**per-model action services**
+— Fleet-Ops's
+`OrderActions`
+, Ledger's
+`InvoiceActions`
+, etc. It pre-wires the standard CRUD verbs against
+`crud`
+,
+`notifications`
+,
+`intl`
+, and the table/context panel system, so per-resource services just declare a
+`modelName`
+and override action hooks as needed.
+
+### Pattern
+
+```
+// addon/services/widget-actions.js
+import ResourceActionService from '@fleetbase/ember-core/services/resource-action';
+
+export default class WidgetActions extends ResourceActionService {
+    modelName = 'widget';
+    modelNamePath = 'name';
+
+    fetchOptions = { namespace: 'my-extension/v1' };
+
+    onAfterCreate(widget) {
+        this.notifications.success(`Widget ${widget.name} created`);
+    }
+}
+```
+
+### Pre-wired Actions
+
+| Action | What it does |
+| --- | --- |
+| `create(attributes?, options?)` | Create + show in resource-context panel |
+| `update(record, options?)` | Save with conflict handling |
+| `delete(record, options?, deleteOptions?)` | Delegates to `crud.delete` |
+| `bulkDelete(selected[], options?)` | Delegates to `crud.bulkDelete` |
+| `export(selections[], options?)` | Delegates to `crud.export` |
+| `import(options?)` | Delegates to `crud.import` |
+| `search(query, options?)` | Server-side search returning records |
+| `refresh()` | Re-run the active table query |
+| `transitionTo(routeName, …args)` | Delegates to host router |
+| `confirmContinueWithUnsavedChanges(model, options?)` | Standard "you have unsaved changes" modal |
+
+### Source
+
+`addon/services/resource-action.js`
+
+---
+
+## loader
+
+Loading overlay primitive used during long-running operations (imports, exports, bulk actions).
+
+```
+this.loader.show({ loadingMessage: 'Importing…' });
+this.loader.hide();
+```
+
+---
+
+## urlSearchParams
+
+Read and mutate query params on the current URL without going through the router.
+
+```
+this.urlSearchParams.all();
+this.urlSearchParams.get('view');
+this.urlSearchParams.set('view', 'details');
+this.urlSearchParams.setParamsToCurrentUrl({ view: 'details', id: '123' });
+```
+
+---
+
+## filters
+
+Used by Fleet-Ops, Ledger, etc. for the standard filter UI on resource list pages. Build a filter spec and the service produces matching query params — useful when you're rendering your own filter UI but want the same query-param layout the platform already understands.
+
+---
+
+## hostRouter
+
+Engine routes use the engine-local
+`router`
+. To navigate to host routes (
+`console.…`
+,
+`auth.…`
+), inject
+`hostRouter`
+:
+
+```
+@service hostRouter;
+
+logout() {
+    this.hostRouter.transitionTo('auth.login');
+}
+```
+
+---
+
+## Universe Sub-services
+
+The Universe service tree is documented separately. Each sub-service has its own dedicated page:
+
+| Service name | Purpose | Docs |
+| --- | --- | --- |
+| `universe` | Façade — `getService(name)` , `whenEngineLoaded` , `registerHook` , etc. | [Universe Service](https://fleetbase.io/docs/extension-development/universe/overview) |
+| `universe/menu-service` | Menu items | [Menu Service](https://fleetbase.io/docs/extension-development/universe/menu-service) |
+| `universe/registry-service` | Component registries | [Registry Service](https://fleetbase.io/docs/extension-development/universe/registry-service) |
+| `universe/widget-service` | Dashboard widgets | [Widget Service](https://fleetbase.io/docs/extension-development/universe/widget-service) |
+| `universe/hook-service` | Lifecycle hooks | [Hook Service](https://fleetbase.io/docs/extension-development/universe/hook-service) |
+| `universe/extension-manager` | Engine boot, lazy-load, cross-engine sharing | [Extension Manager](https://fleetbase.io/docs/extension-development/universe/extension-manager) |
+
+## See Also
+
+* [API Services](https://fleetbase.io/docs/extension-development/reference/api-services)
+  — backend support classes (SmsService, NotificationRegistry, SocketCluster broadcaster, etc.)
+* [Decorators](https://fleetbase.io/docs/extension-development/reference/decorators)
+  —
+  `@engineService`
+  ,
+  `@fromStore`
+  ,
+  `@fetchFrom`
+* [Contracts](https://fleetbase.io/docs/extension-development/reference/contracts)
+  —
+  `MenuItem`
+  ,
+  `Widget`
+  ,
+  `Hook`
+  ,
+  `ExtensionComponent`
+  , etc.
+* [Ember Service base class](https://api.emberjs.com/ember/release/classes/Service)
+  on the upstream Ember API docs
+* [Ember Data Store](https://api.emberjs.com/ember-data/release/modules/@ember-data%2Fstore)
+  — the
+  `store`
+  service
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/exports/services.js` | Canonical service injection list for engines |
+| `addon/services/` | All host services |

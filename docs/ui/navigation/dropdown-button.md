@@ -1,0 +1,131 @@
+---
+title: "DropdownButton"
+url: https://fleetbase.io/docs/ui/navigation/dropdown-button
+module: ui
+---
+
+# DropdownButton
+
+<DropdownButton> is a button that opens a dropdown menu — used for action menus, bulk actions, and grouped controls. Accepts an items array or yields a custom dropdown body.
+
+# <DropdownButton>
+
+A button that opens a dropdown panel on click. Used for action menus ("More…"), grouped controls (bulk actions), and any UI where a primary trigger reveals a list of choices.
+
+## Items-Based Usage
+
+```
+<DropdownButton @text="Actions" @icon="ellipsis" @items={{this.actions}} />
+```
+
+```
+actions = [
+  { text: 'Edit',   icon: 'pencil',  onClick: this.edit },
+  { text: 'Export', icon: 'download', onClick: this.exportData },
+  { separator: true },
+  { text: 'Delete', icon: 'trash',    onClick: this.delete, class: 'text-red-500' },
+];
+```
+
+Each item supports:
+
+| Field | Description |
+| --- | --- |
+| `text` (or `label` ) | Menu item label |
+| `icon` | FontAwesome icon |
+| `iconSize` , `iconWidth` | Icon overrides |
+| `onClick` (or `fn` ) | Click handler |
+| `perform` | Ember-concurrency task to perform |
+| `disabled` | Disabled state |
+| `class` | Extra classes on the item |
+| `wrapperClass` | Extra classes on the wrapper |
+| `separator: true` | Render a separator instead of an item |
+| `seperatorClass` | Extra classes on the separator |
+
+## Block-Based Usage
+
+For richer dropdown content, yield a block. The yield is the
+`BasicDropdown`
+API — you can call
+`dd.actions.close()`
+from inside:
+
+```
+<DropdownButton @text="Filters" @icon="filter" as |dd|>
+  <div class="next-dd-menu p-4 w-72">
+    <h3 class="font-semibold mb-2">Filter by status</h3>
+    {{!-- ... --}}
+    <Button @text="Apply" @onClick={{dd.actions.close}} />
+  </div>
+</DropdownButton>
+```
+
+## Arguments
+
+### Button
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@text` | string | — | Button label |
+| `@icon` | string | — | FontAwesome icon |
+| `@iconPrefix` , `@iconSize` , `@iconClass` | — | — | Icon overrides |
+| `@type` | string | `default` | Button type — `primary` , `magic` , etc. |
+| `@size` | string | — | `xs` , `sm` , `md` , `lg` , `xl` |
+| `@active` | boolean | — | Force the active state |
+| `@isLoading` | boolean | — | Show a spinner |
+| `@disabled` | boolean | — | Disable the button |
+| `@visible` | boolean | `true` | When false, nothing renders |
+| `@helpText` | string | — | Tooltip on the button |
+| `@tooltipPlacement` | string | `top` | Tooltip placement |
+| `@buttonClass` , `@buttonWrapperClass` , `@textClass` | — | — | Class overrides |
+| `@buttonComponent` | string | — | Replace the default `<Button>` with a custom component |
+| `@buttonComponentArgs` | object | — | Args forwarded to `@buttonComponent` |
+| `@img` , `@imgClass` , `@alt` | — | — | Render an image inside the button |
+| `@permission` | string | — | Permission gating |
+
+### Dropdown Behavior
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@items` | array | — | Item descriptors (when not using a block) |
+| `@dropdownId` | string | — | DOM `id` for the dropdown |
+| `@triggerClass` , `@contentClass` , `@dropdownMenuClass` | — | — | Class overrides |
+| `@horizontalPosition` | string | — | `left` , `right` , `auto` |
+| `@verticalPosition` | string | — | `above` , `below` , `auto` |
+| `@matchTriggerWidth` | boolean | — | Make the panel as wide as the trigger |
+| `@calculatePosition` | function | — | Custom positioning function |
+| `@renderInPlace` | boolean | — | Render in DOM order vs. portal |
+| `@overlay` | boolean | — | Render a backdrop behind the panel |
+| `@defaultClass` | string | — | Class on the dropdown's default state |
+| `@onOpen` , `@onClose` | functions | — | Lifecycle callbacks |
+
+## Real-World Examples
+
+```
+{{!-- Action menu on a row --}}
+<DropdownButton @icon="ellipsis" @size="xs" @items={{this.rowActions}} />
+
+{{!-- Bulk actions menu (only visible when rows are selected) --}}
+{{#if this.selectedCount}}
+  <DropdownButton
+    @icon="layer-group"
+    @text="Bulk Actions"
+    @type="magic"
+    @items={{this.bulkActions}}
+  />
+{{/if}}
+
+{{!-- Block-based filter panel --}}
+<DropdownButton @text="Filters" @icon="filter" as |dd|>
+  <div class="p-4">
+    <FiltersPanel @onApply={{fn this.applyFilters dd}} />
+  </div>
+</DropdownButton>
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/dropdown-button.hbs` | Template |
+| `addon/components/dropdown-button.js` | Class |

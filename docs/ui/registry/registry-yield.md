@@ -1,0 +1,126 @@
+---
+title: "RegistryYield"
+url: https://fleetbase.io/docs/ui/registry/registry-yield
+module: ui
+---
+
+# RegistryYield
+
+<RegistryYield> renders contributions from other extensions — components or menu items — into a named slot. Drives extension-to-extension UI integration.
+
+# <RegistryYield>
+
+`<RegistryYield>`
+is the primary mechanism for letting one extension contribute UI into another. It iterates over items in a named registry (components or menu items) and yields each one for you to render.
+
+This is what makes Fleetbase extensible: a payment-gateway extension can register a button in Ledger's gateway settings; an analytics extension can register a chart in the Fleet-Ops dashboard; etc. — without either side knowing the other exists at compile time.
+
+## Component Contributions
+
+```
+<RegistryYield @registry="ledger:invoice-actions" as |Component context|>
+  <Component @invoice={{this.invoice}} @context={{context}} />
+</RegistryYield>
+```
+
+Other extensions register their components via the Universe
+`registry-service`
+, and
+`<RegistryYield>`
+resolves and renders each one.
+
+## Menu Item Contributions
+
+```
+<RegistryYield @registry="fleet-ops:driver-row-actions" @type="menu" as |item|>
+  <a {{on "click" item.onClick}} class="next-dd-item">
+    {{#if item.icon}}<FaIcon @icon={{item.icon}} />{{/if}}
+    {{item.label}}
+  </a>
+</RegistryYield>
+```
+
+Pass
+`@type="menu"`
+(or
+`buttons`
+,
+`menuItems`
+,
+`menu-item`
+) when iterating menu items rather than components.
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@registry` | string | The registry key to read from |
+| `@type` | string | Optional — `menu` , `menuItems` , `menu-item` , or `buttons` to read menu items instead of components |
+| `@context` | any | Context object yielded as the second positional value to your block |
+
+## Yielded Block
+
+For component contributions, the first yielded value is a resolved component class — render it with
+`<Component />`
+. For menu items, the first yield is the menu item descriptor (with
+`label`
+,
+`icon`
+,
+`onClick`
+, etc.).
+
+The second yield is the
+`@context`
+you passed in — useful for forwarding state down into contributed components.
+
+## How It Works
+
+`<RegistryYield>`
+looks up items in this priority:
+
+1. The new
+   `universe/menu-service`
+   (for menu items) or
+   `universe/registry-service`
+   (for components)
+2. Falls back to legacy
+   `universe.getMenuItemsFromRegistry()`
+   /
+   `getRenderableComponentsFromRegistry()`
+
+Lazy engine components (those that come from another Ember Engine) are wrapped with
+`<LazyEngineComponent>`
+automatically so they load on demand.
+
+## Real-World Example
+
+```
+{{!-- Inside a Ledger invoice detail page --}}
+<ContentPanel @title="Actions" @open={{true}}>
+  <:default>
+    <Button @text="Edit" @onClick={{this.edit}} />
+
+    {{!-- Other extensions can contribute additional actions here --}}
+    <RegistryYield @registry="ledger:invoice-actions" @context={{this.invoice}} as |Action ctx|>
+      <Action @invoice={{ctx}} />
+    </RegistryYield>
+  </:default>
+</ContentPanel>
+```
+
+## See Also
+
+* [Universe registry overview](https://fleetbase.io/docs/ui/registry/overview)
+  — registering components and menu items
+* [Extension Development](https://fleetbase.io/docs/extension-development/getting-started/quickstart)
+  — full guide to building extensions
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/registry-yield.hbs` | Template |
+| `addon/components/registry-yield.js` | Class |
+| `addon/services/universe/menu-service.js` | Backing service for menu items |
+| `addon/services/universe/registry-service.js` | Backing service for components |

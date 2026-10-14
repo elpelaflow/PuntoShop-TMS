@@ -1,0 +1,109 @@
+---
+title: "Custom Fields"
+url: https://fleetbase.io/docs/platform/console-features/custom-fields
+module: platform
+---
+
+# Custom Fields
+
+Add structured custom data fields to any platform resource using the Custom Fields Manager — no code required.
+
+# Custom Fields
+
+Custom Fields let you attach additional structured data to platform resources — orders, drivers, vehicles, contacts, and more — without writing code. Fields are organized into named groups, rendered inline on resource detail views, and returned in API responses.
+
+The Custom Fields Manager is embedded inside the settings panel of each extension that supports it (for example,
+**Fleet-Ops → Settings → Custom Fields**
+).
+
+![Custom Fields Manager — resource type tabs, field groups as panels, fields with type pills and edit/delete buttons](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-custom-fields-settings.3d8100f1.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Resource Tabs
+
+The manager shows a tab for each resource type that supports custom fields. Click a tab to view and manage fields for that resource (e.g. Order, Driver, Vehicle, Contact).
+
+## Field Groups
+
+Fields are organized into
+**groups**
+. A group is a named container that renders as a section on the resource detail view. You need at least one group before you can add fields.
+
+### Creating a Group
+
+Click
+**New field group**
+and enter a name. The group appears immediately in the manager.
+
+### Grid Size
+
+Each group has a
+**Grid Size**
+setting that controls the number of columns its fields are rendered in:
+
+| Grid Size | Layout |
+| --- | --- |
+| `1` | Single column — fields span full width |
+| `2` | Two equal columns |
+| `3` | Three equal columns |
+
+Change it via the
+**Grid Size**
+dropdown on the group. Compact fields like short text inputs or toggles work well with a larger grid size.
+
+### Deleting a Group
+
+Click the
+**trash**
+icon on a group to remove it along with all its fields.
+
+## Field Types
+
+| Type | Description |
+| --- | --- |
+| **Input** | Single-line text input |
+| **Phone Input** | Phone number with international dial code selector |
+| **Money Input** | Numeric currency amount |
+| **Date Time Input** | Combined date and time picker |
+| **Date Picker** | Date-only picker |
+| **Radio Button** | Single selection from predefined options shown as radio buttons |
+| **Select** | Single selection from predefined options shown as a dropdown |
+| **File Upload** | File attachment — images, PDFs, documents, and more |
+
+## Creating a Field
+
+Click
+**Create new custom field**
+inside a group to open the field form.
+
+![Custom field form — Label, Description, Help Text, Required/Editable toggles, Field Type, Options, and Column Span](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-custom-field-create.cf152118.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+| Field | Description |
+| --- | --- |
+| **Field Label** | The display name shown on forms and detail views |
+| **Field Description** | Optional description explaining what the field captures |
+| **Field Help Text** | Hint text shown beneath the input on the form |
+| **Field is Required** | Prevents saving the resource without a value |
+| **Field is Editable** | When toggled off, the field becomes read-only after initial entry |
+| **Field Type** | The input component to use — see types above |
+| **Options** | For Radio Button and Select types — define the list of selectable values |
+| **Column Span** | How many grid columns this field occupies within the group's layout |
+
+## Editing and Deleting Fields
+
+Click the
+**pencil**
+icon on any field to edit it. Changes apply immediately across all resource records.
+
+Click the
+**trash**
+icon to delete a field. The field and all its stored values are permanently removed.
+
+## API Access
+
+Custom field values are included in API responses for their resource. Field keys are derived from the field label in snake\_case. You can read and write custom field values via the standard
+`GET`
+,
+`POST`
+, and
+`PUT`
+endpoints for the resource.

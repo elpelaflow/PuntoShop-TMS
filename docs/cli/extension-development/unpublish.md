@@ -1,0 +1,105 @@
+---
+title: "Unpublish"
+url: https://fleetbase.io/docs/cli/extension-development/unpublish
+module: cli
+---
+
+# Unpublish
+
+Remove a published extension from the Fleetbase Extension Registry using `flb unpublish`.
+
+# flb unpublish
+
+Remove a published extension (or a specific version of it) from the registry. Under the hood this runs
+`npm unpublish --force`
+.
+
+```
+flb unpublish @yourcompany/yourext-engine          # Unpublish all versions
+flb unpublish @yourcompany/yourext-engine@1.2.3    # Unpublish a single version
+```
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `[packageName]` | Package name to unpublish (with optional `@version` suffix) |
+| `-r, --registry <url>` | Registry URL (default: `https://registry.fleetbase.io` ) |
+
+## Authentication
+
+Like
+[`flb publish`](https://fleetbase.io/docs/cli/extension-development/publish)
+, unpublishing requires you to be logged in to the registry — see
+[`flb login`](https://fleetbase.io/docs/cli/account/login)
+or
+[`flb set-auth`](https://fleetbase.io/docs/cli/account/set-auth)
+.
+
+You can only unpublish packages you own.
+
+## Examples
+
+### Unpublish a specific version
+
+```
+flb unpublish @acme/vehicle-inspections-engine@1.2.0
+```
+
+### Unpublish all versions
+
+```
+flb unpublish @acme/vehicle-inspections-engine
+```
+
+This removes the entire package from the registry.
+
+### Self-hosted registry
+
+```
+flb unpublish @acme/vehicle-inspections-engine@1.2.0 --registry https://registry.mycompany.com
+```
+
+Unpublishing affects every Fleetbase instance that has this extension installed. Future
+`flb install`
+calls will fail, and
+`pnpm install`
+/
+`composer require`
+reruns on existing instances will fail to fetch the package.
+
+Most public registries (including npm itself) impose a 72-hour window after publish during which unpublishing is allowed, after which it is restricted to prevent ecosystem damage. Verify the registry's policy before relying on unpublish.
+
+## When to Use This
+
+* **Right after a bad publish**
+  — you shipped a broken version, caught it within minutes, and want to pull it before anyone installs it
+* **Security incident**
+  — a published version contains exposed credentials or a critical vulnerability
+
+For normal version churn (deprecating an old version, replacing with a new one),
+**don't unpublish — publish a newer version instead**
+.
+
+## Alternatives to Unpublishing
+
+* **Deprecate**
+  the bad version with
+  `npm deprecate <pkg>@<version> "message"`
+  — keeps the version installable but adds a warning
+* **Publish a fixed version**
+  — bump with
+  `flb version-bump --patch`
+  and
+  `flb publish`
+  . Most package managers prefer the highest valid version anyway
+* **Yank in registry UI**
+  — some self-hosted registries let admins flag a version as withdrawn without deleting it
+
+## Troubleshooting
+
+**`Error: 403 Forbidden`**
+— you don't own the package, or the registry's unpublish window has expired.
+
+**`Error: 404 Not Found`**
+— the package name or version doesn't exist on the registry.

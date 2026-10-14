@@ -1,0 +1,87 @@
+---
+title: "Requirements"
+url: https://fleetbase.io/docs/cli/getting-started/requirements
+module: cli
+---
+
+# Requirements
+
+What you need installed before using the Fleetbase CLI — Node, plus Docker and Git for installing Fleetbase itself.
+
+# Requirements
+
+The CLI itself runs on Node. Some commands additionally need Docker, Git, pnpm, or PHP/Composer on your machine.
+
+## CLI Itself
+
+| Tool | Notes |
+| --- | --- |
+| **Node.js** ≥ 18 | The CLI is published as `@fleetbase/cli` on npm |
+| **npm** (or pnpm / yarn) | Used to install the CLI globally |
+
+## To Install Fleetbase ( flb install-fleetbase )
+
+| Tool | Notes |
+| --- | --- |
+| **Docker** | Required — the wizard runs `docker compose up -d` |
+| **Docker Compose v2** | The wizard checks for the `docker compose` plugin (not the legacy `docker-compose` binary) |
+| **Git** | Used to clone `github.com/elpelaflow/PuntoShop-TMS.git` if the target directory isn't already a checkout |
+
+The installer also pre-flight checks these ports for availability:
+
+* **8000**
+  — API
+* **4200**
+  — Console
+* **3306**
+  — MySQL
+* **38000**
+  — SocketCluster
+
+Conflicts on any of these print a warning but don't abort — the installer continues so you can decide whether to free the port.
+
+## To Manage Extensions on a Running Instance ( flb install , flb uninstall )
+
+The CLI installs extensions by running
+`pnpm install`
+(in the
+`console/`
+directory) and
+`composer require`
+(in the
+`api/`
+directory) of your Fleetbase checkout. You'll need:
+
+| Tool | Notes |
+| --- | --- |
+| **pnpm** | Required — Fleetbase uses pnpm in the console workspace |
+| **PHP / Composer** | Required — used to install the API-side composer package |
+
+`flb install`
+and
+`flb uninstall`
+need the path to your Fleetbase instance — the directory that contains the
+`console/`
+and
+`api/`
+folders. Pass it via
+`--path /path/to/fleetbase`
+, or run the command from inside that directory.
+
+## To Publish Extensions ( flb publish , flb bundle-upload )
+
+| Tool | Notes |
+| --- | --- |
+| **npm** | Used under the hood for the publish flow ( `npm publish` ) |
+| **A registry account** | [Register](https://fleetbase.io/docs/cli/account/register) and [verify](https://fleetbase.io/docs/cli/account/verify) to get an auth token |
+
+## Operating Systems
+
+The CLI runs on macOS, Linux, and Windows (via WSL2 for Docker-based commands). The installer wizard is tested on macOS and Linux; on Windows, run it inside WSL2.
+
+[Fleetbase CLI
+
+The Fleetbase CLI (flb) — install Fleetbase, manage extensions on a running instance, and publish your own extensions to the registry.](https://fleetbase.io/docs/cli)
+[Installing the CLI
+
+Install the Fleetbase CLI globally via npm so the `flb` command is available system-wide.](https://fleetbase.io/docs/cli/getting-started/installation)

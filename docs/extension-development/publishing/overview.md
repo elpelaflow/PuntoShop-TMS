@@ -1,0 +1,104 @@
+---
+title: "Publishing to the Marketplace"
+url: https://fleetbase.io/docs/extension-development/publishing/overview
+module: extension-development
+---
+
+# Publishing to the Marketplace
+
+Authenticate with the Fleetbase registry and publish your extension using the CLI.
+
+# Publishing to the Marketplace
+
+Once you have finished building and testing your extension locally, you can publish it to the
+**Fleetbase Registry**
+.
+
+Publishing your extension makes it available in the Fleetbase Marketplace, allowing other users (or just other organizations within your own self-hosted instance) to discover and install it with a single click.
+
+## Prerequisites
+
+Before you can publish an extension, you must ensure that:
+
+1. Your extension has a valid
+   `extension.json`
+   manifest file.
+2. Your extension's source code is hosted in a public Git repository (e.g., GitHub, GitLab, Bitbucket). The Registry needs to be able to clone the repository to build the extension.
+3. You have an account on the Fleetbase Registry.
+
+## Authenticating with the CLI
+
+To publish an extension, you must first authenticate the Fleetbase CLI with the Registry.
+
+1. Open your terminal.
+2. Run the
+   `login`
+   command:
+
+```
+flb login
+```
+
+3. The CLI will prompt you for your Registry credentials (email and password).
+
+Once authenticated, the CLI will store a secure token locally, allowing you to run subsequent commands without logging in again.
+
+## Publishing the Extension
+
+To publish your extension, navigate to the root directory of your extension (where the
+`extension.json`
+file is located) and run the
+`publish`
+command.
+
+```
+cd my-extension
+flb publish
+```
+
+The CLI will perform the following steps:
+
+1. **Validate the Manifest**
+   : It will check your
+   `extension.json`
+   file to ensure all required fields (name, version, author, etc.) are present and correctly formatted.
+2. **Check for Existing Versions**
+   : It will check the Registry to see if an extension with the same name and version already exists. If it does, the publish will fail. You must increment the version number in
+   `extension.json`
+   before publishing an update.
+3. **Upload the Manifest**
+   : It will send the manifest data to the Registry.
+4. **Trigger a Build**
+   : The Registry will queue a background job to clone your Git repository, build the frontend engine, and package the backend code.
+
+## The Build Process
+
+When you publish an extension, the Registry does not upload your local files directly. Instead, it pulls the code from your Git repository.
+
+This ensures that the published extension is built in a clean, standardized environment and that the source code is always available for auditing.
+
+The build process typically takes a few minutes. You can check the status of your extension in the Fleetbase Console by navigating to
+**Extensions**
+>
+**My Published Extensions**
+.
+
+## Updating an Extension
+
+To publish a new version of your extension:
+
+1. Commit your changes and push them to your Git repository.
+2. Update the
+   `version`
+   field in your
+   `extension.json`
+   file (e.g., from
+   `1.0.0`
+   to
+   `1.0.1`
+   ).
+3. Run
+   `flb publish`
+   again.
+
+The Registry will pull the latest code, build the new version, and make it available as an update to users who have already installed the extension.

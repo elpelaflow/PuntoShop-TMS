@@ -1,0 +1,274 @@
+---
+title: "Set Up Real-Time Tracking"
+url: https://fleetbase.io/docs/platform/recipes/set-up-real-time-tracking
+module: platform
+---
+
+# Set Up Real-Time Tracking
+
+Subscribe to Fleetbase socket events to display live driver locations and order status updates in your own application or dashboard.
+
+# Set Up Real-Time Tracking
+
+Fleetbase broadcasts real-time events — driver location updates, order status changes, and platform events — over WebSocket using
+[SocketCluster](https://socketcluster.io/)
+. This recipe shows how to subscribe to those channels from your own application and render live driver positions on a map.
+
+## What You'll Build
+
+A browser page that connects to the Fleetbase socket server, subscribes to your organisation's event channel, and plots incoming driver locations on a Leaflet.js map in real time.
+
+## Prerequisites
+
+* A Fleetbase account with Fleet-Ops installed and at least one active driver using the Navigator app
+* Your
+  **API public key**
+  and
+  **company UUID**
+  from the Developer Console
+* Your socket server hostname (for self-hosted: your domain; for Fleetbase Cloud: provided in your account settings)
+
+## How the Socket Layer Works
+
+Fleetbase maintains two types of channels you can subscribe to:
+
+| Channel | What it receives |
+| --- | --- |
+| `api.{key_id}` | Events scoped to a specific API key |
+| `company.{company_id}` | All events for your organisation, regardless of key |
+
+Driver location updates are published to
+`company.{company_id}`
+as drivers move. The event type is
+`driver.location_changed`
+and the payload includes the driver's current latitude, longitude, bearing, and speed.
+
+You can monitor live events directly in the console at
+**Developers → Socket Events**
+before writing any code.
+
+## Step 1 — Install the Client Library
+
+```
+npm install socketcluster-client
+```
+
+Or via CDN in a browser page:
+
+```
+<script src="https://cdn.jsdelivr.net/npm/socketcluster-client/socketcluster-client.min.js"></script>
+```
+
+## Step 2 — Connect to the Socket Server
+
+```
+import socketClusterClient from 'socketcluster-client';
+
+const socket = socketClusterClient.create({
+    hostname: 'socket.your-instance.com', // or your Fleetbase Cloud socket host
+    secure: true,
+    port: 443,
+});
+
+socket.on('connect', () => {
+    console.log('Connected to Fleetbase socket server');
+});
+
+socket.on('disconnect', () => {
+    console.log('Disconnected — will attempt to reconnect automatically');
+});
+```
+
+SocketCluster automatically reconnects on disconnect. You do not need to implement reconnect logic yourself.
+
+## Step 3 — Subscribe to the Organisation Channel
+
+```
+const COMPANY_ID = 'your-company-uuid'; // from Developer Console → API Keys
+
+async function subscribeToCompanyChannel() {
+    const channel = socket.subscribe(`company.${COMPANY_ID}`);
+
+    for await (const event of channel) {
+        handleSocketEvent(event);
+    }
+}
+
+function handleSocketEvent(event) {
+    console.log(`Event received [${event.event}]:`, event.data);
+
+    switch (event.event) {
+        case 'driver.location_changed':
+            updateDriverMarker(event.data);
+            break;
+        case 'order.dispatched':
+            onOrderDispatched(event.data);
+            break;
+        case 'order.completed':
+            onOrderCompleted(event.data);
+            break;
+    }
+}
+
+subscribeToCompanyChannel();
+```
+
+## Step 4 — Render Driver Locations on a Map
+
+This example uses
+[Leaflet.js](https://leafletjs.com/)
+, a lightweight open-source mapping library.
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Live Driver Tracking</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/socketcluster-client/socketcluster-client.min.js"></script>
+  <script>
+    // Initialise map
+    const map = L.map('map').setView([1.3521, 103.8198], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Track markers by driver ID
+    const driverMarkers = {};
+
+    function updateDriverMarker(driver) {
+        const { id, name, location } = driver;
+        const { coordinates } = location; // [lng, lat] in GeoJSON order
+        const latLng = [coordinates[1], coordinates[0]];
+
+        if (driverMarkers[id]) {
+            driverMarkers[id].setLatLng(latLng);
+        } else {
+            const marker = L.marker(latLng)
+                .bindPopup(`<strong>${name}</strong>`)
+                .addTo(map);
+            driverMarkers[id] = marker;
+        }
+    }
+
+    // Connect to Fleetbase socket
+    const socket = socketClusterClient.create({
+        hostname: 'socket.your-instance.com',
+        secure: true,
+        port: 443,
+    });
+
+    const COMPANY_ID = 'your-company-uuid';
+
+    (async () => {
+        const channel = socket.subscribe(`company.${COMPANY_ID}`);
+        for await (const event of channel) {
+            if (event.event === 'driver.location_changed') {
+                updateDriverMarker(event.data);
+            }
+        }
+    })();
+  </script>
+</body>
+</html>
+```
+
+## Step 5 — Load Existing Driver Positions via API
+
+Socket events only deliver updates from when you connect. To show drivers already on the map before any movement event fires, fetch their last known positions from the API on load:
+
+```
+const API_KEY = 'flb_live_your_public_key_here';
+
+async function loadActiveDrivers() {
+    const response = await fetch('https://api.fleetbase.io/v1/drivers?status=active', {
+        headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Content-Type': 'application/json',
+        }
+    });
+
+    const { data: drivers } = await response.json();
+
+    for (const driver of drivers) {
+        if (driver.location) {
+            updateDriverMarker(driver);
+        }
+    }
+}
+
+loadActiveDrivers();
+```
+
+## Location Event Payload
+
+The
+`driver.location_changed`
+event payload looks like this:
+
+```
+{
+  "event": "driver.location_changed",
+  "data": {
+    "id": "driver_01H...",
+    "public_id": "DRV-001",
+    "name": "Alex Tan",
+    "phone": "+6591234567",
+    "status": "active",
+    "location": {
+      "type": "Point",
+      "coordinates": [103.8198, 1.3521]
+    },
+    "heading": 145,
+    "speed": 42.5
+  }
+}
+```
+
+Coordinates follow GeoJSON order:
+`[longitude, latitude]`
+. Swap them when passing to Leaflet's
+`[lat, lng]`
+convention.
+
+## Subscribing to a Specific API Key Channel
+
+If you only want events tied to a specific integration (rather than all organisation events), subscribe to
+`api.{key_id}`
+instead:
+
+```
+const KEY_ID = 'your-api-key-id'; // The ID portion of your public key
+
+const channel = socket.subscribe(`api.${KEY_ID}`);
+```
+
+You can find the key ID in
+**Developers → API Keys**
+.
+
+## Origin Restrictions
+
+In production, restrict which origins can connect to your socket server. See
+[System Setup → Socket](https://fleetbase.io/docs/platform/system-setup/socket)
+for configuration details.
+
+## Next Steps
+
+* Monitor live events in the console at
+  **Developers → Socket Events**
+* See
+  [Socket Events](https://fleetbase.io/docs/platform/developer-console/socket-events)
+  for channel reference
+* See
+  [Connect Your First Webhook](https://fleetbase.io/docs/platform/recipes/connect-your-first-webhook)
+  to receive persistent event callbacks instead of real-time streams

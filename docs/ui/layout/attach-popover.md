@@ -1,0 +1,160 @@
+---
+title: "Attach::Popover"
+url: https://fleetbase.io/docs/ui/layout/attach-popover
+module: ui
+---
+
+# Attach::Popover
+
+<Attach::Popover> renders a floating layer attached to its parent — used for popovers, dropdown menus, and click-triggered floating UIs.
+
+# <Attach::Popover>
+
+`<Attach::Popover>`
+renders a floating layer attached to its parent element. Unlike
+`<Attach::Tooltip>`
+(which is configured for transient hover hints), the Popover is configured for richer interactions — click triggers, persistent visibility, and
+`@interactive`
+content the user can mouse into.
+
+It uses
+`<Floating>`
+under the hood for positioning.
+
+## Basic Usage
+
+Place the Popover
+**inside**
+the element it should attach to:
+
+```
+<button class="btn btn-default">
+  <FaIcon @icon="ellipsis" />
+  <Attach::Popover @showOn="click" @hideOn="clickout escapekey">
+    <div class="bg-white p-4 rounded shadow-lg">
+      <h4 class="font-semibold mb-2">Quick actions</h4>
+      <Button @text="Edit"   @onClick={{this.edit}} />
+      <Button @text="Delete" @type="danger" @onClick={{this.delete}} />
+    </div>
+  </Attach::Popover>
+</button>
+```
+
+## Differences from <Attach::Tooltip>
+
+|  | Tooltip | Popover |
+| --- | --- | --- |
+| Default `@showOn` | `mouseenter focus` | `mouseenter focus` |
+| Default `@hideOn` | `mouseleave blur escapekey` | `mouseleave blur escapekey` |
+| Default `@placement` | `top` | `top` |
+| Default `@interactive` | `false` | `false` |
+| Default `@animation` | `fill` | `fill` |
+
+The components have similar defaults — but
+`Popover`
+is the lower-level building block.
+`Tooltip`
+is a thin wrapper that also adds
+`@class="ember-attacher-tooltip"`
+and
+`@ariaRole="tooltip"`
+.
+
+For real popovers (click-triggered, persistent, interactive), override the defaults:
+
+```
+<Attach::Popover
+  @showOn="click"
+  @hideOn="clickout escapekey"
+  @interactive={{true}}
+  @placement="bottom-end"
+  @arrow={{true}}
+>
+  {{!-- popover content --}}
+</Attach::Popover>
+```
+
+## Imperative Show/Hide
+
+Use
+`@isShown`
+for full programmatic control:
+
+```
+<Attach::Popover @isShown={{this.popoverOpen}}>
+  {{!-- ... --}}
+</Attach::Popover>
+
+<Button @text="Toggle popover" @onClick={{toggle this 'popoverOpen'}} />
+```
+
+Pair this with
+`@showOn`
+/
+`@hideOn`
+set to empty strings if you want to suppress the default event triggers.
+
+## Lazy Rendering
+
+For expensive content (heavy charts, big tables), enable
+`@lazyRender`
+:
+
+```
+<Attach::Popover @lazyRender={{true}}>
+  <ExpensiveChart />
+</Attach::Popover>
+```
+
+The chart only renders the first time the popover is shown.
+
+## Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@placement` | string | `top` | `top` , `bottom` , `left` , `right` , plus `-start` / `-end` variants |
+| `@arrow` | boolean | `false` | Render an arrow pointing at the parent |
+| `@offset` | number | — | Distance from the parent in px |
+| `@shiftOptions` | object | — | Floating-UI shift middleware options |
+| `@animation` | string | `fill` | Animation — `fill` , `scale` , `slide` , `none` |
+| `@hideOn` | string | `mouseleave blur escapekey` | Space-separated events to hide on. Common: `clickout` |
+| `@showOn` | string | `mouseenter focus` | Space-separated events to show on. Common: `click` |
+| `@interactive` | boolean | `false` | Allow the user to mouse into the popover without it closing |
+| `@isShown` | boolean | — | Imperative show/hide |
+| `@lazyRender` | boolean | `false` | Don't render until first show |
+| `@showDelay` | number | `0` | Show delay in ms |
+| `@hideDelay` | number | `0` | Hide delay in ms |
+| `@showDuration` | number | `300` | Show animation duration |
+| `@hideDuration` | number | `300` | Hide animation duration |
+| `@transitionDuration` | number | `0` | Transition duration |
+| `@renderInPlace` | boolean | `false` | Render in DOM order instead of via a portal |
+| `@flip` | object | — | Floating-UI flip middleware options |
+| `@modifiers` | array | — | Additional Floating-UI middleware |
+| `@useCapture` | boolean | `false` | Use capture phase for event listeners |
+| `@onChange` | `(isShown)` | — | Called when the popover toggles |
+| `@classNames` | string | — | Extra classes on the popover wrapper |
+
+## Common Trigger Patterns
+
+| Pattern | `@showOn` | `@hideOn` | `@interactive` |
+| --- | --- | --- | --- |
+| Hover tooltip | `mouseenter focus` | `mouseleave blur escapekey` | `false` |
+| Click menu | `click` | `clickout escapekey` | `true` |
+| Hover popover (mouse can enter) | `mouseenter focus` | `mouseleave blur escapekey` | `true` |
+| Manual control | `""` (empty) | `""` (empty) | as needed |
+
+## See Also
+
+* [`<Attach::Tooltip>`](https://fleetbase.io/docs/ui/layout/attach-tooltip)
+  — the tooltip-flavored wrapper
+* [`<Floating>`](https://fleetbase.io/docs/ui/layout/floating)
+  — the underlying positioning primitive
+* [`<DropdownButton>`](https://fleetbase.io/docs/ui/navigation/dropdown-button)
+  — for button + menu combos (uses BasicDropdown rather than Attach::Popover)
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/attach/popover.hbs` | Popover template |
+| `addon/components/attach/popover.js` | Popover class |

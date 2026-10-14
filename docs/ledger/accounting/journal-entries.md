@@ -1,0 +1,112 @@
+---
+title: "Journal Entries"
+url: https://fleetbase.io/docs/ledger/accounting/journal-entries
+module: ledger
+---
+
+# Journal Entries
+
+View automated journal entries and create manual entries for accounting adjustments and corrections.
+
+# Journal Entries
+
+A
+**Journal Entry**
+is the atomic record of a financial event. Most entries are written automatically by Ledger as the system processes invoice payments, gateway charges, wallet operations, and transport order settlements. You can also create manual entries for adjustments and corrections.
+
+Navigate to
+**Ledger → Accounting → Journal**
+.
+
+## Journal Entry Attributes
+
+| Field | Description |
+| --- | --- |
+| **Number** | Auto-generated sequential ID, format `JE-00001` (5-digit zero-padded) |
+| **Type** | Entry type (see types below) |
+| **Status** | Currently always `posted` for entries written by the system |
+| **Debit Account** | Account being debited |
+| **Credit Account** | Account being credited |
+| **Amount** | Entry amount in the account's currency (integer minor units) |
+| **Currency** | 3-character ISO code |
+| **Entry Date** | Date the event occurred |
+| **Reference** | Human-readable reference (invoice number, order ID, etc.) |
+| **Description** | Free-text description |
+| **Is System Entry** | `true` if created automatically; `false` if manual |
+| **Transaction** | Linked Ledger transaction if applicable |
+
+## Entry Types
+
+The manual-entry form picker offers these types:
+
+| Type | When to use |
+| --- | --- |
+| `standard` | Day-to-day manual entries |
+| `adjusting` | Period-end adjustments (e.g., accruals, deferrals) |
+| `closing` | Period close — zero-out income statement accounts |
+| `reversing` | Reversing prior-period entries (manually constructed; there is no automated reversal action) |
+| `opening` | Opening balances for a new fiscal period |
+
+System-written entries use these types depending on the source event:
+
+| Type | Source |
+| --- | --- |
+| `general` | Default (most wallet operations) |
+| `manual_entry` | Created via the **New Manual Entry** action in the journal |
+| `revenue_recognition` | Invoice draft created by Fleet-Ops `PurchaseRateObserver` |
+| `invoice_payment` | Payment recorded against an invoice |
+| `gateway_payment` | Successful gateway webhook payment |
+| `order_settlement` | Freight order completion or transaction settlement |
+
+## Creating a Manual Journal Entry
+
+Navigate to
+**Ledger → Accounting → Journal**
+.
+
+Click
+**New Manual Entry**
+.
+
+Select the
+**Debit Account**
+and a
+**different**
+**Credit Account**
+.
+
+Enter the
+**Amount**
+(integer minor units, minimum 1) and
+**Currency**
+(3-letter ISO).
+
+Enter a
+**Description**
+(required) and optional
+**Entry Date**
+.
+
+Click
+**Save**
+. The entry is posted immediately and both account balances are updated.
+
+## Reversing an Entry
+
+There is
+**no built-in Reverse action**
+in this version of Ledger. To reverse a posted entry, create a new manual entry of type
+`reversing`
+with the debit and credit accounts swapped for the same amount, and reference the original entry's number in the description.
+
+Manually constructed reversing entries change account balances but do not transition the original entry's status. The original remains
+`posted`
+.
+
+## Viewing Entries for an Account
+
+For a filtered view of all entries for a specific account, use the
+**Account Ledger**
+view:
+**Ledger → Accounting → Accounts → [Account]**
+. This shows debit, credit, and running balance columns for that account.

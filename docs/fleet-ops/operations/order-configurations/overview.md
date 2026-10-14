@@ -1,0 +1,182 @@
+---
+title: "Order Configurations"
+url: https://fleetbase.io/docs/fleet-ops/operations/order-configurations/overview
+module: fleet-ops
+---
+
+Order Configurations
+
+# Order Configurations
+
+Order configurations define custom order types with their own workflows, entity fields, POD methods, and activity steps.
+
+# Order Configurations
+
+An
+**Order Configuration**
+(Order Config) is a template that defines how a particular type of order works in Fleet-Ops. Every order you create must be based on an Order Config — it determines the order's lifecycle, the data fields collected on each item, and what proof of delivery is required.
+
+This lets you run different service types from the same Fleet-Ops instance. A courier might have one config for same-day parcels (signature required), another for document delivery (photo required), and a third for returns (no POD needed). Each config has its own workflow and fields.
+
+![Order Configuration manager — list of configs with status, namespace, and action buttons](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-order-config-details.7b86ae6a.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## What an Order Config Contains
+
+| Component | Purpose |
+| --- | --- |
+| **Name** | Display name shown in the console |
+| **Namespace & Key** | Unique identifiers used by the API and the system (e.g. `system:order-config:transport` ) |
+| **Description** | Free-text description for operators |
+| **Status** | `private` or `public` — controls visibility of the config |
+| **Version** | Version string for the config (e.g. `0.0.1` ) |
+| **Activity Flow** | The graph of activities drivers move through; each activity has its own POD settings, transitions, logic, and events. See [Activity Flows](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows) . |
+| **Entity Definitions** | Field templates for each item (entity) created on orders of this type. See [Order Types](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/order-types) . |
+| **Tags** | Free-form tags for organisation and filtering |
+| **Custom Fields** | Order-level custom fields, attached separately and rendered alongside built-in fields |
+
+POD method and POD-required settings live on individual activities inside the activity flow, not on the config itself.
+
+## Managing Order Configurations
+
+Navigate to
+**Fleet-Ops → Operations → Order Configurations**
+.
+
+The list shows all existing configs with their name, namespace key, version, and status (active/inactive). From here you can:
+
+* **Create**
+  a new configuration
+* **Edit**
+  an existing configuration's flow and fields
+* **Duplicate**
+  an existing configuration as a starting point
+* **Activate/deactivate**
+  configs to control which types are available when creating orders
+* **Delete**
+  configs that are no longer needed (only if no orders reference them)
+
+## Creating a New Order Configuration
+
+Click
+**+ New Configuration**
+.
+
+Set the
+**Name**
+(e.g., "Same-Day Delivery") and
+**Description**
+.
+
+The
+**Namespace**
+key is auto-generated from the name (e.g.,
+`same-day-delivery`
+) — this is the API identifier for the config.
+
+Configure the
+**Activity Flow**
+— the graph of activities drivers move through, including per-activity POD settings (
+`scan`
+,
+`signature`
+, or
+`photo`
+). See
+[Activity Flows](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows)
+.
+
+Add
+**Entity Definitions**
+— fields required on each item in this order type. See
+[Order Types](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/order-types)
+.
+
+Click
+**Save**
+. The config is now available for selection when creating orders.
+
+## The Core Service Configuration
+
+Fleet-Ops ships with
+**one built-in core service configuration**
+:
+**Transport**
+. Every new company gets a Transport config created automatically with
+`core_service: 1`
+set, so an out-of-the-box instance always has a usable order config available immediately.
+
+| Field | Value |
+| --- | --- |
+| **Name** | Transport |
+| **Key** | `transport` |
+| **Namespace** | `system:order-config:transport` |
+| **Default flow** | `created → dispatched → started → enroute → completed` |
+| **Default entities** | None — entities are added per order |
+
+Core-service configs are protected: they cannot be deleted (the API rejects deletion when
+`core_service === 1`
+). You can duplicate them, edit your own copies, or build new configurations from scratch — for example
+*Pickup & Delivery*
+,
+*Returns*
+, or
+*Multi-Drop Courier*
+are common patterns customers create on top of the platform.
+
+## Order Configs and the API
+
+When creating orders via the consumable API, reference the order configuration by its
+**`public_id`**
+(e.g.
+`config_dnid32`
+) using the
+`order_config`
+field. You can also pass
+`type`
+matching the config's
+`key`
+or
+`namespace`
+to fall back to a config when no
+`order_config`
+is supplied.
+
+```
+{
+  "order_config": "config_dnid32",
+  "payload": {
+    "pickup":  { ... },
+    "dropoff": { ... }
+  }
+}
+```
+
+**The consumable API never accepts or returns
+`uuid`
+values**
+— every record is referenced by its
+`public_id`
+(e.g.
+`order_5sk3lf`
+,
+`driver_tt2x9q`
+,
+`vehicle_3hk912`
+). The internal
+`uuid`
+columns are private to the database. Throughout the docs, when an API example shows a field like
+`order_config`
+,
+`driver`
+, or
+`vehicle`
+, supply the matching
+`public_id`
+.
+
+## Related Pages
+
+* [Order Types](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/order-types)
+  — defining entity fields and requirements per order type
+* [Activity Flows](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows)
+  — configuring the step-by-step driver workflow

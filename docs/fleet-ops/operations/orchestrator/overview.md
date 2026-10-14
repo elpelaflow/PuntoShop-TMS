@@ -1,0 +1,181 @@
+---
+title: "Orchestrator Overview"
+url: https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview
+module: fleet-ops
+---
+
+Orchestrator
+
+# Orchestrator Overview
+
+A multi-phase planner that turns a pool of unassigned orders into a committable plan — stack vehicle allocation, driver allocation, and route optimization phases in sequence.
+
+# Orchestrator Overview
+
+The
+**Orchestrator**
+is the automated planner Fleet-Ops uses to turn a pool of unassigned orders into a committable assignment plan. Rather than running a single fixed pipeline, you compose
+**phases**
+in the Orchestrator Workbench and stack them in sequence — for example
+*Assign Vehicles → Optimize Routes → Assign Drivers*
+. Each phase runs one mode against the order pool using a configurable engine. The result is a proposed plan you can preview, adjust, and commit when ready.
+
+![Orchestrator Workbench — multi-phase plan with three phases stacked: Assign Vehicles → Optimize Routes → Assign Vehicles](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orchestrator-phases.fe955c7f.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## When to Use the Orchestrator
+
+The Orchestrator is built for any planning task you'd otherwise do by hand:
+
+* Dispatching a morning batch of 50+ deliveries across 10 drivers
+* Re-sequencing stops on a driver's manifest after new urgent orders are added mid-day
+* Optimizing route order without changing driver/vehicle assignments
+* Allocating vehicles to orders by capacity, then assigning drivers in a separate phase
+* Running a single phase (e.g. just route optimization) over an existing assignment
+
+For one-off, ad-hoc assignments, manual assignment from the order detail panel is simpler and faster.
+
+## Phases
+
+The unit of work in the Orchestrator is a
+**phase**
+. Each phase declares one
+**mode**
+— what to optimize for — and one
+**engine**
+— the strategy used to compute it. Phases run in the order you add them in the Workbench's phase builder. The output of each phase becomes the input to the next, so a multi-phase run can build up a complete plan progressively.
+
+### Available Modes
+
+| Mode | What it does |
+| --- | --- |
+| `assign_vehicles` | Allocate orders to vehicles based on capacity, location, and constraints |
+| `assign_drivers` | Match drivers to vehicles or orders (typically using shift schedules and skills) |
+| `optimize_routes` | Re-sequence the stops on each driver/vehicle's route for minimum distance or time |
+| `allocate` | Legacy single-pass mode: assign both driver and vehicle to each order in one go |
+
+You can run a single phase on its own — for example just
+`optimize_routes`
+to re-sequence an existing plan — or stack several into a multi-phase pipeline. A common pattern is
+`assign_vehicles → assign_drivers → optimize_routes`
+, but any combination is valid.
+
+### Available Engines
+
+Engines are pluggable strategies for computing a phase. Two ship with Fleet-Ops:
+
+| Engine ID | Name | Notes |
+| --- | --- | --- |
+| `greedy` | Greedy (built-in) | Fast first-fit allocation; predictable, simple |
+| `vroom` | VROOM | High-quality optimization for complex constraints — time windows, capacity, multi-stop |
+
+Both engines support every mode listed above.
+**There is no engine that
+*only*
+does route sequencing or
+*only*
+does driver assignment**
+— VROOM and the built-in greedy algorithm both handle all three. The mode is the goal of the phase; the engine is how you reach it.
+
+Extensions can register additional engines with the
+`OrchestrationEngineRegistry`
+, so a self-hosted instance may expose more options in the engine dropdown.
+
+## Phase Configuration
+
+Each phase has its own settings, so different phases in the same run can use different rules:
+
+| Setting | Meaning |
+| --- | --- |
+| **Label** | Free-text name shown on the phase tab (e.g. *Allocate Orders* ) |
+| **Mode** | One of the four modes above |
+| **Engine** | The strategy used for this phase |
+| **Order statuses** | Which order statuses the phase considers — typically `created` , can include `dispatched` or `started` for re-planning |
+| **Balance workload** | Try to equalize stops/orders across drivers |
+| **Respect skills** | Honor skill requirements on orders and skills on drivers |
+| **Respect capacity** | Honor vehicle capacity (weight, volume) when allocating |
+| **Return to depot** | Add a final leg back to each driver's depot |
+| **Auto-commit** | Commit this phase's changes immediately before the next phase runs |
+
+## Constraints the Orchestrator Respects
+
+Across all phases, the Orchestrator considers:
+
+### Order Constraints
+
+* **Required skills**
+  — order requires a driver with specific certifications
+* **Time window start / end**
+  — earliest pickup and latest delivery times
+* **Scheduled at**
+  — don't dispatch before this time
+* **Orchestrator priority**
+  (0–100) — higher priority orders allocated first
+
+### Driver Constraints
+
+* **Skills**
+  — array of certifications the driver has
+* **Shift window**
+  — driver's available start and end times for the day
+* **Online status**
+  — only consider online/available drivers
+* **Maximum travel time**
+  — global cap from the Orchestrator settings
+
+### Vehicle Constraints
+
+* **Capacity weight**
+  — maximum load in kg
+* **Capacity volume**
+  — maximum load in m³
+* **Current location**
+  — used as the route starting point
+
+## Workflow
+
+1. Open
+   **Operations → Orchestrator**
+   to enter the Workbench
+2. The order pool on the left shows all unassigned orders
+3. Open the
+   **Phase Builder**
+   and add one or more phases — set each phase's mode, engine, and options
+4. Click
+   **Run Phase(s)**
+   — phases execute in sequence and produce a proposed plan
+5. Review the plan on the map and in the resource panel; drag to override individual assignments if needed
+6. Click
+   **Commit**
+   — Manifests are created for each driver and orders are dispatched
+
+See
+[Workbench](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/workbench)
+for the detailed Workbench guide.
+
+## Manifest Output
+
+When you commit a plan, the Orchestrator creates a
+**Manifest**
+for each assigned driver — an ordered list of stops with:
+
+* Total estimated distance and duration
+* Sequence number for each stop
+* Estimated arrival time per stop
+* The driver and vehicle assigned
+
+Drivers see their manifest in the Navigator app as their active job list.
+
+## Unassigned Orders
+
+The Orchestrator flags any orders it could not allocate, with a reason (no available driver, capacity exceeded, no driver with required skills, time window impossible). These remain in the pool for the next run or for manual assignment.
+
+## Related Pages
+
+* [Workbench](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/workbench)
+  — detailed Workbench usage
+* [Vehicle Allocation](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/vehicle-allocation)
+  — how vehicles are matched to orders
+* [Payload & Capacity Allocation](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/payload-capacity-allocation)
+  — capacity constraints and payload matching
+* [Orchestrator Settings](https://fleetbase.io/docs/fleet-ops/settings/orchestrator)
+  — defaults, auto-allocate flags, and global constraints

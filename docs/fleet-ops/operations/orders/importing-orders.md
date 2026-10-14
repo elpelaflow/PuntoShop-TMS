@@ -1,0 +1,209 @@
+---
+title: "Importing Orders"
+url: https://fleetbase.io/docs/fleet-ops/operations/orders/importing-orders
+module: fleet-ops
+---
+
+Orders
+
+# Importing Orders
+
+Import many orders at once from a spreadsheet — including multi-waypoint and multi-entity orders — using the Order Import wizard.
+
+# Importing Orders
+
+For high-volume operations it isn't practical to create orders one-by-one in the console. Fleet-Ops includes an
+**Order Import**
+wizard that ingests
+`.xlsx`
+or
+`.csv`
+spreadsheets and creates orders, waypoints, entities, customers, and drivers in a single pass. This page walks through the import flow, the spreadsheet shape, and the row-grouping rules that drive multi-stop and multi-item orders.
+
+![Orders Import — file upload modal with drag-and-drop area, accepted file types, and queued files list](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orders-import.fea7cd24.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## When to Use Import
+
+* Onboarding a backlog of orders from another system
+* Loading the day's batch from a dispatch sheet maintained externally
+* Scripted exports from a WMS, ERP, or e-commerce platform that produces a per-line spreadsheet
+
+For ongoing automated integration, prefer the
+[REST API](https://fleetbase.io/docs/fleet-ops/operations/orders/managing-orders)
+— import is best for one-shot or periodic loads.
+
+## Starting an Import
+
+Navigate to
+**Fleet-Ops → Operations → Orchestrator**
+(or the orders list).
+
+Click
+**Import Orders**
+. The import modal opens with a file-drop area and a queue list.
+
+Drop or pick one or more files. Accepted formats:
+`.xlsx`
+,
+`.xls`
+, and
+`.csv`
+.
+
+Click
+**Start Upload**
+. Files are uploaded, parsed, and processed into orders, waypoints, entities, customers, and drivers as appropriate.
+
+## The Spreadsheet Template
+
+Download the canonical template from the import modal —
+`Fleetbase_Order_Import_Template.xlsx`
+— and fill in the
+**Import**
+sheet starting at row 2 (row 1 is the header).
+
+### Required columns
+
+Three columns are required on every row:
+
+| Required column | Purpose |
+| --- | --- |
+| `Order Ref *` | A reference shared across all rows that belong to the same order. The first row carrying a given Order Ref defines the order; subsequent rows with the same Order Ref **append waypoints and entities** to that order. |
+| `Pickup Name *` | The label or business name of the pickup location |
+| `Dropoff Name *` | The label or business name of the dropoff location |
+
+Required fields are marked with an asterisk (
+`*`
+) in the template's header row.
+
+### Optional columns
+
+The template includes 44 columns covering everything an order can carry:
+
+| Group | Columns |
+| --- | --- |
+| **Order metadata** | `Order Type` , `Scheduled At` , `Notes` |
+| **Pickup location** | `Pickup Name *` , `Pickup Street` , `Pickup City` , `Pickup State` , `Pickup Postcode` , `Pickup Country` , `Pickup Lat` , `Pickup Lng` |
+| **Dropoff location** | `Dropoff Name *` , `Dropoff Street` , `Dropoff City` , `Dropoff State` , `Dropoff Postcode` , `Dropoff Country` , `Dropoff Lat` , `Dropoff Lng` |
+| **Payload summary** | `Payload Type` , `Payload Weight (kg)` , `Payload Volume (m³)` |
+| **Customer** | `Customer Name` , `Customer Email` , `Customer Phone` , `Customer Type` |
+| **Facilitator** | `Facilitator Name` , `Facilitator Email` , `Facilitator Type` |
+| **Driver & vehicle** | `Vehicle Plate` , `Driver Name` , `Driver Email` , `Driver Phone` |
+| **Entity (item-level)** | `Entity Name` , `Entity Type` , `Entity SKU` , `Entity Description` , `Entity Weight (kg)` , `Entity Length (cm)` , `Entity Width (cm)` , `Entity Height (cm)` , `Entity Declared Value` , `Entity Currency` |
+
+Hover over any header cell in the
+**Import**
+sheet to see a tooltip describing the field.
+
+Columns can appear in any order — the import wizard maps headers to Fleet-Ops fields automatically. Extra columns the wizard doesn't recognise are ignored, so you can keep your own spreadsheet conventions intact.
+
+## Row Grouping — One Order Across Many Rows
+
+The
+**`Order Ref`**
+column is the anchor that ties rows together. The wizard uses it to decide whether each row creates a new order or extends an existing one:
+
+* **First occurrence of an Order Ref**
+  — creates the order. Order-level fields (pickup, dropoff, customer, facilitator, driver, vehicle, scheduling) come from this row.
+* **Subsequent occurrences of the same Order Ref**
+  — append a waypoint and/or an entity to the order created on the first row. The pickup/dropoff fields define an additional waypoint; the entity fields define an additional item.
+
+This means
+**one order can occupy any number of rows**
+depending on how many entities and stops it has.
+
+### Example — multi-entity order
+
+The same Order Ref
+`ORD-001`
+appears on two rows. Row 1 sets up the order with a laptop box; row 2 adds a phone charger as a second entity:
+
+```
+Order Ref | Pickup Name   | Dropoff Name | Entity Name    | Entity SKU
+─────────────────────────────────────────────────────────────────────
+ORD-001   | Fleetbase HQ  | Customer A   | Laptop Box     | SKU-001
+ORD-001   | Fleetbase HQ  | Customer A   | Phone Charger  | SKU-002
+```
+
+Result: one order from Fleetbase HQ → Customer A with two entities attached.
+
+### Example — multi-waypoint order
+
+The same Order Ref appears across rows with
+**different dropoff locations**
+, which the wizard reads as additional waypoints:
+
+```
+Order Ref | Pickup Name   | Dropoff Name        | Entity Name
+────────────────────────────────────────────────────────────────
+ORD-007   | Fleetbase HQ  | Customer A — North  | Package 1
+ORD-007   | Fleetbase HQ  | Customer B — East   | Package 2
+ORD-007   | Fleetbase HQ  | Customer C — South  | Package 3
+```
+
+Result: one multi-waypoint order with three stops and three entities — each entity routed to its own waypoint.
+
+You can combine the patterns: multiple entities at a single waypoint, multiple waypoints with one or many entities each, all under the same Order Ref.
+
+## Field Tips
+
+* **Dates and times**
+  — ISO 8601 (
+  `YYYY-MM-DD HH:MM`
+  ) is the most reliable format. The parser accepts other formats but ISO eliminates ambiguity. The
+  `Scheduled At`
+  field on the first row of an Order Ref sets the order's
+  `scheduled_at`
+  .
+* **Country codes**
+  — use ISO 3166-1 alpha-2 codes (
+  `SG`
+  ,
+  `US`
+  ,
+  `GB`
+  ).
+* **Coordinates**
+  —
+  `Pickup Lat`
+  /
+  `Pickup Lng`
+  and
+  `Dropoff Lat`
+  /
+  `Dropoff Lng`
+  are optional. If supplied they pin the location precisely; if omitted the wizard geocodes the address fields.
+* **Order Type**
+  — free-form string that Fleet-Ops uses to match an
+  [Order Configuration](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/overview)
+  . Common values:
+  `transport`
+  ,
+  `delivery`
+  ,
+  `pickup`
+  ,
+  `multi_waypoint`
+  . If no matching config exists the order falls back to the default Transport config.
+* **Customer / facilitator / driver**
+  — if a contact, vendor, or driver with the supplied email or name doesn't already exist, the import creates one and links it to the order. Existing records are matched and re-used.
+* **Vehicle Plate**
+  — when supplied, the wizard looks up the matching vehicle and pre-assigns it. If no match is found, the order is created without a vehicle and can be assigned later by the Orchestrator or manually.
+
+## After Import
+
+Once the import finishes:
+
+* A summary shows the number of orders, waypoints, entities, customers, and drivers created or updated
+* The new orders appear in
+  **Operations → Orders**
+  with system status
+  `created`
+  , ready to be dispatched manually or picked up by the Orchestrator
+* Any rows the wizard couldn't process are returned in an error report so you can fix them and re-import
+
+Imported orders behave identically to console-created orders from this point — they participate in
+[Order Configurations](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/overview)
+, the
+[Orchestrator](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview)
+, and tracking.

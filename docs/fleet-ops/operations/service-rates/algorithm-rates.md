@@ -1,0 +1,270 @@
+---
+title: "Algorithm-Based Rates"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates
+module: fleet-ops
+---
+
+Service Rates
+
+# Algorithm-Based Rates
+
+Use a math expression to compute service rates dynamically — combine distance, time, stops, parcels, and other variables into a single formula evaluated at quote time.
+
+# Algorithm-Based Service Rates
+
+When
+`rate_calculation_method`
+is set to
+**`algo`**
+(or
+`algorithm`
+), the rate is computed by evaluating a math expression you supply. This unlocks pricing models that fixed brackets or per-meter rates can't express — for example "$3 base + $1.20/km, capped at $50" or "$0.05 per parcel-meter, plus $2 per extra stop".
+
+The expression is stored on the rate's
+`algorithm`
+field as a string. At quote time, Fleet-Ops substitutes the live values for placeholders like
+`{distance_km}`
+and
+`{stops}`
+, evaluates the math, and uses the result as the service fee.
+
+![Algorithm form — formula field with the list of available variables and worked examples](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-algorithm.bad31065.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## How an Algorithm Rate Is Evaluated
+
+When an order is quoted against an algorithm rate:
+
+1. The order is summarised into a set of
+   **variables**
+   (distance, time, stop count, parcel count, etc. — see below)
+2. Each
+   `{variable}`
+   placeholder in your formula is replaced with its numeric value
+3. Any supported function calls (
+   `max`
+   ,
+   `min`
+   ,
+   `ceil`
+   ,
+   `floor`
+   ,
+   `round`
+   ) are resolved
+4. The remaining math is evaluated
+5. The result is rounded to 2 decimal places (typical for currency) and added to the quote's base fee
+
+Results are always numeric. If the expression fails to evaluate (bad syntax, unknown variable, division by zero), the rate falls back to whatever else is on the rate (base fee, parcel fees).
+
+## Available Variables
+
+Every algorithm has the same fixture of variables available, all populated automatically from the order being quoted:
+
+| Variable | Type | Description |
+| --- | --- | --- |
+| `{distance_m}` , `{distance}` | meters | Total route distance in meters |
+| `{distance_km}` | kilometers | `distance_m / 1000` |
+| `{distance_mi}` | miles | `distance_m / 1609.344` |
+| `{time_s}` , `{time}` | seconds | Total route time in seconds |
+| `{time_min}` | minutes | `time_s / 60` |
+| `{stops}` | integer | Number of stops on the route (pickup + dropoffs + waypoints) |
+| `{waypoints}` | integer | Number of intermediate waypoints ( `stops - endpoints` ) |
+| `{parcels}` | integer | Count of payload entities with `type = parcel` |
+| `{entities}` | integer | Total count of payload entities (any type) |
+| `{base_fee}` | decimal | The rate's `base_fee` value, useful for `algo` expressions that build on top of a base |
+
+Custom variables you supply on the rate are merged into this set, so you can also reference your own keys like
+`{markup_factor}`
+if you've populated them.
+
+## Available Functions
+
+The expression engine supports these helper functions inline:
+
+| Function | Behaviour |
+| --- | --- |
+| `max(a, b)` | Returns the larger of two values |
+| `min(a, b)` | Returns the smaller of two values |
+| `ceil(x)` | Rounds up to the next integer |
+| `floor(x)` | Rounds down to the previous integer |
+| `round(x, p)` | Rounds `x` to `p` decimal places |
+
+Standard arithmetic (
+`+`
+,
+`-`
+,
+`*`
+,
+`/`
+,
+`^`
+, parentheses) is supported throughout.
+
+## Worked Examples
+
+### 1. Distance-based with floor
+
+> *"Charge $1.50 per kilometer, with a $5 minimum."*
+
+```
+max(5, 1.5 * {distance_km})
+```
+
+For a 2 km order:
+`max(5, 1.5 * 2)`
+=
+`max(5, 3)`
+=
+**$5**
+.
+For a 10 km order:
+`max(5, 1.5 * 10)`
+=
+`max(5, 15)`
+=
+**$15**
+.
+
+### 2. Distance with cap
+
+> *"$3 base + $1.20 per km, capped at $50."*
+
+```
+min(50, 3 + 1.2 * {distance_km})
+```
+
+For a 5 km order:
+`min(50, 3 + 6)`
+=
+**$9**
+.
+For a 100 km order:
+`min(50, 3 + 120)`
+=
+**$50**
+(capped).
+
+### 3. Per-parcel surcharge
+
+> *"$5 per parcel."*
+
+```
+5 * {parcels}
+```
+
+For an order with 12 parcels:
+**$60**
+.
+
+### 4. Multi-stop courier
+
+> *"$2 base + $0.80 per km + $1.50 for each waypoint after the first."*
+
+```
+2 + 0.8 * {distance_km} + 1.5 * {waypoints}
+```
+
+For a 12 km order with 3 stops (pickup + 2 dropoffs, so
+`waypoints = 1`
+):
+`2 + 9.6 + 1.5`
+=
+**$13.10**
+.
+
+### 5. Time-based fare with rounding
+
+> *"$1.25 per minute of estimated drive time, rounded up."*
+
+```
+ceil(1.25 * {time_min})
+```
+
+For an estimated 23-minute trip:
+`ceil(28.75)`
+=
+**$29**
+.
+
+### 6. Combined model
+
+> *"Base of $4, plus $0.50/km, plus $1 per parcel beyond the first 3, capped at $80."*
+
+```
+min(80, 4 + 0.5 * {distance_km} + max(0, {parcels} - 3))
+```
+
+## Configuration Workflow
+
+Create or open a service rate in
+**Fleet-Ops → Operations → Service Rates**
+.
+
+Set
+**Rate Calculation Method**
+to
+**Algorithm**
+.
+
+Enter your math expression in the
+**Algorithm**
+field. Use the variable names exactly as listed above, in curly braces (e.g.
+`{distance_km}`
+,
+`{parcels}`
+).
+
+*Optional:*
+Set a
+**Base Fee**
+that will be added to the algorithm result.
+
+*Optional:*
+Configure
+**COD Fees**
+and
+**Peak Hours**
+— these surcharges apply on top of the algorithm result, the same way they do for any other rate type.
+
+Save and test by generating a quote for a sample order. Check the
+**Quote**
+section on the order detail to see the calculated amount and the rate that was applied.
+
+## Validating an Expression
+
+Before saving, Fleet-Ops can validate that an expression is
+**computable**
+— it runs the expression against a set of representative values to confirm the result is numeric. The validator evaluates your formula against:
+
+```
+distance_m = 25000   stops    = 4   parcels  = 3   base_fee = 100
+time_s     = 5400    waypoints = 2  entities = 5
+```
+
+If your expression returns a number for those values, it's safe to save. If it errors out (typo, unknown variable, missing operator), the validation will fail.
+
+## Limitations
+
+* **No conditionals beyond
+  `min`
+  /
+  `max`**
+  — there's no
+  `if`
+  operator. Use
+  `min`
+  /
+  `max`
+  to express caps and floors.
+* **No string operations**
+  — algorithm rates are pure-numeric.
+* **No external lookups**
+  — variables must come from the per-order fixture; you can't pull live data (FX rates, time of day) into the expression. Use peak-hour surcharges for time-of-day pricing instead.
+
+## Related Pages
+
+* [Service Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  — calculation methods and rate scoping
+* [Service Quotes](https://fleetbase.io/docs/fleet-ops/operations/service-quotes/overview)
+  — how the calculated rate becomes a quote on an order

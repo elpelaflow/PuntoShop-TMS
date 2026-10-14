@@ -1,0 +1,108 @@
+---
+title: "Request Logs"
+url: https://fleetbase.io/docs/platform/developer-console/request-logs
+module: platform
+---
+
+# Request Logs
+
+Inspect a complete, filterable history of every API request made to your Fleetbase instance.
+
+# Request Logs
+
+Request Logs records every inbound API request to your Fleetbase instance. Use it to debug integration issues, audit API usage, or trace unexpected behaviour back to a specific call. Navigate to
+**Developers → Request Logs**
+.
+
+![Request Logs list — Description, Status badge, ID, API Credential, Method, Version, Date columns](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdevelopers-request-logs-list.9b0ab4c9.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Request Table
+
+| Column | Description |
+| --- | --- |
+| **Description** | A summary of the request (route and action) |
+| **Status** | The HTTP response status code returned — colour-coded (green for 2xx, red for 4xx/5xx) |
+| **ID** | The public request ID — click to copy |
+| **API Credential** | The API key used to authenticate the request — click to copy the key name |
+| **HTTP Method** | `GET` , `POST` , `PUT` , `PATCH` , or `DELETE` |
+| **Version** | The API version targeted by the request |
+| **Date** | When the request was received |
+
+## Filtering
+
+Click
+**Filters**
+to open the filter panel. You can filter by any combination of:
+
+* **API Credential**
+  — show only requests from a specific key
+* **HTTP Method**
+  — filter to one or more methods (GET, POST, PUT, PATCH, DELETE)
+* **Version**
+  — filter to a specific API version
+* **Date**
+  — filter to a date range
+
+Use the
+**Visible Columns**
+picker to show or hide columns that are not relevant to your current investigation.
+
+## Request Detail View
+
+Click any row to open the full request record.
+
+![Request Log detail — Details, Query Params, Request Headers, Request Body, and Response Body panels](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdevelopers-request-log-details.940dc87a.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+The detail view is broken into focused panels:
+
+### Details
+
+The high-level summary — request description, HTTP status code (shown as a badge in the header), API key used, method, version, and timestamp.
+
+### Query Parameters
+
+URL query parameters included in the request, if any.
+
+### Request Headers
+
+All HTTP headers sent with the request, including
+`Authorization`
+,
+`Content-Type`
+, and
+`User-Agent`
+.
+
+### Request Body
+
+The JSON body sent with the request (for
+`POST`
+,
+`PUT`
+, and
+`PATCH`
+requests). Empty for
+`GET`
+and
+`DELETE`
+.
+
+### Response Body
+
+The exact JSON payload returned by Fleetbase. For failed requests, the error message and validation details appear here — this is usually the fastest way to understand why a request failed.
+
+Use the
+**Back**
+button in the header to return to the list.
+
+## Test vs. Live Logs
+
+Request Logs are scoped to the current environment. Switch to
+**Test mode**
+using the toggle in the top navigation bar to see only requests made with test keys. Switch back to view live traffic.
+
+## Data Retention
+
+Logs are retained for a rolling window and automatically pruned to keep database size manageable. For long-term auditing, forward critical requests to an external logging service via
+[Webhooks](https://fleetbase.io/docs/platform/developer-console/webhooks)
+or export them on a regular schedule.

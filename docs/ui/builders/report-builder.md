@@ -1,0 +1,89 @@
+---
+title: "ReportBuilder"
+url: https://fleetbase.io/docs/ui/builders/report-builder
+module: ui
+---
+
+# ReportBuilder
+
+<ReportBuilder> is a visual query builder for constructing reports — pick tables, columns, filters, sorts, and group-bys, then preview live results.
+
+# <ReportBuilder>
+
+`<ReportBuilder>`
+is a visual query builder for constructing custom reports. The user picks tables and columns, applies filters and sorts, and previews the resulting data live. The configuration is persisted as a
+`query_config`
+JSON object on a Report record.
+
+## Basic Usage
+
+```
+<ReportBuilder
+  @extension="fleet-ops"
+  @category="orders"
+  @report={{this.report}}
+  @onQueryConfigChanged={{this.persistConfig}}
+/>
+```
+
+The component:
+
+1. Loads available tables and columns from
+   `GET /reports/tables`
+   (filtered by
+   `extension`
+   and
+   `category`
+   )
+2. Renders the configuration UI on the
+   **Configuration**
+   tab
+3. Renders live results on the
+   **Preview**
+   tab via
+   `POST /reports/execute-query`
+4. Mutates
+   `report.query_config`
+   and
+   `report.fillResult(...)`
+   as the user edits
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@extension` | string | Extension key — filters the available tables |
+| `@category` | string | Category within the extension — further filters tables |
+| `@report` | model | The Report record being edited (its `query_config` and result are mutated) |
+| `@onQueryConfigChanged` | `(queryConfig)` | Called whenever the query config changes |
+
+## Internal Behavior
+
+| Task | Description |
+| --- | --- |
+| `loadSchema` | `GET reports/tables` — fetches available tables and columns |
+| `execute` | `POST reports/execute-query` — runs the configured query and returns rows |
+
+## Tabs
+
+The builder has two tabs:
+
+* **Configuration**
+  — table selector, columns picker, filters, sorts, group-by
+* **Preview**
+  — table view of the live results
+
+## Validation
+
+The component tracks
+`validationErrors`
+and
+`validationWarnings`
+— surfaced inline as the user edits.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/report-builder.hbs` | Template |
+| `addon/components/report-builder.js` | Class |

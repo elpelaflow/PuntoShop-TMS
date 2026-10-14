@@ -1,0 +1,118 @@
+---
+title: "Sidebar Service"
+url: https://fleetbase.io/docs/ui/services/sidebar
+module: ui
+---
+
+# Sidebar Service
+
+The `sidebar` service controls the console sidebar's visibility (visible / minimized / hidden) and enabled state.
+
+# Sidebar Service
+
+```
+@service sidebar;
+```
+
+The
+`sidebar`
+service controls the console sidebar — show, hide, minimize, enable, disable. Most extension authors only need it for full-screen views (where you want to hide the sidebar to give a workflow more space) or special UIs that mode-switch the sidebar's visibility.
+
+## Inject
+
+```
+import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
+
+export default class FullscreenViewerComponent extends Component {
+  @service sidebar;
+}
+```
+
+## States
+
+The sidebar has three visual states:
+
+| State | Meaning |
+| --- | --- |
+| `visible` | Default — full sidebar showing |
+| `minimized` | Collapsed to icons only |
+| `hidden` | Completely off-screen |
+
+Plus an enabled flag — when
+`disabled`
+, the sidebar is forced hidden and
+`show()`
+/
+`minimize()`
+are ignored.
+
+## Public API
+
+### State Getters
+
+| Getter | Description |
+| --- | --- |
+| `isVisible` | True when state ≠ `hidden` |
+| `isHidden` | True when state = `hidden` |
+| `isMinimized` | True when state = `minimized` |
+| `isEnabled` | True when not disabled |
+| `isDisabled` | True when disabled |
+| `hasContext` | True when a sidebar component is registered |
+
+### Actions
+
+| Method | Description |
+| --- | --- |
+| `show()` | Transition to `visible` |
+| `hide(options?)` | Transition to `hidden` . Pass `{ immediate: true }` for no animation, or `{ preserveDisabled: true }` to keep the disabled state |
+| `hideNow()` | Hide immediately (no animation) |
+| `minimize()` | Transition to `minimized` |
+| `toggle()` | Toggle between visible and hidden |
+| `enable(state?)` | Set enabled and restore the previous state (or the passed state) |
+| `disable()` | Force-hide and prevent the user from re-opening |
+| `setVisualState(state)` | Set the state without triggering side effects |
+| `setEnabled(bool)` | Set enabled flag without other side effects |
+| `transitionTo(state, options?)` | Lower-level transition |
+
+### Element Access
+
+| Method | Description |
+| --- | --- |
+| `getComponent()` | The registered sidebar component instance |
+| `getElement()` | The sidebar's DOM node |
+| `getGutterElement()` | The sidebar gutter (resize handle) |
+
+## Real-World Examples
+
+```
+// Hide the sidebar when entering a full-screen workflow
+@action enterFullscreen() {
+  this.sidebar.hide();
+}
+
+@action exitFullscreen() {
+  this.sidebar.show();
+}
+
+// Disable the sidebar entirely (e.g. during onboarding)
+@action startOnboarding() {
+  this.sidebar.disable();
+}
+
+@action finishOnboarding() {
+  this.sidebar.enable();   // restores the previous state
+}
+
+// Minimize during a focus mode
+@action focusMode() {
+  this.sidebar.minimize();
+}
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/services/sidebar.js` | Service class |
+| `addon/components/layout/sidebar/` | Sidebar component |

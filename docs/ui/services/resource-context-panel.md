@@ -1,0 +1,199 @@
+---
+title: "Resource Context Panel Service"
+url: https://fleetbase.io/docs/ui/services/resource-context-panel
+module: ui
+---
+
+# Resource Context Panel Service
+
+The `resource-context-panel` service opens contextual detail overlays for any Fleetbase resource — single-content or tabbed, with route-sync and a stack of nested panels.
+
+# Resource Context Panel Service
+
+```
+@service resourceContextPanel;
+```
+
+The
+`resource-context-panel`
+service is the standardized way to open a contextual detail overlay for a record. It supports a stack of panels, single-content or tabbed layouts, route-synced URLs, and per-tab navigation guards.
+
+This is the same mechanism the console uses for "click a row → open detail panel" — and you can drive it from anywhere in your extension.
+
+## Inject
+
+```
+import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
+
+export default class DriverRowComponent extends Component {
+  @service resourceContextPanel;
+}
+```
+
+## Open a Single-Content Panel
+
+```
+@action openDriver(driver) {
+  this.resourceContextPanel.open({
+    title: driver.name,
+    resource: driver,
+    content: 'driver/detail-panel',     // component path
+    size: 'lg',
+    onClose: () => { /* … */ },
+  });
+}
+```
+
+The component at
+`addon/components/driver/detail-panel.{hbs,js}`
+renders inside the panel and receives the resource via its arguments.
+
+## Open a Tabbed Panel
+
+```
+@action openOrder(order) {
+  this.resourceContextPanel.open({
+    title: order.public_id,
+    resource: order,
+    tabs: [
+      { key: 'overview', label: 'Overview', component: 'order/tabs/overview' },
+      { key: 'timeline', label: 'Timeline', component: 'order/tabs/timeline' },
+      { key: 'comments', label: 'Comments', component: 'order/tabs/comments' },
+    ],
+    initialTab: 'overview',
+    routeSync: true,
+    closeOnTransition: true,
+  });
+}
+```
+
+A tabbed panel is required to have
+**either**
+`tabs`
+**or**
+`content`
+, not both.
+
+## Definition Object
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | Optional — auto-generated if omitted |
+| `title` | string | Panel title |
+| `resource` (or `model` ) | model | The Fleetbase record the panel is about |
+| `size` | string | `sm` , `md` , `lg` , `xl` , `full` (default `sm` ) |
+| `content` | string | Component path for a single-content panel |
+| `tabs` | array | Tab descriptors (mutually exclusive with `content` ) |
+| `initialTab` | string | Initial tab key |
+| `routeSync` | boolean | Reflect the open panel + active tab in the URL via `panel_id` and `panel_tab` query params |
+| `closeOnTransition` | boolean | Close automatically when the user navigates away |
+| `onOpen` | `({ resource, model, close })` | Called when the panel opens |
+| `onClose` | `({ model, close })` | Called when closing — return a Promise to wait |
+
+### Tab Descriptor
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `key` | string | Unique key |
+| `label` (or `title` ) | string | Display label |
+| `component` | string | Component path |
+| `render` | function | Alternative — render function |
+| `beforeLeave` | `({ model, close }) → bool | Promise<bool>` | Guard that runs when switching away from this tab — return `false` to block |
+
+## Public API
+
+| Method | Description |
+| --- | --- |
+| `open(definition)` | Open a panel. Returns the panel ID |
+| `update(id, partial)` | Merge updates into an existing panel |
+| `close(id?)` | Close a specific panel, or the active one if no id |
+| `closeAll()` | Close every panel in the stack |
+| `setActiveTab(id, tabKey)` | Switch tabs (respects `beforeLeave` ) |
+| `getActive()` | The top-most panel |
+| `getById(id)` | Find a specific panel |
+| `getActiveTab(id)` | The active tab key for a panel |
+| `isOpen(id?)` | Whether the panel (or any panel) is open |
+| `stack()` | Snapshot of the panel stack |
+| `bringToFront(id)` | Move a panel to the top of the stack |
+
+## Route Sync
+
+When
+`routeSync: true`
+, the service writes
+`panel_id`
+and
+`panel_tab`
+to the route's query params. This means refresh-survives panels and shareable URLs — paste the URL into a new browser tab and the same panel reopens.
+
+Pair
+`routeSync: true`
+with
+`closeOnTransition: true`
+if you want the panel to close cleanly when the user navigates to a different page.
+
+## Real-World Example
+
+```
+@action openInvoice(invoice) {
+  this.resourceContextPanel.open({
+    title: `Invoice ${invoice.number}`,
+    resource: invoice,
+    size: 'lg',
+    routeSync: true,
+    closeOnTransition: true,
+    tabs: [
+      {
+        key: 'details',
+        label: 'Details',
+        component: 'invoice/details',
+      },
+      {
+        key: 'history',
+        label: 'History',
+        component: 'invoice/history',
+      },
+      {
+        key: 'edit',
+        label: 'Edit',
+        component: 'invoice/edit',
+        beforeLeave: async ({ model }) => {
+          if (model.hasDirtyAttributes) {
+            return confirm('Discard unsaved changes?');
+          }
+          return true;
+        },
+      },
+    ],
+    onClose: async ({ model }) => {
+      if (model.hasDirtyAttributes) {
+        model.rollbackAttributes();
+      }
+    },
+  });
+}
+```
+
+## See Also
+
+* [`<ResourceContextPanel>`
+  component](#)
+  — the component the service mounts (rendered once at the app shell)
+* `helpers/resource-context-panel-save-disabled.js`
+  — small helper used by the panel's save button
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/services/resource-context-panel.js` | Service class |
+| `addon/components/resource-context-panel.hbs` | Component template |
+| `addon/components/resource-context-panel.js` | Component class |
+
+[Sidebar Service
+
+The `sidebar` service controls the console sidebar's visibility (visible / minimized / hidden) and enabled state.](https://fleetbase.io/docs/ui/services/sidebar)
+[Template Builder Service
+
+The `template-builder` service lets extensions register Fleetbase model classes as queryable resource types in the TemplateQuery form.](https://fleetbase.io/docs/ui/services/template-builder)

@@ -1,0 +1,52 @@
+---
+title: "ProgressBar"
+url: https://fleetbase.io/docs/ui/display/progress-bar
+module: ui
+---
+
+# ProgressBar
+
+<ProgressBar> is a linear progress indicator with a title and percentage. Used for uploads, multi-step flows, and KPI completion.
+
+# <ProgressBar>
+
+A simple linear progress indicator with a title on the left and a percentage on the right.
+
+## Basic Usage
+
+```
+<ProgressBar @title="Upload progress" @percent={{this.uploadPercent}} />
+```
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@title` | string | Label rendered above the bar (left-aligned) |
+| `@percent` | number | Progress percentage 0–100 |
+
+The width of the inner bar is bound to
+`@percent`
+and updates with a 500ms transition.
+
+## Real-World Examples
+
+```
+{{!-- File upload --}}
+{{#if this.isUploading}}
+  <ProgressBar @title="Uploading {{this.file.name}}" @percent={{this.file.percent}} />
+{{/if}}
+
+{{!-- Multi-step wizard --}}
+<ProgressBar @title="Onboarding" @percent={{div (mul this.step 100) this.totalSteps}} />
+
+{{!-- Goal completion KPI --}}
+<ProgressBar @title="Monthly target" @percent={{this.metrics.completion_pct}} />
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/progress-bar.hbs` | Template |
+| `addon/components/progress-bar.js` | Class |

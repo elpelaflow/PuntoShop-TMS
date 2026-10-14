@@ -1,0 +1,71 @@
+---
+title: "FullCalendar"
+url: https://fleetbase.io/docs/ui/scheduling/full-calendar
+module: ui
+---
+
+# FullCalendar
+
+<FullCalendar> is a full-featured calendar component wrapping FullCalendar.io. Day/week/month/timeline views with drag-and-drop event editing.
+
+# <FullCalendar>
+
+`<FullCalendar>`
+wraps
+[FullCalendar.io](https://fullcalendar.io/)
+for rich calendar UIs — day, week, month, and timeline views with drag-and-drop, event resizing, and resources/lanes for assignment-style schedules.
+
+For driver-style schedules with resource lanes, the higher-level
+[`<ScheduleCalendar>`](https://fleetbase.io/docs/ui/scheduling/event-calendar)
+is usually a better fit (it pre-configures FullCalendar for that pattern).
+
+## Basic Usage
+
+```
+<FullCalendar
+  @events={{this.events}}
+  @initialView="dayGridMonth"
+  @headerToolbar={{this.headerToolbar}}
+  @editable={{true}}
+  @onEventClick={{this.handleEventClick}}
+  @onEventDrop={{this.handleEventDrop}}
+  @onDateClick={{this.handleDateClick}}
+/>
+```
+
+## Common Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@events` | array | Events to display |
+| `@resources` | array | Resources for resource-style views |
+| `@initialView` | string | `dayGridMonth` , `timeGridWeek` , `timeGridDay` , `resourceTimeline` , etc. |
+| `@headerToolbar` | object | Toolbar config — buttons, layout |
+| `@editable` | boolean | Enable drag-and-drop |
+| `@selectable` | boolean | Enable date-range selection |
+| `@height` | string | Calendar height |
+| `@plugins` | array | FullCalendar plugins to enable |
+
+### Callbacks
+
+| Argument | Description |
+| --- | --- |
+| `@onEventClick` | Event clicked |
+| `@onEventDrop` | Event drag-dropped |
+| `@onEventResize` | Event resized |
+| `@onDateClick` | Empty date cell clicked |
+| `@onSelect` | Date range selected |
+
+The component forwards most FullCalendar.io options as
+`@`
+-args — see the
+[FullCalendar API reference](https://fullcalendar.io/docs)
+for the full list.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/full-calendar.hbs` | Template |
+| `addon/components/full-calendar.js` | Class — wraps [FullCalendar.io](https://fullcalendar.io) |
+| `addon/components/full-calendar/` | Subcomponents |

@@ -1,0 +1,169 @@
+---
+title: "TabNavigation"
+url: https://fleetbase.io/docs/ui/navigation/tab-navigation
+module: ui
+---
+
+# TabNavigation
+
+<TabNavigation> renders a tab strip — supports route-driven tabs (LinkTo), state-driven tabs, icons, badges, closable tabs, and an Add-tab button.
+
+# <TabNavigation>
+
+`<TabNavigation>`
+renders a tab strip with active state, icons, badges, and an optional content area. Tabs can be:
+
+* **Route-driven**
+  — clicking a tab navigates via
+  `LinkTo`
+* **State-driven**
+  — clicking a tab toggles internal active state and emits
+  `@onSelect`
+
+For a simpler container that yields a curried
+`<Tab>`
+subcomponent, use
+`<Tabs>`
+.
+
+## Route-Driven Example
+
+```
+<TabNavigation @tabs={{this.tabs}} />
+```
+
+```
+tabs = [
+  { id: 'overview', label: 'Overview', route: 'driver.show.overview', icon: 'eye' },
+  { id: 'orders',   label: 'Orders',   route: 'driver.show.orders',   icon: 'list', badgeText: this.orderCount },
+  { id: 'docs',     label: 'Documents',route: 'driver.show.docs',     icon: 'file' },
+];
+```
+
+Each tab can have:
+
+* `id`
+  (required for state-driven tabs)
+* `label`
+  — display text
+* `route`
+  — Ember route name (uses
+  `LinkTo`
+  )
+* `query`
+  — query params for the route
+* `model`
+  — model for the route
+* `icon`
+  — FontAwesome icon
+* `iconSize`
+  ,
+  `iconClass`
+  ,
+  `iconWrapperClass`
+  — icon overrides
+* `hasBadge`
+  /
+  `badgeText`
+  — small badge after the label
+* `isClosable`
+  — show a close button on the tab
+* `isDisabled`
+  — disabled state
+* `class`
+  — extra classes on this specific tab
+
+## State-Driven Example
+
+```
+<TabNavigation @tabs={{this.tabs}} @onSelect={{this.selectTab}} as |activeTab|>
+  {{#if (eq activeTab.id "overview")}}
+    <OverviewPanel />
+  {{else if (eq activeTab.id "orders")}}
+    <OrdersPanel />
+  {{/if}}
+</TabNavigation>
+```
+
+When tabs don't have a
+`route`
+, they switch internal active state and emit
+`@onSelect(tab)`
+. The active tab is yielded into the default block.
+
+## Arguments
+
+### Tabs
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@tabs` | array | Tab descriptors |
+| `@iconType` | string | `"icon"` (default, FontAwesome) or `"component"` (renders the icon as a component) |
+| `@onSelect` | `(tab)` | Called when a state-driven tab is clicked |
+| `@onAddTab` | `()` | If set, shows a `+` button at the end of the strip |
+| `@onCloseTab` | `(tab)` | Called when a closable tab's close button is clicked |
+
+### Visual
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@style` | string | `github` | Visual style preset |
+| `@size` | string | `md` | `sm` , `md` , `lg` |
+| `@containerClass` | string | — | Outer wrapper |
+| `@tablistClass` | string | — | Tab list row |
+| `@tabClass` | string | — | Each tab |
+| `@contentClass` | string | — | Content area |
+| `@tabActionsWrapperClass` | string | — | Right-side actions |
+| `@tabTitleWrapperClass` | string | — | Title slot |
+
+### Yielded Blocks
+
+| Block | Receives | Purpose |
+| --- | --- | --- |
+| (default) | `activeTab` | Content for the active tab |
+| `:title` | — | Render content before the tabs |
+| `:tabs` | the component | Replace the entire tab list with custom markup |
+| `:actions` | — | Action buttons on the right side |
+
+## Real-World Examples
+
+```
+{{!-- Driver detail page with route-driven tabs --}}
+<TabNavigation @tabs={{this.detailTabs}}>
+  <:title>
+    <h2 class="text-lg font-semibold">{{this.driver.name}}</h2>
+  </:title>
+  <:actions>
+    <Button @icon="ellipsis" @size="xs" />
+  </:actions>
+</TabNavigation>
+
+{{!-- Inline tabs in a settings panel --}}
+<TabNavigation @tabs={{this.tabs}} @onSelect={{this.onTab}} as |tab|>
+  {{#if (eq tab.id "general")}}
+    <GeneralSettings />
+  {{else if (eq tab.id "permissions")}}
+    <PermissionsSettings />
+  {{/if}}
+</TabNavigation>
+```
+
+## See Also
+
+* `<Tabs>`
+  — simpler container that yields a
+  `<Tab>`
+  subcomponent (use
+  `@title`
+  on each)
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/tab-navigation.hbs` | Template |
+| `addon/components/tab-navigation.js` | Class |
+| `addon/components/tabs.hbs` | Sibling — simpler container that yields a `<Tab>` subcomponent |
+| `addon/components/tabs.js` |  |
+| `addon/components/tabs/tab.hbs` | Tab subcomponent template |
+| `addon/components/tabs/tab.js` | Tab subcomponent class |

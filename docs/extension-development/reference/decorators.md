@@ -1,0 +1,188 @@
+---
+title: "Decorators"
+url: https://fleetbase.io/docs/extension-development/reference/decorators
+module: extension-development
+---
+
+# Decorators
+
+Property decorators from @fleetbase/ember-core for cross-engine service injection and lazy data loading: @engineService, @fromStore, and @fetchFrom.
+
+# Decorators
+
+`@fleetbase/ember-core`
+ships three custom property decorators for the patterns Ember's built-in
+`@service`
+doesn't cover: pulling a service from another engine, lazily querying the store on first access, and lazily fetching from the API on first access.
+
+## @engineService
+
+Inject a service that lives in
+**another**
+engine. Useful when an extension needs Fleet-Ops's
+`location`
+service, Ledger's
+`currency`
+service, etc. — a regular
+`@service`
+can't see across engine boundaries.
+
+```
+import Component from '@glimmer/component';
+import engineService from '@fleetbase/ember-core/decorators/engine-service';
+
+export default class OrderTrackingLookup extends Component {
+    @engineService('@fleetbase/fleetops-engine') location;
+    @engineService('@fleetbase/fleetops-engine') movementTracker;
+    // …
+}
+```
+
+Real example:
+[`packages/fleetops/addon/components/order-tracking-lookup.js:21`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/packages/fleetops/addon/components/order-tracking-lookup.js#L21)
+.
+
+### Signature
+
+```
+@engineService(engineName, options?) propertyName;
+```
+
+| Argument | Description |
+| --- | --- |
+| `engineName` | The engine package name (e.g. `'@fleetbase/fleetops-engine'` ) |
+| `options` | Optional `{ serviceName }` — defaults to the property name if you want a different service name |
+| Property name | Defaults to the lookup name ( `location` → `service:location` in the target engine) |
+
+### How It Works
+
+The decorator resolves to a computed property that, on first access, loads the target engine via
+`extensionManager.ensureEngineLoaded(engineName)`
+and looks up the service from the engine's container. The first access is async — guard it accordingly. Subsequent accesses return the cached service synchronously.
+
+### When to Use
+
+* Cross-engine integrations that can't be expressed via
+  `ExtensionComponent`
+  or registry slots
+* Triggering an action in another engine from your component or controller
+* Reading state from a service whose owning engine is loaded on demand
+
+When in doubt, prefer registering a renderable component via the
+[Registry Service](https://fleetbase.io/docs/extension-development/universe/registry-service)
+— it avoids touching the target engine's container at all.
+
+## @fromStore
+
+Lazily query the Ember Data store on first access of a tracked property:
+
+```
+import fromStore from '@fleetbase/ember-core/decorators/from-store';
+
+export default class WebhooksController extends Controller {
+    @fromStore('api-credential', { limit: -1 }) apiCredentials;
+}
+```
+
+Equivalent to writing:
+
+```
+get apiCredentials() {
+    return this.store.query('api-credential', { limit: -1 });
+}
+```
+
+…except it caches the resolved value instead of re-querying on every access, and you don't have to keep referencing
+`this.store`
+.
+
+### Signature
+
+```
+@fromStore(modelName, query?, options?) propertyName;
+```
+
+| Argument | Description |
+| --- | --- |
+| `modelName` | Ember Data model name (e.g. `'api-credential'` ) |
+| `query` | Query hash forwarded to `store.query()` |
+| `options` | Adapter options forwarded as the third arg, plus `onComplete(response, this)` callback |
+
+The first read returns a Promise; assign-on-resolve lets a template auto-rerender once the data lands. If the query fails the property is set to
+`null`
+.
+
+There's also a
+`legacy-from-store`
+variant for code on classic Ember objects (computed-style); the modern decorator is the default.
+
+## @fetchFrom
+
+Same idea as
+`@fromStore`
+, but for raw API endpoints via the
+`fetch`
+service — not Ember Data:
+
+```
+import fetchFrom from '@fleetbase/ember-core/decorators/fetch-from';
+
+export default class WebhooksViewController extends Controller {
+    @fetchFrom('webhook-endpoints/events') webhookEvents;
+    @fetchFrom('webhook-endpoints/versions') apiVersions;
+}
+```
+
+Equivalent to:
+
+```
+get webhookEvents() {
+    return this.fetch.get('webhook-endpoints/events');
+}
+```
+
+…with the same caching + auto-set behavior as
+`@fromStore`
+.
+
+### Signature
+
+```
+@fetchFrom(endpoint, query?, options?) propertyName;
+```
+
+| Argument | Description |
+| --- | --- |
+| `endpoint` | Path passed to `fetch.get()` (relative to your API base) |
+| `query` | Query parameters serialized into the URL |
+| `options` | Forwarded to `fetch.get()` as the options bag, plus `onComplete(response, this)` |
+
+Real example:
+[`packages/dev-engine/addon/controllers/webhooks/view.js:25`](https://github.com/elpelaflow/PuntoShop-TMS/blob/main/packages/dev-engine/addon/controllers/webhooks/view.js#L25)
+.
+
+## When to Reach for Each
+
+| Want… | Use |
+| --- | --- |
+| A service from another engine | `@engineService` |
+| Ember Data records, lazy-loaded | `@fromStore` |
+| Raw API JSON, lazy-loaded | `@fetchFrom` |
+| A service from your own engine | Plain `@service` (Ember built-in) |
+| Eager data needed before render | Route's `model()` hook |
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/decorators/engine-service.js` | Cross-engine service decorator |
+| `addon/decorators/from-store.js` | Lazy `store.query` decorator |
+| `addon/decorators/fetch-from.js` | Lazy `fetch.get` decorator |
+| `addon/utils/inject-engine-service.js` | Underlying engine-service resolver |
+
+[Contracts
+
+Reference for every contract in @fleetbase/ember-core/contracts — MenuItem, MenuPanel, Widget, Hook, ExtensionComponent, TableColumn, ResourceAction, ActionButton, Registry, TemplateHelper, BaseContract.](https://fleetbase.io/docs/extension-development/reference/contracts)
+[Ember Services
+
+Reference for the host services your extension consumes — fetch, store, current-user, session, abilities, intl, notifications, socket, crud, chat, theme, modalsManager, events, app-cache, language, hostRouter, and more.](https://fleetbase.io/docs/extension-development/reference/ember-services)

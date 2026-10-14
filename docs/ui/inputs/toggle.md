@@ -1,0 +1,137 @@
+---
+title: "Toggle"
+url: https://fleetbase.io/docs/ui/inputs/toggle
+module: ui
+---
+
+# Toggle
+
+<Toggle> is the on/off switch for boolean values. Supports labels, custom colors, permission gating, and a yielded block for inline content.
+
+# <Toggle>
+
+A switch-style on/off input for boolean values. Used everywhere a single boolean flag needs to be set — settings panels, feature flags, "Online" / "Active" toggles.
+
+## Basic Usage
+
+```
+<Toggle @isToggled={{this.isOnline}} @onToggle={{fn (mut this.isOnline)}} />
+```
+
+## With a Label
+
+```
+<Toggle
+  @isToggled={{this.driver.online}}
+  @label="Online"
+  @onToggle={{fn (mut this.driver.online)}}
+/>
+```
+
+The
+`@label`
+is rendered to the right of the switch.
+
+## Yielding a Custom Label
+
+If you need the label to be rich (icon + text, custom markup), yield a block:
+
+```
+<Toggle @isToggled={{this.notify}} @onToggle={{fn (mut this.notify)}}>
+  <FaIcon @icon="bell" class="mx-2" />
+  <span class="text-sm">Email me on every order</span>
+</Toggle>
+```
+
+## Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@isToggled` | boolean | `false` | The current toggle state |
+| `@onToggle` | `(isToggled) => void` | — | Called with the new state when the user flips the switch |
+| `@label` | string | — | Optional label rendered to the right of the switch |
+| `@labelClass` | string | — | Extra classes on the label |
+| `@activeColor` | string | `green` | Tailwind color name used for the on-state background — e.g. `green` , `blue` , `red` , `yellow` |
+| `@disabled` | boolean | `false` | When true, clicks do nothing and the switch is dimmed |
+| `@visible` | boolean | `true` | When false, nothing renders |
+| `@permission` | string | — | If the current user lacks this ability, the toggle is auto-disabled and shows an "Unauthorized" tooltip |
+| `@helpText` | string | — | Tooltip text shown next to the label |
+| `@exampleText` | string | — | Optional example beneath the help text |
+| `@icon` | string | `info-circle` | Icon shown next to the help-text trigger |
+| `@iconClass` | string | — | Extra classes on the help icon |
+| `@tooltipPlacement` | string | `right` | Tooltip placement — `top` , `bottom` , `left` , `right` |
+| `@wrapperClass` | string | — | Extra classes on the outer wrapper |
+
+## Different Color
+
+Use
+`@activeColor`
+to change the on-state color — useful to convey severity:
+
+```
+<Toggle @isToggled={{this.danger}} @label="Demolition mode" @activeColor="red" @onToggle={{fn (mut this.danger)}} />
+<Toggle @isToggled={{this.warn}}   @label="Warning mode"    @activeColor="yellow" @onToggle={{fn (mut this.warn)}} />
+<Toggle @isToggled={{this.info}}   @label="Info mode"       @activeColor="blue" @onToggle={{fn (mut this.info)}} />
+```
+
+## Permission Gating
+
+```
+<Toggle
+  @isToggled={{this.feature.enabled}}
+  @label="Enable feature flag"
+  @permission="platform manage feature-flags"
+  @onToggle={{fn (mut this.feature.enabled)}}
+/>
+```
+
+If the current user can't manage feature flags, the switch is rendered disabled with an "Unauthorized" tooltip.
+
+## With Help Text
+
+```
+<Toggle
+  @isToggled={{this.options.auto_dispatch}}
+  @label="Auto-dispatch orders"
+  @helpText="Orders are dispatched as soon as they are accepted, without manual intervention."
+  @onToggle={{fn (mut this.options.auto_dispatch)}}
+/>
+```
+
+## Real-World Examples
+
+```
+{{!-- Driver online/offline --}}
+<Toggle
+  @isToggled={{this.driver.online}}
+  @label="Online"
+  @onToggle={{fn (mut this.driver.online)}}
+/>
+
+{{!-- Settings boolean with help text --}}
+<Toggle
+  @isToggled={{this.options.tax_enabled}}
+  @label="Enable tax"
+  @helpText="Apply a tax line item to checkouts. You'll be prompted for the tax percentage."
+  @onToggle={{fn (mut this.options.tax_enabled)}}
+/>
+
+{{!-- Inside a form, paired with InputGroup --}}
+<InputGroup>
+  <Toggle
+    @isToggled={{this.driver.email_notifications}}
+    @label="Email notifications"
+    @onToggle={{fn (mut this.driver.email_notifications)}}
+  />
+</InputGroup>
+
+{{!-- Disabled toggle --}}
+<Toggle @isToggled={{this.locked}} @label="Locked (admin only)" @disabled={{true}} />
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/toggle.hbs` | Template |
+| `addon/components/toggle.js` | Class |

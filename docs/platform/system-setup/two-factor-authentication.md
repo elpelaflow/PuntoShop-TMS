@@ -1,0 +1,60 @@
+---
+title: "Two-Factor Authentication"
+url: https://fleetbase.io/docs/platform/system-setup/two-factor-authentication
+module: platform
+---
+
+# Two-Factor Authentication
+
+Enable and enforce two-factor authentication system-wide for all users in your Fleetbase instance.
+
+# Two-Factor Authentication
+
+Two-factor authentication (2FA) adds a second verification step to the login flow. After entering their password, users must confirm a one-time code before gaining access. Navigate to
+**Admin → Auth Config → Two-Factor Auth**
+to configure 2FA system-wide.
+
+2FA applies to every way of signing in, including
+[OAuth Sign-in](https://fleetbase.io/docs/platform/system-setup/oauth-sign-in)
+— signing in with a provider never skips the one-time code.
+
+![Two-Factor Authentication settings — Enable toggle, delivery Method selector, and Enforce toggle](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fadmin-two-factor-settings.c665a65e.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Enabling 2FA
+
+Toggle
+**Enable Two-Factor Authentication**
+to make 2FA available across the instance. When enabled, users can activate 2FA on their own accounts from their personal security settings. Enabling here does not immediately force all users to use it — see
+[Enforcing 2FA](#enforcing-2fa)
+below.
+
+## Method
+
+Choose how one-time codes are delivered to users when they log in:
+
+| Method | Description |
+| --- | --- |
+| **Email** | A verification code is sent to the user's registered email address. No additional setup required. |
+| **SMS** | A verification code is sent to the user's registered phone number. Requires [Twilio](https://fleetbase.io/docs/platform/system-setup/services#twilio) to be configured. |
+
+Only one method is active system-wide at a time. Use
+**Email**
+if Twilio is not yet configured.
+
+## Enforcing 2FA
+
+Toggle
+**Enforce Two-Factor Authentication**
+to require every user to complete 2FA setup on their next login. When enforced:
+
+* Users who have not yet set up 2FA are prompted to do so immediately after entering their password.
+* They cannot access the console until 2FA is fully configured on their account.
+* Users who already have 2FA enabled continue without interruption.
+
+Enforcement applies to all users in the instance, including administrators.
+
+## Saving
+
+Click
+**Save Changes**
+to apply. Changes take effect on the next login attempt — currently active sessions are not interrupted.

@@ -1,0 +1,102 @@
+---
+title: "Organizations"
+url: https://fleetbase.io/docs/platform/identity-and-access/organizations
+module: platform
+---
+
+# Organizations
+
+Understand the two distinct organization views in Fleetbase — the system-wide admin list and your personal organization membership panel.
+
+# Organizations
+
+Fleetbase is multi-tenant by design. A single instance can host multiple fully isolated organizations, each with their own users, data, API keys, extensions, and settings. No data crosses organization boundaries unless explicitly shared through the API.
+
+There are two distinct places in the console where organizations appear — one for system-level administrators, and one for every user managing their own membership.
+
+---
+
+## Admin View — All Organizations
+
+This section is only accessible to
+**instance administrators**
+(system-level admins).
+
+Navigate to
+**Admin → Organizations**
+to see every organization registered on the instance. This is the global management panel, not a personal membership view.
+
+![Admin Organizations list — organization name, owner, country, and creation date](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fadmin-organizations-list.d6afcb88.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+The list displays each organization's name, owner, country, and creation date. Click any row to view or manage that organization.
+
+### How Organizations Are Created
+
+When any user creates an account on Fleetbase, an organization is automatically created for them. Every resource in the system — orders, drivers, vehicles, contacts, webhooks — belongs to exactly one organization.
+
+### Multi-Tenant Use Cases
+
+The multi-organization architecture is commonly used for:
+
+* **Internal departments**
+  — Separate organizations for different regional teams or business units sharing one Fleetbase instance
+* **White-label platforms**
+  — SaaS providers who use Fleetbase to power their own product offer each customer a separate organization
+* **Client isolation**
+  — Agencies or logistics operators who manage fleets on behalf of multiple clients keep each client's data fully isolated
+
+---
+
+## User View — Your Organizations
+
+Every user can view and manage the organizations they personally belong to. This is separate from the admin panel and is accessible to all users.
+
+Navigate to
+**User menu (avatar) → Your profile → Organizations**
+.
+
+![Profile Organizations panel — list of organization memberships with Switch, Edit, Leave, and Delete actions](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-organizations-list.b4263575.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+This panel lists every organization the logged-in user is a member of — including organizations they own and organizations they were invited into.
+
+### Switching Organizations
+
+Click
+**Switch**
+next to any organization to make it the active context. The console immediately reloads and reflects only the data and settings of that organization. The active organization is shown in the top navigation bar.
+
+Users who belong to only one organization do not need to switch — the active organization is set automatically on login.
+
+### Editing an Organization
+
+Users can edit an organization's name, description, and settings if they
+**own**
+the organization or have been granted the appropriate permissions within it.
+
+![Edit organization form — name, description, and settings fields](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-organization-edit.cd060f6d.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+Users without ownership or the required permissions will see the organization listed but will not have edit controls available.
+
+### Leaving an Organization
+
+Click
+**Leave**
+next to any organization you are a member of but do not own. Leaving removes you from the organization immediately — you will no longer have access to its data or console.
+
+You cannot leave an organization you own. Transfer ownership or delete the organization instead.
+
+### Deleting an Organization
+
+Organization owners can delete their organization from this panel. Deleting an organization permanently removes all data, users, API keys, and resources belonging to it. This action cannot be undone.
+
+Users who are not the owner will not see a delete option for that organization.
+
+---
+
+## Cross-Organization Invites
+
+When a user is invited to a second organization by email and that email already has a Fleetbase account, a cross-organization invite is issued. The user accepts the invite and gains access to the new organization while keeping their existing account. Their credentials, 2FA settings, and profile remain unchanged — only the active organization context changes.
+
+See
+[Users](https://fleetbase.io/docs/platform/identity-and-access/users)
+for details on the invite flow.

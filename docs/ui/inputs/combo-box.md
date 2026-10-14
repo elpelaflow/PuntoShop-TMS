@@ -1,0 +1,71 @@
+---
+title: "ComboBox"
+url: https://fleetbase.io/docs/ui/inputs/combo-box
+module: ui
+---
+
+# ComboBox
+
+<ComboBox> is a dual-list selector — left column shows available options, right column shows selected options, with arrow buttons to move items between.
+
+# <ComboBox>
+
+`<ComboBox>`
+is a dual-list selector — sometimes called a "shuttle" or "transfer list". The left column lists available options, the right column lists selected options, and arrow buttons move items between the two.
+
+This is
+**not**
+the same pattern as a typeahead/autocomplete. For that, use
+[`<Select>`](https://fleetbase.io/docs/ui/inputs/select)
+,
+[`<ModelSelect>`](https://fleetbase.io/docs/ui/inputs/model-select)
+, or
+[`<MultiSelect>`](https://fleetbase.io/docs/ui/inputs/multi-select)
+.
+
+## Basic Usage
+
+```
+<ComboBox
+  @options={{this.allPermissions}}
+  @selected={{this.assignedPermissions}}
+  @optionLabel="name"
+  @optionBoxLabel="Available"
+  @selectionBoxLabel="Assigned"
+  @onChange={{fn (mut this.assignedPermissions)}}
+/>
+```
+
+## How It Works
+
+1. The user clicks options in the left column to select them (highlighted as "pending")
+2. Clicks the right-arrow button to move them to the selected list
+3. Or clicks options in the right column ("unpending") and the left-arrow button to remove them
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@options` | array | All available options |
+| `@selected` | array | Currently-selected options (subset of `@options` ) |
+| `@optionLabel` | string | Property path on each option for the display label |
+| `@optionBoxLabel` | string | Heading for the left (available) column |
+| `@selectionBoxLabel` | string | Heading for the right (selected) column |
+| `@onChange` | `(selected)` | Called with the new selected array after a transfer |
+
+## When to Use
+
+* Permission / role assignment UIs (assign abilities to a role)
+* Multi-pick configuration where seeing both "available" and "assigned" simultaneously is helpful
+* Bulk-assign workflows (assign drivers to a zone, products to a catalog, etc.)
+
+For most multi-select use cases prefer
+[`<MultiSelect>`](https://fleetbase.io/docs/ui/inputs/multi-select)
+— it's more compact.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/combo-box.hbs` | Template |
+| `addon/components/combo-box.js` | Class |

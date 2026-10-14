@@ -1,0 +1,248 @@
+---
+title: "Zones"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/zones
+module: fleet-ops
+---
+
+Service Areas & Geofences
+
+# Zones
+
+Nest precise operational boundaries inside a service area for finer dispatch, pricing, and geofencing.
+
+# Zones
+
+A
+**Zone**
+is a Polygon nested inside a single
+[Service Area](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/service-areas)
+. Zones subdivide a service area into finer-grained operational boundaries — delivery rings around a depot, exclusion zones inside a city, pickup territories assigned to specific drivers — and they participate in geofencing and pricing exactly like service areas.
+
+## When to Use a Zone vs a Service Area
+
+Use a
+**service area**
+when the boundary represents a country, region, or large metro you want to manage as a unit.
+
+Use a
+**zone**
+when the boundary represents a subdivision of that area — typically smaller than ~50 km across — and you want different geofence triggers or pricing inside vs outside it.
+
+| Decision | Use a zone | Use a service area |
+| --- | --- | --- |
+| Is the boundary contained inside an existing service area? | ✓ |  |
+| Does it represent a country, state, or large metro? |  | ✓ |
+| Will multiple boundaries need to share configuration (a shared parent)? | ✓ |  |
+| Is it for a national-scale geofence or country-level pricing? |  | ✓ |
+
+## Concepts
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `name` | string | Human-readable label (e.g. `Zone A — Downtown` ). |
+| `description` | text | Optional notes shown in the management UI. |
+| `service_area_uuid` | UUID | The parent service area. Required. |
+| `border` | Polygon | Boundary geometry, stored as a MySQL spatial column. |
+| `color` , `stroke_color` | hex | Fill and outline color on the live map. |
+| `status` | string | Defaults to `active` on creation. Set to `inactive` to hide without deleting. |
+| `trigger_on_entry` , `trigger_on_exit` | bool | Whether to emit geofence events when a driver/vehicle crosses the boundary. |
+| `dwell_threshold_minutes` | integer | Fires a dwell event if a subject stays inside ≥ N minutes. |
+| `speed_limit_kmh` | integer | Recorded for the zone; combined with telematics to detect speed violations. |
+
+Zones have stable public IDs prefixed with
+`zone_`
+. The API exposes a virtual
+`type`
+attribute that always returns
+`zone`
+— that's how downstream consumers (geofence handlers, pricing) distinguish zones from service areas without having to inspect the model class.
+
+## Managing Zones on the Map
+
+Zones are managed from the same place as their parent service areas:
+**Fleet-Ops → Dashboard → Map**
+tab. Zones are always created in the context of a service area, so the entry points are:
+
+* **Toolbar service-area panel**
+  — open the panel, click a service area in the list, then
+  **Create Zone**
+  from its action menu.
+* **Right-click an existing service-area polygon**
+  on the map and pick
+  **Create Zone**
+  from the contextual menu.
+* **Right-click an existing zone**
+  to get its own action menu (edit, edit boundaries, hide, delete) — the same pattern as service areas.
+
+![Live map with the toolbar's service-area panel open — create a service area, show or hide all of them, or select one to work with its zones](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-zones-map.080fb465.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+See
+[Service Areas → Managing Service Areas on the Map](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/service-areas#managing-service-areas-on-the-map)
+for the toolbar and context-menu screenshots — zones use the same panels and the same edit-boundaries handles.
+
+## Creating a Zone
+
+**Pick a parent service area.**
+A zone must belong to exactly one service area — if you find yourself wanting a "freestanding" zone, model it as a service area instead. The "Create Zone" entry on either the toolbar panel or the right-click context menu carries the parent through for you.
+
+**Draw the boundary on the map.**
+Fleet-Ops switches into draw mode with the polygon tool active. Click each vertex, then double-click (or click the first vertex again) to close the polygon. The creation modal opens with the boundary you just drew.
+
+**Name and describe.**
+A short
+`name`
+plus optional
+`description`
+showing dispatchers what the zone is for (e.g.
+*Zone B — Express delivery only*
+).
+
+**Choose colors.**
+Pick a fill and stroke color that visually distinguish the zone from its siblings on the live map.
+
+**Configure geofence triggers**
+(optional). Toggle entry/exit events, set a dwell threshold, or record a speed limit. See
+[Geofences](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/geofences)
+for what each option controls.
+
+**Save.**
+The zone appears nested under the parent in the toolbar list and on the live map.
+
+To reshape a zone after it's been created, right-click it on the map and pick
+**Edit Boundaries**
+— the polygon switches to a dashed outline with draggable handles at every vertex, exactly like service-area boundary editing.
+
+If you need to create zones programmatically — from a radius around a point, or from a pre-drawn GeoJSON polygon — use the
+[API](#api)
+instead. Those options are not exposed in the UI.
+
+## Zone-Based Pricing
+
+Zones unlock per-region pricing through
+**Service Rate Fees**
+. A service rate can carry an array of fees, each scoped to a
+`zone_uuid`
+(or
+`service_area_uuid`
+) with a
+`priority`
+and an optional
+`is_fallback`
+flag:
+
+| Field | Purpose |
+| --- | --- |
+| `zone_uuid` | Restrict the fee to deliveries that originate or terminate in this zone. |
+| `service_area_uuid` | Restrict the fee to a whole service area (without targeting a specific zone). |
+| `priority` | When multiple fees match, the lowest priority wins. Use this to handle overlapping zones. |
+| `is_fallback` | If no zone-scoped fee matches, the fee marked `is_fallback` is applied instead. |
+| `label` | The line-item label shown on the generated quote. |
+
+### Worked Example
+
+Imagine a same-day delivery operation in Singapore with:
+
+* A central
+  **Downtown**
+  zone with premium pricing.
+* A surrounding
+  **Suburbs**
+  zone with standard pricing.
+* A
+  **Fallback**
+  rate for anywhere else inside the country.
+
+In
+**Settings → Operations → Service Rates**
+, create a service rate for the Singapore service area, then add three fees:
+
+| Label | Zone | Priority | Fallback | Amount |
+| --- | --- | --- | --- | --- |
+| Downtown surcharge | Downtown | 10 | – | +$8 |
+| Standard suburb delivery | Suburbs | 20 | – | +$4 |
+| Default country-wide | – | 99 | ✓ | +$2 |
+
+When an order is quoted, Fleet-Ops resolves the pickup/dropoff into a zone, picks the lowest-priority matching fee, and falls back to the
+`is_fallback`
+fee when no zone matches.
+
+See
+[Service Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+for the full pricing model.
+
+## API
+
+All endpoints live under
+`/zones`
+. Auth via your standard API key.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/zones` | List zones, optionally filtered by `service_area` . |
+| `GET` | `/zones/{id}` | Retrieve a single zone. |
+| `POST` | `/zones` | Create a new zone. |
+| `PATCH` | `/zones/{id}` | Update an existing zone. |
+| `DELETE` | `/zones/{id}` | Soft-delete a zone. |
+
+### Create — Point + Radius
+
+```
+curl -X POST https://api.fleetbase.io/v1/zones \
+  -H "Authorization: Bearer $FLEETBASE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Zone A — Downtown",
+    "service_area": "sa_singapore_xxx",
+    "latitude": 1.2839,
+    "longitude": 103.8607,
+    "radius": 1500,
+    "color": "#ef4444",
+    "stroke_color": "#991b1b",
+    "trigger_on_entry": true,
+    "trigger_on_exit": true,
+    "dwell_threshold_minutes": 15
+  }'
+```
+
+### Create — Explicit Border
+
+```
+curl -X POST https://api.fleetbase.io/v1/zones \
+  -H "Authorization: Bearer $FLEETBASE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Restricted Loading Bay",
+    "service_area": "sa_singapore_xxx",
+    "description": "No deliveries between 07:00 and 09:00.",
+    "border": {
+      "type": "Polygon",
+      "coordinates": [[[103.85, 1.28], [103.86, 1.28], [103.86, 1.29], [103.85, 1.29], [103.85, 1.28]]]
+    }
+  }'
+```
+
+## Best Practices
+
+* **Keep zones small.**
+  Boundary checks run on every driver/vehicle location update. A few hundred well-shaped zones per company is fine; tens of thousands of overlapping zones will slow down dispatch.
+* **Use descriptive names.**
+  Drivers and dispatchers see the zone name in event logs and quote line items —
+  `Zone A — Downtown`
+  is far more useful than
+  `Z1`
+  .
+* **Don't duplicate the parent.**
+  If a zone is roughly the same shape as its service area, you're using the wrong primitive — promote it to a service area or merge it with siblings.
+* **Reserve fallback rates for the broadest scope.**
+  Mark
+  `is_fallback`
+  on a service-area-level fee, not a zone-level one, so it only fires when no zone matches.
+
+## What's Next
+
+* Add entry/exit/dwell triggers in
+  [Geofences](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/geofences)
+  .
+* Price orders differently per zone with
+  [Service Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  .

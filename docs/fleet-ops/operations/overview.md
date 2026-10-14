@@ -1,0 +1,102 @@
+---
+title: "Operations Overview"
+url: https://fleetbase.io/docs/fleet-ops/operations/overview
+module: fleet-ops
+---
+
+# Operations Overview
+
+An overview of Fleet-Ops operational capabilities — orders, dispatch, scheduling, and automation.
+
+# Operations Overview
+
+The Operations section of Fleet-Ops is the day-to-day control center for your logistics operation. It covers everything from creating and dispatching individual orders to running automated batch assignment across your entire fleet.
+
+![Fleet-Ops operations panel — orders list with filter bar and live map](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orders-map.80724e10.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## What's in Operations
+
+| Section | Purpose |
+| --- | --- |
+| **Orders** | Create, manage, assign, dispatch, and track all deliveries |
+| **Order Configurations** | Define custom order types with configurable workflows and entity fields |
+| **Orchestrator** | Multi-phase planner for batch vehicle allocation, driver allocation, and route optimization |
+| **Scheduler** | Driver shift scheduling and order timeline management |
+| **Service Rates** | Pricing rules for calculating order costs |
+| **Service Quotes** | On-demand price quotation for orders |
+
+## The Order Workflow
+
+Orders are the core unit of work in Fleet-Ops. A typical order moves through these stages:
+
+1. **Create**
+   — An operator (or external system via API) creates an order with a pickup and dropoff address, items, and an Order Configuration. The order's system status is
+   `created`
+   .
+2. **Schedule**
+   (optional) — Set a specific date and time window. The order remains
+   `created`
+   until dispatched.
+3. **Assign**
+   — Link a driver and vehicle to the order, manually or via an Orchestrator phase. Assignment alone does not change the system status.
+4. **Dispatch**
+   — Send the order to the driver's Navigator app. Status moves to
+   `dispatched`
+   .
+5. **Start**
+   — When the driver accepts and begins the order, status moves to
+   `started`
+   . The activity flow defined by the Order Configuration runs through pickup, transit, and dropoff steps.
+6. **Complete**
+   — When the activity with the
+   `complete`
+   flag fires (e.g.
+   *Items Delivered*
+   ,
+   *Signature Captured*
+   ), status moves to
+   `completed`
+   .
+
+See
+[Order Lifecycle](https://fleetbase.io/docs/fleet-ops/operations/orders/order-lifecycle)
+for the full state model.
+
+## Automation with the Orchestrator
+
+For high-volume operations, manually assigning each order is not practical. The
+**Orchestrator**
+is a multi-phase planner: you compose phases that run in sequence — for example
+*Assign Vehicles*
+→
+*Optimize Routes*
+→
+*Assign Drivers*
+— and the Orchestrator builds a complete plan you preview and commit. You can run a single phase on its own (e.g. just route optimization) or stack many. Each phase uses a configurable engine (the built-in greedy algorithm, VROOM, or any engine registered by an extension).
+
+See
+[Orchestrator Overview](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview)
+for details.
+
+## Shift Scheduling with the Scheduler
+
+The
+**Scheduler**
+provides a calendar view of all driver shifts and order assignments. Use it to plan which drivers are working on which days, and to visualize how orders are distributed across your fleet.
+
+See
+[Scheduler Overview](https://fleetbase.io/docs/fleet-ops/operations/scheduler/overview)
+for details.
+
+## Pricing with Service Rates
+
+**Service Rates**
+define how order costs are calculated — flat fees, distance-based, weight-based, zone-based, or tiered. Rates can be scoped to specific service areas, zones, or order types. When a rate matches an order, a
+**Service Quote**
+is generated showing the estimated cost.
+
+See
+[Service Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+and
+[Service Quotes](https://fleetbase.io/docs/fleet-ops/operations/service-quotes/overview)
+for details.

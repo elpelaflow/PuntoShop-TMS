@@ -1,0 +1,159 @@
+---
+title: "Attach::Tooltip"
+url: https://fleetbase.io/docs/ui/layout/attach-tooltip
+module: ui
+---
+
+# Attach::Tooltip
+
+<Attach::Tooltip> renders a tooltip attached to its parent element. Wraps <Attach::Popover> with tooltip-friendly defaults — hover/focus triggers, top placement, fade animation.
+
+# <Attach::Tooltip>
+
+`<Attach::Tooltip>`
+renders a tooltip floating layer attached to its parent element. It is a thin wrapper around
+[`<Attach::Popover>`](https://fleetbase.io/docs/ui/layout/attach-popover)
+with sensible tooltip defaults — shows on
+`mouseenter focus`
+, hides on
+`mouseleave blur escapekey`
+, with
+`top`
+placement.
+
+This is the canonical tooltip primitive used throughout
+`@fleetbase/ember-ui`
+. Most other components (
+`<Button>`
+,
+`<ContentPanel>`
+,
+`<Toggle>`
+, etc.) have built-in tooltip behavior driven by their
+`@helpText`
+arg — under the hood they're rendering
+`<Attach::Tooltip>`
+.
+
+## Basic Usage
+
+Place
+`<Attach::Tooltip>`
+**inside**
+the element you want to attach to:
+
+```
+<button class="btn">
+  <FaIcon @icon="info" />
+  <Attach::Tooltip>
+    Click here to learn more
+  </Attach::Tooltip>
+</button>
+```
+
+The tooltip auto-hides until the user hovers or focuses the parent button.
+
+## With Rich Content
+
+```
+<span class="cursor-help underline decoration-dotted">
+  Tax inclusive
+  <Attach::Tooltip @placement="bottom">
+    <div class="text-xs">
+      Prices include tax at the rate configured for your store.
+    </div>
+  </Attach::Tooltip>
+</span>
+```
+
+## Common Pattern with <InputInfo>
+
+Most ember-ui components combine
+`<Attach::Tooltip>`
+with the
+`<InputInfo>`
+content component:
+
+```
+<button class="btn btn-default">
+  <FaIcon @icon="info-circle" />
+  <Attach::Tooltip @class="clean" @animation="scale" @placement="top">
+    <InputInfo @text="Configures the order auto-acceptance window" @exampleText="Recommended: 5 minutes" />
+  </Attach::Tooltip>
+</button>
+```
+
+Use this when you want the matching styling that
+`@helpText`
+produces on
+`<Button>`
+,
+`<ContentPanel>`
+, etc.
+
+## Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@placement` | string | `top` | Placement — `top` , `bottom` , `left` , `right` , plus `-start` / `-end` variants |
+| `@class` | string | — | Class on the tooltip — pass `clean` for the unstyled-tooltip variant used with `<InputInfo>` |
+| `@arrow` | boolean | `false` | Render an arrow pointing at the parent |
+| `@offset` | number | — | Distance from the parent in px |
+| `@shiftOptions` | object | — | Floating-UI shift middleware options |
+| `@animation` | string | `fill` | Animation — `fill` , `scale` , `slide` , `none` |
+| `@hideOn` | string | `mouseleave blur escapekey` | Space-separated event names to hide on |
+| `@showOn` | string | `mouseenter focus` | Space-separated event names to show on |
+| `@interactive` | boolean | `false` | Allow the user to mouse into the tooltip without it closing |
+| `@isShown` | boolean | `false` | Imperative show/hide |
+| `@lazyRender` | boolean | `false` | Don't render until the first show |
+| `@showDelay` | number | `0` | Show delay in ms |
+| `@showDuration` | number | `300` | Show animation duration |
+| `@transitionDuration` | number | `0` | Transition duration |
+| `@renderInPlace` | boolean | `false` | Render in DOM order instead of via a portal |
+
+## Real-World Examples
+
+```
+{{!-- Standard help tooltip --}}
+<button>
+  <FaIcon @icon="info-circle" />
+  <Attach::Tooltip>This explains what the field does</Attach::Tooltip>
+</button>
+
+{{!-- Tooltip on a status icon --}}
+<span class="text-yellow-500">
+  <FaIcon @icon="exclamation-triangle" />
+  <Attach::Tooltip @placement="right">
+    Driver hasn't been seen in over 30 minutes
+  </Attach::Tooltip>
+</span>
+
+{{!-- Used by ember-ui internally for @helpText support --}}
+<Button @text="Save" @helpText="Persists your changes" />
+{{!-- expands to: <button> ... <Attach::Tooltip>...<InputInfo @text=...></InputInfo></Attach::Tooltip></button> --}}
+```
+
+## See Also
+
+* [`<Attach::Popover>`](https://fleetbase.io/docs/ui/layout/attach-popover)
+  — for click-triggered or persistent popovers
+* [`<Floating>`](https://fleetbase.io/docs/ui/layout/floating)
+  — the lower-level positioning primitive both Attach components use
+* The
+  `@helpText`
+  arg on
+  `<Button>`
+  ,
+  `<ContentPanel>`
+  ,
+  `<Toggle>`
+  ,
+  `<Checkbox>`
+  — built-in tooltip support that uses this internally
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/attach/tooltip.hbs` | Tooltip template — wraps `<Attach::Popover>` |
+| `addon/components/attach/tooltip.js` | Tooltip class |

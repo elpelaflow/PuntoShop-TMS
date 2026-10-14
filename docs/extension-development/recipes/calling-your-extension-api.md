@@ -1,0 +1,274 @@
+---
+title: "Calling Your Extension's API"
+url: https://fleetbase.io/docs/extension-development/recipes/calling-your-extension-api
+module: extension-development
+---
+
+# Calling Your Extension's API
+
+Make authenticated requests from your engine to your extension's backend by passing the right namespace to the fetch service.
+
+# Calling Your Extension's API
+
+The
+`fetch`
+service knows how to call
+**the console's**
+API by default — but your extension exposes its own routes under its own prefix, and those calls need to go there instead. This recipe covers the patterns: per-call namespace, controller-level shorthand, and a dedicated wrapper service.
+
+## The Problem
+
+Your extension declares its API prefix in
+`server/src/routes.php`
+:
+
+```
+Route::prefix(config('my-extension.api.routing.prefix', 'my-extension'))
+    ->namespace('MyOrg\MyExtension\Http\Controllers')
+    ->group(function ($router) {
+        $router->group(['middleware' => ['fleetbase.protected']], function ($router) {
+            $router->fleetbaseRoutes('widgets');
+        });
+    });
+```
+
+That registers
+`GET /my-extension/widgets`
+,
+`POST /my-extension/widgets`
+, etc.
+
+But by default,
+`this.fetch.get('widgets')`
+from your engine hits the
+**console's**
+namespace (
+`int/v1`
+), not yours. You need to tell
+`fetch`
+where to send the request.
+
+## Solution 1 — Per-Call namespace Option
+
+Pass
+`options.namespace`
+as the third argument to any
+`fetch`
+method:
+
+```
+import { inject as service } from '@ember/service';
+
+export default class WidgetsController extends Controller {
+    @service fetch;
+
+    async loadWidgets() {
+        const widgets = await this.fetch.get(
+            'widgets',                        // path (relative to the namespace)
+            { status: 'active' },             // query params
+            { namespace: 'my-extension' }     // ← targets your API
+        );
+        return widgets;
+    }
+
+    async createWidget(payload) {
+        return this.fetch.post('widgets', payload, { namespace: 'my-extension' });
+    }
+}
+```
+
+This works for one-off calls. If your namespace is versioned (
+`my-extension/v1`
+), include the version in the namespace string.
+
+| Method | Signature |
+| --- | --- |
+| `fetch.get(path, query?, options?)` | GET request |
+| `fetch.post(path, data?, options?)` | POST with JSON body |
+| `fetch.put(path, data?, options?)` | PUT |
+| `fetch.patch(path, data?, options?)` | PATCH |
+| `fetch.delete(path, data?, options?)` | DELETE |
+| `fetch.upload(path, files[], options?)` | Multipart upload |
+| `fetch.download(path, query?, options?)` | File download |
+
+The
+`options`
+bag accepts
+`namespace`
+,
+`host`
+,
+`externalRequest`
+,
+`fromCache`
+,
+`normalizeToEmberData`
+,
+`onSuccess`
+,
+`onError`
+, and
+`rawError`
+. See
+[Ember Services → fetch](https://fleetbase.io/docs/extension-development/reference/ember-services#fetch)
+.
+
+## Solution 2 — A Wrapper Service
+
+When the same component or controller makes many calls to your API, repeating the namespace gets noisy. Define a thin service that pre-bakes the namespace:
+
+```
+// addon/services/my-extension-api.js
+import Service, { inject as service } from '@ember/service';
+
+export default class MyExtensionApi extends Service {
+    @service fetch;
+
+    namespace = 'my-extension/v1';
+
+    get(path, query) {
+        return this.fetch.get(path, query, { namespace: this.namespace });
+    }
+
+    post(path, data) {
+        return this.fetch.post(path, data, { namespace: this.namespace });
+    }
+
+    put(path, data) {
+        return this.fetch.put(path, data, { namespace: this.namespace });
+    }
+
+    delete(path, data) {
+        return this.fetch.delete(path, data, { namespace: this.namespace });
+    }
+
+    upload(path, files) {
+        return this.fetch.upload(path, files, { namespace: this.namespace });
+    }
+}
+```
+
+Inject and use it like the underlying
+`fetch`
+:
+
+```
+import { inject as service } from '@ember/service';
+
+export default class WidgetsController extends Controller {
+    @service('my-extension-api') api;
+
+    async loadWidgets() {
+        return this.api.get('widgets', { status: 'active' });
+    }
+
+    async createWidget(payload) {
+        return this.api.post('widgets', payload);
+    }
+}
+```
+
+The wrapper makes the intent ("we're talking to
+*our*
+API") explicit at the call site without leaking the namespace string everywhere.
+
+## Solution 3 — setNamespace() (use sparingly)
+
+`fetch.setNamespace('my-extension')`
+mutates the
+*shared*
+fetch service to use your namespace as default.
+**This affects every other call**
+site too — including unrelated console calls in components from other engines that might run in parallel. Don't reach for this unless you fully own the route lifecycle (e.g., an isolated standalone application where your extension is the only thing running).
+
+```
+this.fetch.setNamespace('my-extension');
+this.fetch.setHost('https://api.my-extension.example.com'); // also possible
+```
+
+If you need this kind of isolation, prefer Solution 2 — a wrapper service is just as ergonomic and doesn't pollute global state.
+
+## Versioning
+
+If your API is versioned (recommended for any public surface), include the version in the namespace:
+
+```
+// server/src/routes.php
+Route::prefix('my-extension')
+    ->group(function ($router) {
+        $router->group(['prefix' => 'v1', 'middleware' => ['fleetbase.api']], function ($router) {
+            $router->fleetbaseRestRoutes('widgets');
+        });
+    });
+```
+
+```
+this.fetch.get('widgets', {}, { namespace: 'my-extension/v1' });
+```
+
+Internal-only console endpoints often use the
+`int/v1`
+convention:
+
+```
+$router->prefix('int/v1')->group(function ($router) {
+    $router->group(['middleware' => ['fleetbase.protected']], function ($router) {
+        $router->fleetbaseRoutes('widgets');
+    });
+});
+```
+
+```
+this.fetch.get('widgets', {}, { namespace: 'my-extension/int/v1' });
+```
+
+## Handling Errors
+
+`fetch`
+rejects with the first error from the
+`errors[]`
+array. Pair with
+`notifications.serverError()`
+to display the message:
+
+```
+@service fetch;
+@service notifications;
+
+async createWidget(payload) {
+    try {
+        const widget = await this.fetch.post('widgets', payload, { namespace: 'my-extension' });
+        this.notifications.success(`Widget ${widget.public_id} created`);
+        return widget;
+    } catch (err) {
+        this.notifications.serverError(err, 'Could not create widget');
+        throw err;
+    }
+}
+```
+
+## What About Ember Data?
+
+If you're loading
+**records**
+(not raw JSON), use the
+`store`
+instead and let an adapter handle the namespace once. See the next recipe:
+[Connecting Models to Your Extension API](https://fleetbase.io/docs/extension-development/recipes/connecting-models-to-your-api)
+.
+
+## Reference
+
+* [Ember Services → fetch](https://fleetbase.io/docs/extension-development/reference/ember-services#fetch)
+  — full method surface
+* `addon/services/fetch.js`
+  — service source
+* [Routes & Controllers](https://fleetbase.io/docs/extension-development/backend/routes-and-controllers)
+  — declaring the API on the backend
+
+[API Services
+
+Backend support classes shipped by fleetbase/core-api — SmsService, the Support\Http and Support\Find/Resolve helpers, NotificationRegistry, and the SocketCluster broadcaster.](https://fleetbase.io/docs/extension-development/reference/api-services)
+[Connecting Models to Your Extension API
+
+Wire Ember Data models to your extension's API by extending ApplicationAdapter with the right namespace, then point each model at the right adapter.](https://fleetbase.io/docs/extension-development/recipes/connecting-models-to-your-api)

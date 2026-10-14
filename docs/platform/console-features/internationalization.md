@@ -1,0 +1,59 @@
+---
+title: "Internationalization"
+url: https://fleetbase.io/docs/platform/console-features/internationalization
+module: platform
+---
+
+# Internationalization
+
+Switch the console UI language using the locale selector in the top navigation bar.
+
+# Internationalization
+
+The Fleetbase Console is available in multiple languages. Users can switch their language at any time using the
+**locale selector**
+in the top navigation bar. The selection is saved to the user's account and applies immediately without a page reload.
+
+## Switching Language
+
+Click the
+**globe icon**
+in the right side of the top navigation bar to open the locale selector.
+
+![Locale selector dropdown — language list with flag emojis and checkmark on the active locale](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fconsole-locale-select.8048c1a4.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+A dropdown lists all available languages with their country flag emoji. The currently active locale has a green checkmark next to it. Click any language to switch immediately.
+
+The preference is persisted to your user account on the server, so the same language applies the next time you log in on any device.
+
+## Available Languages
+
+| Language | Locale code |
+| --- | --- |
+| English | `en-us` |
+| Arabic | `ar-ae` |
+| Bulgarian | `bg-bg` |
+| Spanish (Spain) | `es-es` |
+| Spanish (Mexico) | `es-mx` |
+| Persian | `fa-ir` |
+| French | `fr-fr` |
+| Mongolian | `mn-mn` |
+| Portuguese (Brazil) | `pt-br` |
+| Russian | `ru-ru` |
+| Uzbek | `uz-uz` |
+| Vietnamese | `vi-vn` |
+| Chinese (Simplified) | `zh-cn` |
+
+## Adding or Extending Languages
+
+Translation files live in the
+`translations/`
+directory of the console application, one YAML file per locale (e.g.
+`en-us.yaml`
+). Extension packages include their own translation keys in their own
+`translations/`
+directories, which are merged at build time.
+
+To add a new locale or override existing strings, add or edit the corresponding YAML file and rebuild the console. Keys follow a dot-notation path structure (e.g.
+`console.notifications.mark-as-read`
+).

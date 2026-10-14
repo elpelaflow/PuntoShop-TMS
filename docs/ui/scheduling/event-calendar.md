@@ -1,0 +1,113 @@
+---
+title: "EventCalendar / ScheduleCalendar"
+url: https://fleetbase.io/docs/ui/scheduling/event-calendar
+module: ui
+---
+
+# EventCalendar / ScheduleCalendar
+
+<EventCalendar> is a date-grid calendar; <ScheduleCalendar> is a resource-lane scheduler with drag-and-drop. Both yield blocks for custom item rendering.
+
+# <EventCalendar> and <ScheduleCalendar>
+
+Two scheduling components ship in
+`@fleetbase/ember-ui`
+:
+
+* **`<EventCalendar>`**
+  — a lightweight calendar for displaying events on a date grid (month/week/day)
+* **`<ScheduleCalendar>`**
+  — a resource-lane scheduler (drivers / vehicles as rows, time as columns) with drag-and-drop assignment
+
+For raw FullCalendar access, use
+[`<FullCalendar>`](https://fleetbase.io/docs/ui/scheduling/full-calendar)
+.
+
+## <ScheduleCalendar>
+
+The most common scheduling pattern in Fleetbase — assign items to drivers/vehicles in a timeline view.
+
+```
+<ScheduleCalendar
+  @resources={{this.drivers}}
+  @items={{this.scheduleItems}}
+  @view="resourceTimeline"
+  @onItemClick={{this.handleItemClick}}
+  @onItemDrop={{this.handleItemDrop}}
+  @onDateClick={{this.handleDateClick}}
+>
+  <:item as |item|>
+    <div class="custom-event-content">{{item.title}}</div>
+  </:item>
+</ScheduleCalendar>
+```
+
+### Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@resources` | array | — | Resources (drivers, vehicles, etc.) — rendered as rows |
+| `@items` | array | — | Schedule items |
+| `@view` | string | `resourceTimeline` | View type |
+| `@editable` | boolean | `true` | Enable drag-and-drop |
+| `@onItemClick` | `(item)` | — | Item clicked |
+| `@onItemDrop` | `(item, oldStart, newStart)` | — | Item moved |
+| `@onDateClick` | `(date, resource)` | — | Empty cell clicked |
+
+### Named Blocks
+
+| Block | Purpose |
+| --- | --- |
+| `:item` | Custom item renderer (yields the item) |
+| `:header` | Custom header content |
+| `:footer` | Custom footer content |
+
+## <ScheduleItemCard>
+
+A card-style item renderer typically used inside
+`<ScheduleCalendar>`
+'s
+`:item`
+block:
+
+```
+<ScheduleItemCard @item={{this.scheduleItem}} @onClick={{this.handleClick}}>
+  <:content as |ctx|>
+    <div class="custom-content">{{ctx.item.title}}</div>
+  </:content>
+  <:actions as |ctx|>
+    <button {{on "click" (fn this.edit ctx.item)}}>Edit</button>
+    <button {{on "click" (fn this.delete ctx.item)}}>Delete</button>
+  </:actions>
+</ScheduleItemCard>
+```
+
+## <EventCalendar>
+
+A simpler date-grid calendar — useful when you don't need resource lanes:
+
+```
+<EventCalendar
+  @events={{this.events}}
+  @view="month"
+  @onEventClick={{this.handleClick}}
+/>
+```
+
+## See Also
+
+The full scheduling component reference is in the source repo's
+`SCHEDULING_COMPONENTS.md`
+— read it for advanced usage, custom views, and styling.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/schedule-calendar.hbs` | Template |
+| `addon/components/schedule-calendar.js` | Class |
+| `addon/components/schedule-item-card.hbs` | Item card template |
+| `addon/components/schedule-item-card.js` | Item card class |
+| `addon/components/event-calendar.hbs` | Date-grid calendar template |
+| `addon/components/event-calendar.js` | Date-grid calendar class |
+| `SCHEDULING_COMPONENTS.md` | Reference doc in the package root |

@@ -1,0 +1,55 @@
+---
+title: "Analytics Overview"
+url: https://fleetbase.io/docs/fleet-ops/analytics/overview
+module: fleet-ops
+---
+
+# Analytics Overview
+
+Build custom reports against the Fleet-Ops dataset using a query-builder UI — pick tables, columns, joins, filters, and exports.
+
+# Analytics Overview
+
+The
+**Analytics**
+section of Fleet-Ops gives you a query-builder over the Fleet-Ops dataset. Reports are configured visually — pick a primary table, select columns, add joins to related tables, layer in filters and aggregates, and run the query to render a table you can export.
+
+![Fleet-Ops report builder — primary table picker, columns, joins, conditions, and results table](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-report-builder.b598ad5b.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+Charts, summary cards, and pre-built dashboards are not in Fleet-Ops yet — analytics today is purely
+**table-based reports**
+. Visualisation is on the roadmap.
+
+## What's in Analytics
+
+| Section | Purpose |
+| --- | --- |
+| [**Reports**](https://fleetbase.io/docs/fleet-ops/analytics/reports/overview) | Build, run, save, and export reports against the Fleet-Ops dataset using the visual query builder |
+
+## What You Can Report On
+
+The Fleet-Ops report schema registers seven tables you can build reports against:
+
+| Table | Description |
+| --- | --- |
+| `orders` | Delivery and service orders — status, scheduled and completion times, totals, customer, driver, vehicle |
+| `drivers` | Driver records — assignments, online status, location, skills |
+| `vehicles` | Vehicle records — make/model, plate, capacity, location, ownership |
+| `places` | Saved locations used as pickup, dropoff, and waypoint addresses |
+| `contacts` | Customers, suppliers, and facilitators |
+| `vendors` | Third-party carriers and integrated vendors |
+| `fuel_reports` | Fuel transactions submitted from Navigator or the console |
+
+Each table exposes its columns plus relationships to related tables (e.g. orders → drivers, vehicles, customer contact, payload), so you can join across them when building a report.
+
+## Accessing Analytics
+
+Navigate to
+**Fleet-Ops → Analytics → Reports**
+in the left sidebar.
+
+## Data Freshness
+
+Reports run against the live Fleet-Ops database. Each report execution pulls the current state — there's no lag and no warehouse sync. For very large operations, individual tables in the schema set caching TTLs and row caps to keep query times reasonable; see
+[Reports](https://fleetbase.io/docs/fleet-ops/analytics/reports/overview)
+for the details.

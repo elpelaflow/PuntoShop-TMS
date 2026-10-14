@@ -1,0 +1,68 @@
+---
+title: "Settings"
+url: https://fleetbase.io/docs/ledger/settings/overview
+module: ledger
+---
+
+# Settings
+
+Configure organization-wide defaults — invoice prefix, payment terms, default gateway, default template, fiscal year, and base currency.
+
+# Settings
+
+Ledger exposes three settings groups under
+**Ledger → Settings**
+:
+
+| Group | Purpose |
+| --- | --- |
+| **Invoice** | Defaults applied when creating invoices |
+| **Payment** | Defaults for invoice payment behavior |
+| **Accounting** | Base currency, fiscal year, and default journal accounts |
+
+Each group has its own page in the console where you can view and update the values.
+
+## Invoice Settings
+
+**Ledger → Settings → Invoice**
+
+![Invoice Settings — invoice numbering prefix, default currency and payment terms, and default notes and terms](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-invoice-settings.4c949e58.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+| Field | Key | Description |
+| --- | --- | --- |
+| **Invoice Prefix** | `invoice_prefix` | Prefix for auto-generated invoice numbers. Default `INV-` (so numbers look like `INV-004821` ) |
+| **Default Currency** | `default_currency` | Currency assigned to new invoices |
+| **Payment Terms (days)** | `payment_terms_days` | Stored as a label/explainer (e.g., "Net 30") |
+| **Due Date Offset (days)** | `due_date_offset_days` | When non-zero, new invoices auto-set `due_date = invoice_date + offset` . Setting this to 0 disables the auto-default |
+| **Default Notes** | `default_notes` | Pre-filled into new invoices' Notes field |
+| **Default Terms** | `default_terms` | Pre-filled into new invoices' Terms field |
+| **Auto-send on Creation** | `auto_send_on_creation` | When `true` , new invoices are automatically emailed to the customer on creation |
+| **Default Template** | `default_template_uuid` | Template used when an invoice has no template set. Required for `render-pdf` to succeed |
+
+## Payment Settings
+
+**Ledger → Settings → Payment**
+
+![Payment Settings — default gateway, partial payments and wallet credit, and payment receipt emails](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-payment-settings.7ed71415.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+| Field | Key | Description |
+| --- | --- | --- |
+| **Default Gateway** | `default_gateway_uuid` | Gateway pre-selected on the public payment page |
+| **Allow Partial Payments** | `allow_partial_payments` | Whether the public payment page accepts an amount less than `balance` |
+| **Auto-apply Wallet Credit** | `auto_apply_wallet_credit` | If true, customer wallet credit is applied to invoice payment automatically |
+| **Send Payment Receipt** | `send_payment_receipt` | When `true` , customers receive an emailed receipt after a successful payment |
+
+## Accounting Settings
+
+**Ledger → Settings → Accounting**
+
+| Field | Key | Description |
+| --- | --- | --- |
+| **Base Currency** | `base_currency` | Default currency for new accounts |
+| **Fiscal Year Start Month** | `fiscal_year_start_month` | Month (1-12) — used to scope fiscal-year reports |
+| **Auto-post Journal Entries** | `auto_post_journal_entries` | Whether system entries are posted immediately (default `true` ) |
+| **Default Accounts Receivable Account** | `default_ar_account_uuid` | AR account used by `revenue_recognition` and `invoice_payment` journal entries |
+| **Default Revenue Account** | `default_revenue_account_uuid` | Credited by `revenue_recognition` entries when no per-line-item account is specified |
+| **Default Expense Account** | `default_expense_account_uuid` | Used as a fallback contra account by automated entries |
+
+Settings are scoped to your Fleetbase company — each organization has its own values.

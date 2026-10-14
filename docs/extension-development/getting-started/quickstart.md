@@ -1,0 +1,214 @@
+---
+title: "Quickstart"
+url: https://fleetbase.io/docs/extension-development/getting-started/quickstart
+module: extension-development
+---
+
+# Quickstart
+
+Use the Fleetbase CLI to scaffold a new extension with a working backend and frontend skeleton.
+
+# Quickstart
+
+The easiest way to start building a new Fleetbase extension is to use the
+**Fleetbase CLI**
+.
+
+The CLI provides a
+`scaffold`
+command that generates a complete, working extension skeleton, including both the
+[Backend](https://fleetbase.io/docs/extension-development/backend/service-provider)
+(Laravel package) and the
+[Frontend](https://fleetbase.io/docs/extension-development/frontend/routing)
+(Ember Engine), along with the necessary
+`extension.json`
+manifest.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your local development machine:
+
+* **Node.js**
+  (v18 or higher)
+* **PHP**
+  (v8.2 or higher)
+* **Composer**
+* **Git**
+* The
+  **Fleetbase CLI**
+
+If you haven't installed the CLI yet, you can do so via npm:
+
+```
+npm install -g @fleetbase/cli
+```
+
+## Scaffolding the Extension
+
+Scaffold
+**inside**
+your Fleetbase clone's
+`packages/`
+directory. The platform's Docker
+`application`
+container already mounts
+`./packages`
+(per
+[Platform → Development Setup](https://fleetbase.io/docs/platform/quickstart/development-setup)
+), so any extension placed there is visible to both the API container and the Ember dev server without extra mount config.
+
+```
+cd /path/to/fleetbase/packages
+flb scaffold my-extension
+```
+
+The CLI will prompt for a few details:
+
+* **Extension Name**
+  : human-readable name (e.g., "My Custom Extension")
+* **Description**
+  : short summary
+* **Author**
+  : you or your organization
+* **Namespace**
+  : PHP namespace for the backend (e.g.,
+  `MyOrg\MyExtension`
+  )
+
+It then generates the directory structure.
+
+## The Generated Structure
+
+```
+fleetbase/
+├── api/
+├── console/
+└── packages/
+    └── my-extension/
+        ├── addon/                 # Ember.js frontend addon
+        ├── server/                # PHP Laravel backend package
+        ├── extension.json         # extension manifest
+        ├── package.json
+        ├── composer.json
+        └── README.md
+```
+
+Empty but fully functional — ready to link.
+
+## Linking for Development
+
+The platform-side mechanics — Docker volume mounts, the two paths for the Ember dev server, Octane reload — are covered once in
+[Platform → Development Setup](https://fleetbase.io/docs/platform/quickstart/development-setup)
+. Make sure the platform is up before continuing.
+
+### Link the Backend Package
+
+In
+`fleetbase/api/composer.json`
+, add a
+`path`
+repository entry pointing at your extension's
+`server/`
+directory and require the package:
+
+```
+{
+  "repositories": [
+    { "type": "path", "url": "../packages/my-extension/server" }
+  ],
+  "require": {
+    "my-org/my-extension-api": "*"
+  }
+}
+```
+
+Resolve inside the running container:
+
+```
+docker compose exec application composer install
+docker compose exec application bash -c "./deploy.sh"
+```
+
+### Link the Frontend Addon
+
+**Build the addon first.**
+Before pnpm can resolve a
+`link:`
+dependency, the linked package must have its own
+`node_modules`
+populated. Skip this and
+`pnpm install`
+(or
+`pnpm build`
+) in the console will fail with missing-module errors.
+
+```
+cd packages/my-extension
+pnpm install
+```
+
+Then in
+`fleetbase/console/package.json`
+, add a
+`link:`
+dependency pointing at your extension root (the addon is at the package root, not inside
+`addon/`
+):
+
+```
+{
+  "dependencies": {
+    "@my-org/my-extension-engine": "link:../packages/my-extension"
+  }
+}
+```
+
+Install in the console:
+
+```
+cd PuntoShop-TMS/console
+pnpm install
+```
+
+## Running
+
+Follow
+[Development Setup → Frontend Development](https://fleetbase.io/docs/platform/quickstart/development-setup#frontend-development)
+to start the dev server. Either path works:
+
+* **Path A**
+  — Ember dev server in Docker via
+  `Dockerfile.server-build`
+* **Path B**
+  — Ember dev server local (
+  `pnpm start:dev`
+  in
+  `console/`
+  )
+
+The console reloads on changes to your extension's
+`addon/`
+. PHP edits to
+`server/`
+need an Octane reload:
+
+```
+docker compose exec application php artisan octane:reload
+```
+
+Open
+`http://localhost:4200`
+— your extension shows up in the sidebar. Clicking it loads the default route from your scaffolded engine.
+
+You're ready to begin
+[Backend Development](https://fleetbase.io/docs/extension-development/backend/service-provider)
+and
+[Frontend Development](https://fleetbase.io/docs/extension-development/frontend/routing)
+.
+
+[Extension Development
+
+Build custom extensions for Fleetbase. Add features, integrations, and entire modules using the Universe service architecture in @fleetbase/ember-core and the Laravel package layer in fleetbase/core-api.](https://fleetbase.io/docs/extension-development)
+[Extension Anatomy
+
+A tour of a scaffolded Fleetbase extension — addon/, server/, extension.json, and the key entry points (addon/extension.js, the engine, the service provider).](https://fleetbase.io/docs/extension-development/getting-started/extension-anatomy)

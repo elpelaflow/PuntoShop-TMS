@@ -1,0 +1,118 @@
+---
+title: "Checkbox"
+url: https://fleetbase.io/docs/ui/inputs/checkbox
+module: ui
+---
+
+# Checkbox
+
+<Checkbox> is the standard boolean checkbox. Supports labels, permission gating, help text, and a yielded block for rich label content.
+
+# <Checkbox>
+
+The standard checkbox for boolean inputs. Use this when you need a checkbox specifically — for an on/off switch, prefer
+[`<Toggle>`](https://fleetbase.io/docs/ui/inputs/toggle)
+.
+
+## Basic Usage
+
+```
+<Checkbox @value={{this.accepted}} @label="I agree to the terms" @onToggle={{fn (mut this.accepted)}} />
+```
+
+## Yielding a Rich Label
+
+```
+<Checkbox @value={{this.consent}} @onToggle={{fn (mut this.consent)}}>
+  I agree to the <a href="/terms">terms and conditions</a>
+</Checkbox>
+```
+
+## Arguments
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@value` | boolean | `false` | The current checked state. Aliased as `@checked` |
+| `@checked` | boolean | — | Same as `@value` . If both are passed, `@checked` wins |
+| `@label` | string | — | Label text rendered to the right of the box |
+| `@onToggle` | `(checked, target) => void` | — | Called when the checkbox is toggled |
+| `@onChange` | `(checked, event) => void` | — | Called with the raw change event in addition to `@onToggle` |
+| `@id` | string | auto-generated | Override the input's `id` |
+| `@disabled` | boolean | `false` | Disable the checkbox |
+| `@visible` | boolean | `true` | When false, nothing renders |
+| `@permission` | string | — | If the current user lacks this ability, the checkbox is auto-disabled and shows an "Unauthorized" tooltip |
+| `@alignItems` | string | `start` | `items-start` (default), `items-center` , `items-end` — how to align the label vertically |
+| `@helpText` | string | — | Tooltip text |
+| `@exampleText` | string | — | Optional example beneath the help text |
+| `@tooltipPlacement` | string | `top` | Tooltip placement |
+| `@inputClass` | string | — | Extra classes on the `<input>` |
+| `@labelClass` | string | — | Extra classes on the `<label>` |
+| `@wrapperClass` | string | — | Extra classes on the outer wrapper |
+
+## Permission Gating
+
+```
+<Checkbox
+  @value={{this.feature.enabled}}
+  @label="Beta feature"
+  @permission="platform manage feature-flags"
+  @onToggle={{fn (mut this.feature.enabled)}}
+/>
+```
+
+If the current user can't manage feature flags, the checkbox is disabled with an "Unauthorized" tooltip.
+
+## Distinguishing @onToggle vs @onChange
+
+Both fire on every change. The difference is the second argument:
+
+* `@onToggle(checked, target)`
+  —
+  `target`
+  is the input DOM element
+* `@onChange(checked, event)`
+  —
+  `event`
+  is the full DOM event
+
+Use whichever fits your handler signature.
+
+## Real-World Examples
+
+```
+{{!-- Simple "include" toggle --}}
+<Checkbox @value={{this.includeFreight}} @label="Include freight charges" @onToggle={{fn (mut this.includeFreight)}} />
+
+{{!-- Inside a row of options --}}
+{{#each this.permissionsList as |permission|}}
+  <Checkbox
+    @value={{includes permission this.selectedPermissions}}
+    @label={{humanize permission}}
+    @onToggle={{fn this.togglePermission permission}}
+  />
+{{/each}}
+
+{{!-- With help text --}}
+<Checkbox
+  @value={{this.options.cod_enabled}}
+  @label="Enable cash on delivery"
+  @helpText="Show Cash on Delivery as a payment option at checkout."
+  @onToggle={{fn (mut this.options.cod_enabled)}}
+/>
+```
+
+## When to Use What
+
+| Need | Use |
+| --- | --- |
+| A boolean field on a form | `<Checkbox>` or `<Toggle>` |
+| An on/off switch (settings, feature flags) | `<Toggle>` |
+| Selecting one or more rows in a list | `<Checkbox>` |
+| Acknowledging terms or consent | `<Checkbox>` |
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/checkbox.hbs` | Template |
+| `addon/components/checkbox.js` | Class |

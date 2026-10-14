@@ -1,0 +1,239 @@
+---
+title: "Invoices"
+url: https://fleetbase.io/docs/ledger/billing/invoices
+module: ledger
+---
+
+# Invoices
+
+Create and manage invoices — line items, payments, public payment URL, PDF rendering, and Fleet-Ops integration.
+
+# Invoices
+
+An
+**Invoice**
+is a formal request for payment. It details the products or services provided, quantities, prices, and the total amount due. Invoices have a complete lifecycle from
+`draft`
+to
+`paid`
+with revenue recognition at each step.
+
+Navigate to
+**Ledger → Billing → Invoices**
+.
+
+![Invoices list — number, customer, status, total, balance, due date and invoice date, with draft, sent, partial, paid and overdue invoices](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-invoices-list.7c024937.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+![Invoice detail — header with customer and dates, line items table, totals, and action buttons](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-invoice-details.79c46be1.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Invoice Attributes
+
+| Field | Description |
+| --- | --- |
+| **Number** | Auto-generated, format `INV-` plus a 6-digit random integer (e.g., `INV-004821` ). **Not** sequential. Prefix configurable in **Settings → Invoice** |
+| **Customer** | Polymorphic ( `customer_uuid` + `customer_type` ) — Fleetbase contact, vendor, driver, or user |
+| **Status** | `draft` / `sent` / `viewed` / `partial` / `paid` / `overdue` / `cancelled` / `refunded` / `void` |
+| **Invoice Date** | Date the invoice was issued |
+| **Due Date** | Auto-set from the `due_date_offset_days` invoice setting when non-zero |
+| **Currency** | Invoice currency |
+| **Notes** | Free-text notes shown on the invoice |
+| **Terms** | Payment terms text shown on the invoice |
+| **Template** | Invoice template ( `template_uuid` ) used for PDF rendering |
+| **Subtotal** | Sum of line item amounts before tax (computed) |
+| **Tax** | Total tax across all line items (computed) |
+| **Total Amount** | Subtotal + Tax (computed) |
+| **Amount Paid** | Total payments received so far |
+| **Balance** | `total_amount − amount_paid` |
+| **Order link** | Optional `order_uuid` linking to a Fleet-Ops order |
+| **Transaction link** | Optional `transaction_uuid` linking to the wallet transaction that paid it |
+| **Viewed At** | Auto-stamped the first time the customer opens the public URL |
+
+## Creating an Invoice
+
+Navigate to
+**Ledger → Billing → Invoices**
+.
+
+Click
+**New Invoice**
+.
+
+Select the
+**Customer**
+(search across contacts, vendors, drivers, and users).
+
+Set the
+**Invoice Date**
+. The
+**Due Date**
+auto-fills from the
+`due_date_offset_days`
+setting if non-zero.
+
+Add
+**Line Items**
+— for each row:
+
+* **Description**
+  — what is being charged
+* **Quantity**
+  — number of units
+* **Unit Price**
+  — price per unit (minor currency units)
+* **Tax Rate**
+  — decimal percentage 0–100 (e.g.,
+  `10`
+  for 10%);
+  `tax_amount = amount * tax_rate / 100`
+
+Add optional
+**Notes**
+and
+**Terms**
+.
+
+Click
+**Save**
+. The invoice is created in
+`draft`
+and totals are calculated.
+
+## Sending an Invoice
+
+There are two ways to dispatch an invoice —
+**Send**
+(email it) or
+**Mark as Sent**
+(transition the status only).
+
+### Send (email the customer)
+
+Open the invoice.
+
+Click
+**Send**
+. Ledger emails the invoice to the customer's email address with a link to the public payment URL, and transitions the status to
+`sent`
+.
+
+The customer must have a valid email address on their record — otherwise the action returns a 422 error.
+
+### Mark as Sent (status only)
+
+Open the invoice.
+
+Click
+**Mark as Sent**
+to transition the status to
+`sent`
+without emailing. Use this when you want to deliver the invoice through your own channel (SMS, CRM, in person).
+
+Share the public invoice URL
+`/~/invoice?id={public_id}`
+with the customer.
+
+The first time the customer opens the public URL, the invoice transitions to
+`viewed`
+.
+
+## Recording Payment
+
+When payment is received outside the online portal (bank transfer, cash, etc.):
+
+Open the invoice.
+
+Click
+**Record Payment**
+.
+
+Enter the
+**Amount**
+received (integer minor units, minimum 1), the
+**Payment Method**
+(defaults to
+`manual`
+), and an optional
+**Reference**
+.
+
+Click
+**Save**
+.
+
+![Invoice payment page — customer-facing public URL with gateway selection](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-invoice-payment.1e8c23fa.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+Ledger updates
+`amount_paid`
+, recalculates
+`balance`
+, and transitions the invoice status:
+
+* If
+  `balance = 0`
+  : status →
+  `paid`
+* If
+  `balance > 0`
+  : status →
+  `partial`
+
+A journal entry (
+`invoice_payment`
+type) and a
+[Transaction](https://fleetbase.io/docs/ledger/payments/transactions)
+record are created automatically.
+
+## Creating an Invoice from a Fleet-Ops Order
+
+Click
+**Create from Order**
+on the invoices list.
+
+Select the order. Ledger extracts line items from the order's service quote items if present, or falls back to a summary line item.
+
+Review the generated draft invoice and save.
+
+To enable
+**fully automatic**
+draft invoice creation when a service quote is set as the purchase rate on an order, see
+[Fleet-Ops Integration](https://fleetbase.io/docs/ledger/integrations/fleet-ops)
+.
+
+## Previewing & Downloading PDF
+
+Open any invoice and use the actions in the detail panel:
+
+* **Preview**
+  — render the invoice with its assigned template
+* **Download PDF**
+  — download the rendered PDF
+
+Both require the invoice to have a template assigned, either directly or via the
+**Default Template**
+invoice setting.
+
+## Online Payment by Customer
+
+Customers can pay invoices at the public URL without logging in:
+
+1. The customer opens
+   `/~/invoice?id={public_id}`
+   — the
+   `viewed_at`
+   timestamp is auto-stamped on first open and the status transitions to
+   `viewed`
+2. The customer-facing page lists available payment gateways
+3. The customer selects a gateway and submits payment
+4. Ledger creates a
+   `Transaction`
+   , posts the
+   `invoice_payment`
+   journal entry, and transitions the invoice to
+   `paid`
+   (or
+   `partial`
+   )
+
+Drafts are not payable via the public URL — the link returns a not-allowed response until the invoice is at least
+`sent`
+.

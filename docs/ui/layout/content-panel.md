@@ -1,0 +1,302 @@
+---
+title: "ContentPanel"
+url: https://fleetbase.io/docs/ui/layout/content-panel
+module: ui
+---
+
+# ContentPanel
+
+<ContentPanel> is the canonical collapsible section used to organize forms, settings, and detail views. Supports titles, status badges, action buttons, and permission gating.
+
+# <ContentPanel>
+
+`<ContentPanel>`
+is the standard collapsible panel used to organize a page into discrete sections. Forms, settings groups, detail views, drawers — they all use ContentPanel.
+
+It's collapsible by default. Pass
+`@open={{true}}`
+to render expanded.
+
+## Basic Usage
+
+```
+<ContentPanel @title="Driver Details" @open={{true}}>
+  <InputGroup @name="Name" @value={{this.driver.name}} />
+  <InputGroup @name="Phone">
+    <PhoneInput @value={{this.driver.phone}} />
+  </InputGroup>
+</ContentPanel>
+```
+
+## Collapsible by Default
+
+Without
+`@open={{true}}`
+, the panel renders collapsed:
+
+```
+<ContentPanel @title="Advanced Settings">
+  {{!-- This body is hidden until the user clicks the header --}}
+  <InputGroup @name="Webhook URL" @value={{this.webhookUrl}} />
+</ContentPanel>
+```
+
+## With a Status Badge
+
+`@titleStatus`
+renders a
+[`<Badge>`](https://fleetbase.io/docs/ui/display/badge)
+next to the title:
+
+```
+<ContentPanel
+  @title="Order #FB-1234"
+  @titleStatus={{this.order.status}}
+  @open={{true}}
+>
+  {{!-- ... --}}
+</ContentPanel>
+```
+
+## With a Subtitle
+
+```
+<ContentPanel
+  @title="Payment Settings"
+  @subtitle="Configure how customers pay you"
+  @open={{true}}
+>
+  {{!-- ... --}}
+</ContentPanel>
+```
+
+## With Action Buttons
+
+The
+`actions`
+named block places action buttons in the panel header (right side):
+
+```
+<ContentPanel @title="Locations" @open={{true}}>
+  <:actions>
+    <Button @type="primary" @icon="plus" @text="Add Location" @onClick={{this.addLocation}} />
+  </:actions>
+
+  <:default>
+    {{!-- Locations list --}}
+  </:default>
+</ContentPanel>
+```
+
+## Arguments
+
+### Title & Subtitle
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@title` | string | Panel title |
+| `@subtitle` | string | Smaller text rendered beneath the title |
+| `@prefixTitle` | string | Small text shown above the title |
+| `@titleIcon` | string | FontAwesome icon next to the title |
+| `@titleIconPrefix` | string | Icon prefix ( `fas` , `far` , `fab` ) |
+| `@titleIconSize` | string | Default `xs` |
+| `@titleIconClass` | string | Extra classes on the icon |
+| `@titleStatus` | string | Status string — renders a `<Badge>` next to the title |
+| `@disableTitleStatusHumanize` | boolean | Pass through to the `<Badge>` |
+| `@hideStatusDot` | boolean | Pass through to the `<Badge>` |
+| `@titleComponent` | string | Render a custom component instead of the default title block |
+| `@titleComponentContext` | any | Context passed to `@titleComponent` |
+| `@titleStatusContainerClass` | string | Extra classes around the status badge |
+| `@titleStatusClass` | string | Extra classes on the status badge |
+
+### Open / Toggle Behavior
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@open` | boolean | `false` | Whether the panel starts open |
+| `@toggleOnCaretOnly` | boolean | `false` | Only toggle when clicking the caret icon — clicking the title text does nothing |
+| `@hideCaret` | boolean | `false` | Hide the chevron toggle |
+| `@caretIcon` | string | `chevron` | The icon name (suffixed with `-down` / `-up` based on state) |
+| `@caretLeft` | boolean | `false` | Render the caret on the left of the title instead of the right |
+
+### Loading & Disabled
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@isLoading` | boolean | `false` | Show a spinner inside the title row and dim the panel |
+| `@disabled` | boolean | `false` | Visually disable the toggle (still clickable, but dimmed) |
+| `@permission` | string | — | If the current user lacks this ability, the panel auto-disables and shows an "Unauthorized" tooltip |
+
+### Tooltip
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@helpText` | string | — | Tooltip on the title |
+| `@exampleText` | string | — | Optional example beneath the help text |
+| `@tooltipPlacement` | string | `right` | Tooltip placement |
+
+### Action Buttons
+
+`@actionButtons`
+accepts an array of action descriptors — each is rendered as a
+`<Button>`
+(or a custom component) in the panel header:
+
+```
+<ContentPanel @title="Settings" @open={{true}} @actionButtons={{this.headerActions}}>
+  {{!-- ... --}}
+</ContentPanel>
+```
+
+```
+// in your component class
+get headerActions() {
+  return [
+    { type: 'primary', icon: 'plus', text: 'Add', onClick: this.add },
+    {
+      icon: 'ellipsis',
+      items: [   // dropdown menu
+        { text: 'Export', onClick: this.export },
+        { text: 'Import', onClick: this.import },
+      ],
+    },
+  ];
+}
+```
+
+For more control, use the
+`actions`
+named block instead.
+
+### Layout Class Hooks
+
+A long tail of
+`*Class`
+arguments lets you target every internal element:
+
+`@wrapperClass`
+,
+`@containerClass`
+,
+`@panelClass`
+,
+`@panelHeaderClass`
+,
+`@panelHeaderLeftClass`
+,
+`@panelHeaderRightClass`
+,
+`@panelTitleClass`
+,
+`@panelTitleInlineClass`
+,
+`@panelTitleWrapperClass`
+,
+`@panelSubtitleInlineClass`
+,
+`@titleContainerClass`
+,
+`@prefixTitleClass`
+,
+`@prefixTitleContainerClass`
+,
+`@titleIconWrapperClass`
+,
+`@pad`
+.
+
+### Callbacks
+
+| Argument | Signature | Description |
+| --- | --- | --- |
+| `@onInsert` | `(api)` | Called when the panel is inserted. Receives `{ toggle, open, close }` |
+| `@onToggle` | `(isOpen)` | Called whenever the panel toggles |
+| `@onClick` | `(api)` | Called on any click in the header |
+| `@onClickCaret` | `(api)` | Called when the caret specifically is clicked |
+| `@onClickPanelTitle` | `(api)` | Called when the title (not the caret) is clicked |
+
+The
+`api`
+object contains
+`{ toggle, open, close }`
+so you can imperatively control the panel from outside.
+
+## Imperative Control
+
+Capture the API via
+`@onInsert`
+to control the panel from outside:
+
+```
+<ContentPanel @title="Filters" @onInsert={{this.captureApi}}>
+  {{!-- ... --}}
+</ContentPanel>
+
+<Button @text="Open filters" @onClick={{fn this.api.open}} />
+<Button @text="Close filters" @onClick={{fn this.api.close}} />
+```
+
+```
+@tracked api = null;
+
+@action captureApi(api) {
+  this.api = api;  // { toggle, open, close }
+}
+```
+
+## Yielded Blocks
+
+| Block | Purpose |
+| --- | --- |
+| (default) | The panel body |
+| `:title` | Custom content next to the title (replaces the default title rendering) |
+| `:actions` | Action buttons / dropdown in the header right |
+
+## Real-World Examples
+
+```
+{{!-- Settings group with status badge --}}
+<ContentPanel
+  @title="Stripe Gateway"
+  @titleStatus={{if this.gateway.is_sandbox "sandbox" "live"}}
+  @open={{true}}
+>
+  <InputGroup @name="Publishable Key" @value={{this.gateway.publishable_key}} />
+  <InputGroup @name="Secret Key" @value={{this.gateway.secret_key}} @type="password" />
+</ContentPanel>
+
+{{!-- Permission-gated panel --}}
+<ContentPanel
+  @title="Danger Zone"
+  @permission="platform manage organization"
+  @helpText="Only org admins can change these settings"
+>
+  <Button @type="danger" @text="Delete Organization" @onClick={{this.delete}} />
+</ContentPanel>
+
+{{!-- With actions block --}}
+<ContentPanel @title="Drivers" @open={{true}}>
+  <:actions>
+    <Button @type="primary" @icon="plus" @text="New Driver" @onClick={{this.addDriver}} />
+    <Button @icon="filter" @onClick={{this.openFilters}} />
+  </:actions>
+
+  <:default>
+    {{!-- Drivers list --}}
+  </:default>
+</ContentPanel>
+
+{{!-- Loading state --}}
+<ContentPanel @title="Order Details" @isLoading={{this.isLoading}} @open={{true}}>
+  {{#unless this.isLoading}}
+    {{!-- Order body --}}
+  {{/unless}}
+</ContentPanel>
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/content-panel.hbs` | Template |
+| `addon/components/content-panel.js` | Class |

@@ -1,0 +1,346 @@
+---
+title: "Configuration"
+url: https://fleetbase.io/docs/fleet-ops/navigator-app/configuration
+module: fleet-ops
+---
+
+# Configuration
+
+Full env-var reference for the open-source Fleetbase Navigator app — Fleetbase connection, maps, driver UI, push notifications, geolocation, localization, and deep linking.
+
+# Configuration
+
+This guide is the full env-var reference for developers and operators who
+**fork, brand, and self-publish**
+the Fleetbase Navigator driver app. If your drivers will use the public Fleetbase Navigator app from the App Store / Google Play, see
+[Navigator App Setup](https://fleetbase.io/docs/fleet-ops/getting-started/navigator-app-setup)
+instead — that page covers installing the public app and connecting it to your instance via the console-generated deep link.
+
+The Navigator source lives at
+`navigator-app`
+. It's a React Native 0.77 app, Expo-free, with Tamagui for styling and Fastlane for release automation.
+
+To get the app running locally for the first time, see
+[Quickstart](https://fleetbase.io/docs/fleet-ops/navigator-app/quickstart)
+. For colors, themes, and other visual branding, see
+[Theming & Branding](https://fleetbase.io/docs/fleet-ops/navigator-app/theming)
+.
+
+## Prerequisites
+
+| Tool | Used for |
+| --- | --- |
+| **Node.js 18+** | JS runtime |
+| **Yarn** (or npm/pnpm) | Package manager |
+| **React Native CLI** | Metro bundler, native builds |
+| **Xcode 12+** | iOS builds (macOS only) |
+| **Android Studio + JDK 17** | Android builds |
+| **Ruby + Bundler** | CocoaPods and Fastlane |
+| **A Fleetbase instance** | The API host the app will connect to |
+| **A Fleetbase API key** | Generated under **Developers → API Keys** in the console |
+
+Publishing release builds for iOS or Android requires a
+**paid commercial license**
+for
+`react-native-background-geolocation`
+(Transistor Soft). Debug builds work without it, but you cannot ship without a per-platform license. See the
+[purchase page](https://docs.transistorsoft.com/purchase/?platform=react-native)
+and the
+[setup guide](https://docs.transistorsoft.com/react-native/setup/)
+.
+
+## Environment Variables
+
+All configuration is driven by environment variables loaded via
+`react-native-config`
+. Start from
+`.env.example`
+and override per environment in
+`.env.dev`
+/
+`.env.prod`
+/ a custom flavor file.
+
+### Core
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `APP_NAME` | `Navigator` | Display name shown on the home screen and in the title bar. |
+| `APP_IDENTIFIER` | `io.fleetbase.navigator` | Bundle ID (iOS) and applicationId (Android). Must be reverse-DNS and unique on the stores. |
+| `APP_LINK_PREFIX` | `flbnavigator` | Deep-link URL scheme. Used both for "Open in app" links from the console and for OAuth callback URLs. |
+| `APP_THEME` | `blue` | Tamagui base theme key. Drives the accent color palette. |
+| `DEFAULT_COORDINATES` | `1.369,103.8864` | `lat,lng` used to center the map when no driver position is available. |
+| `DEFAULT_LOCALE` | `en` | Initial UI language. Users can change this at runtime. |
+| `LOGIN_BG_COLOR` | `#111827` | Background color of the login / setup screens. |
+
+### Fleetbase Connection
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `FLEETBASE_HOST` | `https://api.fleetbase.io` | Your Fleetbase API base URL. For self-hosted instances, set to `https://api.your-domain.com` . |
+| `FLEETBASE_KEY` | *(empty)* | The API secret key drivers will authenticate with. Generate one in **Console → Developers → API Keys** . |
+| `SOCKETCLUSTER_HOST` | `socket.fleetbase.io` | Realtime push backend host (live order updates, chat). |
+| `SOCKETCLUSTER_PORT` | `8000` | Realtime push backend port. |
+| `SOCKETCLUSTER_SECURE` | `true` | Whether to use WSS over WS. |
+| `SOCKETCLUSTER_PATH` | `/socketcluster/` | Realtime push backend path. |
+
+These values are also baked into the deep link your console emits — so most drivers never touch them directly. They're the fallback when no deep link is provided.
+
+### Maps
+
+| Variable | Purpose |
+| --- | --- |
+| `GOOGLE_MAPS_API_KEY` | Required. Used by `react-native-maps` , `react-native-maps-directions` , and the in-app launch navigator. |
+
+Generate a key in the
+[Google Cloud Console](https://console.cloud.google.com/)
+with
+**Maps SDK for iOS**
+,
+**Maps SDK for Android**
+, and
+**Directions API**
+enabled. Restrict the key to your bundle ID / package name in production.
+
+### Driver UI
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `DRIVER_NAVIGATOR_TABS` | `DriverDashboardTab,DriverTaskTab,DriverReportTab,DriverChatTab,DriverAccountTab` | Comma-separated list of tabs to show in the driver bottom navigation, in order. |
+| `DRIVER_NAVIGATOR_DEFAULT_TAB` | `DriverDashboardTab` | Tab opened on app launch. |
+
+Remove tabs your deployment doesn't need (e.g. drop
+`DriverChatTab`
+if you're not using built-in chat).
+
+### Android Signing
+
+The Android
+`release`
+signing config in
+`android/app/build.gradle`
+reads these from the environment when present:
+
+| Variable | Purpose |
+| --- | --- |
+| `ANDROID_VERSION_CODE` | Monotonically increasing integer for Play Store version reconciliation. |
+| `ANDROID_VERSION_NAME` | User-facing version (e.g. `1.4.2` ). |
+| `ANDROID_NAVIGATOR_APP_UPLOAD_STORE_FILE` | Absolute path to your `.keystore` file. |
+| `ANDROID_NAVIGATOR_APP_UPLOAD_STORE_PASSWORD` | Keystore password. |
+| `ANDROID_NAVIGATOR_APP_UPLOAD_KEY_ALIAS` | Key alias inside the keystore. |
+| `ANDROID_NAVIGATOR_APP_UPLOAD_KEY_PASSWORD` | Key password. |
+
+See
+[Build & Release](https://fleetbase.io/docs/fleet-ops/navigator-app/build-and-release)
+for keystore generation.
+
+## Minimal .env
+
+For a first run pointing at the hosted Fleetbase backend:
+
+```
+APP_NAME=Acme Driver
+APP_IDENTIFIER=com.acme.driver
+APP_LINK_PREFIX=acmedriver
+FLEETBASE_HOST=https://api.fleetbase.io
+FLEETBASE_KEY=flb_live_xxxxxxxxxxxxxxxx
+GOOGLE_MAPS_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+DEFAULT_COORDINATES=1.369,103.8864
+```
+
+## Connect to a Self-Hosted Fleetbase
+
+Point
+`FLEETBASE_HOST`
+at your API domain and update the SocketCluster envs to match your realtime gateway:
+
+```
+FLEETBASE_HOST=https://api.acme.com
+SOCKETCLUSTER_HOST=socket.acme.com
+SOCKETCLUSTER_PORT=443
+SOCKETCLUSTER_SECURE=true
+SOCKETCLUSTER_PATH=/socketcluster/
+```
+
+The runtime config layer (
+`src/contexts/ConfigContext.tsx`
+) lets users override these at runtime by scanning a deep-link QR code from the console — so the env values function as defaults, not hard-codes.
+
+## Push Notifications
+
+Navigator uses
+`react-native-notifications`
+for both FCM (Android) and APNS (iOS).
+
+Android (FCM)
+
+iOS (APNS)
+
+1. Create a Firebase project in the
+   [Firebase Console](https://console.firebase.google.com/)
+   .
+2. Add an Android app with your
+   `APP_IDENTIFIER`
+   as the package name.
+3. Download
+   `google-services.json`
+   and drop it into
+   `android/app/`
+   .
+4. Build & run —
+   `com.google.gms.google-services`
+   is already applied at the bottom of
+   `android/app/build.gradle`
+   .
+
+1. In Apple Developer →
+   **Keys**
+   , create an APNS auth key (
+   `.p8`
+   ).
+2. Upload the key in
+   **Fleetbase Console → Settings → Notifications**
+   under push credentials (or feed it directly to your push provider).
+3. In Xcode, ensure
+   **Signing & Capabilities**
+   includes
+   **Push Notifications**
+   and
+   **Background Modes → Remote notifications**
+   . The Info.plist already declares
+   `remote-notification`
+   ,
+   `processing`
+   ,
+   `location`
+   , and
+   `fetch`
+   background modes.
+4. `FirebaseAppDelegateProxyEnabled`
+   is set to
+   `false`
+   in the Info.plist — Navigator handles registration manually via the
+   `NotificationContext`
+   .
+
+## Background Geolocation
+
+Navigator uses
+[`react-native-background-geolocation`](https://github.com/transistorsoft/react-native-background-geolocation)
+(Transistor Soft) for continuous driver tracking — including when the app is backgrounded or the device is locked. This is
+**not**
+the free
+`react-native-geolocation-service`
+package.
+
+The wiring is already in place:
+
+* Android:
+  `apply from: "${background_geolocation.projectDir}/app.gradle"`
+  at the top of
+  `android/app/build.gradle`
+  .
+* iOS:
+  `Info.plist`
+  declares
+  `NSLocationAlwaysAndWhenInUseUsageDescription`
+  ,
+  `NSLocationAlwaysUsageDescription`
+  , and the
+  `location`
+  background mode.
+* App code:
+  `src/contexts/LocationContext.tsx`
+  configures and starts the plugin.
+
+What you have to do per platform before a release build:
+
+1. Purchase a license at
+   [docs.transistorsoft.com/purchase](https://docs.transistorsoft.com/purchase/?platform=react-native)
+   — one for iOS, one for Android.
+2. Follow
+   [the setup guide](https://docs.transistorsoft.com/react-native/setup/)
+   to drop the license keys into:
+   * **Android**
+     :
+     `<meta-data android:name="com.transistorsoft.locationmanager.license" android:value="YOUR_LICENSE_KEY"/>`
+     in
+     `AndroidManifest.xml`
+     .
+   * **iOS**
+     :
+     `BackgroundGeolocation.license`
+     key in
+     `Info.plist`
+     .
+
+Without a license, release builds (Android
+`bundleRelease`
+/ iOS Archive) will log a license error on launch and tracking will not start. Debug builds work for development.
+
+## Branding
+
+For app icon, splash screen, theme colors, custom color overrides, named themes, and native display names, see
+[Theming & Branding](https://fleetbase.io/docs/fleet-ops/navigator-app/theming)
+.
+
+## Localization
+
+Default locale is set by
+`DEFAULT_LOCALE`
+. To add a new language:
+
+1. Create a translations bundle and register it with
+   `react-native-i18n`
+   in the language context provider.
+2. The user's runtime selection is persisted via
+   `react-native-mmkv-storage`
+   and survives reinstalls if the keychain entry persists.
+
+The current locale negotiation falls back to the device locale when
+`DEFAULT_LOCALE`
+is unset.
+
+## Deep Linking
+
+`APP_LINK_PREFIX`
+is the URL scheme registered with both platforms:
+
+* **iOS**
+  : declared in
+  `Info.plist`
+  under
+  `CFBundleURLTypes`
+  .
+* **Android**
+  : written as
+  `appLinkScheme`
+  into
+  `AndroidManifest.xml`
+  via
+  `manifestPlaceholders`
+  in
+  `android/app/build.gradle`
+  .
+
+When the Fleetbase console emits an
+**App Link**
+for drivers to scan, the URL is shaped like:
+
+```
+<APP_LINK_PREFIX>://configure?host=https://api.acme.com&key=flb_live_xxx&socket_host=socket.acme.com&...
+```
+
+If you change
+`APP_LINK_PREFIX`
+, also change the matching value in your Fleetbase instance's
+`fleetops.navigator.link_prefix`
+config so the console emits a link the app will respond to.
+
+## Next
+
+For running the app locally on iOS, Android, or web, see
+[Quickstart](https://fleetbase.io/docs/fleet-ops/navigator-app/quickstart)
+. When you're ready to build release artifacts and ship to the stores, continue to
+[Build & Release](https://fleetbase.io/docs/fleet-ops/navigator-app/build-and-release)
+.

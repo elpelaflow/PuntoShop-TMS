@@ -1,0 +1,258 @@
+---
+title: "Service Provider"
+url: https://fleetbase.io/docs/extension-development/backend/service-provider
+module: extension-development
+---
+
+# Service Provider
+
+The Laravel service provider is the entry point for your extension's backend. It loads routes, migrations, observers, expansions, middleware, and binds services into the container.
+
+# Service Provider
+
+The backend half of an extension is a Laravel package. Your service provider is its entry point — Composer auto-discovers it via the
+`extra.laravel.providers`
+array in
+`composer.json`
+, and Laravel boots it on every request.
+
+Fleetbase ships a base service provider,
+**`Fleetbase\Providers\CoreServiceProvider`**
+, that does most of the wiring for you. Extend it (don't extend Laravel's
+`ServiceProvider`
+directly) so you inherit observer auto-registration, middleware groups, expansion loading, and the rest.
+
+## The Server Layout
+
+```
+server/
+├── composer.json
+├── src/
+│   ├── routes.php                            # Route definitions (NOT routes/api.php)
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   ├── Middleware/
+│   │   └── Requests/
+│   ├── Models/
+│   ├── Observers/
+│   ├── Expansions/
+│   ├── Providers/
+│   │   └── MyExtensionServiceProvider.php
+│   └── Console/
+│       └── Commands/
+└── migrations/                               # Migrations live here
+```
+
+## composer.json
+
+Laravel package discovery is configured in
+`extra.laravel.providers`
+:
+
+```
+{
+    "name": "my-org/my-extension-api",
+    "version": "0.0.1",
+    "require": {
+        "php": "^8.0",
+        "fleetbase/core-api": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "MyOrg\\MyExtension\\": "server/src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MyOrg\\MyExtension\\Providers\\MyExtensionServiceProvider"
+            ]
+        }
+    }
+}
+```
+
+The
+`flb scaffold`
+CLI generates this for you. See
+[Architecture Overview](https://fleetbase.io/docs/extension-development/architecture/overview)
+for the full manifest discussion.
+
+## A Minimal Service Provider
+
+```
+<?php
+
+namespace MyOrg\MyExtension\Providers;
+
+use Fleetbase\Providers\CoreServiceProvider;
+
+if (!class_exists(CoreServiceProvider::class)) {
+    throw new \Exception('My Extension cannot be loaded without `fleetbase/core-api` installed!');
+}
+
+class MyExtensionServiceProvider extends CoreServiceProvider
+{
+    /**
+     * Observers auto-registered by CoreServiceProvider.
+     */
+    public $observers = [
+        \MyOrg\MyExtension\Models\Widget::class => \MyOrg\MyExtension\Observers\WidgetObserver::class,
+    ];
+
+    /**
+     * Console commands auto-registered by CoreServiceProvider.
+     */
+    public $commands = [
+        \MyOrg\MyExtension\Console\Commands\SyncCommand::class,
+    ];
+
+    public function register()
+    {
+        $this->app->register(CoreServiceProvider::class);
+    }
+
+    public function boot()
+    {
+        $this->registerCommands();
+        $this->registerObservers();
+        $this->registerExpansionsFrom(__DIR__ . '/../Expansions');
+        $this->loadRoutesFrom(__DIR__ . '/../routes.php');
+        $this->loadMigrationsFrom(__DIR__ . '/../../migrations');
+        $this->mergeConfigFrom(__DIR__ . '/../../config/my-extension.php', 'my-extension');
+    }
+}
+```
+
+Real example:
+`ledger/server/src/Providers/LedgerServiceProvider.php`
+.
+
+## What CoreServiceProvider Does for You
+
+| Property | Behavior |
+| --- | --- |
+| `$observers` | Each `Model => Observer` pair is registered when you call `$this->registerObservers()` |
+| `$commands` | Console commands registered via `$this->registerCommands()` |
+| `$middleware` | Named middleware groups ( `'fleetbase.api'` , `'fleetbase.protected'` ) — extend by pushing to existing groups |
+| `$globalMiddlewares` | Always-on global middleware — append to add your own |
+| `$transformers` | Resource transformers registered when you call `$this->registerTransformers()` — see [Resource Transformers](https://fleetbase.io/docs/extension-development/backend/resource-transformers) |
+
+| Helper | Purpose |
+| --- | --- |
+| `loadRoutesFrom(path)` | Loads route file (Laravel built-in) |
+| `loadMigrationsFrom(path)` | Loads migrations (Laravel built-in) |
+| `registerExpansionsFrom(dir)` | Auto-loads every `Expansion` class in the directory and `expand()` s its target |
+| `registerTransformersFrom(dir)` | Auto-loads every `ResourceTransformer` class in the directory and registers it |
+| `scheduleCommands(callback)` | Wires up scheduled commands on the Laravel scheduler |
+
+See
+`Fleetbase\Providers\CoreServiceProvider`
+for the full set.
+
+## Middleware Groups
+
+Two named groups are defined globally — your routes attach to one:
+
+| Group | When to use | Includes |
+| --- | --- | --- |
+| `fleetbase.api` | Public API endpoints called with API keys | Throttle, basic-auth, request logging, route binding |
+| `fleetbase.protected` | Internal console endpoints called with the user session | Sanctum, session, authorization guard, presence tracking |
+
+Push your own middleware into a group from
+`boot()`
+:
+
+```
+$this->app->router->pushMiddlewareToGroup(
+    'fleetbase.api',
+    \MyOrg\MyExtension\Http\Middleware\RequireFeatureFlag::class
+);
+```
+
+## Routes
+
+Define your routes in
+`server/src/routes.php`
+(the path you pass to
+`loadRoutesFrom`
+). Use the namespace + prefix convention — see
+[Routes & Controllers](https://fleetbase.io/docs/extension-development/backend/routes-and-controllers)
+for the full guide.
+
+```
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::prefix(config('my-extension.api.routing.prefix', 'my-extension'))
+    ->namespace('MyOrg\MyExtension\Http\Controllers')
+    ->group(function ($router) {
+        $router->group(['middleware' => ['fleetbase.protected']], function ($router) {
+            $router->fleetbaseRoutes('widgets');
+        });
+    });
+```
+
+`fleetbaseRoutes()`
+is an expansion macro that registers the standard REST routes for a resource (
+`index`
+,
+`store`
+,
+`show`
+,
+`update`
+,
+`destroy`
+) plus a few Fleetbase extras. See
+[Routes & Controllers](https://fleetbase.io/docs/extension-development/backend/routes-and-controllers)
+.
+
+## Migrations
+
+Migrations live at
+`server/migrations/`
+(a flat directory, not
+`database/migrations/`
+). They're auto-loaded when you call
+`$this->loadMigrationsFrom()`
+. See
+[Migrations](https://fleetbase.io/docs/extension-development/backend/migrations)
+.
+
+## Observers, Expansions, Transformers, Events
+
+Four patterns fan out from the service provider:
+
+* **[Observers](https://fleetbase.io/docs/extension-development/backend/expansions-and-observers#observers)**
+  — react to model lifecycle events (created, updated, deleted) on your own or core models
+* **[Expansions](https://fleetbase.io/docs/extension-development/backend/expansions-and-observers#expansions)**
+  — extend Laravel facades (
+  `Route`
+  ,
+  `Str`
+  ,
+  `Arr`
+  , etc.) with custom methods. The
+  `Route::fleetbaseRoutes()`
+  macro is itself an expansion
+* **[Resource transformers](https://fleetbase.io/docs/extension-development/backend/resource-transformers)**
+  — decorate the JSON output of resources you don't own (core or other extensions), everywhere they are serialized, without modifying them
+* **Event service provider**
+  — for application events, register a sibling
+  `EventServiceProvider`
+  and
+  `register()`
+  it from your main provider. See
+  `fleetops/server/src/Providers/EventServiceProvider.php`
+  for a reference implementation.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `src/Providers/CoreServiceProvider.php` | Base service provider — extend this |
+| `src/Expansions/Route.php` | `fleetbaseRoutes` , `fleetbaseRestRoutes` , `fleetbaseAuthRoutes` |
+| `ledger/server/src/Providers/LedgerServiceProvider.php` | Reference extension provider |
+| `fleetops/server/src/Providers/FleetOpsServiceProvider.php` | Another reference extension provider |

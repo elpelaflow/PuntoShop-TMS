@@ -1,0 +1,144 @@
+---
+title: "Modifiers"
+url: https://fleetbase.io/docs/ui/helpers/modifiers
+module: ui
+---
+
+# Modifiers
+
+Element modifiers from @fleetbase/ember-ui — set-height, set-width, imask, background-url, fallback-img-src, and more.
+
+# Modifiers
+
+Modifiers attach behavior to an element. They look like helpers but apply to the element rather than producing a value:
+
+```
+<div {{set-height "400px"}}>fixed-height container</div>
+```
+
+The modifier runs on render and re-runs when its arguments change.
+
+## Dimension Modifiers
+
+### {{set-height value}}
+
+Sets
+`style.height`
+:
+
+```
+<div {{set-height "400px"}}>...</div>
+<div {{set-height (concat this.computedHeight "px")}}>...</div>
+```
+
+### {{set-width value}}
+
+Sets
+`style.width`
+.
+
+### {{set-max-height value}}
+
+Sets
+`style.maxHeight`
+.
+
+### {{set-max-width value}}
+
+Sets
+`style.maxWidth`
+.
+
+### {{set-z-index value}}
+
+Sets
+`style.zIndex`
+.
+
+### {{set-container-dimensions}}
+
+Sets the element's
+`width`
+and
+`height`
+to the dimensions of its parent.
+
+### {{constrain-view-section-width}}
+
+Pins the element's width to the available view section width — handles responsive resize.
+
+### {{increase-height-by value}}
+
+Increases the element's height by the given amount.
+
+### {{vertical-offset-by value}}
+
+Translates the element vertically by the given amount.
+
+### {{translate-x value}}
+
+Sets
+`style.transform = translateX(...)`
+.
+
+## Image Modifiers
+
+### {{background-url url}}
+
+Sets
+`style.backgroundImage = url(...)`
+:
+
+```
+<div class="hero" {{background-url @company.banner_url}}>...</div>
+```
+
+### {{fallback-img-src fallback}}
+
+Sets
+`src`
+to the fallback if the original image fails to load:
+
+```
+<img src={{@user.avatar_url}} {{fallback-img-src "/assets/placeholder.png"}} />
+```
+
+## Input Modifiers
+
+### {{imask mask}}
+
+Applies an
+[iMask](https://imask.js.org)
+input mask. The mask can be a preset name or a configuration object:
+
+```
+<input type="text" {{imask "phone"}} />
+<input type="text" {{imask (hash mask="00/00/0000")}} />
+```
+
+Common presets:
+
+| Preset | Pattern |
+| --- | --- |
+| `phone` | International phone format |
+| `currency` | Currency input with separators |
+| `date` | Date input |
+| `card` | Credit card number with spaces |
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/modifiers/set-height.js` | Modifier |
+| `addon/modifiers/set-width.js` | Modifier |
+| `addon/modifiers/set-max-height.js` | Modifier |
+| `addon/modifiers/set-max-width.js` | Modifier |
+| `addon/modifiers/set-z-index.js` | Modifier |
+| `addon/modifiers/set-container-dimensions.js` | Modifier |
+| `addon/modifiers/constrain-view-section-width.js` | Modifier |
+| `addon/modifiers/increase-height-by.js` | Modifier |
+| `addon/modifiers/vertical-offset-by.js` | Modifier |
+| `addon/modifiers/translate-x.js` | Modifier |
+| `addon/modifiers/background-url.js` | Modifier |
+| `addon/modifiers/fallback-img-src.js` | Modifier |
+| `addon/modifiers/imask.js` | Modifier |

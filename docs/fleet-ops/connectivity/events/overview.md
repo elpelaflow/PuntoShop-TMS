@@ -1,0 +1,109 @@
+---
+title: "Device Events"
+url: https://fleetbase.io/docs/fleet-ops/connectivity/events/overview
+module: fleet-ops
+---
+
+Events
+
+# Device Events
+
+View and inspect raw device and sensor events — GPS readings, OBD-II data, sensor values, and system events from connected fleet hardware.
+
+# Device Events
+
+**Device Events**
+are the raw data points received from connected fleet hardware — GPS position updates, OBD-II diagnostic readings, sensor values, and alert events. Every time a device or sensor sends data to Fleet-Ops, a DeviceEvent is recorded.
+
+Navigate to
+**Fleet-Ops → Connectivity → Events**
+.
+
+![Device events list — event type, device, vehicle, value, timestamp, and location](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-device-events-list.8de7a98a.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Event Types
+
+| Event Type | Source | Data Captured |
+| --- | --- | --- |
+| **Position Update** | GPS tracker or telematics modem | Latitude, longitude, speed, heading, altitude |
+| **OBD-II Reading** | OBD-II scanner | RPM, fuel level, coolant temperature, engine hours, fault codes |
+| **Temperature Reading** | Temperature sensor | Temperature value, timestamp |
+| **Door Event** | Door sensor | Open / Closed state, timestamp |
+| **Motion Event** | Motion/vibration sensor | G-force, impact severity |
+| **Speed Alert** | GPS or OBD-II | Speed exceeded threshold |
+| **Geofence Event** | Geofence service | Entry / Exit for a service area or zone |
+| **Fault Code** | OBD-II scanner | DTC (Diagnostic Trouble Code) with severity |
+| **Device Heartbeat** | Any device | Connectivity status check |
+
+## Viewing Events
+
+The Events list shows all recent device events across your fleet. Filter by:
+
+* **Device**
+  — events from a specific GPS tracker or modem
+* **Vehicle**
+  — all events associated with a vehicle
+* **Event Type**
+  — filter to position updates, OBD readings, alerts, etc.
+* **Date Range**
+  — events from a specific period
+
+Click any event row to see the full event payload, including raw data and exact coordinates.
+
+## Event Payload
+
+Each event record contains:
+
+```
+{
+  "id": "event_01H...",
+  "device_id": "device_01H...",
+  "vehicle_id": "vehicle_01H...",
+  "event_type": "position_update",
+  "timestamp": "2025-04-30T08:42:15Z",
+  "location": {
+    "type": "Point",
+    "coordinates": [103.8198, 1.3521]
+  },
+  "data": {
+    "speed": 42.5,
+    "heading": 225,
+    "altitude": 15.2,
+    "accuracy": 4.0
+  }
+}
+```
+
+## Event Inspection
+
+Clicking an event opens the
+**Event Detail**
+view which shows:
+
+* Device and vehicle linked to the event
+* Full event payload with all data fields
+* Map showing the event location (for position and geofence events)
+* Link to the vehicle position history for context
+
+## Using Events for Investigations
+
+Device events are useful for post-incident investigations:
+
+* **Accident reconstruction**
+  — replay position events to trace the vehicle's path before impact
+* **Unauthorized use**
+  — check events for activity outside driver hours
+* **Cold chain breach**
+  — find temperature events that exceeded the threshold and when
+* **Excessive idling**
+  — identify periods of zero speed with engine-on events
+
+## Programmatic Access
+
+Device events can be accessed via the internal API:
+
+```
+GET /int/v1/fleet-ops/devices/{device_id}/events
+```
+
+The response includes paginated events with full payload data, suitable for integration with external analytics or compliance systems.

@@ -1,0 +1,200 @@
+---
+title: "Pill"
+url: https://fleetbase.io/docs/ui/display/pill
+module: ui
+---
+
+# Pill
+
+<Pill> renders an avatar + name + optional subtitle for a Fleetbase resource — driver, customer, vehicle, etc. Optional online indicator and tooltip.
+
+# <Pill>
+
+`<Pill>`
+is a compact representation of a Fleetbase resource — typically used in lists, table cells, and assignment widgets. It shows the resource's image (with fallback), name, optional subtitle, and an online indicator if the resource has an
+`online`
+property.
+
+For categorical / status labels, use
+[`<Badge>`](https://fleetbase.io/docs/ui/display/badge)
+instead.
+
+## Basic Usage
+
+```
+<Pill @resource={{driver}} />
+```
+
+The pill auto-derives:
+
+* The image from
+  `driver.photo_url`
+  (or whatever your
+  `<Image>`
+  resolves)
+* The name from
+  `driver.name`
+  (or
+  `display_name`
+  ,
+  `displayName`
+  ,
+  `tracking`
+  ,
+  `public_id`
+  )
+* The fallback image from
+  `defaultValues.<fallbackImageType>`
+  or
+  `defaultValues.placeholderImage`
+
+## With a Subtitle
+
+```
+<Pill @resource={{driver}} @subtitle={{driver.public_id}} />
+```
+
+## With an Online Indicator
+
+```
+<Pill @resource={{driver}} @showOnlineIndicator={{true}} />
+```
+
+A small dot is overlaid on the avatar — green if
+`driver.online === true`
+, yellow otherwise. Use
+`@onlinePath`
+to look at a different property.
+
+## Custom Image
+
+Override the auto-resolved image:
+
+```
+<Pill @resource={{vehicle}} @imageSrc={{vehicle.photo_url}} @imageSize="40" />
+```
+
+## Click Handler
+
+```
+<Pill @resource={{driver}} @onClick={{this.openDriverDetail}} />
+```
+
+The handler receives the resource as the first argument (followed by the click event).
+
+## Yielded Blocks
+
+| Block | Receives | Purpose |
+| --- | --- | --- |
+| (default) | `@resource` | Override the title + subtitle area |
+| `:image` | `@resource` | Override the image |
+| `:tooltip` | `@resource` | Render content inside the hover tooltip |
+
+```
+<Pill @resource={{driver}}>
+  <:image>
+    <CustomAvatar @driver={{driver}} />
+  </:image>
+  <:default as |d|>
+    <strong>{{d.name}}</strong>
+    <span class="ml-2 text-xs">{{d.role}}</span>
+  </:default>
+  <:tooltip as |d|>
+    Last seen: {{format-date-fns d.last_seen "PPpp"}}
+  </:tooltip>
+</Pill>
+```
+
+## Arguments
+
+### Resource
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@resource` | model | The Fleetbase resource record |
+| `@namePath` | string | Dot-path on the resource for the name (default: tries `name` , `display_name` , `displayName` , `tracking` , `public_id` ) |
+| `@title` | string | Override the resolved name |
+| `@titleFallback` | string | Fallback when name resolution returns nothing (defaults to `-` ) |
+| `@subtitle` | string | Smaller text under the name |
+
+### Image
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@imageSrc` | string | Override the avatar URL |
+| `@imageFallback` | string | Override the fallback URL |
+| `@fallbackImageType` | string | Lookup key — `defaultValues.<fallbackImageType>` |
+| `@imageSize` | string | Width and height in px (default `28` ) |
+| `@imageWidth` | string | Width only |
+| `@imageHeight` | string | Height only |
+| `@imageAlt` | string | `alt` attribute |
+| `@imageClass` | string | Extra classes on the image |
+| `@imageWrapperClass` | string | Extra classes around the image |
+
+### Online Indicator
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@showOnlineIndicator` | boolean | `false` | Show the online dot overlay |
+| `@onlinePath` | string | `online` | Property path on the resource for online state |
+| `@onlineIndicatorClass` | string | — | Extra classes on the indicator |
+
+### Tooltip
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@noTooltip` | boolean | Disable tooltips entirely |
+| `@tooltipPosition` | string | `top` , `bottom` , `left` , `right` (default `top` ) |
+| `@tooltipComponent` | string | Render this component inside the tooltip |
+
+### Layout Class Hooks
+
+`@anchorClass`
+,
+`@contentWrapperClass`
+,
+`@titleClass`
+,
+`@subtitleClass`
+.
+
+### Callback
+
+| Argument | Signature | Description |
+| --- | --- | --- |
+| `@onClick` | `(resource, event)` | Called with the resource on click |
+
+## Real-World Examples
+
+```
+{{!-- Driver pill in an order detail --}}
+<Pill @resource={{order.driver}} @showOnlineIndicator={{true}} @subtitle="Assigned driver" />
+
+{{!-- Inside a table cell --}}
+{{#if row.assignee}}
+  <Pill @resource={{row.assignee}} @onClick={{fn this.openProfile row.assignee}} />
+{{else}}
+  <span class="text-gray-400">Unassigned</span>
+{{/if}}
+
+{{!-- With a custom tooltip --}}
+<Pill @resource={{driver}}>
+  <:tooltip as |d|>
+    <div>{{d.name}}</div>
+    <div class="text-xs">{{d.email}}</div>
+    <div class="text-xs">Vehicle: {{d.vehicle.name}}</div>
+  </:tooltip>
+</Pill>
+```
+
+## See Also
+
+* [`<Badge>`](https://fleetbase.io/docs/ui/display/badge)
+  — for categorical/status labels (no avatar)
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/pill.hbs` | Template |
+| `addon/components/pill.js` | Class |

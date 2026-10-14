@@ -1,0 +1,94 @@
+---
+title: "Services"
+url: https://fleetbase.io/docs/platform/system-setup/services
+module: platform
+---
+
+# Services
+
+Configure third-party service integrations — AWS, Google Maps, Twilio SMS, Sentry error tracking, and IP geolocation.
+
+# Services
+
+The Services settings panel is where you connect Fleetbase to external APIs it uses across the platform — mapping, SMS, error monitoring, and IP geolocation. Navigate to
+**Admin → System Settings → Services**
+to access these settings.
+
+![Services settings — AWS, Google Maps, Twilio, Sentry, and IP Info configuration sections](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fadmin-services-settings.c977e332.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+For production infrastructure planning, including required external connectivity and service dependencies, see
+[Infrastructure Sizing](https://fleetbase.io/docs/platform/quickstart/infrastructure-sizing)
+.
+
+## AWS
+
+Fleetbase uses the AWS SDK for integrations that require direct AWS API access (such as SES for email or SQS for queue processing). These credentials are separate from the S3 credentials configured in
+[Filesystem](https://fleetbase.io/docs/platform/system-setup/filesystem)
+.
+
+| Field | Description |
+| --- | --- |
+| **AWS Access Key** | Your IAM user's Access Key ID |
+| **AWS Access Secret** | Your IAM user's Secret Access Key |
+| **AWS Region** | Default region (e.g. `us-east-1` , `ap-southeast-1` ) |
+
+Create a dedicated IAM user in the AWS Console with the minimum permissions needed for your use case. Avoid using root account credentials.
+
+## Google Maps
+
+Google Maps powers address autocomplete, geocoding, and the live map in Fleet-Ops.
+
+| Field | Description |
+| --- | --- |
+| **Google Maps API Key** | Your API key from the [Google Cloud Console](https://console.cloud.google.com/) |
+| **Google Maps Locale** | Default locale for map labels and autocomplete results (e.g. `us` , `gb` , `au` ) |
+
+The API key must have the following APIs enabled in your Google Cloud project:
+
+* Maps JavaScript API
+* Geocoding API
+* Places API
+
+Restrict the key to your console's domain in the Google Cloud Console to prevent unauthorized use.
+
+## Twilio
+
+Twilio handles outbound SMS — used for driver notifications, 2FA codes when SMS is selected as the delivery method, and any SMS alerts configured in extensions.
+
+| Field | Description |
+| --- | --- |
+| **Twilio SID** | Your Twilio Account SID (from the Twilio Console dashboard) |
+| **Twilio Token** | Your Twilio Auth Token |
+| **Twilio From** | The Twilio phone number or Messaging Service SID to send from |
+
+Enter a phone number in the
+**Test Twilio Config**
+field and click the test button to send a live SMS and confirm credentials are working before saving.
+
+## Sentry
+
+Sentry captures unhandled exceptions and errors from the Fleetbase API, giving you visibility into production issues.
+
+| Field | Description |
+| --- | --- |
+| **Sentry DSN** | The DSN from your Sentry project settings |
+
+Create a Laravel project in your Sentry account to get the DSN. Click
+**Test Sentry Config**
+to fire a test exception and confirm events are appearing in your Sentry dashboard.
+
+## IP Info
+
+Fleetbase uses IP geolocation to enrich audit logs and session records with approximate location data.
+
+| Field | Description |
+| --- | --- |
+| **IP Info API Key** | Your API key from [ipinfo.io](https://ipinfo.io/) |
+
+A free ipinfo.io account provides 50,000 requests per month, which is sufficient for most self-hosted instances.
+
+## Saving
+
+Click
+**Save Changes**
+to apply all service configuration. The configuration cache is refreshed automatically — no restart is required.

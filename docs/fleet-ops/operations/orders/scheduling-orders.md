@@ -1,0 +1,132 @@
+---
+title: "Scheduling Orders"
+url: https://fleetbase.io/docs/fleet-ops/operations/orders/scheduling-orders
+module: fleet-ops
+---
+
+Orders
+
+# Scheduling Orders
+
+Schedule an order for a specific date and time — set pickup windows, time constraints, and future dispatch.
+
+# Scheduling Orders
+
+Orders can be scheduled for a specific future date and time rather than dispatched immediately. A scheduled order is still a normal order with system status
+`created`
+— the scheduling fields tell the Scheduler, the Orchestrator, and the dispatch queue
+*when*
+it's eligible to go out, but Fleet-Ops does not have a separate "scheduled" status.
+
+## Setting a Scheduled Pickup
+
+When creating or editing an order, enable
+**Schedule**
+in the order form:
+
+Open the new order form (
+**Operations → Orders → + New Order**
+) or edit an existing order.
+
+Toggle
+**Schedule Order**
+on.
+
+Set the
+**Scheduled At**
+date and time — the target pickup time.
+
+Optionally set a
+**Time Window Start**
+and
+**Time Window End**
+to define the acceptable pickup range (e.g., between 09:00 and 12:00).
+
+Save the order. The order is created with status
+**`created`**
+and the
+`scheduled_at`
+field set; it is not dispatched yet.
+
+![New order form — Schedule toggle with date/time picker and time window fields](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-order-create-schedule.74347ce4.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## How Scheduled Orders Behave
+
+A
+`created`
+order with a
+`scheduled_at`
+value behaves differently from one without:
+
+* It is filterable in the orders list using the
+  **Scheduled**
+  quick filter (which shows orders with a future
+  `scheduled_at`
+  )
+* It appears in the Scheduler calendar view on its scheduled date
+* The Orchestrator can include it in optimization runs that target a specific date or window
+* It does not appear in the active dispatch queue until the scheduled window is reached
+
+## Time Windows
+
+The
+**time window**
+(start and end time) defines when the order pickup can occur. This is distinct from the scheduled time — it gives the driver a range rather than an exact moment.
+
+Time windows are used by the
+**Orchestrator**
+as a hard constraint when assigning and routing orders. An order with a time window of 09:00–12:00 will only be assigned to a driver who can reach the pickup location before 12:00.
+
+For waypoints within an order, each stop can have its own independent time window.
+
+## Automatic Dispatch at the Scheduled Time
+
+Scheduled orders
+**are dispatched automatically**
+when the scheduled date and time arrives. The order moves from
+`created`
+to
+`dispatched`
+, the driver receives a push notification in Navigator, and the order appears in their active job list — no operator action required.
+
+If the order has no driver assigned yet at the scheduled time, dispatch can be configured to either:
+
+* Hold the order until the next Orchestrator run picks it up, or
+* Trigger an Orchestrator allocation pass at the scheduled time and dispatch as soon as a driver is matched
+
+You can also dispatch a scheduled order
+**early**
+by opening it and clicking
+**Dispatch**
+— useful when the driver is ready before the scheduled window.
+
+## Viewing Scheduled Orders
+
+Scheduled orders appear in two places:
+
+1. **Orders List**
+   — use the
+   **Scheduled**
+   quick filter to see all
+   `created`
+   orders with a future
+   `scheduled_at`
+2. **Scheduler Calendar**
+   — navigate to
+   **Operations → Scheduler**
+   to see a timeline view of all scheduled orders organized by date and driver
+
+## Rescheduling
+
+To change the scheduled date or time:
+
+1. Open the order detail and click
+   **Edit**
+2. Update the
+   **Scheduled At**
+   field and time window
+3. Save — the order remains in
+   `created`
+   status with the updated time
+
+If the order has already been dispatched, rescheduling requires cancelling the dispatch first.

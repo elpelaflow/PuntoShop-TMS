@@ -1,0 +1,98 @@
+---
+title: "UnitInput"
+url: https://fleetbase.io/docs/ui/inputs/unit-input
+module: ui
+---
+
+# UnitInput
+
+<UnitInput> is a numeric input with an attached unit label or unit picker — used for weights, distances, capacities, and any measurement.
+
+# <UnitInput>
+
+A numeric input with a unit label fixed to its right. Optionally lets the user pick a different unit from a dropdown.
+
+Used for weights (
+`kg`
+,
+`lb`
+), distances (
+`km`
+,
+`mi`
+), capacities (
+`L`
+,
+`gal`
+), and similar measurement fields.
+
+## Basic Usage
+
+```
+<UnitInput @value={{this.vehicle.max_weight}} @unit="kg" />
+```
+
+## With Unit Picker
+
+```
+<UnitInput
+  @value={{this.vehicle.max_weight}}
+  @unit={{this.vehicle.weight_unit}}
+  @canSelectUnit={{true}}
+  @units={{this.weightUnits}}
+  @onUnitChange={{fn (mut this.vehicle.weight_unit)}}
+/>
+```
+
+```
+weightUnits = [
+  { name: 'Kilograms', value: 'kg' },
+  { name: 'Pounds', value: 'lb' },
+  { name: 'Tonnes', value: 'tn' },
+];
+```
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@value` | number | The numeric value |
+| `@unit` | string | The unit code shown on the right |
+| `@units` | array | Array of `{ name, value }` for the unit picker |
+| `@canSelectUnit` | boolean | Show the dropdown picker |
+| `@onUnitChange` | `(unit)` | Called when the user picks a different unit |
+| `@disabled` | boolean | Disable the input |
+| `@placeholder` | string | Placeholder for the numeric input |
+| `@wrapperClass` | string | Extra classes on the outer wrapper |
+
+Any additional
+`...attributes`
+are forwarded to the inner
+`<input>`
+.
+
+## Real-World Examples
+
+```
+{{!-- Vehicle capacity --}}
+<InputGroup @name="Maximum Weight">
+  <UnitInput
+    @value={{this.vehicle.max_weight}}
+    @unit={{this.vehicle.weight_unit}}
+    @canSelectUnit={{true}}
+    @units={{this.weightUnits}}
+    @onUnitChange={{fn (mut this.vehicle.weight_unit)}}
+  />
+</InputGroup>
+
+{{!-- Service rate base distance --}}
+<UnitInput @value={{this.rate.base_distance}} @unit="km" />
+```
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/unit-input.hbs` | Template |
+| `addon/components/unit-input.js` | Class |
+| `addon/components/unit-input/` | `UnitHandle` subcomponent |

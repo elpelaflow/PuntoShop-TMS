@@ -1,0 +1,123 @@
+---
+title: "Permission Helpers"
+url: https://fleetbase.io/docs/ui/helpers/permissions
+module: ui
+---
+
+# Permission Helpers
+
+Helpers for conditional rendering based on IAM permissions — can-action, cannot-action, can-delete, can-write, and friends.
+
+# Permission Helpers
+
+These helpers wrap
+[`ember-can`](https://github.com/minutebase/ember-can)
+abilities to make permission gating concise in templates. They are pure functions — passing them stale arguments returns stale answers, so write the ability string inline rather than computing it externally.
+
+For declarative gating on individual components, prefer the built-in
+`@permission`
+arg on
+`<Button>`
+,
+`<ContentPanel>`
+,
+`<Toggle>`
+, etc. Use these helpers when the component itself doesn't accept
+`@permission`
+or when you need to gate arbitrary markup.
+
+## {{can-action ability}}
+
+Returns true if the current user has the ability:
+
+```
+{{#if (can-action "fleet-ops driver delete")}}
+  <Button @type="danger" @text="Delete driver" @onClick={{this.delete}} />
+{{/if}}
+```
+
+## {{cannot-action ability}}
+
+The negation:
+
+```
+{{#if (cannot-action "fleet-ops driver delete")}}
+  <span class="text-gray-400">You don't have permission to delete drivers</span>
+{{/if}}
+```
+
+## {{can-delete subject}}
+
+Convenience for
+`delete-<model>`
+style abilities:
+
+```
+{{#if (can-delete @driver)}}
+  <Button @type="danger" @icon="trash" @onClick={{fn this.delete @driver}} />
+{{/if}}
+```
+
+## {{cannot-delete subject}}
+
+The negation of
+`can-delete`
+.
+
+## {{can-write subject}}
+
+Convenience for
+`update-<model>`
+(or whatever your write ability is):
+
+```
+{{#if (can-write @driver)}}
+  <InputGroup @name="Name" @value={{@driver.name}} />
+{{else}}
+  <InputGroup @name="Name" @value={{@driver.name}} @disabled={{true}} />
+{{/if}}
+```
+
+## {{cannot-write subject}}
+
+The negation.
+
+## {{get-write-permission subject}}
+
+Returns the ability string used by
+`can-write`
+for a subject — useful for forwarding to a component's
+`@permission`
+arg:
+
+```
+<Button
+  @text="Save"
+  @permission={{get-write-permission @driver}}
+  @onClick={{this.save}}
+/>
+```
+
+## {{can-remove-chat-participant participant chat}}
+
+Specialized helper for chat-feature gating. True if the current user can remove the given participant from the chat.
+
+## See Also
+
+* [`<Button @permission>`](https://fleetbase.io/docs/ui/actions/button)
+  and similar — declarative permission gating on components
+* The IAM and roles system in the
+  [Platform docs](https://fleetbase.io/docs/platform/identity-and-access)
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/helpers/can-action.js` | Helper |
+| `addon/helpers/can-delete.js` | Helper |
+| `addon/helpers/can-write.js` | Helper |
+| `addon/helpers/cannot-action.js` | Helper |
+| `addon/helpers/cannot-delete.js` | Helper |
+| `addon/helpers/cannot-write.js` | Helper |
+| `addon/helpers/get-write-permission.js` | Helper |
+| `addon/helpers/can-remove-chat-participant.js` | Helper |

@@ -1,0 +1,197 @@
+---
+title: "Workbench"
+url: https://fleetbase.io/docs/fleet-ops/operations/orchestrator/workbench
+module: fleet-ops
+---
+
+Orchestrator
+
+# Workbench
+
+Compose phases, run the Orchestrator, review the proposed plan, and commit assignments — all from the Orchestrator Workbench.
+
+# Orchestrator Workbench
+
+The
+**Workbench**
+is the main UI for running the Orchestrator. It lays out the unassigned order pool, the available drivers and vehicles, and a phase builder where you compose and run optimization phases. The Workbench is a planning surface — nothing changes in production until you click
+**Commit**
+.
+
+![Orchestrator Workbench — phase builder with order pool, map, and resource panel](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orchestrator-workbench.ff9ab52d.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Layout
+
+Open the Workbench from
+**Fleet-Ops → Operations → Orchestrator**
+. The screen is divided into three regions:
+
+| Region | Purpose |
+| --- | --- |
+| **Order Pool** (left) | Filterable list of orders eligible for allocation |
+| **Map + Phase Builder** (center) | Interactive map; phase builder panel slides down when toggled |
+| **Resource Panel** (right) | Available vehicles and drivers, filterable by status |
+
+After you run phases, the right panel switches to the
+**Plan Viewer**
+showing proposed assignments per driver/vehicle.
+
+## The Order Pool
+
+The order pool lists every order currently eligible for allocation. Each card shows the order ID, customer, pickup and dropoff, scheduled time (if any), and the order's system status. Use the quick filters above the list —
+*All*
+,
+*Scheduled*
+,
+*Today*
+,
+*Urgent*
+,
+*Unassigned*
+,
+*Imported*
+— and the
+**Advanced Filters**
+button for date, fleet, order config, and status filters.
+
+Click an order to highlight its pickup and dropoff on the map. The pool count updates as you filter.
+
+## The Resource Panel
+
+The resource panel lists available vehicles and drivers. Each vehicle card shows the make/model, plate, a status badge (
+*Active*
+,
+*Maintenance*
+,
+*In Transit*
+,
+*No Driver*
+,
+*Available*
+), and the assigned driver if one is linked. The drivers tab shows online drivers, their skills, and their shift window.
+
+Toggle a vehicle or driver off to exclude them from the run.
+
+## Phase Builder
+
+The phase builder is where you compose the orchestration. Click the
+**Phases**
+button in the toolbar to open it. By default the panel is empty — click
+**+ Add Phase**
+to add the first phase.
+
+### Adding a Phase
+
+Each phase has these fields:
+
+| Field | Meaning |
+| --- | --- |
+| **Phase Label** | Free-text name shown on the phase tab (e.g. *Allocate Orders* , *Re-sequence Routes* ) |
+| **Mode** | What the phase optimizes for: *Assign Vehicles* , *Assign Drivers* , *Optimize Routes* , or *Allocate Orders* |
+| **Engine** | The strategy used to compute the phase — `greedy` or `vroom` (or any engine registered by an extension) |
+| **Include Order Statuses** | Which order statuses the phase pulls from — typically `created` , but `dispatched` or `started` can be included for re-planning |
+| **Balance Workload** | Try to equalize stops/orders across drivers |
+| **Respect Skills** | Honor skill requirements on orders and skills on drivers |
+| **Respect Capacity** | Honor vehicle capacity (weight, volume) when allocating |
+| **Return to Depot** | Add a final leg back to each driver's depot |
+| **Auto-commit** | Commit this phase's result before the next phase runs (rather than reviewing the entire plan at the end) |
+
+Phases run in the order shown in the panel. Use the up/down arrows on a phase to reorder. Use the trash icon to delete a phase.
+
+### Running One Phase or Many
+
+You can run a single phase on its own — for example, just
+**Optimize Routes**
+to re-sequence an existing manifest without changing assignments — or chain several phases together.
+
+![Phase toggle — enabling and disabling individual phases before a run](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orchestrator-phase-toggle.ef300a23.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+![Workbench with three phases stacked — Phase 1: Assign Vehicles, Phase 2: Optimize Routes, Phase 3: Assign Vehicles, with the Allocate Orders mode selected](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-orchestrator-phases.fe955c7f.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+Common multi-phase patterns:
+
+* *Assign Vehicles → Optimize Routes*
+  — allocate by capacity, then plan the route
+* *Assign Vehicles → Assign Drivers → Optimize Routes*
+  — full three-step build
+* *Assign Drivers → Optimize Routes*
+  — when vehicles are pre-paired with drivers
+
+Each phase reads the current state and writes the updated plan, so the next phase sees the previous phase's output as its input.
+
+## Running the Orchestrator
+
+### Filter the order pool
+
+Use the quick filters or
+**Advanced Filters**
+to narrow the pool to the orders you want to plan against. Excluded orders stay in the pool for the next run.
+
+### Open the Phase Builder
+
+Click
+**Phases**
+in the toolbar. Add and configure phases — at minimum one phase, or as many as the workflow needs.
+
+### Click Run Phase(s)
+
+The button label reflects the count (
+*Run 1 Phase(s)*
+,
+*Run 3 Phase(s)*
+). Phases execute in sequence; each result feeds the next.
+
+### Review the proposed plan
+
+The right panel switches to the Plan Viewer. Each driver/vehicle row shows their assigned orders, total distance, and estimated duration. The map draws the proposed routes. Click any assignment to inspect it.
+
+Orders that could not be allocated appear in an
+**Unassigned**
+section with the reason (capacity exceeded, no matching skill, time window impossible, no available driver).
+
+### Adjust the plan (optional)
+
+Drag orders between drivers, exclude orders, or re-run with different phase settings until the plan looks right.
+
+### Commit
+
+Click
+**Commit Plan**
+. The Orchestrator creates a
+**Manifest**
+per assigned driver, links the driver and vehicle to each order, and dispatches the orders to the Navigator app. A confirmation summarizes the result.
+
+## Card Fields
+
+The
+**Card Fields**
+button in the toolbar opens a panel for choosing which fields appear on each order card in the pool and plan viewer (e.g. tracking number, scheduled time, customer, dropoff). You can configure separate field sets for the standard view, per Order Configuration, and metadata fields.
+
+## Reviewing Results After Commit
+
+Once committed, each driver's manifest appears in:
+
+* **Fleet-Ops → Resources → Drivers → [Driver] → Schedule**
+  — the driver's order list for the day
+* **Navigator app**
+  — drivers see their manifest as their active job queue
+
+Unassigned orders return to the pool and remain available for the next Orchestrator run or manual assignment.
+
+## See Also
+
+* [Orchestrator Overview](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview)
+  — modes, engines, and the planning model
+* [Vehicle Allocation](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/vehicle-allocation)
+  — how vehicles are matched to orders
+* [Payload & Capacity Allocation](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/payload-capacity-allocation)
+  — weight and volume constraints
+* [Orchestrator Settings](https://fleetbase.io/docs/fleet-ops/settings/orchestrator)
+  — defaults and global behavior
+
+[Orchestrator Overview
+
+A multi-phase planner that turns a pool of unassigned orders into a committable plan — stack vehicle allocation, driver allocation, and route optimization phases in sequence.](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview)
+[Vehicle Allocation
+
+How the Orchestrator matches vehicles to orders — availability, location proximity, and driver assignment.](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/vehicle-allocation)

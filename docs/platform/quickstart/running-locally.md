@@ -1,0 +1,420 @@
+---
+title: "Running Locally"
+url: https://fleetbase.io/docs/platform/quickstart/running-locally
+module: platform
+---
+
+# Running Locally
+
+Run the full Fleetbase stack on your local machine using Docker Compose — for evaluation, testing, and local use.
+
+# Running Locally
+
+Fleetbase ships with a
+`docker-compose.yml`
+that boots the entire stack — API, console, database, Redis, SocketCluster, queue workers, and scheduler — with a single command. This is the recommended setup for local development and testing.
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+* **Docker**
+  v20.10+ and
+  **Docker Compose**
+  v2.0+ —
+  [Install Docker](https://docs.docker.com/get-docker/)
+* **Git**
+  — to clone the repository
+* **Node.js**
+  v18+ and
+  **npm**
+  — required if using the CLI method
+* At least
+  **4 GB of RAM**
+  allocated to Docker and
+  **10 GB of free disk space**
+
+## Installation
+
+CLI (Recommended)
+
+Docker Compose
+
+Shell Script
+
+The Fleetbase CLI is the fastest path. It handles cloning, configuration, and startup — including running the deploy script — interactively.
+
+```
+npm install -g @fleetbase/cli
+flb install-fleetbase
+```
+
+The CLI will prompt you for:
+
+* **Host**
+  — use
+  `localhost`
+  for local-only access
+* **Environment**
+  — choose
+  `development`
+* **Install directory**
+  — defaults to a new
+  `fleetbase/`
+  folder
+
+Setup takes 3–5 minutes. When complete, the CLI prints the URLs for the console and API.
+
+Clone the repository, start the stack, and run the deploy script:
+
+```
+git clone https://github.com/elpelaflow/PuntoShop-TMS.git
+cd PuntoShop-TMS
+docker compose up -d
+```
+
+On first run, Docker pulls the required images and builds the containers. Wait for the stack to come up, then run the deploy script to run migrations and bootstrap the application:
+
+```
+docker compose exec application bash -c "./deploy.sh"
+```
+
+The repository includes a setup wizard that handles configuration, starts the stack, and runs the deploy script automatically:
+
+```
+git clone https://github.com/elpelaflow/PuntoShop-TMS.git
+cd PuntoShop-TMS
+./scripts/docker-install.sh
+```
+
+## Services and Ports
+
+Once running, the stack exposes the following services:
+
+| Service | URL | Description |
+| --- | --- | --- |
+| **Console** | <http://localhost:4200> | Ember.js admin interface |
+| **API** | <http://localhost:8000> | Laravel REST API |
+| **MySQL** | localhost:3306 | Primary database |
+| **Redis** | `cache:6379` (internal only) | Cache and job queue |
+| **SocketCluster** | ws://localhost:38000 | Real-time WebSocket server |
+
+Redis is not published to the host. Other containers reach it at
+`cache:6379`
+over the Compose network. To inspect it, run
+`redis-cli`
+inside the container with
+`docker compose exec cache redis-cli`
+.
+
+The
+`httpd`
+container acts as a reverse proxy in front of the API and console containers. The
+`scheduler`
+and
+`queue`
+containers handle cron jobs and background job processing respectively.
+
+## Verify Everything Is Running
+
+Check that all containers are up:
+
+```
+docker compose ps
+```
+
+All services should show a status of
+`Up`
+. If any container exited, check its logs:
+
+```
+docker compose logs -f application
+docker compose logs -f console
+```
+
+You can also run quick health checks:
+
+```
+# Check Redis is responding
+docker compose exec cache redis-cli ping
+# Expected: PONG
+
+# Check MySQL is up
+docker compose exec database mysqladmin -u root ping
+# Expected: mysqld is alive
+```
+
+## First-Time Setup
+
+After the containers start, run the deploy script to apply migrations and initialise the application:
+
+```
+docker compose exec application bash -c "./deploy.sh"
+```
+
+Then open
+<http://localhost:4200>
+in your browser. You'll be prompted to create your first admin account and organisation.
+
+If the console shows a blank page or connection error on first launch, wait 30–60 seconds for the API container to finish initialising, then refresh.
+
+## Environment Configuration
+
+All environment configuration is managed through
+`docker-compose.override.yml`
+for the backend and two files in the
+`console/`
+directory for the frontend. Never edit
+`docker-compose.yml`
+directly — the override file is the right place for all local configuration.
+
+Backend
+
+Frontend
+
+Backend environment variables are set under
+`services.application.environment`
+in
+`docker-compose.override.yml`
+. The install wizard generates this file automatically; for manual setups, create it yourself.
+
+**Core**
+
+```
+services:
+  application:
+    environment:
+      APP_KEY: "base64:your-generated-key"   # openssl rand -base64 32
+      APP_NAME: "Fleetbase"
+      APP_URL: "http://localhost:8000"
+      CONSOLE_HOST: "http://localhost:4200"
+      ENVIRONMENT: "development"
+      APP_DEBUG: "true"
+      DATABASE_URL: "mysql://fleetbase:password@database/fleetbase"
+      SESSION_DOMAIN: "localhost"
+      FRONTEND_HOSTS: ""                      # additional CORS origins if needed
+```
+
+**Mail**
+— choose one driver:
+
+```
+      # SMTP
+      MAIL_MAILER: "smtp"
+      MAIL_HOST: "smtp.mailgun.org"
+      MAIL_PORT: "587"
+      MAIL_USERNAME: "your-username"
+      MAIL_PASSWORD: "your-password"
+      MAIL_FROM_ADDRESS: "hello@example.com"
+      MAIL_FROM_NAME: "Fleetbase"
+
+      # Mailgun
+      MAIL_MAILER: "mailgun"
+      MAILGUN_DOMAIN: "mg.example.com"
+      MAILGUN_SECRET: "your-mailgun-secret"
+
+      # Postmark
+      MAIL_MAILER: "postmark"
+      POSTMARK_TOKEN: "your-postmark-token"
+
+      # SendGrid
+      MAIL_MAILER: "sendgrid"
+      SENDGRID_API_KEY: "your-sendgrid-key"
+
+      # Resend
+      MAIL_MAILER: "resend"
+      RESEND_KEY: "your-resend-key"
+```
+
+For local development with no mail server, use
+`MAIL_MAILER: "log"`
+— emails are written to the application log.
+
+**File storage**
+— choose one driver:
+
+```
+      # AWS S3
+      FILESYSTEM_DRIVER: "s3"
+      AWS_ACCESS_KEY_ID: "your-key-id"
+      AWS_SECRET_ACCESS_KEY: "your-secret"
+      AWS_DEFAULT_REGION: "us-east-1"
+      AWS_BUCKET: "your-bucket"
+      AWS_URL: ""                              # optional public CDN URL
+      AWS_USE_PATH_STYLE_ENDPOINT: ""          # set to "true" for MinIO/non-AWS S3
+
+      # Google Cloud Storage
+      FILESYSTEM_DRIVER: "gcs"
+      GOOGLE_CLOUD_PROJECT_ID: "your-project"
+      GOOGLE_CLOUD_STORAGE_BUCKET: "your-bucket"
+      GOOGLE_CLOUD_KEY_FILE: "/path/to/key.json"
+```
+
+For local development, omit
+`FILESYSTEM_DRIVER`
+— it defaults to local disk.
+
+**Optional third-party services**
+
+```
+      IPINFO_API_KEY: ""          # IP geolocation (ipinfo.io)
+      GOOGLE_MAPS_API_KEY: ""     # Maps and geocoding
+      GOOGLE_MAPS_LOCALE: "us"
+      TWILIO_SID: ""              # SMS notifications
+      TWILIO_TOKEN: ""
+      TWILIO_FROM: ""
+```
+
+**OAuth sign-in**
+— only needed if you offer Google, Microsoft, GitHub, or Apple sign-in. Providers are normally configured in
+**Admin → Auth Config → OAuth Sign-in**
+; set this when the API's public URL differs from
+`APP_URL`
+:
+
+```
+      OAUTH_REDIRECT_BASE: ""     # public origin of the API, e.g. https://api.example.com
+```
+
+See
+[OAuth Sign-in](https://fleetbase.io/docs/platform/system-setup/oauth-sign-in)
+for the full list of variables.
+
+**WebSocket**
+— set on the
+`socket`
+service, not
+`application`
+:
+
+```
+  socket:
+    environment:
+      SOCKETCLUSTER_OPTIONS: '{"origins":"http://localhost:*,ws://localhost:*"}'
+```
+
+After changing any value in
+`docker-compose.override.yml`
+, restart the affected services:
+
+```
+docker compose up -d
+```
+
+The console is configured via two files in the
+`console/`
+directory. These are written by the install wizard and read at build time (
+`.env.*`
+) and runtime (
+`fleetbase.config.json`
+).
+
+**`console/fleetbase.config.json`**
+— runtime config loaded by the Ember app:
+
+```
+{
+  "API_HOST": "http://localhost:8000",
+  "SOCKETCLUSTER_HOST": "localhost",
+  "SOCKETCLUSTER_PORT": "38000",
+  "SOCKETCLUSTER_SECURE": "false"
+}
+```
+
+> `fleetbase.config.json`
+> is disabled in production environments by default. To enable it in production, set
+> `DISABLE_RUNTIME_CONFIG=false`
+> in the console container's environment.
+
+**`console/environments/.env.development`**
+— used during local development builds:
+
+```
+API_HOST=http://localhost:8000
+API_NAMESPACE=int/v1
+SOCKETCLUSTER_PATH=/socketcluster/
+SOCKETCLUSTER_HOST=localhost
+SOCKETCLUSTER_SECURE=false
+SOCKETCLUSTER_PORT=38000
+OSRM_HOST=https://router.project-osrm.org
+```
+
+**`console/environments/.env.production`**
+— used for production builds (replace with your domain):
+
+```
+API_HOST=https://yourdomain.com:8000
+API_NAMESPACE=int/v1
+API_SECURE=true
+SOCKETCLUSTER_PATH=/socketcluster/
+SOCKETCLUSTER_HOST=yourdomain.com
+SOCKETCLUSTER_SECURE=true
+SOCKETCLUSTER_PORT=38000
+OSRM_HOST=https://router.project-osrm.org
+```
+
+After editing these files, restart the console container to pick up changes:
+
+```
+docker compose restart console
+```
+
+## Upgrading
+
+After pulling a new release, run the deploy script to apply any new migrations and updates:
+
+```
+git pull
+docker compose pull
+docker compose up -d
+docker compose exec application bash -c "./deploy.sh"
+docker compose up -d
+```
+
+Always run
+`./deploy.sh`
+after pulling a new release. It handles migrations, cache clearing, and any other deployment steps the release requires.
+
+## Useful Commands
+
+```
+# Start the stack
+docker compose up -d
+
+# Stop the stack (keeps data)
+docker compose down
+
+# Stop and wipe all data (full reset)
+docker compose down -v
+
+# Run the deploy script (migrations + bootstrap)
+docker compose exec application bash -c "./deploy.sh"
+
+# Tail logs from all containers
+docker compose logs -f
+
+# Tail logs from a specific container
+docker compose logs -f application
+
+# Open a shell inside the API container
+docker compose exec application bash
+
+# Run an Artisan command
+docker compose exec application php artisan [command]
+
+# Pull latest images and redeploy
+docker compose pull && docker compose up -d && docker compose exec application bash -c "./deploy.sh"
+```
+
+## What's Next
+
+Now that you have Fleetbase running locally:
+
+* **[System Setup](https://fleetbase.io/docs/platform/system-setup/services)**
+  — Configure mail, storage, and other services
+* **[Extension Development](https://fleetbase.io/docs/extension-development/getting-started/quickstart)**
+  — Scaffold and run a custom extension against your local instance
+* **[Developer Console → API Keys](https://fleetbase.io/docs/platform/developer-console/api-keys)**
+  — Generate a key and make your first API call
+* **[Deploy in Cloud](https://fleetbase.io/docs/platform/quickstart/deploy-in-cloud)**
+  — When you're ready, deploy this same stack to a production server

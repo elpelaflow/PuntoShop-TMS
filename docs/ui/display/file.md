@@ -1,0 +1,87 @@
+---
+title: "File"
+url: https://fleetbase.io/docs/ui/display/file
+module: ui
+---
+
+# File
+
+<File> renders a file card with preview (image thumbnail or icon), filename, and an optional actions dropdown. Pair with <FileIcon> for inline icons.
+
+# <File>
+
+`<File>`
+renders a card-style preview of a Fleetbase
+`file`
+record. It shows the image thumbnail (for images) or a file-type icon (for everything else), the truncated filename, and an optional actions dropdown with delete/download/preview entries.
+
+For a smaller inline icon, use
+`<FileIcon>`
+.
+
+## Basic Usage
+
+```
+{{#each this.driver.documents as |doc|}}
+  <File
+    @file={{doc}}
+    @onDownload={{this.downloadDoc}}
+    @onPreview={{this.previewDoc}}
+    @onDelete={{this.deleteDoc}}
+  />
+{{/each}}
+```
+
+## Arguments
+
+### Core
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@file` | model | The Fleetbase `file` record (must have `original_filename` and `url` ) |
+
+### Actions
+
+The actions dropdown renders only when at least one action callback is provided. Each callback receives the file:
+
+| Argument | Signature | Description |
+| --- | --- | --- |
+| `@onDelete` | `(file)` | Show the Delete action |
+| `@onDownload` | `(file)` | Show the Download action |
+| `@onPreview` | `(file)` | Show the Preview action |
+
+### Dropdown Customization
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `@dropdownIcon` | string | `ellipsis-v` | Icon for the actions trigger |
+| `@dropdownButtonIconPrefix` | string | — | FontAwesome prefix |
+| `@dropdownButtonText` | string | — | Optional text on the trigger |
+| `@dropdownButtonRenderInPlace` | boolean | `true` | Render in DOM order |
+| `@dropdownButtonWrapperClass` | string | — | Class on the trigger wrapper |
+| `@dropdownButtonTriggerClass` | string | — | Class on the trigger itself |
+| `@dropdownButtonCalculatePosition` | function | — | Custom position calculator |
+| `@registerAPI` | function | — | Capture the dropdown's API |
+| `@onInsert` | function | — | Called when the dropdown is inserted |
+
+Any additional
+`...attributes`
+are forwarded to the outer card.
+
+## See Also
+
+* `<FileIcon>`
+  — small inline file-type icon
+* `<UploadButton>`
+  — trigger button for file uploads
+* [`<FileUpload>`](https://fleetbase.io/docs/ui/inputs/file-upload)
+  — file picker component
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/file.hbs` | Template |
+| `addon/components/file.js` | Class |
+| `addon/components/file-icon.hbs` | Sibling — small inline file-type icon |
+| `addon/components/file-icon.js` |  |

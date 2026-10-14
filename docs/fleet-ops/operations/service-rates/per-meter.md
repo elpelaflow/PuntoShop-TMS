@@ -1,0 +1,179 @@
+---
+title: "Per Meter"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-rates/per-meter
+module: fleet-ops
+---
+
+Service Rates
+
+# Per Meter
+
+Charge a flat rate per unit of distance — meters, kilometers, feet, yards, or miles. The simplest linear distance-based pricing model.
+
+# Per Meter
+
+**Per Meter**
+scales the service fee
+**linearly with distance**
+. You set a fee per unit of distance (e.g. $0.80 per km), pick the unit, and Fleet-Ops multiplies it by the actual route distance at quote time. (In the API this method is identified as
+`per_meter`
+.)
+
+Use this for taxi-style or urban-delivery pricing where every additional unit of distance adds a predictable, constant amount. If your pricing curve changes at certain distances, use
+[Fixed Rate](https://fleetbase.io/docs/fleet-ops/operations/service-rates/fixed-rate)
+instead; if it needs to vary by region, use
+[Multi-zone Distance](https://fleetbase.io/docs/fleet-ops/operations/service-rates/multi-zone-distance)
+.
+
+![Per Meter form — flat rate per unit and distance unit selector](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-rate-per-meter.528b8bc6.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## How it works
+
+> **Service fee = Base Fee + (Per-Meter Rate × distance in the selected unit)**
+
+At quote time:
+
+1. The route's total distance is converted into the unit you selected (kilometers, miles, meters, feet, or yards).
+2. That distance is multiplied by your per-unit rate.
+3. The result is added to the Base Fee to produce the service fee.
+
+Distance is
+**not capped**
+— pricing keeps scaling linearly however far the route goes. If you need a cap, use the
+[Algorithm](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+method with a
+`min()`
+expression.
+
+## API reference
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `rate_calculation_method` | yes | Set to `per_meter` . |
+| `per_meter_flat_rate_fee` | yes | The fee charged per unit of distance, in the rate's currency. |
+| `per_meter_unit` | yes | The unit the rate is denominated in. One of: `m` , `km` , `ft` , `yd` , `mi` . |
+| `base_fee` | optional | Added to the distance-scaled fee. Useful as a flag-fall or pickup fee. |
+| `currency` | yes | Currency for the fee. |
+
+## Worked examples
+
+### 1. Per kilometer
+
+> *"$2 pickup fee + $0.80 per km."*
+
+| Setting | Value |
+| --- | --- |
+| Base Fee | $2.00 |
+| Per-Meter Rate | $0.80 |
+| Distance Unit | km |
+
+For a
+**12 km**
+route: 2 + (0.80 × 12) =
+**$11.60**
+.
+
+For a
+**3 km**
+route: 2 + (0.80 × 3) =
+**$4.40**
+.
+
+### 2. Per mile
+
+> *"$1.50 per mile, no pickup fee."*
+
+| Setting | Value |
+| --- | --- |
+| Base Fee | $0.00 |
+| Per-Meter Rate | $1.50 |
+| Distance Unit | mi |
+
+For an
+**8 mi**
+route: 0 + (1.50 × 8) =
+**$12.00**
+.
+
+### 3. Per meter (very short hops)
+
+> *"$0.01 per meter — for indoor or campus deliveries."*
+
+| Setting | Value |
+| --- | --- |
+| Per-Meter Rate | $0.01 |
+| Distance Unit | m |
+
+For a
+**350 m**
+route: 0.01 × 350 =
+**$3.50**
+.
+
+## Configuration workflow
+
+Create or open a service rate in
+**Fleet-Ops → Operations → Service Rates**
+.
+
+Set
+**Rate Calculation Method**
+to
+**Per Meter**
+.
+
+Set the
+**Per-Meter Rate Fee**
+and
+**Distance Unit**
+. The form previews the formula live as you change the values.
+
+*Optional:*
+Set a
+**Base Fee**
+(the flag-fall amount added before the distance calculation).
+
+*Optional:*
+Configure
+**COD Fees**
+and
+**Peak Hours**
+— these surcharges apply on top of the per-meter result.
+
+Save and test by generating a quote for a sample order. Check the
+**Quote**
+section on the order detail to see the computed amount.
+
+## Limitations
+
+* **No tiers.**
+  A single rate applies for any distance — there's no way to express "first 10 km at one rate, then a different rate after". Use
+  [Fixed Rate](https://fleetbase.io/docs/fleet-ops/operations/service-rates/fixed-rate)
+  for banded pricing or
+  [Algorithm](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+  for piecewise expressions.
+* **No geography awareness.**
+  The same rate applies everywhere the rate is scoped. For different rates in different zones, use
+  [Multi-zone Distance](https://fleetbase.io/docs/fleet-ops/operations/service-rates/multi-zone-distance)
+  .
+* **No minimum or maximum.**
+  If you need either, use
+  [Algorithm](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+  with
+  `max()`
+  /
+  `min()`
+  .
+
+## Related Pages
+
+* [Service Rates Overview](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  — all calculation methods and rate scoping
+* [Fixed Rate](https://fleetbase.io/docs/fleet-ops/operations/service-rates/fixed-rate)
+  — banded distance pricing
+* [Multi-zone Distance](https://fleetbase.io/docs/fleet-ops/operations/service-rates/multi-zone-distance)
+  — distance pricing per geographic area
+* [Algorithm Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/algorithm-rates)
+  — custom formulas for caps, floors, and combined surcharges
+* [Service Quotes](https://fleetbase.io/docs/fleet-ops/operations/service-quotes/overview)
+  — how the calculated rate becomes a quote on an order

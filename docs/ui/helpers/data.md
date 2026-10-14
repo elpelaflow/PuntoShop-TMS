@@ -1,0 +1,214 @@
+---
+title: "Data & Utility Helpers"
+url: https://fleetbase.io/docs/ui/helpers/data
+module: ui
+---
+
+# Data & Utility Helpers
+
+Helpers for data manipulation, model access, navigation, and general utility — get-dot-prop, set-model-attr, json-stringify, transition-to, and many more.
+
+# Data & Utility Helpers
+
+This page covers the rest of the helper library — data manipulation, model access, navigation, and miscellaneous utilities.
+
+## Data Access
+
+### {{get-dot-prop object path}}
+
+Reads a value via a dot-path string:
+
+```
+{{get-dot-prop @order "customer.address.city"}}
+```
+
+### {{safe-has object key}}
+
+Returns true if the object has the key set (handles null/undefined safely):
+
+```
+{{#if (safe-has @row "metadata.tags")}}
+  {{!-- tags exist --}}
+{{/if}}
+```
+
+### {{safe-dasherize value}}
+
+Dasherizes a string, returning empty string on null/undefined:
+
+```
+class="status-{{safe-dasherize @order.status}}"
+```
+
+### {{first-char value}}
+
+Returns the first character — useful for avatars / monogram fallbacks:
+
+```
+<div class="avatar">{{first-char @user.name}}</div>
+```
+
+### {{n-a value fallback?}}
+
+Returns the value if truthy, otherwise
+`N/A`
+(or your custom fallback):
+
+```
+{{n-a @order.driver.name}}
+{{n-a @order.driver.name "Unassigned"}}
+```
+
+### {{string-starts-with str prefix}}
+
+```
+{{#if (string-starts-with @id "store_")}}
+  {{!-- it's a store key --}}
+{{/if}}
+```
+
+### {{to-int value}}
+
+Coerces to integer:
+
+```
+{{to-int @order.quantity}}
+```
+
+## JSON
+
+### {{json-stringify value indent?}}
+
+Stringifies a value:
+
+```
+<pre>{{json-stringify @order indent=2}}</pre>
+```
+
+### {{json-hash key1=value1 key2=value2}}
+
+Builds a plain object from key/value pairs:
+
+```
+{{component "table/cell/component"
+  cellComponentArgs=(json-hash actions=this.actions)
+}}
+```
+
+## Model & Resource
+
+### {{set-model-attr model attr value}}
+
+Imperative attribute setter — useful in inline action contexts:
+
+```
+<button {{on "click" (fn (set-model-attr @driver "online")) true}}>
+  Mark online
+</button>
+```
+
+### {{get-model-name model}}
+
+Returns the model's type name:
+
+```
+{{get-model-name @row}}    {{!-- "driver" --}}
+```
+
+### {{avatar-url subject}}
+
+Returns a fallback-safe avatar URL for a user/driver/customer:
+
+```
+<img src={{avatar-url @user}} />
+```
+
+### {{get-file-url file}}
+
+Returns the public URL for a file record:
+
+```
+<a href={{get-file-url @doc}}>{{@doc.original_filename}}</a>
+```
+
+### {{point-coordinates point}} , {{point-to-coordinates point}} , {{unwrap-coordinates point}}
+
+Helpers for working with PostGIS-style point objects.
+
+### {{get-default-value value default}}
+
+Falls back to the default when the value is null/undefined:
+
+```
+{{get-default-value @options.timezone "UTC"}}
+```
+
+## Universe / Registry
+
+### {{get-universe-components registry}}
+
+Returns components contributed to a registry — typically you'd use
+[`<RegistryYield>`](https://fleetbase.io/docs/ui/registry/registry-yield)
+instead.
+
+### {{get-universe-menu-items registry}}
+
+Returns menu items contributed to a registry.
+
+### {{has-registration registry key}}
+
+Returns true if a registration exists in a registry.
+
+## Navigation
+
+### {{transition-to route ...models}}
+
+Returns a callback that transitions to the route — convenient for
+`@onClick`
+:
+
+```
+<Button @text="Back" @onClick={{transition-to "drivers.index"}} />
+```
+
+## Component Resolution
+
+### {{component-resolvable name}}
+
+Returns true if the component name resolves in the current resolver:
+
+```
+{{#if (component-resolvable @customCellComponent)}}
+  {{component @customCellComponent row=@row}}
+{{/if}}
+```
+
+### {{resolve-component name}}
+
+Resolves a component by name — useful for dynamic component rendering.
+
+### {{lazy-engine-component name}}
+
+Resolves a component from another engine, lazy-loading the engine if needed.
+
+## Other Useful Helpers
+
+| Helper | Purpose |
+| --- | --- |
+| `{{noop}}` | A no-op — useful as a fallback `@onClick` |
+| `{{now}}` | Returns the current `Date` |
+| `{{config "defaultValues.placeholderImage"}}` | Read a config value |
+| `{{join-column-list columns}}` | Joins column labels with commas |
+| `{{set-has-item set value}}` | True if the Set contains the value |
+| `{{set-object-kv obj key value}}` | Returns a new object with the key set |
+| `{{cfg-edit-buttons}}` | Returns the standard edit/cancel/save button config |
+| `{{spread-widget-options widget}}` | Spreads widget options to component args |
+| `{{get-notification-key event}}` | Translates an event into a notification key |
+| `{{dropdown-fn dd action ...args}}` | Closes the dropdown after running the action |
+| `{{resource-context-panel-save-disabled panel}}` | Logic for the resource-context-panel save button |
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/helpers/` | All helpers — 50+ files, read each as needed |

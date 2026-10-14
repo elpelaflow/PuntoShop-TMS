@@ -1,0 +1,132 @@
+---
+title: "ModelCoordinatesInput"
+url: https://fleetbase.io/docs/ui/inputs/model-coordinates-input
+module: ui
+---
+
+# ModelCoordinatesInput
+
+<ModelCoordinatesInput> wraps <CoordinatesInput> for binding directly to a Fleetbase Ember Data model — auto-updates the record's `location` property and reverse-geocodes the address into the model.
+
+# <ModelCoordinatesInput>
+
+`<ModelCoordinatesInput>`
+is a thin wrapper around
+[`<CoordinatesInput>`](https://fleetbase.io/docs/ui/inputs/coordinates-input)
+that binds directly to an Ember Data record. When the user moves the map marker, the record's
+`location`
+property is updated and Fleetbase's reverse-geocoder fills in
+`street1`
+,
+`city`
+,
+`country`
+, etc. on the same record.
+
+Use this when you have a model with a GeoJSON
+`location`
+field —
+`Place`
+,
+`StoreLocation`
+,
+`Driver`
+,
+`FuelReport`
+, etc. — and want a single component to handle both the coordinate picker and the address auto-fill.
+
+## Basic Usage
+
+```
+<ModelCoordinatesInput @model={{this.place}} />
+```
+
+When the user picks a coordinate:
+
+1. `place.location`
+   is updated to a GeoJSON Point
+2. The fleetbase reverse-geocoder fills in
+   `place.street1`
+   ,
+   `place.city`
+   ,
+   `place.province`
+   ,
+   `place.country`
+   ,
+   `place.postal_code`
+   , etc.
+
+## Different Property Path
+
+By default the component reads/writes
+`model.location`
+. Override with
+`@locationProperty`
+:
+
+```
+<ModelCoordinatesInput @model={{this.driver}} @locationProperty="current_location" />
+```
+
+## Address Autocomplete
+
+```
+<ModelCoordinatesInput @model={{this.place}} @autocomplete="all" />
+```
+
+| `@autocomplete` | Effect when the user picks a place from the map's address search |
+| --- | --- |
+| `"location"` | Only update the location property |
+| `"all"` (or `true` ) | Update every matching property on the model (street, city, country, etc.) |
+| omitted | No autocomplete-driven model update |
+
+## Arguments
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `@model` | model | The Ember Data record to bind to |
+| `@locationProperty` | string | Property path on the record (default: `location` ) |
+| `@autocomplete` | `'all' | 'location' | true` | Whether to auto-fill model properties from the geocoder |
+| `@disabled` | boolean | Disable the input |
+
+### Callbacks
+
+| Argument | Signature | Description |
+| --- | --- | --- |
+| `@onReverseGeocode` | `({ latitude, longitude })` | Called after a successful reverse geocode (in addition to mutating the model) |
+| `@onAutocomplete` | `(selected)` | Called when the user picks an address from the map's search |
+| `@onInputReady` | `(coordinatesInput)` | Called once with the underlying `<CoordinatesInput>` API |
+
+## Real-World Example
+
+```
+{{!-- Edit a Place record with the map plus auto-fill --}}
+<ContentPanel @title="Location" @open={{true}}>
+  <ModelCoordinatesInput
+    @model={{this.place}}
+    @autocomplete="all"
+    @onReverseGeocode={{this.onLocationChanged}}
+  />
+
+  <InputGroup @name="Street" @value={{this.place.street1}} />
+  <InputGroup @name="City" @value={{this.place.city}} />
+  <InputGroup @name="Country" @value={{this.place.country}} />
+</ContentPanel>
+```
+
+After the user moves the marker, the three
+`<InputGroup>`
+s will auto-fill from the reverse-geocoder result.
+
+## See Also
+
+* [`<CoordinatesInput>`](https://fleetbase.io/docs/ui/inputs/coordinates-input)
+  — the underlying component without model binding
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/model-coordinates-input.hbs` | Template — wraps `<CoordinatesInput>` |
+| `addon/components/model-coordinates-input.js` | Class — handles model binding and reverse-geocode |

@@ -1,0 +1,251 @@
+---
+title: "Service Areas"
+url: https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/service-areas
+module: fleet-ops
+---
+
+Service Areas & Geofences
+
+# Service Areas
+
+Define top-level geographic boundaries (typically country or region scale) that contain zones and drive geofence behavior in Fleet-Ops.
+
+# Service Areas
+
+A
+**Service Area**
+is a top-level geographic boundary that defines where your operation runs. Service areas are stored as MultiPolygons — they can be a country outline, a metropolitan region, a delivery footprint, or any other named area — and they act as containers for one or more nested
+[Zones](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/zones)
+.
+
+Service areas are the foundation for:
+
+* **Geofencing**
+  — triggering on driver/vehicle entry, exit, dwell, and speeding (see
+  [Geofences](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/geofences)
+  )
+* **Zone-based pricing**
+  — service rates can be scoped to a service area or a specific zone within it (see
+  [Service Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  )
+* **Operational filtering**
+  — limit orders, drivers, and dispatch logic to a region
+
+## Concepts
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `name` | string | Human-readable label (e.g. `Singapore` , `Greater Toronto Area` ). |
+| `type` | string | Defaults to `country` . Free-form — use it to group areas (e.g. `country` , `region` , `city` , `district` ). |
+| `border` | MultiPolygon | The actual boundary geometry, stored as a MySQL spatial column with a spatial index. |
+| `parent_uuid` | UUID | Optional reference to a parent service area. Lets you nest a city under a country, a district under a city, etc. |
+| `country` | string | ISO country code, used for filtering and pricing lookups. |
+| `color` , `stroke_color` | hex | Fill and outline color on the live map. |
+| `status` | string | Defaults to `active` . Set to `inactive` to hide from dispatch without deleting. |
+| `trigger_on_entry` , `trigger_on_exit` | bool | Whether to emit geofence events when a driver/vehicle crosses the boundary. |
+| `dwell_threshold_minutes` | integer | If set, fires a dwell event when a subject stays inside for ≥ N minutes. |
+| `speed_limit_kmh` | integer | Recorded for the area. Combined with telematics to detect speed violations. |
+
+Service areas have stable public IDs prefixed with
+`sa_`
+.
+
+## Managing Service Areas on the Map
+
+Service areas (and the zones inside them) are managed from
+**Fleet-Ops → Dashboard → Map**
+tab. The map provider used to render tiles is governed by
+[Map Settings](https://fleetbase.io/docs/fleet-ops/settings/map)
+.
+
+There are two ways to drive service-area management from the map:
+
+* **The map toolbar**
+  — the icon strip on the left of the map. The service-areas icon opens a panel with creation, visual-control, and per-area action items.
+* **The right-click context menu**
+  — right-click anywhere on the map for a "Create new Service Area" entry, or right-click on an existing service-area polygon to get its contextual action menu (edit, edit boundaries, hide, delete, create zone inside, etc.).
+
+![Service area toolbar panel and the right-click context menu showing per-area actions](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-area-controls.409a840f.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+### Toolbar Panel
+
+Click the service-areas icon in the map toolbar to open the panel. From the top:
+
+| Action | What it does |
+| --- | --- |
+| **Create new Service Area** | Opens the creation modal anchored at the current map center. |
+| **Show all Service Areas** | Reveals every service area on the map (undoes any hides). |
+| **Hide all Service Areas** | Hides every service-area polygon without deleting them — useful to declutter the map. |
+| *(list of existing service areas)* | Click an entry to focus the map on that area. Each entry has its own visibility toggle. |
+
+### Per-Area Context Menu
+
+Right-click on a service-area polygon (or click its entry in the toolbar list) to get its actions menu:
+
+| Action | What it does |
+| --- | --- |
+| **Hide** | Blur the polygon from the map. The data is untouched — toggle visibility back from the toolbar. |
+| **Create Zone** | Opens the zone-creation modal pre-scoped to this service area. See [Zones](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/zones) . |
+| **Edit** | Opens the service-area edit modal — name, type, country, colors, geofence triggers. |
+| **Edit Boundaries** | Switches the polygon into edit mode with draggable vertex handles. |
+| **Delete** | Soft-deletes the service area (and detaches its zones from this parent). |
+
+### Editing Boundaries
+
+Choosing
+**Edit Boundaries**
+turns the polygon into a dashed outline with square handles at every vertex and midpoint. Drag a handle to reshape the boundary in place — no separate dialog, the change is committed on save.
+
+![Service area in edit-boundaries mode — dashed outline with draggable handles and an in-map cancel/save tooltip](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-service-area-edit.09f1088f.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+Click outside the polygon or press the in-map
+**cancel**
+affordance to discard the change.
+
+## Creating a Service Area
+
+From the toolbar's
+**Create new Service Area**
+entry (or the right-click context menu), Fleet-Ops switches the map into draw mode. Use the polygon tool in the draw controls to outline the area — click each vertex, then double-click (or click the first vertex again) to close the polygon. After you close the polygon, the creation modal opens with the boundary you just drew.
+
+The creation modal asks for:
+
+* **Name**
+* **Type**
+  (defaults to
+  `country`
+  )
+* **Country**
+  (selected from the country dropdown)
+* **Border color**
+  and
+  **Fill color**
+
+After saving, the new service area appears on the map and in the toolbar's service-area list. From there you can focus, hide, edit, edit boundaries, add zones, or delete it.
+
+If you need to create service areas programmatically — from a radius around a point, or from a pre-drawn GeoJSON boundary — use the
+[API](#api)
+instead. Those options are not exposed in the UI.
+
+## Hierarchies
+
+Service areas support a parent/child relationship via
+`parent_uuid`
+. A typical hierarchy:
+
+```
+Country: United States (sa_abc…)
+ ├── Region: West Coast (sa_def…)
+ │    ├── State: California (sa_ghi…)
+ │    │    └── City: San Francisco (sa_jkl…)
+ │    └── State: Oregon (sa_mno…)
+ └── Region: East Coast (sa_pqr…)
+```
+
+Use hierarchies when:
+
+* Different management responsibilities apply at each level (e.g. a regional manager owns dispatch within a region, but pricing is set at the country level).
+* You want to inherit defaults — child areas typically reuse the parent's
+  `country`
+  and visual style.
+
+Skip the hierarchy when your operation is single-region — a flat list of service areas is easier to reason about.
+
+## Zones vs Service Areas
+
+|  | **Service Area** | **Zone** |
+| --- | --- | --- |
+| Geometry | MultiPolygon | Polygon |
+| Typical scale | Country / region / metro | Delivery zone, pickup area, restricted area |
+| Nesting | Can be parent of other service areas | Nested inside exactly one service area |
+| Purpose | Define operational footprint, drive pricing scope | Subdivide a service area for finer pricing and geofencing |
+
+Create a service area first, then create zones inside it. See
+[Zones](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/zones)
+.
+
+## API
+
+All endpoints live under the Fleet-Ops v1 API at
+`/service-areas`
+. Auth via your standard API key.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/service-areas` | List all service areas for the authenticated company. |
+| `GET` | `/service-areas/{id}` | Retrieve a single service area (zones are eager-loaded). |
+| `POST` | `/service-areas` | Create a new service area. |
+| `PATCH` | `/service-areas/{id}` | Update an existing service area. |
+| `DELETE` | `/service-areas/{id}` | Soft-delete a service area. |
+
+### Create — Point + Radius
+
+```
+curl -X POST https://api.fleetbase.io/v1/service-areas \
+  -H "Authorization: Bearer $FLEETBASE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Downtown Singapore",
+    "type": "city",
+    "country": "SG",
+    "latitude": 1.2839,
+    "longitude": 103.8607,
+    "radius": 5000,
+    "color": "#3b82f6",
+    "stroke_color": "#1d4ed8",
+    "trigger_on_entry": true,
+    "trigger_on_exit": true
+  }'
+```
+
+The server generates a circular MultiPolygon with a 5 km radius around the point.
+
+### Create — Explicit Border
+
+```
+curl -X POST https://api.fleetbase.io/v1/service-areas \
+  -H "Authorization: Bearer $FLEETBASE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Custom Footprint",
+    "type": "region",
+    "country": "SG",
+    "border": {
+      "type": "MultiPolygon",
+      "coordinates": [[[[103.85, 1.28], [103.87, 1.28], [103.87, 1.30], [103.85, 1.30], [103.85, 1.28]]]]
+    }
+  }'
+```
+
+GeoJSON coordinate order is
+`[lng, lat]`
+.
+
+### Nesting
+
+Pass
+`parent`
+(the public ID of the parent service area) when creating:
+
+```
+{
+  "name": "San Francisco",
+  "parent": "sa_def_west_coast",
+  "country": "US",
+  "latitude": 37.7749,
+  "longitude": -122.4194,
+  "radius": 25000
+}
+```
+
+## What's Next
+
+* Subdivide a service area with
+  [Zones](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/zones)
+  .
+* Wire up entry/exit/dwell triggers in
+  [Geofences](https://fleetbase.io/docs/fleet-ops/operations/service-areas-geofences/geofences)
+  .
+* Price orders differently by region with
+  [Service Rates](https://fleetbase.io/docs/fleet-ops/operations/service-rates/overview)
+  .

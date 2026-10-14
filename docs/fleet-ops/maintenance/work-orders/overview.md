@@ -1,0 +1,159 @@
+---
+title: "Work Orders"
+url: https://fleetbase.io/docs/fleet-ops/maintenance/work-orders/overview
+module: fleet-ops
+---
+
+Work Orders
+
+# Work Orders
+
+Create, assign, and track maintenance work orders — from initial task assignment through checklist completion and cost tracking to closure.
+
+# Work Orders
+
+A
+**Work Order**
+is an assigned maintenance or repair task. Work orders can be generated automatically from maintenance schedules when service thresholds are reached, or created manually for ad-hoc repairs and inspections. Each work order is tracked from open to completion with a full cost record.
+
+![Work orders list — code, subject, target, assignee, priority, status, and due date](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-maintenances-list.64d17c52.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Work Order Attributes
+
+| Field | Description |
+| --- | --- |
+| **Code** | Auto-generated reference code (e.g., WO-00123) |
+| **Subject** | Title of the task (e.g., "Oil Change", "Brake Pad Replacement") |
+| **Target** | The vehicle, driver, or equipment the work is performed on |
+| **Assignee** | Who is responsible for completing the task |
+| **Priority** | low, medium, high, critical |
+| **Status** | Current stage in the workflow |
+| **Opened At** | When the work order was created |
+| **Due At** | Deadline for completion |
+| **Closed At** | When the work order was completed and closed |
+| **Instructions** | Detailed task instructions |
+| **Checklist** | Structured list of sub-tasks to complete |
+| **Estimated Cost** | Pre-work cost estimate |
+| **Approved Budget** | Authorized spend amount |
+| **Actual Cost** | Real cost after completion |
+| **Currency** | Currency for all cost fields |
+| **Cost Center** | Budget code/department for accounting |
+
+![Work order detail panel — code, subject and category, status and priority, target asset, assigned vendor, linked schedule, and opened and due dates](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffleet-ops-work-order-details.266396b9.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## Work Order Status Flow
+
+```
+open ──► in_progress ──► closed
+            │
+        canceled (terminal at any point)
+```
+
+| Status | Meaning |
+| --- | --- |
+| `open` | Created, not yet started — the default for new work orders |
+| `in_progress` | Work has begun |
+| `closed` | Work complete, all checklist items done, `closed_at` set |
+| `canceled` | Canceled before completion |
+
+Assignment is captured by the polymorphic
+`assignee_uuid`
+/
+`assignee_type`
+fields, not by status — a work order in
+`open`
+can already have an assignee.
+
+## Creating a Work Order
+
+Navigate to
+**Fleet-Ops → Maintenance → Work Orders**
+.
+
+Click
+**+ New Work Order**
+.
+
+Set the
+**Subject**
+and
+**Priority**
+.
+
+Select the
+**Target**
+— a Vehicle, Driver, or Equipment record.
+
+Set the
+**Assignee**
+— a user or team responsible for completing the work.
+
+Set the
+**Due At**
+date.
+
+Add
+**Instructions**
+describing what needs to be done.
+
+Build the
+**Checklist**
+— add individual task items the assignee must check off (e.g., "Drain old oil", "Replace oil filter", "Refill with new oil", "Run engine and check for leaks").
+
+Set the
+**Estimated Cost**
+and
+**Approved Budget**
+.
+
+Click
+**Save**
+.
+
+## Checklist
+
+The checklist breaks the work order into discrete, trackable steps. Assignees check off each item as they complete it. The work order cannot move to
+`pending_review`
+until all checklist items are marked done.
+
+Checklist items can include:
+
+* Inspection steps
+* Parts replacement
+* Fluid top-ups
+* Sensor calibration
+* Road test
+
+## Cost Tracking
+
+Work orders track three cost values:
+
+| Field | When set |
+| --- | --- |
+| **Estimated Cost** | Set at creation by the scheduler or manager |
+| **Approved Budget** | Authorized by a supervisor before work begins |
+| **Actual Cost** | Recorded by the assignee during or after work completion |
+
+Cost breakdown can be itemized using line items — listing parts, labor, and other expenses separately. Parts used from the Parts inventory are automatically linked and their cost added to the actual cost.
+
+## Email Notifications
+
+From the work order detail, click
+**Send Email**
+to notify the assignee or stakeholders about the work order status, due date, or instructions. The email includes the work order code, subject, instructions, and a link to the work order in the console.
+
+## Linked Inspections
+
+A work order can be opened from a failed inspection, with a checklist item for each failed check. The work order's details then show a
+**Linked Inspection**
+section. Click the inspection to open it and see the answers, photos, and who filed it. See
+[Reviewing & Follow-up](https://fleetbase.io/docs/fleet-ops/maintenance/inspections/reviewing-and-follow-up)
+.
+
+## Attaching Work Orders to Vehicles
+
+Work orders are linked to their target vehicle and appear in:
+
+* **Fleet-Ops → Resources → Vehicles → [Vehicle] → Work Orders**
+  tab
+* The vehicle's maintenance cost history

@@ -1,0 +1,326 @@
+---
+title: "Expansions & Observers"
+url: https://fleetbase.io/docs/extension-development/backend/expansions-and-observers
+module: extension-development
+---
+
+# Expansions & Observers
+
+React to model lifecycle events with observers, and add methods to core models or Laravel facades with expansions — both auto-loaded by your service provider.
+
+# Expansions & Observers
+
+Two patterns let your extension hook into other code without owning it:
+**observers**
+for model lifecycle events, and
+**expansions**
+for adding methods to a class you don't own.
+
+## Observers
+
+Observers run extension code in response to Eloquent lifecycle events on a model. Use them to enforce invariants, dispatch jobs, send notifications, or sync data with external services.
+
+### Defining an Observer
+
+```
+<?php
+
+namespace MyOrg\MyExtension\Observers;
+
+use MyOrg\MyExtension\Models\Widget;
+use MyOrg\MyExtension\Notifications\WidgetCreated;
+
+class WidgetObserver
+{
+    public function creating(Widget $widget): void
+    {
+        // Last-minute defaults — fires before INSERT
+        if (!$widget->status) {
+            $widget->status = 'active';
+        }
+    }
+
+    public function created(Widget $widget): void
+    {
+        $widget->company->notify(new WidgetCreated($widget));
+    }
+
+    public function updating(Widget $widget): void
+    {
+        if ($widget->isDirty('status')) {
+            // …
+        }
+    }
+
+    public function deleted(Widget $widget): void
+    {
+        // …
+    }
+}
+```
+
+Standard Eloquent events:
+`retrieved`
+,
+`creating`
+,
+`created`
+,
+`updating`
+,
+`updated`
+,
+`saving`
+,
+`saved`
+,
+`deleting`
+,
+`deleted`
+,
+`restoring`
+,
+`restored`
+,
+`forceDeleted`
+. Each method receives the model instance.
+
+Real example:
+`fleetops/server/src/Observers/OrderObserver.php`
+.
+
+### Registering Observers
+
+`CoreServiceProvider`
+reads the
+`$observers`
+array on your service provider and calls
+`Model::observe()`
+for each pair when you call
+`$this->registerObservers()`
+:
+
+```
+// server/src/Providers/MyExtensionServiceProvider.php
+public $observers = [
+    \MyOrg\MyExtension\Models\Widget::class       => \MyOrg\MyExtension\Observers\WidgetObserver::class,
+
+    // You can also observe core models — fires on the same model used by other extensions
+    \Fleetbase\Models\User::class                 => \MyOrg\MyExtension\Observers\UserObserver::class,
+];
+
+public function boot()
+{
+    parent::boot();
+    $this->registerObservers();
+}
+```
+
+The implementation in
+`CoreServiceProvider::registerObservers()`
+skips entries whose model class doesn't exist, so it's safe to declare observers for optional dependencies.
+
+### Observing Core Models
+
+You can observe
+`Fleetbase\Models\User`
+,
+`Company`
+,
+`Order`
+, etc. — multiple extensions stack their observers on the same model and all fire. Be defensive: don't assume you're the only listener, and don't throw from non-creating events unless you genuinely want to abort the save.
+
+## Expansions
+
+Expansions add methods to a class
+**you don't own**
+— Laravel facades (
+`Route`
+,
+`Str`
+,
+`Arr`
+,
+`Builder`
+,
+`Carbon`
+,
+`Request`
+,
+`Response`
+), or any model that supports
+`Macroable`
+. The
+`Route::fleetbaseRoutes()`
+macro you saw in
+[Routes & Controllers](https://fleetbase.io/docs/extension-development/backend/routes-and-controllers)
+is itself an expansion shipped by
+`core-api`
+.
+
+### Defining an Expansion
+
+```
+<?php
+
+namespace MyOrg\MyExtension\Expansions;
+
+use Fleetbase\Build\Expansion;
+
+class StrExpansion implements Expansion
+{
+    /**
+     * The class this expansion targets.
+     */
+    public static function target()
+    {
+        return \Illuminate\Support\Str::class;
+    }
+
+    /**
+     * Each public static method becomes a macro on the target.
+     */
+    public static function dasherizeUuid()
+    {
+        return function (string $uuid): string {
+            return strtolower(str_replace('_', '-', $uuid));
+        };
+    }
+}
+```
+
+Now
+`Str::dasherizeUuid('ABC_123')`
+works anywhere in the app.
+
+### Targeting a Model
+
+To attach behaviour to a core model, target the model class. Each expansion method's returned closure is bound to a model instance —
+`$this`
+inside it is the model:
+
+```
+<?php
+
+namespace MyOrg\MyExtension\Expansions;
+
+use MyOrg\MyExtension\Models\Widget;
+use Fleetbase\Build\Expansion;
+
+class UserExpansion implements Expansion
+{
+    public static function target()
+    {
+        return \Fleetbase\Models\User::class;
+    }
+
+    public static function widgets()
+    {
+        return function () {
+            /** @var \Fleetbase\Models\User $this */
+            return $this->hasMany(Widget::class, 'created_by_uuid', 'uuid');
+        };
+    }
+}
+```
+
+After this expansion loads, any
+`User`
+instance has
+`$user->widgets`
+as a real Eloquent relationship — usable in queries, eager loads, and
+`with()`
+.
+
+Real example:
+`fleetops/server/src/Expansions/UserExpansion.php`
+— adds
+`driver()`
+,
+`customer()`
+,
+`contact()`
+, and other relationships to the core
+`User`
+model.
+
+### Auto-loading Expansions
+
+Drop expansions into
+`server/src/Expansions/`
+and call
+`registerExpansionsFrom`
+from
+`boot()`
+:
+
+```
+// server/src/Providers/MyExtensionServiceProvider.php
+public function boot()
+{
+    parent::boot();
+    $this->registerExpansionsFrom(__DIR__ . '/../Expansions');
+}
+```
+
+The provider scans the directory, resolves each class through your namespace's
+`Expansions\\`
+,
+`Macros\\`
+, or
+`Mixins\\`
+folders, and calls
+`Target::expand($expansion)`
+(falling back to
+`Target::mixin($expansion)`
+if the target is a model). Source:
+`CoreServiceProvider::registerExpansionsFrom()`
+.
+
+## Observers vs. Hooks vs. Webhooks
+
+These three reaction mechanisms work at different layers:
+
+| Mechanism | Runs in | Use for |
+| --- | --- | --- |
+| **Backend observer** | PHP — same request as the model save | Server-side invariants, side effects on save (notifications, jobs, syncing) |
+| **Frontend hook** | Browser — Ember runtime | UI reactions during route transitions, login, etc. See [Hook Service](https://fleetbase.io/docs/extension-development/universe/hook-service) |
+| **Webhook** | External — HTTP POST after the request commits | Third-party services reacting to platform events. Configured via the [Developer Console](https://fleetbase.io/docs/platform/developer-console/webhooks) |
+
+Pick the layer that matches the side effect's owner.
+
+## When to Reach for Each
+
+* Need to enforce a rule whenever a model saves?
+  **Observer.**
+* Need to add a method to a Laravel facade or a core model?
+  **Expansion.**
+* Need to change the JSON a core or third-party resource returns?
+  **[Resource transformer](https://fleetbase.io/docs/extension-development/backend/resource-transformers)
+  .**
+* Need a third party (or your own backend job) to react asynchronously?
+  **Webhook + Listener**
+  — define a Laravel
+  `EventServiceProvider`
+  (sibling to your main provider) and register listeners there.
+
+For event service providers, mirror the
+`fleetops/server/src/Providers/EventServiceProvider.php`
+pattern.
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `src/Build/Expansion.php` | The `Expansion` interface |
+| `src/Providers/CoreServiceProvider.php` | `$observers` , `registerObservers()` , `registerExpansionsFrom()` |
+| `src/Expansions/Route.php` | Reference expansion — adds `fleetbaseRoutes()` to `Route` |
+| `fleetops/server/src/Observers/OrderObserver.php` | Reference observer |
+| `fleetops/server/src/Expansions/UserExpansion.php` | Reference model expansion |
+
+[Migrations
+
+Define database migrations for your extension. They live under server/migrations/, follow Fleetbase's UUID + public\_id conventions, and load automatically via the service provider.](https://fleetbase.io/docs/extension-development/backend/migrations)
+[Resource Transformers
+
+Decorate the JSON output of any API resource — core or another extension's — without modifying the resource or its model. Target by resource, model or interface, chain by priority, scope to webhooks, broadcasts, internal or public requests, and batch-load to avoid N+1 queries.](https://fleetbase.io/docs/extension-development/backend/resource-transformers)

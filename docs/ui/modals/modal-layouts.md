@@ -1,0 +1,220 @@
+---
+title: "Modal Layouts"
+url: https://fleetbase.io/docs/ui/modals/modal-layouts
+module: ui
+---
+
+# Modal Layouts
+
+Pre-built modal layouts in @fleetbase/ember-ui — confirm, alert, prompt, bulk-action, progress, process, loading, and option-prompt.
+
+# Modal Layouts
+
+`@fleetbase/ember-ui`
+ships several pre-built modal layouts. You don't render these directly — you call them via the
+[`modals-manager`](https://fleetbase.io/docs/ui/modals/modals-manager)
+service. Each is just a convenience wrapper around
+`modalsManager.show()`
+with a layout component preset.
+
+| Layout | Service method | Component |
+| --- | --- | --- |
+| Confirm | `confirm(options)` | `modal/layouts/confirm` |
+| Alert | `alert(options)` | `modal/layouts/alert` |
+| Prompt | `prompt(options)` | `modal/layouts/prompt` |
+| Bulk action | `bulk(options)` | `modal/layouts/bulk-action` |
+| Progress | `progress(options)` | `modal/layouts/progress` |
+| Process | `process(options)` | `modal/layouts/process` |
+| Loading | `loader(options)` / `displayLoader(options)` | `modal/layouts/loading` |
+| Option prompt | `userSelectOption(title, options, modalOptions)` | `modal/layouts/option-prompt` |
+
+## Confirm
+
+The most-used layout. A small dialog with a question and Confirm / Decline buttons. Used for any binary decision.
+
+```
+this.modalsManager.confirm({
+  title: 'Delete driver?',
+  body: 'This action cannot be undone.',
+  acceptButtonText: 'Delete',
+  acceptButtonScheme: 'danger',
+  confirm: async () => await driver.destroyRecord(),
+});
+```
+
+Useful options:
+`title`
+,
+`body`
+,
+`acceptButtonText`
+,
+`acceptButtonScheme`
+,
+`acceptButtonIcon`
+,
+`declineButtonText`
+,
+`confirm`
+,
+`decline`
+.
+
+## Alert
+
+A single-button "OK" notice. The Confirm button is hidden; Decline is renamed to
+**OK**
+.
+
+```
+this.modalsManager.alert({
+  title: 'Update available',
+  body: 'A new version of the console is available — please refresh.',
+});
+```
+
+Useful options:
+`title`
+,
+`body`
+,
+`declineButtonText`
+.
+
+## Prompt
+
+A modal that requests a single text input.
+
+```
+this.modalsManager.prompt({
+  title: 'Rename',
+  body: 'Enter a new name:',
+  confirm: async (modal) => {
+    const name = modal.options.value;
+    /* … */
+  },
+});
+```
+
+Useful options:
+`title`
+,
+`body`
+,
+`value`
+(initial value),
+`placeholder`
+,
+`inputType`
+,
+`acceptButtonText`
+,
+`confirm`
+.
+
+## Bulk Action
+
+Designed for confirming an action across many selected rows. Shows the selected count and (optionally) a list preview.
+
+```
+this.modalsManager.bulk({
+  title: 'Delete drivers',
+  body: `Delete ${this.selected.length} drivers?`,
+  selected: this.selected,
+  acceptButtonScheme: 'danger',
+  confirm: async () => {
+    await Promise.all(this.selected.map((d) => d.destroyRecord()));
+  },
+});
+```
+
+Useful options:
+`selected`
+(array),
+`title`
+,
+`body`
+,
+`acceptButtonScheme`
+,
+`confirm`
+.
+
+## Progress
+
+Tracks progress across an array of promises and shows a percentage bar.
+
+```
+this.modalsManager.progress({
+  title: 'Importing rows…',
+  promises: rows.map((r) => r.save()),
+});
+```
+
+`options.promises`
+is
+**required**
+(the manager throws if not provided).
+
+## Process
+
+Like Progress but for a single async function with explicit stages.
+
+```
+this.modalsManager.process({
+  title: 'Generating report…',
+  process: async () => {
+    await this.fetchData();
+    await this.computeAggregates();
+    await this.renderPdf();
+  },
+});
+```
+
+`options.process`
+is
+**required**
+.
+
+## Loading / Loader
+
+A blocking loader with no buttons. Use it to indicate work in flight; close manually with
+`done()`
+.
+
+```
+this.modalsManager.loader({ title: 'Loading…' });
+try {
+  await this.upstream.sync();
+} finally {
+  this.modalsManager.done();
+}
+```
+
+## Option Prompt
+
+A radio-list selection. Returns a Promise that resolves with the selected value.
+
+```
+const choice = await this.modalsManager.userSelectOption(
+  'Choose a destination',
+  [
+    { value: 'wallet_main', label: 'Main Wallet' },
+    { value: 'wallet_reserve', label: 'Reserve Wallet' },
+  ],
+);
+```
+
+The third positional argument is a regular
+`modalOptions`
+object that supports the same fields as
+`confirm()`
+.
+
+## Common Options
+
+All layouts accept the standard modal options — see the
+[`modals-manager`](https://fleetbase.io/docs/ui/modals/modals-manager)
+page for the complete list (button texts, schemes, backdrop behavior, position, size, transition duration,
+`keepOpen`
+, etc.).

@@ -1,0 +1,145 @@
+---
+title: "Balance Sheet"
+url: https://fleetbase.io/docs/ledger/reports/balance-sheet
+module: ledger
+---
+
+# Balance Sheet
+
+View your organization's financial position — assets, liabilities, and equity at a specific point in time.
+
+# Balance Sheet
+
+The
+**Balance Sheet**
+is a snapshot of your organization's financial position at a specific date. It answers the question: what does your organization own (assets) and what does it owe (liabilities and equity)?
+
+Navigate to
+**Ledger → Reports → Balance Sheet**
+.
+
+![Balance sheet — assets, liabilities, equity, totals row, balanced indicator](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-report-balance-sheet.03bcde34.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+## The Accounting Equation
+
+A balance sheet always satisfies:
+
+```
+Assets = Liabilities + Equity
+```
+
+If your books are in balance, total assets will equal total liabilities plus equity. The report shows a
+**Balanced**
+indicator — green when the equation holds, red when it doesn't.
+
+## Report Structure
+
+### Assets
+
+All
+**asset**
+accounts from your chart of accounts. Default seeded assets:
+
+* Cash (
+  `CASH-DEFAULT`
+  )
+* Bank Account (
+  `BANK-DEFAULT`
+  )
+* Accounts Receivable (
+  `AR-DEFAULT`
+  )
+* Stripe Clearing Account (
+  `STRIPE-CLEARING`
+  )
+* Payment Gateway Clearing (
+  `GATEWAY-CLEARING`
+  )
+* Prepaid Expenses (
+  `PREPAID-DEFAULT`
+  )
+
+**Total Assets**
+
+### Liabilities
+
+All
+**liability**
+accounts:
+
+* Accounts Payable (
+  `AP-DEFAULT`
+  )
+* Wallet Liability Pool (
+  `WALLET-POOL`
+  ) plus per-wallet
+  `WALLET-{uuid}`
+  accounts
+* Driver Earnings Payable (
+  `DRIVER-PAYABLE`
+  )
+* Customer Credit Liability (
+  `CUSTOMER-CREDIT`
+  )
+* Tax Payable (
+  `TAX-PAYABLE`
+  )
+* Stripe Fees Payable (
+  `STRIPE-FEES-PAYABLE`
+  )
+* Deferred Revenue (
+  `DEFERRED-REVENUE`
+  )
+
+**Total Liabilities**
+
+### Equity
+
+All
+**equity**
+accounts. Default seeded equity:
+
+* Owner's Equity (
+  `EQUITY-DEFAULT`
+  )
+* Retained Earnings (
+  `RETAINED-EARNINGS`
+  )
+
+Net income for the current period is reflected in the income statement, not as a discrete equity account.
+
+**Total Equity**
+
+### Verification
+
+The report also shows the combined total of liabilities and equity for direct comparison:
+
+```
+Total Assets = Total Liabilities + Total Equity
+```
+
+If these do not match, there is an accounting error — missing journal entries or an unbalanced entry.
+
+## Setting the Report Date
+
+Navigate to
+**Ledger → Reports → Balance Sheet**
+.
+
+Set the
+**As of Date**
+— the balance sheet reflects account balances at end of that date.
+
+Click
+**Generate**
+.
+
+The default is today.
+
+## What Wallet Liabilities Mean
+
+The
+**Wallet Liability Pool**
+plus the auto-created per-wallet liability accounts (
+`WALLET-{wallet_uuid}`
+) represent the total balance owed to all wallet holders. They increase when wallets are credited and decrease when payouts are made. On the balance sheet, this appears as a liability — your organization owes this amount to its wallet holders.

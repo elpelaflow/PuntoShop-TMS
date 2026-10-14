@@ -1,0 +1,308 @@
+---
+title: "Menu Service"
+url: https://fleetbase.io/docs/extension-development/universe/menu-service
+module: extension-development
+---
+
+# Menu Service
+
+Register navigation entries in the console — header items, settings panels, admin panels, organization & user menus, and custom registries — via universe.getService('menu').
+
+# Menu Service
+
+The
+`menu`
+service is how your extension contributes navigation entries to the console. It exposes dedicated registrars for each major menu surface, plus a generic registrar for custom registries (
+`auth:login`
+,
+`engine:fleet-ops`
+, etc.).
+
+```
+// addon/extension.js
+import { MenuItem, ExtensionComponent } from '@fleetbase/ember-core/contracts';
+
+export default {
+    setupExtension(app, universe) {
+        const menuService = universe.getService('menu');
+        // … registrations
+    },
+};
+```
+
+## Registry Names
+
+The service maintains a small set of well-known registries, addressed by
+**colon-separated**
+names:
+
+| Registry | Holds | Registrar |
+| --- | --- | --- |
+| `header` | Header navigation bar items (top of console) | `registerHeaderMenuItem` |
+| `console:account` | Organization & user dropdowns (slugs prefixed `organization:` or `user:` ) | `registerOrganizationMenuItem` , `registerUserMenuItem` |
+| `console:admin` | Admin section — items ( `menu-item` ) and panels ( `menu-panel` ) | `registerAdminMenuItem` , `registerAdminMenuPanel` |
+| `console:settings` | Settings page items | `registerSettingsMenuItem` |
+| `auth:login` | Login screen extras (extra buttons, public unauth pages) | `registerMenuItem('auth:login', …)` |
+| `engine:<name>` | Per-engine settings drawer ( `engine:fleet-ops` , etc.) | `registerMenuItem('engine:<name>', …)` |
+| Custom ( `my-ext:tabs` , etc.) | Anything you define via `registry.createRegistries(...)` | `registerMenuItem('my-ext:tabs', …)` |
+
+## registerHeaderMenuItem(itemOrTitle, route?, options?)
+
+The most-used registrar — adds an entry to the top header of the console.
+
+```
+menuService.registerHeaderMenuItem('Fleet-Ops', 'console.fleet-ops', {
+    icon: 'truck',
+    priority: 0,
+    description: 'Transport and fleet operations management.',
+    shortcuts: [
+        { title: 'Operations', icon: 'route', route: 'console.fleet-ops.operations.orders' },
+        { title: 'Vehicles',   icon: 'truck', route: 'console.fleet-ops.management.vehicles' },
+        { title: 'Drivers',    icon: 'id-card', route: 'console.fleet-ops.management.drivers' },
+    ],
+});
+```
+
+The
+`shortcuts`
+array isn't decorative — each shortcut is
+**automatically registered as a first-class header item**
+(with the parent's title as
+`_parentTitle`
+for grouping in the customizer's overflow dropdown). This means a single header registration can surface multiple discoverable entries.
+
+You can also pass a
+`MenuItem`
+:
+
+```
+import { MenuItem } from '@fleetbase/ember-core/contracts';
+
+menuService.registerHeaderMenuItem(
+    new MenuItem({
+        title: 'Fleet-Ops',
+        route: 'console.fleet-ops',
+        icon: 'truck',
+        priority: 0,
+    })
+);
+```
+
+## registerSettingsMenuItem(itemOrTitle, options?)
+
+Adds an entry to the Settings page.
+
+```
+menuService.registerSettingsMenuItem(
+    new MenuItem({
+        title: 'My Extension',
+        slug: 'my-extension',
+        icon: 'gear',
+        component: new ExtensionComponent('@my-org/my-engine', 'settings-panel'),
+    })
+);
+```
+
+When the
+`MenuItem`
+has a
+`component`
+, it renders inside the settings page when the user clicks the entry. If you also want a route transition, set
+`route: 'console.settings.virtual'`
+and use
+`slug`
+to identify the view.
+
+## registerAdminMenuItem(itemOrTitle, route?, options?) / registerAdminMenuPanel(panelOrTitle, items?, options?)
+
+The admin section supports both flat items and grouped panels.
+
+```
+menuService.registerAdminMenuPanel(
+    'Fleet-Ops Config',
+    [
+        new MenuItem({
+            title: 'Routing',
+            icon: 'route',
+            component: new ExtensionComponent('@fleetbase/fleetops-engine', 'admin/routing-settings'),
+        }),
+        new MenuItem({
+            title: 'Map',
+            icon: 'map',
+            component: new ExtensionComponent('@fleetbase/fleetops-engine', 'admin/map-settings'),
+        }),
+    ],
+    { slug: 'fleet-ops' }
+);
+```
+
+A panel is stored at
+`console:admin → menu-panel → <slug>`
+; its child items also fan out to
+`console:admin → menu-item → <itemSlug>`
+so they're discoverable individually.
+
+## registerOrganizationMenuItem(itemOrTitle, options?)
+
+Items in the organization dropdown (top-right). Slug is auto-prefixed with
+`organization:`
+.
+
+```
+menuService.registerOrganizationMenuItem(
+    new MenuItem({
+        title: 'Ledger Preferences',
+        icon: 'calculator',
+        slug: 'ledger-preferences',
+        view: 'index',
+        component: new ExtensionComponent('@fleetbase/ledger-engine', 'ledger-org-settings'),
+        onClick: (menuItem) => {
+            const router = app.lookup('service:router');
+            router?.transitionTo('console.settings.virtual', menuItem.slug);
+        },
+    })
+);
+```
+
+If
+`section`
+isn't provided, it defaults to
+`'settings'`
+.
+
+## registerUserMenuItem(itemOrTitle, options?)
+
+Items in the user dropdown. Slug is auto-prefixed with
+`user:`
+.
+
+```
+menuService.registerUserMenuItem(
+    new MenuItem({
+        title: 'Help & Tours',
+        icon: 'question-circle',
+        onClick: () => app.lookup('service:tour')?.showTourLauncher(),
+    })
+);
+```
+
+If
+`section`
+isn't provided, it defaults to
+`'account'`
+.
+
+## registerMenuItem(registryName, titleOrMenuItem, options?)
+
+The generic registrar for
+**custom**
+registries — your own (
+`my-ext:sidebar`
+) or well-known engine registries (
+`auth:login`
+,
+`engine:fleet-ops`
+,
+`fleet-ops:component:vehicle:details`
+).
+
+```
+// A button on the login screen — links to your engine's own login route
+menuService.registerMenuItem(
+    'auth:login',
+    new MenuItem({
+        title: 'Partner Login',
+        route: 'partner-portal.login',
+        icon: 'person',
+        type: 'link',
+        wrapperClass: 'btn-block py-1 border dark:border-gray-700 border-gray-200 hover:opacity-50',
+    })
+);
+
+// A tab on the Fleet-Ops order details panel
+menuService.registerMenuItem(
+    'fleet-ops:component:order:details',
+    new MenuItem({
+        title: 'Invoice',
+        route: 'operations.orders.index.details.virtual',
+        component: new ExtensionComponent('@fleetbase/ledger-engine', 'order-invoice'),
+        icon: 'file-invoice-dollar',
+        slug: 'invoice',
+    })
+);
+```
+
+Real example:
+`packages/ledger/addon/extension.js:92`
+— registers an "Invoice" tab on the Fleet-Ops order details panel.
+
+For component-injecting registries (where the host renders contributed UI rather than navigating to a route), use
+[`registry.registerRenderableComponent(...)`](https://fleetbase.io/docs/extension-development/universe/registry-service)
+instead — it's the right tool for component contributions.
+
+## Reading Items Back
+
+| Method | Returns |
+| --- | --- |
+| `getHeaderMenuItems()` | Array of header items |
+| `getOrganizationMenuItems()` | Items prefixed `organization:` |
+| `getUserMenuItems()` | Items prefixed `user:` |
+| `getAdminMenuItems()` | Admin items (excluding panel children) |
+| `getAdminMenuPanels()` (alias `getAdminPanels` ) | Admin panels |
+| `getSettingsMenuItems()` | Settings page items |
+| `getSettingsMenuPanels()` | Settings panels |
+| `getMenuItems(registryName)` | Items in any registry |
+| `getMenuPanels(registryName)` | Panels in any registry |
+| `getMenuItemsFromPanel(panelSlug)` | Items inside a specific panel |
+| `lookupMenuItem(registryName, slug, view?, section?)` (alias `getMenuItem` ) | A specific item |
+
+## Permission Gating
+
+Pass
+`permission`
+on a
+`MenuItem`
+and the menu UI will hide or disable the item per the user's IAM abilities.
+
+```
+new MenuItem({
+    title: 'Delete Driver',
+    icon: 'trash',
+    permission: 'fleet-ops driver delete',
+    onClick: deleteDriver,
+});
+```
+
+## Real-World References
+
+| Extension | Pattern shown | Source |
+| --- | --- | --- |
+| Fleet-Ops | Header item with shortcuts + admin panel | `packages/fleetops/addon/extension.js` |
+| Ledger | Header item, custom dashboard, Fleet-Ops order tab | `packages/ledger/addon/extension.js` |
+| IAM Engine | Organization and user menu integrations, permissions | `packages/iam-engine/addon/extension.js` |
+| Dev Engine | Developer settings, API keys, webhooks menu | `packages/dev-engine/addon/extension.js` |
+
+## See Also
+
+* [Registry Service](https://fleetbase.io/docs/extension-development/universe/registry-service)
+  — for component contributions (renderable components)
+* [`MenuItem`
+  contract](https://fleetbase.io/docs/extension-development/reference/contracts#menuitem)
+  — full property table
+* [`MenuPanel`
+  contract](https://fleetbase.io/docs/extension-development/reference/contracts#menupanel)
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/services/universe/menu-service.js` | The MenuService implementation |
+| `addon/contracts/menu-item.js` | `MenuItem` |
+| `addon/contracts/menu-panel.js` | `MenuPanel` |
+
+[Overview
+
+The UniverseService is the central extensibility facade in @fleetbase/ember-core. It exposes sub-services for menus, registries, resource views, widgets, hooks, and engines — and is the single entry point your extension uses to plug into the console.](https://fleetbase.io/docs/extension-development/universe/overview)
+[Hook Service
+
+Tap into platform lifecycle events using hooks to run logic at key points in the application — login, route transitions, console boot, and custom events you fire yourself.](https://fleetbase.io/docs/extension-development/universe/hook-service)

@@ -1,0 +1,263 @@
+---
+title: "Core Concepts"
+url: https://fleetbase.io/docs/fleet-ops/getting-started/core-concepts
+module: fleet-ops
+---
+
+# Core Concepts
+
+Understand the key building blocks of Fleet-Ops: orders, payloads, drivers, vehicles, fleets, and how they relate.
+
+# Core Concepts
+
+Fleet-Ops is built around a set of entities that represent the real-world objects in your logistics operation. Understanding how these entities relate to each other is the key to using Fleet-Ops effectively.
+
+## Orders
+
+An
+**Order**
+is the central entity — it represents a delivery task or service job. Every order has:
+
+* A
+  **status**
+  that progresses through a lifecycle (created → dispatched → started → completed)
+* A
+  **payload**
+  containing the pickup location, dropoff location, and items being delivered
+* A
+  **driver**
+  and
+  **vehicle**
+  assigned to execute it
+* An
+  **Order Configuration**
+  that defines the workflow, fields, and proof of delivery method
+
+Orders are created in the console, dispatched to drivers via the Navigator app, and completed when proof of delivery is captured.
+
+### Order Statuses
+
+Fleet-Ops has five
+**system order statuses**
+. They drive the high-level lifecycle Fleet-Ops uses for dispatch, billing, and reporting.
+
+| Status | Always present? | Meaning |
+| --- | --- | --- |
+| `created` | Yes | The order has been created and is awaiting dispatch |
+| `dispatched` | Yes | The order has been sent to a driver |
+| `started` | Yes | The driver has accepted and is working the order |
+| `canceled` | Yes | The order was cancelled before completion |
+| `completed` | Configurable | The order has been delivered |
+
+The first four —
+`created`
+,
+`dispatched`
+,
+`started`
+,
+`canceled`
+— are
+**static**
+. They exist on every order and cannot be removed. The
+`completed`
+status, however, can be replaced or supplemented by
+**any custom activity that has its
+`complete`
+flag set to
+`true`**
+in the order's activity flow. When that activity fires (for example,
+*Items Handed Over*
+or
+*Signature Captured*
+), Fleet-Ops marks the order as completed. This means an Order Configuration can define its own terminating step under whatever name fits the operation, while still ending the order's lifecycle.
+
+What happens
+**between
+`started`
+and the order's completion activity**
+is fully configurable. The intermediate steps a driver moves through —
+*arrived at pickup*
+,
+*items loaded*
+,
+*en route to dropoff*
+, and so on — are defined by the
+**activity flow**
+on the Order Configuration. Different order types can have completely different activity flows while still sharing the same system-status backbone.
+
+See
+[Order Configurations](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/overview)
+and
+[Activity Flows](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/activity-flows)
+for how to design custom workflows.
+
+## Payload
+
+A
+**Payload**
+is the container attached to an order. It defines:
+
+* **Pickup**
+  — where the driver collects the items
+* **Dropoff**
+  — the primary delivery destination
+* **Return**
+  — an optional return-to-sender address if delivery fails
+* **Entities**
+  — the individual items being transported (each with its own tracking number)
+* **Waypoints**
+  — intermediate stops for multi-drop routes
+
+Each entity in the payload can have its own dimensions, weight, barcode/SKU, and destination. For multi-stop routes, each waypoint can require its own proof of delivery.
+
+## Order Configuration
+
+An
+**Order Configuration**
+(or Order Config) is a template that defines how a particular type of order works. It includes:
+
+* The
+  **activity flow**
+  — the sequence of status steps drivers move through
+* **Entity definitions**
+  — what fields are required on each item (description, weight, custom fields)
+* **POD method**
+  — signature, photo, QR code, or custom data
+* **Custom fields**
+  — order-level fields specific to your business
+
+You can have multiple order configs for different service types: standard delivery, pickup & delivery, return-to-sender, multi-drop courier, and so on. Each order selects one config at creation.
+
+See
+[Order Configurations](https://fleetbase.io/docs/fleet-ops/operations/order-configurations/overview)
+for details.
+
+## Drivers
+
+A
+**Driver**
+is a person who executes orders using the Navigator mobile app. Each driver record links to a Fleetbase user account and stores:
+
+* Real-time location (latitude, longitude, heading, speed)
+* Online/offline status
+* Current job assignment
+* Skills and constraints used by the Orchestrator (max distance, time window, required skills)
+* Shift schedule
+
+Drivers use the Navigator app to receive dispatched orders, navigate routes, update status at each stop, and capture proof of delivery.
+
+## Vehicles
+
+A
+**Vehicle**
+is a fleet asset assigned to carry out orders. Vehicle records store:
+
+* Make, model, year, body type, color
+* Plate number and VIN
+* Capacity (weight in kg, volume in m³)
+* Real-time location (from telematics or Navigator app)
+* Status: active, inactive, maintenance, offline
+
+Vehicles can have connected devices (GPS trackers, OBD-II scanners, cameras, sensors) through the Connectivity module, and maintenance schedules tracked through the Maintenance module.
+
+## Trailers
+
+A
+**Trailer**
+is an independently managed towed asset. Dry vans, reefers, flatbeds, tankers, chassis, dollies, and similar units retain their own identity, specifications, equipment, maintenance, device, telemetry, and connection history. Tractor heads and prime movers remain Vehicles. Connecting or disconnecting a Trailer changes the effective-dated towing relationship; it does not transfer ownership of the Trailer's records to the Vehicle.
+
+## Fleets
+
+A
+**Fleet**
+is a logical grouping of drivers and vehicles. Fleets help you organize resources by:
+
+* Geographic zone or service area
+* Service type (express, standard, overnight)
+* Shift (morning fleet, evening fleet)
+* Vendor or subcontractor
+
+Fleets are hierarchical — a top-level fleet (e.g., "Metro") can contain sub-fleets (e.g., "Metro North", "Metro South"). The Orchestrator uses fleet membership to scope order allocation.
+
+## Places
+
+A
+**Place**
+is a saved location — a reusable address used as pickup or dropoff points. Places have full address details, precise coordinates, and a contact phone number. They can be linked to Contacts (customers, suppliers) and appear on the live map.
+
+## Contacts
+
+**Contacts**
+are the businesses and people your operation works with — customers who place orders, suppliers who provide pickups, and facilitators who coordinate deliveries. Contacts have types (customer, supplier, facilitator) and can be linked to specific Places.
+
+## Vendors
+
+**Vendors**
+are third-party carriers or service providers. Unlike internal drivers, vendors can have their own driver pools and fleets. Fleetbase supports
+**Integrated Vendors**
+for platforms like Lalamove — where orders can be relayed to the partner's API and quotes fetched automatically.
+
+## Service Areas & Zones
+
+A
+**Service Area**
+is a polygon-drawn geographic boundary defining where your operation works. Inside a service area you can define
+**Zones**
+— smaller sub-regions. Service areas and zones are used to:
+
+* Scope service rates (different pricing per zone)
+* Filter fleet assignment in the Orchestrator
+* Trigger geofence events (entry/exit/dwell time)
+
+## Service Rates
+
+**Service Rates**
+define pricing rules for orders. A rate can be:
+
+* A flat base fee
+* Distance-based (per km/mile)
+* Weight or volume-based
+* Zone-to-zone fixed price
+* Tiered by distance brackets
+
+Rates support surcharges for COD (cash on delivery), peak hours, and parcel size. Multiple rates can coexist, scoped to different service areas, order configs, or customer types.
+
+## Orchestrator
+
+The
+**Orchestrator**
+is a multi-phase planner that turns a pool of unassigned orders into a committable plan. Rather than running a single fixed pipeline, you compose
+**phases**
+in the Orchestrator Workbench and stack them in sequence — for example
+*Assign Vehicles → Optimize Routes → Assign Drivers*
+. Each phase runs one mode (vehicle allocation, driver allocation, route optimization, or full allocation) using a configurable engine. You preview the proposed plan and commit it when you're satisfied — or run a single phase on its own when that's all you need.
+
+See
+[Orchestrator Overview](https://fleetbase.io/docs/fleet-ops/operations/orchestrator/overview)
+for details.
+
+## Manifests
+
+After the Orchestrator commits an assignment plan, it creates a
+**Manifest**
+for each driver — an ordered list of stops (orders) they need to complete, with estimated distances and arrival times. The manifest is the driver's physical delivery plan for a shift.
+
+## How It All Connects
+
+```
+Order Config ──────────────────────── defines activity flow + entity fields
+     │
+     ▼
+  Order ──── Payload ── Pickup / Dropoff / Entities / Waypoints
+     │           │
+     │           └── TrackingNumber (per entity)
+     │
+     ├── Driver (assigned)
+     ├── Vehicle (assigned)
+     ├── ServiceQuote (pricing)
+     ├── Route (calculated directions)
+     ├── Proofs (signature / photo / QR)
+     └── Manifest (after Orchestrator commit)
+            └── ManifestStop (each order in the manifest)
+```

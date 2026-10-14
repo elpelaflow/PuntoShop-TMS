@@ -1,0 +1,191 @@
+---
+title: "Table"
+url: https://fleetbase.io/docs/ui/display/table
+module: ui
+---
+
+# Table
+
+<Table> is the standard data table component — sortable, resizable, selectable, expandable, with pagination support and pluggable cell components.
+
+# <Table>
+
+`<Table>`
+is the standard data table for resource lists. It supports sortable columns, resizable columns, row selection (single and bulk), expandable rows, custom cell components, and pagination.
+
+For full resource pages with search, filters, and bulk actions, prefer
+[`<Layout::Resource::Tabular>`](https://fleetbase.io/docs/ui/layout/resource-tabular)
+— it's a higher-level wrapper around
+`<Table>`
+.
+
+## Basic Usage
+
+```
+<Table @rows={{this.rows}} @columns={{this.columns}} @onRowClick={{this.openRow}} />
+```
+
+```
+columns = [
+  { label: 'ID',     valuePath: 'public_id', sortable: true,  width: '120px' },
+  { label: 'Name',   valuePath: 'name',      sortable: true },
+  { label: 'Status', valuePath: 'status',    cellComponent: 'table/cell/status' },
+  { label: '',       cellComponent: 'table/cell/dropdown', cellComponentArgs: { actions: this.rowActions } },
+];
+```
+
+## Column Descriptors
+
+Each column is a plain object with these fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `label` | string | Column header text |
+| `valuePath` | string | Dot-path on the row to display |
+| `width` | string | CSS width (e.g. `120px` , `15%` ) |
+| `sortable` | boolean | Allow sorting by this column |
+| `resizable` | boolean | Allow drag-resizing |
+| `filterable` | boolean | Show in the filters picker |
+| `cellComponent` | string | Resolution path for a custom cell renderer |
+| `cellComponentArgs` | object | Args forwarded to the cell component |
+| `headerComponent` | string | Custom header renderer |
+| `hidden` | boolean | Hidden by default; surfaces in the column picker |
+| `permanent` | boolean | Cannot be hidden via the column picker |
+| `cellClass` , `headerClass` | string | Class hooks |
+
+## Row Selection
+
+```
+<Table
+  @rows={{this.rows}}
+  @columns={{this.columns}}
+  @selectable={{true}}
+  @canSelectAll={{true}}
+  @onRowClick={{this.openRow}}
+/>
+```
+
+Read
+`table.selectedRows`
+from the captured table instance to power bulk actions.
+
+## Expandable Rows
+
+```
+<Table @rows={{this.rows}} @columns={{this.columns}} @canExpand={{true}}>
+  <:expandedRow as |row|>
+    {{!-- arbitrary expanded content --}}
+    <DriverDetails @driver={{row}} />
+  </:expandedRow>
+</Table>
+```
+
+## Pagination
+
+```
+<Table
+  @rows={{this.rows}}
+  @columns={{this.columns}}
+  @pagination={{true}}
+  @paginationMeta={{this.paginationMeta}}
+  @page={{this.page}}
+  @onPageChange={{fn (mut this.page)}}
+  @insertPagination={{true}}
+  @useTfootPagination={{true}}
+/>
+```
+
+## Arguments
+
+### Core
+
+| Argument | Description |
+| --- | --- |
+| `@rows` | Row data (array) |
+| `@columns` | Column descriptors |
+| `@onRowClick` | `(row, event)` — row click handler |
+| `@onSetup` | Captures the table API |
+| `@wrapperClass` | Outer wrapper class |
+| `@selectable` | Enable per-row checkboxes |
+| `@canSelectAll` | Enable a "select all" checkbox in the header |
+| `@checkboxSticky` | Sticky position for the select-all column |
+| `@selectAllColumnWidth` | Width of the select-all column (default 40) |
+
+### Expansion
+
+| Argument | Description |
+| --- | --- |
+| `@canExpand` | Enable expandable rows |
+| `:expandedRow` named block | Yields the row to render inside the expansion |
+
+### Pagination
+
+| Argument | Description |
+| --- | --- |
+| `@pagination` | Show pagination |
+| `@paginationMeta` | `{ total, perPage, lastPage, currentPage }` |
+| `@page` | Current page |
+| `@onPageChange` | Page change callback |
+| `@insertPagination` | Render the pagination row |
+| `@useTfootPagination` | Render pagination in `<tfoot>` |
+
+## Cell Components
+
+`<Table>`
+ships with several stock cell components. Reference them in
+`cellComponent`
+:
+
+| Path | Renders |
+| --- | --- |
+| `table/cell/anchor` | Clickable link |
+| `table/cell/checkbox` | Checkbox |
+| `table/cell/dropdown` | Action dropdown menu |
+| `table/cell/status` | `<Badge>` for the status |
+| `table/cell/click-to-copy` | Copyable value |
+| `table/cell/click-to-reveal` | Hidden-then-revealable value |
+| `table/cell/media` | Image preview |
+| `table/cell/datetime` | Formatted date |
+| `table/cell/money` | Formatted money |
+| `table/cell/component` | Generic — pass any component name in `cellComponentArgs` |
+
+You can also point
+`cellComponent`
+at any component in your extension.
+
+## Real-World Example
+
+```
+<Table
+  @rows={{this.drivers}}
+  @columns={{array
+    (hash label="ID" valuePath="public_id" sortable=true cellComponent="table/cell/click-to-copy")
+    (hash label="Name" valuePath="name" sortable=true)
+    (hash label="Status" valuePath="status" cellComponent="table/cell/status")
+    (hash label="" cellComponent="table/cell/dropdown" cellComponentArgs=(hash actions=this.rowActions))
+  }}
+  @selectable={{true}}
+  @canSelectAll={{true}}
+  @pagination={{true}}
+  @paginationMeta={{this.paginationMeta}}
+  @onPageChange={{fn (mut this.page)}}
+  @onRowClick={{this.openDriver}}
+/>
+```
+
+## See Also
+
+* [`<Layout::Resource::Tabular>`](https://fleetbase.io/docs/ui/layout/resource-tabular)
+  — full resource page wrapper
+* `<VisibleColumnPicker>`
+  — let users hide/show columns
+* `<Pagination>`
+  — standalone pagination component
+
+## Source
+
+| File | Description |
+| --- | --- |
+| `addon/components/table.hbs` | Template |
+| `addon/components/table.js` | Class |
+| `addon/components/table/` | Head, body, row, th, td, and all cell renderers |

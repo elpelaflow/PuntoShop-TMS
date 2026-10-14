@@ -1,0 +1,95 @@
+---
+title: "Queue"
+url: https://fleetbase.io/docs/platform/system-setup/queue
+module: platform
+---
+
+# Queue
+
+Configure the background job queue that powers webhook delivery, notifications, imports, and async processing in Fleetbase.
+
+# Queue
+
+Fleetbase uses Laravel's queue system to process background jobs — outbound webhook delivery, push notifications, bulk imports, report generation, and scheduled tasks. The Queue settings let you switch the queue driver and configure its connection details. Navigate to
+**Admin → System Settings → Queue**
+to access these settings.
+
+![Queue settings — Driver dropdown and connection configuration fields](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fadmin-queue-settings.bf18192c.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+For production worker sizing, queue scaling, and monitoring guidance, see
+[Infrastructure Sizing](https://fleetbase.io/docs/platform/quickstart/infrastructure-sizing)
+.
+
+## Driver
+
+Select the queue driver from the
+**Driver**
+dropdown. The form updates to show the fields required for the selected driver.
+
+| Driver | Description |
+| --- | --- |
+| **sync** | Processes jobs immediately in the same request — no worker needed. Only suitable for development or very low traffic. |
+| **database** | Stores jobs in the MySQL database. Simple to set up, no additional infrastructure required. |
+| **redis** | Stores jobs in Redis. Recommended for production — fast, reliable, and supports job visibility timeouts. |
+| **beanstalkd** | Uses a [Beanstalkd](https://beanstalkd.github.io/) server. |
+| **sqs** | Uses AWS Simple Queue Service. Suited for high-throughput or serverless deployments on AWS. |
+
+Redis is the recommended driver for most self-hosted production deployments. The
+`redis`
+service in the default Docker Compose stack is already configured as the queue connection.
+
+### Beanstalkd
+
+| Field | Description |
+| --- | --- |
+| **Beanstalk Host** | Hostname or IP of your Beanstalkd server |
+| **Beanstalk Queue** | The tube (queue) name to push jobs to (default: `default` ) |
+
+### SQS
+
+| Field | Description |
+| --- | --- |
+| **SQS Prefix** | Your SQS queue URL prefix including the AWS account ID (e.g. `https://sqs.us-east-1.amazonaws.com/123456789` ) |
+| **SQS Queue** | The SQS queue name |
+| **SQS Suffix** | Optional suffix appended to the queue name (useful for environment-separated queues) |
+
+AWS credentials for SQS are shared with the AWS configuration in
+[Services](https://fleetbase.io/docs/platform/system-setup/services)
+. The IAM user or role must have
+`sqs:SendMessage`
+,
+`sqs:ReceiveMessage`
+, and
+`sqs:DeleteMessage`
+permissions on the queue.
+
+## Queue Workers
+
+The queue driver setting controls where jobs are dispatched to — but a worker process must be running to consume and process those jobs. In the Docker Compose stack, the
+`queue`
+container runs the worker automatically.
+
+```
+# Check worker status
+docker compose ps queue
+
+# View worker logs
+docker compose logs -f queue
+
+# Restart the worker after changing the driver
+docker compose restart queue
+```
+
+Restart the queue worker container after saving a new driver so it picks up the updated connection.
+
+## Testing
+
+Click
+**Test Config**
+to push a test message to the queue using the currently configured driver. A success response confirms the worker can receive messages from the selected queue.
+
+## Saving
+
+Click
+**Save Changes**
+to apply the configuration. The config cache is refreshed automatically. Restart the queue worker after saving to apply the new driver.

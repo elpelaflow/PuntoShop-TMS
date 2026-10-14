@@ -1,0 +1,104 @@
+---
+title: "Payments & Transactions"
+url: https://fleetbase.io/docs/ledger/payments/overview
+module: ledger
+---
+
+# Payments & Transactions
+
+Process digital payments, manage digital wallets, and track every financial transaction across your Fleetbase ecosystem.
+
+# Payments & Transactions
+
+The
+**Payments**
+module covers three interconnected areas: payment gateways for processing real money, wallets for tracking internal balances, and transactions as the immutable audit trail of every wallet movement.
+
+Navigate to
+**Ledger → Payments**
+to access gateways, wallets, and transactions.
+
+## Core Components
+
+### Payment Gateways
+
+External payment processors -
+**GNU Taler**
+,
+**Stripe**
+,
+**Cash**
+, and
+**QPay**
+- integrated with encrypted credentials and
+`sandbox`
+/
+`live`
+environments. All four drivers support
+`purchase`
+and
+`refund`
+capabilities. GNU Taler adds wallet payment URIs, tenant-safe webhooks, refund URIs, and settlement checks; Stripe adds tokenization, setup intents, checkout sessions, webhooks, and recurring payments. Each gateway interaction is logged as a
+`GatewayTransaction`
+for idempotency and audit. See
+[Payment Gateways](https://fleetbase.io/docs/ledger/payments/gateways/overview)
+.
+
+### Wallets
+
+Digital balance accounts tied to drivers, customers, your company, or individual users. Every wallet operation (
+`credit`
+,
+`topup`
+,
+`transfer`
+,
+`payout`
+) creates one or more journal entries maintaining double-entry integrity. Wallets can be frozen to block all operations. See
+[Wallets](https://fleetbase.io/docs/ledger/payments/wallets)
+.
+
+### Transactions
+
+The complete, immutable ledger of every wallet movement. Transactions are never edited or deleted — they are the full audit trail for compliance and reconciliation. See
+[Transactions](https://fleetbase.io/docs/ledger/payments/transactions)
+.
+
+## A Typical Payment Lifecycle
+
+```
+Customer pays via GNU Taler, Stripe, Cash, or QPay
+  → GatewayTransaction logged (idempotency check)
+    → PaymentSucceeded event fires
+      → Ledger Transaction created (credit direction)
+        → Journal Entry posted by the relevant service
+          (invoice → invoice_payment / wallet → general / order → order_settlement)
+```
+
+The exact journal entries differ per source — see the per-flow examples on
+[Wallets](https://fleetbase.io/docs/ledger/payments/wallets)
+and
+[Invoices](https://fleetbase.io/docs/ledger/billing/invoices)
+.
+
+## Webhook Security
+
+Webhook-capable gateways send callbacks to confirm transactions. Each driver verifies provider payloads before processing: Stripe validates signed events, QPay uses its driver verification, and GNU Taler requires exact tenant-safe routing with
+`order_id`
+,
+`company_uuid`
+, and a gateway identifier. Duplicate webhooks are deduplicated using
+`GatewayTransaction::isProcessed()`
+- a check on
+`(gateway_reference_id, event_type)`
+- so each event is processed exactly once.
+
+## Multi-Currency
+
+Wallets are denominated in a single currency. If you operate in multiple currencies, create separate wallets per currency. Transaction records include
+`exchange_rate`
+,
+`settled_currency`
+, and
+`settled_amount`
+fields for multi-currency reconciliation.

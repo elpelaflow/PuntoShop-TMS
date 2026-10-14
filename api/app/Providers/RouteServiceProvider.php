@@ -40,6 +40,15 @@ class RouteServiceProvider extends ServiceProvider
                         );
                     }
                 );
+
+                // Internal documentation endpoints
+                Route::get('/docs/{slug?}', [\App\Http\Controllers\DocsController::class, 'getDoc'])->where('slug', '.*');
+                Route::prefix('v1')->group(function () {
+                    Route::get('/docs/{slug?}', [\App\Http\Controllers\DocsController::class, 'getDoc'])->where('slug', '.*');
+                });
+                Route::prefix('int/v1')->group(function () {
+                    Route::get('/docs/{slug?}', [\App\Http\Controllers\DocsController::class, 'getDoc'])->where('slug', '.*');
+                });
             }
         );
     }

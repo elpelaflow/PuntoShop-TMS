@@ -1,0 +1,193 @@
+---
+title: "Wallets"
+url: https://fleetbase.io/docs/ledger/payments/wallets
+module: ledger
+---
+
+# Wallets
+
+Manage digital wallets for drivers, customers, your company, and individual users — credit, top-up, transfer, payout, freeze, and recalculate.
+
+# Wallets
+
+A
+**Wallet**
+is a digital balance account within Ledger. Wallets track money owed to or held for a specific entity — a driver's earnings, a customer's prepaid credit, your organization's operating account, or an individual user's personal balance.
+
+Navigate to
+**Ledger → Payments → Wallets**
+.
+
+## Wallet Types
+
+Wallets are polymorphic —
+`subject_uuid`
++
+`subject_type`
+point at the entity that owns the balance:
+
+| Type | Subject | Common Use |
+| --- | --- | --- |
+| **Driver** | Fleet-Ops driver | Track earnings from completed deliveries |
+| **Customer** | Fleet-Ops customer / Shipper | Prepaid credit, transport balance, refunds |
+| **Company** | Your organization | Platform revenue, operating, payout / refund reserves |
+| **User** | Individual Fleetbase user | Personal account |
+
+A single subject can have multiple wallets in different currencies.
+
+## Auto-Provisioned Wallets
+
+Ledger creates wallets automatically in two cases:
+
+* **New companies**
+  receive four system wallets on creation:
+  **Operating Wallet**
+  ,
+  **Revenue Wallet**
+  ,
+  **Payout Reserve**
+  , and
+  **Refund Reserve**
+* **New users**
+  (and users joining a company) receive a
+  **personal wallet**
+
+Each wallet additionally has an internal ledger account auto-created with code
+`WALLET-{wallet_uuid}`
+so journal entries can post against it.
+
+## Wallet Status
+
+The
+`status`
+field is the single source of truth for whether a wallet can transact. It accepts one of three values:
+
+| Status | Behavior |
+| --- | --- |
+| **active** | Normal — credits and debits allowed |
+| **frozen** | Operations blocked while under review |
+| **closed** | Permanently disabled |
+
+API responses also expose a derived
+**`is_frozen`**
+attribute — it's a computed accessor that returns
+`true`
+when
+`status === 'frozen'`
+. Don't write to
+`is_frozen`
+; set the wallet's
+`status`
+instead. The legacy
+`is_frozen`
+toggle in the wallet form is a frontend remnant and does not drive backend behaviour.
+
+## Creating a Wallet
+
+Wallets are usually provisioned automatically. To create one manually:
+
+Navigate to
+**Ledger → Payments → Wallets**
+.
+
+Click
+**New Wallet**
+.
+
+Select the
+**Subject**
+— the driver, customer, company, or user the wallet belongs to.
+
+Select the
+**Currency**
+.
+
+Enter an optional
+**Name**
+and
+**Description**
+.
+
+Click
+**Save**
+.
+
+## Wallet Operations
+
+Each operation below is a button on the wallet detail panel.
+
+| Action | Effect |
+| --- | --- |
+| **Credit** | Manual credit (no gateway) |
+| **Top-Up** | Gateway-charged top-up via GNU Taler, Stripe, or QPay |
+| **Transfer** | Move funds to another wallet |
+| **Payout** (sometimes labelled "Withdraw") | Debit the wallet (e.g., driver payout) |
+| **Freeze** | Set the wallet status to `frozen` |
+| **Unfreeze** | Set the wallet status to `active` |
+| **Recalculate Balance** | Recompute the balance from completed transactions |
+| **Transactions** tab | Filtered transaction list for this wallet |
+
+### Credit (manual deposit, no gateway)
+
+![Add funds to wallet — credit form](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-wallet-add-funds.d7f92fae.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+Adds funds to a wallet without charging a gateway. Used for manual adjustments or earning allocations.
+
+Journal entry:
+`DEBIT Cash → CREDIT Wallet Liability`
+. Transaction type:
+`deposit`
+.
+
+### Top-Up (deposit via gateway)
+
+Charges a payment method via the chosen gateway (GNU Taler, Stripe, or QPay) and credits the wallet on success.
+
+Journal entry:
+`DEBIT Cash → CREDIT Wallet Liability`
+. Transaction type:
+`deposit`
+.
+
+### Transfer
+
+![Transfer funds between wallets — source, destination, amount](https://fleetbase.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fledger-wallet-transfer-funds.fb3d6e8e.webp&w=3840&q=75&dpl=dpl_AzJHbqsc2PKAX3JJ9uiyfHMvrkww)
+
+Moves funds between two wallets. Pick a destination wallet and an amount — the transfer produces:
+
+* Two transactions on the source wallet (
+  `transfer_out`
+  , debit) and the destination (
+  `transfer_in`
+  , credit)
+* One journal entry directly between the two wallet liability accounts (no intermediate account)
+
+### Payout
+
+Debits the wallet (e.g., driver earnings sent to a bank). The UI sometimes labels this
+**Withdraw**
+.
+
+Journal entry:
+`DEBIT Wallet Liability → CREDIT Cash`
+. Transaction type:
+`payout`
+.
+
+### Freeze / Unfreeze
+
+Toggles the wallet's
+`status`
+. While frozen, all operations are blocked.
+
+### Recalculate Balance
+
+If a wallet balance appears incorrect, click
+**Recalculate Balance**
+to recompute from all completed transactions.
+
+## Viewing Wallet Transactions
+
+Open any wallet and click the
+**Transactions**
+tab to see a chronological list. Filter by type, direction, status, and date range.
