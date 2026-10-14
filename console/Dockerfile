@@ -36,8 +36,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 # Copy the console directory contents into the container at /console
 COPY . .
 
-# Build the application with 4GB heap to avoid garbage collection thrashing during engine compilation
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Build the application with 2.5GB heap to fit safely within Docker VM memory
+ENV NODE_OPTIONS="--max-old-space-size=2560"
 RUN pnpm build --environment $ENVIRONMENT
 
 # ---- Serve Stage ----

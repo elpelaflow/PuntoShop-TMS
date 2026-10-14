@@ -5453,3 +5453,215 @@ developers:
         websockets: WebSockets
         logs: Registros
         events: Eventos
+
+iam:
+  extension-name: Gestión de Acceso (IAM)
+  common:
+    dashboard: Panel de control
+    user: Usuarios
+    group: Grupos
+    roles: Roles
+    policies: Políticas
+    name: Nombre
+    description: Descripción
+    member: Miembros
+    permission: Permiso
+    service: Servicio
+    type: Tipo
+    create: Creado
+    email: Correo electrónico
+    phone: Teléfono
+    role: Rol
+    policy: Política
+    status: Estado
+    country: País
+    address: Dirección
+    city: Ciudad
+    state: Estado / Provincia
+    zip: Código Postal
+    all: Todos
+    edit: Editar
+    cancel: Cancelar
+    delete: Eliminar
+    save: Guardar
+    new: Nuevo
+    export: Exportar
+    photo: Foto
+    primary: Principal
+    reload: Recargar
+    reload-data: Recargar datos
+    bulk-action: Acción masiva
+    attach-policies: Adjuntar políticas
+    attach-permissions: Adjuntar permisos
+    attach-inline-permissions: Adjuntar permisos en línea
+    select-permissions: Seleccionar permisos
+    select-policy: Seleccionar política...
+  components:
+    widget:
+      metrics:
+        title: Monitoreo de IAM
+    modals:
+      group-details:
+        group-name: Nombre del grupo
+      group-form:
+        group-name: Nombre del grupo
+        group-description: Descripción del grupo
+        select-users-add-group: Seleccionar usuarios para agregar al grupo
+        search-select-users-add-group: Busca y selecciona usuarios para agregarlos a este grupo
+        select-user-add-group: Seleccionar usuario para agregar...
+        no-user-add-group: Aún no se han agregado usuarios a este grupo
+      policy-form:
+        policy-name: Nombre de la política
+        enter-name-your-policy: Ingresa un nombre para tu política
+        policy-description: Descripción de la política
+        enter-description-your-policy: Ingresa una descripción para tu política
+        select-permissions: Seleccionar permisos
+      view-policy-permissions:
+        view-permissions: "Política: Permisos de {policyName}"
+      view-role-permissions:
+        view-permissions: "Rol: Permisos de {roleName}"
+      view-user-permissions:
+        view-permissions: "Usuario: Permisos de {userName}"
+      change-user-email:
+        title: Cambiar correo del usuario
+        heading: Cambiar correo para {userName}
+        prompt: Ingresa la nueva dirección de correo electrónico. El usuario deberá verificar la nueva dirección antes de que sea su correo de acceso.
+        current-email: Correo actual
+        new-email: Nuevo correo
+        send-verification: Enviar verificación
+        email-required: Se requiere una nueva dirección de correo electrónico.
+        verification-sent: Verificación de cambio de correo enviada. El usuario debe confirmar la nueva dirección antes de que cambie su correo de acceso.
+      role-form:
+        role-name: Nombre del rol
+        enter-name-for-this-role: Ingresa un nombre para este rol
+        role-description: Descripción del rol
+        enter-description-your-role: Ingresa una descripción para tu rol
+        select-permission: Seleccionar permisos
+    table:
+      group-members:
+        no-member: Sin miembros
+    permission-picker:
+      selected: "Seleccionado: "
+      search-permissions-keyword: Buscar permisos por palabras clave
+      loading-permission: Cargando permisos...
+  groups:
+    index:
+      untitled: Sin título
+      delete-group-title: Eliminar grupo {groupName}
+      delete-group-success-message: Grupo {name} eliminado.
+      delete-group: Eliminar grupos
+      delete-groups: Eliminar grupos
+      created: Creado
+      edit-group: Editar grupo...
+      delete-group-label: Eliminar grupo...
+      new-group: Nuevo grupo
+      new-group-created: Nuevo grupo creado.
+      edit-group-title: Editar grupo
+      group-actions: Acciones del grupo
+      changes-group-save: Cambios en el grupo guardados.
+      data-assosciated-this-group-deleted: ¿Estás seguro de que deseas eliminar este grupo? Todos los datos asociados con este grupo también serán eliminados. Esta acción no se puede deshacer.
+  policies:
+    index:
+      title: Políticas
+      delete-policies: Eliminar políticas
+      contact-action: Acciones de contacto
+      edit-policy: Editar política...
+      delete-policy: Eliminar política...
+      new-policy: Nueva política
+      new-policy-created: Nueva política creada.
+      unable-changes-policy-warning: No se pueden realizar cambios en una política {policyType}.
+      edit-policy-title: Editar política
+      policy-actions: Acciones de política
+      changes-policy-saved-success: Cambios en la política guardados.
+      unable-delete-policy-warning: No se puede eliminar una política {policyType}.
+      data-assosciated-this-policy-deleted: ¿Estás seguro de que deseas eliminar esta política? Todos los datos asociados con esta política también serán eliminados. Esta acción no se puede deshacer.
+      policy-deleted: Política {policyName} eliminada.
+  roles:
+    index:
+      delete-roles: Eliminar roles
+      contact-action: Acciones de contacto
+      edit-role: Editar rol...
+      delete-role: Eliminar rol...
+      new-role: Nuevo rol
+      new-role-create: Nuevo rol creado
+      edit-role-title: Editar rol
+      role-actions: Acciones del rol
+      changes-role-saved: Cambios en el rol guardados.
+      data-assosciated-this-role-deleted: ¿Estás seguro de que deseas eliminar este rol? Todos los datos asociados con este rol también serán eliminados. Esta acción no se puede deshacer.
+      role-deleted: Rol {roleName} eliminado.
+      unable-changes-role-warning: No se pueden realizar cambios en un rol {roleType}.
+      unable-delete-role-warning: No se puede eliminar un rol {roleType}.
+  users:
+    index:
+      delete-user-title: Eliminar usuario {userName}
+      delete-user-success-message: Usuario {userName} eliminado.
+      deactivate-user-title: Desactivar la cuenta del usuario {userName}
+      deactivate-user-success-message: Usuario {userName} desactivado.
+      re-activate-user-title: Reactivar la cuenta del usuario {userName}
+      re-activate-user-success-message: Usuario {userName} activado.
+      verify-user-title: Verificar manualmente la cuenta del usuario {userName}
+      verify-user-manually-prompt: Al hacer clic en confirmar, esta acción verificará manualmente la dirección de correo electrónico del usuario. ¿Estás seguro de que deseas omitir la verificación para este usuario?
+      user-verified-success-message: Usuario {userName} verificado.
+      mark-verified-title: Marcar {channel} de {userName} como verificado
+      mark-verified-prompt: Esto marcará el {channel} del usuario como verificado sin requerir su confirmación. ¿Estás seguro?
+      send-verification-title: Enviar verificación de {channel}
+      send-verification-prompt: "{userName} recibirá un enlace en {destination} para confirmarlo. El enlace expira en 48 horas."
+      send-verification: Enviar verificación
+      verification-sent: Enlace de verificación enviado a {destination}.
+      channel-email: correo electrónico
+      channel-phone: número de teléfono
+      send-email-verification: Enviar verificación por correo...
+      send-phone-verification: Enviar verificación por teléfono...
+      mark-email-verified: Marcar correo como verificado...
+      mark-phone-verified: Marcar teléfono como verificado...
+      email-verified: Correo verificado
+      phone-verified: Teléfono verificado
+      verified: Verificado
+      unverified: Sin verificar
+      timezone: Zona horaria
+      date-of-birth: Fecha de nacimiento
+      ip-address: Dirección IP
+      new-user-created: Nuevo usuario agregado a la organización.
+      invite-user: Invitar usuario
+      delete-users: Eliminar usuarios
+      last-login: Último acceso
+      created-at: Creado el
+      updated-at: Actualizado el
+      user-actions: Acciones del usuario
+      edit-user: Editar usuario...
+      view-user-permissions: Ver permisos...
+      re-send-invitation: Reenviar invitación...
+      deactivate-user: Desactivar usuario...
+      activate-user: Activar usuario...
+      delete-user: Eliminar usuario...
+      verify-user: Verificar usuario...
+      change-user-password: Cambiar contraseña del usuario...
+      change-user-email: Cambiar correo del usuario...
+      new-user: Nuevo usuario
+      user-invited-join-your-organization-success: El usuario ha sido invitado a unirse a tu organización.
+      edit-user-title: Editar usuario
+      user-changes-saved-success: Cambios del usuario guardados.
+      error-you-cant-delete-yourself: No puedes eliminarte a ti mismo
+      data-assosciated-user-delete: ¿Estás seguro de que deseas eliminar este usuario? Todos los datos asociados con este usuario también serán eliminados. Esta acción no se puede deshacer.
+      access-account-or-resources-unless-re-activated: ¿Estás seguro de que deseas desactivar este usuario? Este usuario ya no podrá acceder a su cuenta ni a los recursos a menos que sea reactivado.
+      this-user-will-regain-access-to-your-organization: ¿Estás seguro de que deseas reactivar a este usuario? Este usuario recuperará el acceso a tu organización.
+      resend-invitation-to-join-organization: Reenviar invitación para unirse a la organización
+      confirming-fleetbase-will-re-send-invitation-for-user-to-join-your-organization: Al confirmar, se reenviará la invitación para que este usuario se una a tu organización.
+      invitation-resent: Invitación reenviada.
+    invite:
+      title: Invitar usuario
+      description: Ingresa el correo electrónico de la persona que deseas invitar. Si ya tiene una cuenta en la plataforma, recibirá una invitación para unirse a tu organización. Si es un usuario nuevo, se creará una cuenta pendiente y se le pedirá definir una contraseña al aceptar.
+      email-placeholder: colega@ejemplo.com
+      name-placeholder: Nombre completo (requerido para nuevos usuarios)
+      name-help: Requerido únicamente si la persona aún no tiene una cuenta en la plataforma.
+      send-invitation: Enviar invitación
+      email-required: Por favor ingresa un correo electrónico.
+      invitation-sent-existing: Invitación enviada. El usuario recibirá un correo para unirse a tu organización.
+      invitation-sent-new: Invitación enviada. Se ha creado una cuenta pendiente y se le solicitará definir una contraseña.
+    role-required: Selecciona un rol para este usuario.
+    notifications:
+      promoted-existing-account: La cuenta existente de {type} para {name} fue promovida a miembro del equipo.
+  application:
+    access-management: Gestión de acceso
+  home:
+    identity-access-management: Gestión de identidad y acceso

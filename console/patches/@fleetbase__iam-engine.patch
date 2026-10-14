@@ -1,0 +1,834 @@
+diff --git a/addon/components/modals/change-user-password.hbs b/addon/components/modals/change-user-password.hbs
+index 35cd4b2..9db645a 100644
+--- a/addon/components/modals/change-user-password.hbs
++++ b/addon/components/modals/change-user-password.hbs
+@@ -1,18 +1,18 @@
+ <Modal::Default @modalIsOpened={{@modalIsOpened}} @options={{@options}} @confirm={{@onConfirm}} @decline={{@onDecline}}>
+     <div class="px-4 text-gray-900 dark:text-gray-50">
+         <div class="mb-1 text-base font-semibold">
+-            You are about to reset the password for
++            Estás a punto de restablecer la contraseña de
+             {{this.user.name}}
+         </div>
+-        <div class="text-sm mb-4">Please enter the new password and confirm it below. You have the option to send the new credentials to the user via email by selecting the checkbox.</div>
++        <div class="text-sm mb-4">Ingresa la nueva contraseña y confírmala a continuación. Tienes la opción de enviar las nuevas credenciales al usuario por correo electrónico marcando la casilla.</div>
+         <InputGroup>
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+-                <InputGroup @name="New Password" @type="password" @value={{this.password}} @wrapperClass="mb-0i" />
+-                <InputGroup @name="Confirm New Password" @type="password" @value={{this.confirmPassword}} @wrapperClass="mb-0i" />
++                <InputGroup @name="Nueva contraseña" @type="password" @value={{this.password}} @wrapperClass="mb-0i" />
++                <InputGroup @name="Confirmar nueva contraseña" @type="password" @value={{this.confirmPassword}} @wrapperClass="mb-0i" />
+             </div>
+         </InputGroup>
+         <InputGroup>
+-            <Checkbox @value={{this.sendCredentials}} @label="Send password credentials to user" @onToggle={{fn (mut this.sendCredentials)}} @alignItems="center" @labelClass="mb-0i" />
++            <Checkbox @value={{this.sendCredentials}} @label="Enviar credenciales de contraseña al usuario" @onToggle={{fn (mut this.sendCredentials)}} @alignItems="center" @labelClass="mb-0i" />
+         </InputGroup>
+     </div>
+ </Modal::Default>
+\ No newline at end of file
+diff --git a/addon/components/permission-picker.hbs b/addon/components/permission-picker.hbs
+index c0860ee..6b3bcb6 100644
+--- a/addon/components/permission-picker.hbs
++++ b/addon/components/permission-picker.hbs
+@@ -18,7 +18,7 @@
+                 {{/if}}
+             </div>
+             <div>
+-                <a href="javascript:;" class="ml-2 text-xs text-blue-500 hover:opacity-50" {{on "click" this.toggleSelected}}>Toggle Selected</a>
++                <a href="javascript:;" class="ml-2 text-xs text-blue-500 hover:opacity-50" {{on "click" this.toggleSelected}}>Ver solo seleccionados</a>
+             </div>
+         </div>
+         <div class="text-xs dark:text-gray-100">
+diff --git a/addon/components/widget/access-coverage.hbs b/addon/components/widget/access-coverage.hbs
+index 175fc0d..5f44317 100644
+--- a/addon/components/widget/access-coverage.hbs
++++ b/addon/components/widget/access-coverage.hbs
+@@ -1,13 +1,13 @@
+-<Widget::IamDashboardWidget @endpoint="access-coverage" @title="Access Coverage" @subtitle="Assignment coverage by user" @icon="shield-user" as |data|>
++<Widget::IamDashboardWidget @endpoint="access-coverage" @title="Cobertura de Acceso" @subtitle="Cobertura de asignaciones por usuario" @icon="shield-user" as |data|>
+     <div class="iam-coverage-hero">
+         <span>{{data.coverage}}%</span>
+-        <small>Users with access assignments</small>
++        <small>Usuarios con accesos asignados</small>
+     </div>
+     <div class="iam-row-list mt-3">
+-        <div class="iam-row"><span>With roles</span><strong>{{data.with_roles}}</strong></div>
+-        <div class="iam-row"><span>With groups</span><strong>{{data.with_groups}}</strong></div>
+-        <div class="iam-row"><span>With policies</span><strong>{{data.with_policies}}</strong></div>
+-        <div class="iam-row"><span>Direct permissions</span><strong>{{data.with_direct_permissions}}</strong></div>
+-        <div class="iam-row iam-row-warning"><span>No assignments</span><strong>{{data.without_assignments}}</strong></div>
++        <div class="iam-row"><span>Con roles</span><strong>{{data.with_roles}}</strong></div>
++        <div class="iam-row"><span>Con grupos</span><strong>{{data.with_groups}}</strong></div>
++        <div class="iam-row"><span>Con políticas</span><strong>{{data.with_policies}}</strong></div>
++        <div class="iam-row"><span>Permisos directos</span><strong>{{data.with_direct_permissions}}</strong></div>
++        <div class="iam-row iam-row-warning"><span>Sin asignaciones</span><strong>{{data.without_assignments}}</strong></div>
+     </div>
+ </Widget::IamDashboardWidget>
+diff --git a/addon/components/widget/access-risk.hbs b/addon/components/widget/access-risk.hbs
+index 51228ac..0847f51 100644
+--- a/addon/components/widget/access-risk.hbs
++++ b/addon/components/widget/access-risk.hbs
+@@ -1,8 +1,8 @@
+-<Widget::IamDashboardWidget @endpoint="privileged-access" @title="Access Risk" @subtitle="Privileged exposure requiring review" @icon="user-lock" as |data|>
++<Widget::IamDashboardWidget @endpoint="privileged-access" @title="Riesgo de Acceso" @subtitle="Exposición con privilegios que requiere revisión" @icon="user-lock" as |data|>
+     <div class="iam-stat-grid iam-stat-grid-3 iam-risk-summary">
+-        <div class="iam-stat-card"><span>{{data.privileged_roles_count}}</span><small>Admin roles</small></div>
+-        <div class="iam-stat-card"><span>{{data.wildcard_policies_count}}</span><small>Wildcard policies</small></div>
+-        <div class="iam-stat-card"><span>{{data.direct_privileged_grants}}</span><small>Direct grants</small></div>
++        <div class="iam-stat-card"><span>{{data.privileged_roles_count}}</span><small>Roles de admin</small></div>
++        <div class="iam-stat-card"><span>{{data.wildcard_policies_count}}</span><small>Políticas globales</small></div>
++        <div class="iam-stat-card"><span>{{data.direct_privileged_grants}}</span><small>Asignaciones directas</small></div>
+     </div>
+     <div class="iam-scroll-list mt-3">
+         {{#each data.roles as |role|}}
+@@ -14,7 +14,7 @@
+                 <strong>{{role.permissions_count}}</strong>
+             </div>
+         {{else}}
+-            <div class="iam-widget-empty">No privileged access risks detected</div>
++            <div class="iam-widget-empty">No se detectaron riesgos de acceso privilegiado</div>
+         {{/each}}
+     </div>
+ </Widget::IamDashboardWidget>
+diff --git a/addon/components/widget/group-coverage.hbs b/addon/components/widget/group-coverage.hbs
+index cc534e9..303fe4e 100644
+--- a/addon/components/widget/group-coverage.hbs
++++ b/addon/components/widget/group-coverage.hbs
+@@ -1,8 +1,8 @@
+-<Widget::IamDashboardWidget @endpoint="group-coverage" @title="Group Coverage" @subtitle="Membership distribution" @icon="people-group" as |data|>
++<Widget::IamDashboardWidget @endpoint="group-coverage" @title="Cobertura de Grupos" @subtitle="Distribución de miembros" @icon="people-group" as |data|>
+     <div class="iam-stat-grid iam-stat-grid-3">
+-        <div class="iam-stat-card"><span>{{data.total_groups}}</span><small>Groups</small></div>
+-        <div class="iam-stat-card"><span>{{data.total_memberships}}</span><small>Memberships</small></div>
+-        <div class="iam-stat-card"><span>{{data.empty_groups}}</span><small>Empty</small></div>
++        <div class="iam-stat-card"><span>{{data.total_groups}}</span><small>Grupos</small></div>
++        <div class="iam-stat-card"><span>{{data.total_memberships}}</span><small>Membresías</small></div>
++        <div class="iam-stat-card"><span>{{data.empty_groups}}</span><small>Vacíos</small></div>
+     </div>
+     <div class="iam-row-list mt-3">
+         {{#each data.buckets as |bucket|}}
+diff --git a/addon/components/widget/identity-health.hbs b/addon/components/widget/identity-health.hbs
+index 8218c11..17b4cc9 100644
+--- a/addon/components/widget/identity-health.hbs
++++ b/addon/components/widget/identity-health.hbs
+@@ -1,34 +1,34 @@
+-<Widget::IamDashboardWidget @endpoint="identity-health" @title="Identity Health" @subtitle="Access posture snapshot" @icon="heart-pulse" as |data|>
++<Widget::IamDashboardWidget @endpoint="identity-health" @title="Salud de Identidad" @subtitle="Estado actual de accesos" @icon="heart-pulse" as |data|>
+     <div class="iam-stat-grid">
+         <div class="iam-stat-card">
+             <span>{{data.status.active}}</span>
+-            <small>Active</small>
++            <small>Activo</small>
+         </div>
+         <div class="iam-stat-card">
+             <span>{{data.status.pending}}</span>
+-            <small>Pending</small>
++            <small>Pendiente</small>
+         </div>
+         <div class="iam-stat-card">
+             <span>{{data.verification.unverified}}</span>
+-            <small>Unverified</small>
++            <small>Sin verificar</small>
+         </div>
+         <div class="iam-stat-card">
+             <span>{{data.dormant.count}}</span>
+-            <small>Dormant</small>
++            <small>Inactivo</small>
+         </div>
+     </div>
+     <div class="iam-row-list mt-3">
+         <div class="iam-row">
+-            <span>MFA coverage</span>
+-            <strong>{{if data.mfa.available (concat data.mfa.value "%") "Unavailable"}}</strong>
++            <span>Cobertura MFA</span>
++            <strong>{{if data.mfa.available (concat data.mfa.value "%") "No disponible"}}</strong>
+         </div>
+         <div class="iam-row">
+-            <span>Organization 2FA</span>
+-            <strong>{{if data.mfa.company_enforced "Enforced" (if data.mfa.company_enabled "Enabled" "Off")}}</strong>
++            <span>2FA de organización</span>
++            <strong>{{if data.mfa.company_enforced "Obligatorio" (if data.mfa.company_enabled "Habilitado" "Desactivado")}}</strong>
+         </div>
+         <div class="iam-row">
+-            <span>Dormant threshold</span>
+-            <strong>{{data.dormant.threshold_days}} days</strong>
++            <span>Umbral de inactividad</span>
++            <strong>{{data.dormant.threshold_days}} días</strong>
+         </div>
+     </div>
+ </Widget::IamDashboardWidget>
+diff --git a/addon/components/widget/policy-surface.hbs b/addon/components/widget/policy-surface.hbs
+index 4abb7b8..e700340 100644
+--- a/addon/components/widget/policy-surface.hbs
++++ b/addon/components/widget/policy-surface.hbs
+@@ -1,8 +1,8 @@
+-<Widget::IamDashboardWidget @endpoint="policy-surface" @title="Policy Surface" @subtitle="Policies by service" @icon="diagram-project" as |data|>
++<Widget::IamDashboardWidget @endpoint="policy-surface" @title="Superficie de Políticas" @subtitle="Políticas por servicio" @icon="diagram-project" as |data|>
+     <div class="iam-stat-grid iam-stat-grid-3">
+         <div class="iam-stat-card"><span>{{data.total}}</span><small>Total</small></div>
+-        <div class="iam-stat-card"><span>{{data.organization_managed}}</span><small>Org managed</small></div>
+-        <div class="iam-stat-card"><span>{{data.fleetbase_managed}}</span><small>Fleetbase</small></div>
++        <div class="iam-stat-card"><span>{{data.organization_managed}}</span><small>De la organización</small></div>
++        <div class="iam-stat-card"><span>{{data.fleetbase_managed}}</span><small>Del sistema</small></div>
+     </div>
+     <div class="iam-scroll-list mt-3">
+         {{#each data.by_service as |service|}}
+@@ -11,7 +11,7 @@
+                 <strong>{{service.value}}</strong>
+             </div>
+         {{else}}
+-            <div class="iam-widget-empty">No policies available</div>
++            <div class="iam-widget-empty">No hay políticas disponibles</div>
+         {{/each}}
+     </div>
+ </Widget::IamDashboardWidget>
+diff --git a/addon/components/widget/privileged-access.hbs b/addon/components/widget/privileged-access.hbs
+index 226bb1a..c220f6e 100644
+--- a/addon/components/widget/privileged-access.hbs
++++ b/addon/components/widget/privileged-access.hbs
+@@ -1,8 +1,8 @@
+-<Widget::IamDashboardWidget @endpoint="privileged-access" @title="Privileged Access" @subtitle="High access exposure" @icon="user-lock" as |data|>
++<Widget::IamDashboardWidget @endpoint="privileged-access" @title="Acceso Privilegiado" @subtitle="Alta exposición de acceso" @icon="user-lock" as |data|>
+     <div class="iam-stat-grid iam-stat-grid-3">
+-        <div class="iam-stat-card"><span>{{data.privileged_roles_count}}</span><small>Admin roles</small></div>
+-        <div class="iam-stat-card"><span>{{data.wildcard_policies_count}}</span><small>Wildcard policies</small></div>
+-        <div class="iam-stat-card"><span>{{data.direct_privileged_grants}}</span><small>Direct grants</small></div>
++        <div class="iam-stat-card"><span>{{data.privileged_roles_count}}</span><small>Roles de admin</small></div>
++        <div class="iam-stat-card"><span>{{data.wildcard_policies_count}}</span><small>Políticas globales</small></div>
++        <div class="iam-stat-card"><span>{{data.direct_privileged_grants}}</span><small>Asignaciones directas</small></div>
+     </div>
+     <div class="iam-scroll-list mt-3">
+         {{#each data.roles as |role|}}
+@@ -14,7 +14,7 @@
+                 <strong>{{role.permissions_count}}</strong>
+             </div>
+         {{else}}
+-            <div class="iam-widget-empty">No privileged roles detected</div>
++            <div class="iam-widget-empty">No se detectaron roles con privilegios</div>
+         {{/each}}
+     </div>
+ </Widget::IamDashboardWidget>
+diff --git a/addon/components/widget/quick-actions.hbs b/addon/components/widget/quick-actions.hbs
+index 33d1c62..9042788 100644
+--- a/addon/components/widget/quick-actions.hbs
++++ b/addon/components/widget/quick-actions.hbs
+@@ -1,17 +1,17 @@
+ <div class="iam-dashboard-widget flex h-full min-h-0 flex-col overflow-hidden rounded-md border shadow-sm" ...attributes>
+     <div class="iam-widget-header">
+         <div class="min-w-0">
+-            <div class="iam-widget-title">IAM Quick Actions</div>
+-            <div class="iam-widget-subtitle">Jump into common access workflows</div>
++            <div class="iam-widget-title">Acciones Rápidas de IAM</div>
++            <div class="iam-widget-subtitle">Ir a flujos comunes de acceso</div>
+         </div>
+         <div class="iam-widget-icon"><FaIcon @icon="bolt" /></div>
+     </div>
+     <div class="iam-widget-body iam-report-body">
+         <div class="iam-action-grid">
+-            <LinkTo @route="users" class="iam-action-link"><FaIcon @icon="user-plus" /><span>Invite user</span></LinkTo>
+-            <LinkTo @route="groups" class="iam-action-link"><FaIcon @icon="people-group" /><span>Create group</span></LinkTo>
+-            <LinkTo @route="roles" class="iam-action-link"><FaIcon @icon="user-tag" /><span>Create role</span></LinkTo>
+-            <LinkTo @route="policies" class="iam-action-link"><FaIcon @icon="file-shield" /><span>Create policy</span></LinkTo>
++            <LinkTo @route="users" class="iam-action-link"><FaIcon @icon="user-plus" /><span>Invitar usuario</span></LinkTo>
++            <LinkTo @route="groups" class="iam-action-link"><FaIcon @icon="people-group" /><span>Crear grupo</span></LinkTo>
++            <LinkTo @route="roles" class="iam-action-link"><FaIcon @icon="user-tag" /><span>Crear rol</span></LinkTo>
++            <LinkTo @route="policies" class="iam-action-link"><FaIcon @icon="file-shield" /><span>Crear política</span></LinkTo>
+         </div>
+     </div>
+ </div>
+diff --git a/addon/components/widget/recent-activity.hbs b/addon/components/widget/recent-activity.hbs
+index 44330de..77c3448 100644
+--- a/addon/components/widget/recent-activity.hbs
++++ b/addon/components/widget/recent-activity.hbs
+@@ -1,4 +1,4 @@
+-<Widget::IamDashboardWidget @endpoint="activity" @title="Recent IAM Activity" @subtitle="Latest identity and access changes" @icon="clock-rotate-left" as |data|>
++<Widget::IamDashboardWidget @endpoint="activity" @title="Actividad Reciente de IAM" @subtitle="Últimos cambios de identidad y acceso" @icon="clock-rotate-left" as |data|>
+     <div class="iam-scroll-list">
+         {{#each data.items as |activity|}}
+             <div class="iam-list-row">
+@@ -9,7 +9,7 @@
+                 <span class="iam-list-subtitle">{{n-a activity.created_at}}</span>
+             </div>
+         {{else}}
+-            <div class="iam-widget-empty">No recent IAM activity</div>
++            <div class="iam-widget-empty">Sin actividad reciente de IAM</div>
+         {{/each}}
+     </div>
+ </Widget::IamDashboardWidget>
+diff --git a/addon/controllers/application.js b/addon/controllers/application.js
+index 361216b..b46915d 100644
+--- a/addon/controllers/application.js
++++ b/addon/controllers/application.js
+@@ -11,7 +11,7 @@ export default class ApplicationController extends Controller {
+         return [
+             {
+                 label: this.intl.t('iam.common.dashboard'),
+-                description: 'Identity and access overview.',
++                description: 'Resumen general de identidad y acceso.',
+                 tooltip: true,
+                 icon: 'home',
+                 route: 'console.iam.home',
+@@ -19,7 +19,7 @@ export default class ApplicationController extends Controller {
+             },
+             {
+                 label: this.intl.t('iam.common.user'),
+-                description: 'Manage team member accounts.',
++                description: 'Gestiona cuentas de miembros del equipo.',
+                 icon: 'id-card',
+                 route: 'console.iam.users',
+                 permission: 'iam list user',
+@@ -28,7 +28,7 @@ export default class ApplicationController extends Controller {
+             },
+             {
+                 label: this.intl.t('iam.common.group'),
+-                description: 'Organize users into access groups.',
++                description: 'Organiza usuarios en grupos de acceso.',
+                 icon: 'building',
+                 route: 'console.iam.groups',
+                 permission: 'iam list group',
+@@ -37,7 +37,7 @@ export default class ApplicationController extends Controller {
+             },
+             {
+                 label: this.intl.t('iam.common.roles'),
+-                description: 'Define reusable permission bundles.',
++                description: 'Define conjuntos de permisos reutilizables.',
+                 icon: 'tag',
+                 route: 'console.iam.roles',
+                 permission: 'iam list role',
+@@ -46,7 +46,7 @@ export default class ApplicationController extends Controller {
+             },
+             {
+                 label: this.intl.t('iam.common.policies'),
+-                description: 'Manage fine-grained access policies.',
++                description: 'Gestiona políticas detalladas de control de acceso.',
+                 icon: 'shield',
+                 route: 'console.iam.policies',
+                 permission: 'iam list policy',
+diff --git a/addon/controllers/users/index.js b/addon/controllers/users/index.js
+index e75e060..6605d7e 100644
+--- a/addon/controllers/users/index.js
++++ b/addon/controllers/users/index.js
+@@ -152,7 +152,7 @@ export default class UsersIndexController extends Controller {
+             sortable: false,
+             filterable: true,
+             filterComponent: 'filter/model',
+-            filterComponentPlaceholder: 'Select role',
++            filterComponentPlaceholder: 'Seleccionar rol',
+             filterParam: 'role',
+             model: 'role',
+         },
+diff --git a/addon/extension.js b/addon/extension.js
+index 783c392..736a41e 100644
+--- a/addon/extension.js
++++ b/addon/extension.js
+@@ -7,133 +7,133 @@ export function registerWidgets(widgetService) {
+     const widgets = [
+         new Widget({
+             id: 'iam-kpi-active-users',
+-            name: 'Active Users',
+-            description: 'Active users who can currently access the organization.',
++            name: 'Usuarios activos',
++            description: 'Usuarios activos que pueden acceder actualmente a la organización.',
+             icon: 'user-check',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/kpi-active-users'),
+             grid_options: kpiGridOptions,
+-            category: 'KPI Tiles',
++            category: 'Métricas KPI',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-kpi-pending-invites',
+-            name: 'Pending Invites',
+-            description: 'Users invited or awaiting verification.',
++            name: 'Invitaciones pendientes',
++            description: 'Usuarios invitados o en espera de verificación.',
+             icon: 'envelope-open-text',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/kpi-pending-invites'),
+             grid_options: kpiGridOptions,
+-            category: 'KPI Tiles',
++            category: 'Métricas KPI',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-kpi-inactive-users',
+-            name: 'Inactive Users',
+-            description: 'Users whose organization access is inactive.',
++            name: 'Usuarios inactivos',
++            description: 'Usuarios cuyo acceso a la organización está inactivo.',
+             icon: 'user-slash',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/kpi-inactive-users'),
+             grid_options: kpiGridOptions,
+-            category: 'KPI Tiles',
++            category: 'Métricas KPI',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-kpi-dormant-users',
+-            name: 'Dormant Users',
+-            description: 'Users with no recent login activity.',
++            name: 'Usuarios sin actividad',
++            description: 'Usuarios sin actividad de inicio de sesión reciente.',
+             icon: 'bed',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/kpi-dormant-users'),
+             grid_options: kpiGridOptions,
+-            category: 'KPI Tiles',
++            category: 'Métricas KPI',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-kpi-mfa-coverage',
+-            name: 'MFA Coverage',
+-            description: 'Share of users with two-factor authentication enabled when available.',
++            name: 'Cobertura MFA',
++            description: 'Porcentaje de usuarios con autenticación de dos factores habilitada.',
+             icon: 'lock',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/kpi-mfa-coverage'),
+             grid_options: kpiGridOptions,
+-            category: 'KPI Tiles',
++            category: 'Métricas KPI',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-kpi-roles',
+             name: 'Roles',
+-            description: 'Organization-managed IAM roles.',
++            description: 'Roles de IAM gestionados por la organización.',
+             icon: 'user-tag',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/kpi-roles'),
+             grid_options: kpiGridOptions,
+-            category: 'KPI Tiles',
++            category: 'Métricas KPI',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-kpi-policies',
+-            name: 'Policies',
+-            description: 'Organization-managed access policies.',
++            name: 'Políticas',
++            description: 'Políticas de acceso gestionadas por la organización.',
+             icon: 'file-shield',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/kpi-policies'),
+             grid_options: kpiGridOptions,
+-            category: 'KPI Tiles',
++            category: 'Métricas KPI',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-user-type-creation-trend',
+-            name: 'Users by Type Created Over Time',
+-            description: 'New identities created by user type over the selected period.',
++            name: 'Tendencia de creación de usuarios',
++            description: 'Nuevas identidades creadas por tipo de usuario en el período seleccionado.',
+             icon: 'chart-column',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/user-type-creation-trend'),
+             grid_options: insightGridOptions,
+-            category: 'Analytics',
++            category: 'Analítica',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-access-risk',
+-            name: 'Access Risk',
+-            description: 'Privileged roles, wildcard policies, and direct privileged grants.',
++            name: 'Riesgo de acceso',
++            description: 'Roles privilegiados, políticas globales y asignaciones directas.',
+             icon: 'user-lock',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/access-risk'),
+             grid_options: insightGridOptions,
+-            category: 'Security',
++            category: 'Seguridad',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-policy-surface',
+-            name: 'Policy Surface',
+-            description: 'Policies grouped by service and ownership.',
++            name: 'Superficie de políticas',
++            description: 'Políticas agrupadas por servicio y origen.',
+             icon: 'diagram-project',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/policy-surface'),
+             grid_options: insightGridOptions,
+-            category: 'Governance',
++            category: 'Gobernanza',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-recent-activity',
+-            name: 'Recent IAM Activity',
+-            description: 'Recent user, group, role, and policy changes.',
++            name: 'Actividad reciente de IAM',
++            description: 'Cambios recientes de usuarios, grupos, roles y políticas.',
+             icon: 'clock-rotate-left',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/recent-activity'),
+             grid_options: insightGridOptions,
+-            category: 'Operations',
++            category: 'Operaciones',
+             default: true,
+         }),
+         new Widget({
+             id: 'iam-quick-actions',
+-            name: 'IAM Quick Actions',
+-            description: 'Shortcuts for common IAM management tasks.',
++            name: 'Acciones rápidas de IAM',
++            description: 'Accesos directos para tareas comunes de gestión de IAM.',
+             icon: 'bolt',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/quick-actions'),
+             grid_options: operationsGridOptions,
+-            category: 'Actions',
++            category: 'Acciones',
+             default: false,
+         }),
+         new Widget({
+             id: 'iam-metrics-widget',
+-            name: 'IAM Metrics (Legacy)',
+-            description: 'Legacy grouped IAM usage metrics.',
++            name: 'Métricas de IAM (Heredado)',
++            description: 'Métricas agrupadas de uso de IAM heredadas.',
+             icon: 'user-shield',
+             component: new ExtensionComponent('@fleetbase/iam-engine', 'widget/iam-metrics'),
+             grid_options: { w: 6, h: 8, minW: 4, minH: 6 },
+-            options: { title: 'IAM Metrics' },
+-            category: 'Legacy',
++            options: { title: 'Métricas de IAM' },
++            category: 'Heredado',
+             default: false,
+         }),
+     ];
+@@ -151,29 +151,29 @@ export default {
+         menuService.registerHeaderMenuItem('IAM', 'console.iam', {
+             icon: 'shield-halved',
+             priority: 3,
+-            description: 'Identity and access management: users, roles, policies, and permissions.',
++            description: 'Gestión de identidad y acceso: usuarios, roles, políticas y permisos.',
+             shortcuts: [
+                 {
+-                    title: 'Users',
+-                    description: 'Manage console user accounts and their access levels.',
++                    title: 'Usuarios',
++                    description: 'Gestiona cuentas de usuario de la consola y sus niveles de acceso.',
+                     icon: 'user',
+                     route: 'console.iam.users',
+                 },
+                 {
+-                    title: 'Groups',
+-                    description: 'Organise users into groups for bulk permission management.',
++                    title: 'Grupos',
++                    description: 'Organiza usuarios en grupos para gestión masiva de permisos.',
+                     icon: 'people-group',
+                     route: 'console.iam.groups',
+                 },
+                 {
+                     title: 'Roles',
+-                    description: 'Define named roles that bundle sets of permissions.',
++                    description: 'Define roles con conjuntos de permisos agrupados.',
+                     icon: 'user-tag',
+                     route: 'console.iam.roles',
+                 },
+                 {
+-                    title: 'Policies',
+-                    description: 'Create fine-grained access control policies for resources.',
++                    title: 'Políticas',
++                    description: 'Crea políticas de control de acceso detalladas para recursos.',
+                     icon: 'file-shield',
+                     route: 'console.iam.policies',
+                 },
+diff --git a/addon/services/policy-actions.js b/addon/services/policy-actions.js
+index 07f2c7c..ebebfbc 100644
+--- a/addon/services/policy-actions.js
++++ b/addon/services/policy-actions.js
+@@ -132,7 +132,7 @@ export default class PolicyActionsService extends ResourceActionService {
+         }
+ 
+         this.modalsManager.confirm({
+-            title: `Delete (${policy.name || 'Untitled'}) policy`,
++            title: `Eliminar política (${policy.name || 'Sin título'})`,
+             body: this.intl.t('iam.policies.index.data-assosciated-this-policy-deleted'),
+             confirm: async (modal) => {
+                 modal.startLoading();
+diff --git a/addon/services/role-actions.js b/addon/services/role-actions.js
+index 55904b8..95ecd1b 100644
+--- a/addon/services/role-actions.js
++++ b/addon/services/role-actions.js
+@@ -44,13 +44,13 @@ export default class RoleActionsService extends ResourceActionService {
+ 
+                 if (!role.name || typeof role.name !== 'string') {
+                     modal.stopLoading();
+-                    return this.notifications.warning('Role name is required.');
++                    return this.notifications.warning('El nombre del rol es requerido.');
+                 }
+ 
+                 const roleName = role.name.toLowerCase();
+                 if (roleName === 'administrator' || roleName.startsWith('admin')) {
+                     modal.stopLoading();
+-                    return this.notifications.error('Creating a role with name "Administrator" or a role name that starts with "Admin" is prohibited, as the name is system reserved.');
++                    return this.notifications.error('Está prohibido crear un rol con el nombre "Administrator" o que comience con "Admin", ya que es un nombre reservado del sistema.');
+                 }
+ 
+                 if (this.abilities.cannot(formPermission)) {
+@@ -101,13 +101,13 @@ export default class RoleActionsService extends ResourceActionService {
+ 
+                 if (!role.name || typeof role.name !== 'string') {
+                     modal.stopLoading();
+-                    return this.notifications.warning('Role name is required.');
++                    return this.notifications.warning('El nombre del rol es requerido.');
+                 }
+ 
+                 const roleName = role.name.toLowerCase();
+                 if (roleName === 'administrator' || roleName.startsWith('admin')) {
+                     modal.stopLoading();
+-                    return this.notifications.error('Creating a role with name "Administrator" or a role name that starts with "Admin" is prohibited, as the name is system reserved.');
++                    return this.notifications.error('Está prohibido crear un rol con el nombre "Administrator" o que comience con "Admin", ya que es un nombre reservado del sistema.');
+                 }
+ 
+                 if (this.abilities.cannot(formPermission)) {
+@@ -140,7 +140,7 @@ export default class RoleActionsService extends ResourceActionService {
+         }
+ 
+         this.modalsManager.confirm({
+-            title: `Delete (${role.name || 'Untitled'}) role`,
++            title: `Eliminar rol (${role.name || 'Sin título'})`,
+             body: this.intl.t('iam.roles.index.data-assosciated-this-role-deleted'),
+             confirm: async (modal) => {
+                 modal.startLoading();
+diff --git a/addon/templates/application.hbs b/addon/templates/application.hbs
+index 492f6bd..e89717c 100644
+--- a/addon/templates/application.hbs
++++ b/addon/templates/application.hbs
+@@ -1,5 +1,5 @@
+ <EmberWormhole @to="sidebar-menu-items">
+-    <Layout::Sidebar::Navigator @items={{this.navigationItems}} @searchPlaceholder="Search IAM..." @searchProvider={{this.searchNavigation}} />
++    <Layout::Sidebar::Navigator @items={{this.navigationItems}} @searchPlaceholder="Buscar en IAM..." @searchProvider={{this.searchNavigation}} />
+ </EmberWormhole>
+ 
+ <Layout::Section::Container>
+diff --git a/addon/templates/home.hbs b/addon/templates/home.hbs
+index ed0c565..a421974 100644
+--- a/addon/templates/home.hbs
++++ b/addon/templates/home.hbs
+@@ -1,7 +1,7 @@
+ <Layout::Section::Body class="overflow-y-scroll h-full">
+     <Dashboard
+         @defaultDashboardId="iam"
+-        @defaultDashboardName="IAM Dashboard"
++        @defaultDashboardName="Panel de control de IAM"
+         @extension="iam"
+         @leftHeaderWrapperClass="iam-dashboard-title"
+         @rightHeaderWrapperClass="iam-dashboard-actions"
+diff --git a/translations/es-mx.yaml b/translations/es-mx.yaml
+new file mode 100644
+index 0000000..b2fb15b
+--- /dev/null
++++ b/translations/es-mx.yaml
+@@ -0,0 +1,211 @@
++iam:
++  extension-name: Gestión de Acceso (IAM)
++  common:
++    dashboard: Panel de control
++    user: Usuarios
++    group: Grupos
++    roles: Roles
++    policies: Políticas
++    name: Nombre
++    description: Descripción
++    member: Miembros
++    permission: Permiso
++    service: Servicio
++    type: Tipo
++    create: Creado
++    email: Correo electrónico
++    phone: Teléfono
++    role: Rol
++    policy: Política
++    status: Estado
++    country: País
++    address: Dirección
++    city: Ciudad
++    state: Estado / Provincia
++    zip: Código Postal
++    all: Todos
++    edit: Editar
++    cancel: Cancelar
++    delete: Eliminar
++    save: Guardar
++    new: Nuevo
++    export: Exportar
++    photo: Foto
++    primary: Principal
++    reload: Recargar
++    reload-data: Recargar datos
++    bulk-action: Acción masiva
++    attach-policies: Adjuntar políticas
++    attach-permissions: Adjuntar permisos
++    attach-inline-permissions: Adjuntar permisos en línea
++    select-permissions: Seleccionar permisos
++    select-policy: Seleccionar política...
++  components:
++    widget:
++      metrics:
++        title: Monitoreo de IAM
++    modals:
++      group-details:
++        group-name: Nombre del grupo
++      group-form:
++        group-name: Nombre del grupo
++        group-description: Descripción del grupo
++        select-users-add-group: Seleccionar usuarios para agregar al grupo
++        search-select-users-add-group: Busca y selecciona usuarios para agregarlos a este grupo
++        select-user-add-group: Seleccionar usuario para agregar...
++        no-user-add-group: Aún no se han agregado usuarios a este grupo
++      policy-form:
++        policy-name: Nombre de la política
++        enter-name-your-policy: Ingresa un nombre para tu política
++        policy-description: Descripción de la política
++        enter-description-your-policy: Ingresa una descripción para tu política
++        select-permissions: Seleccionar permisos
++      view-policy-permissions:
++        view-permissions: "Política: Permisos de {policyName}"
++      view-role-permissions:
++        view-permissions: "Rol: Permisos de {roleName}"
++      view-user-permissions:
++        view-permissions: "Usuario: Permisos de {userName}"
++      change-user-email:
++        title: Cambiar correo del usuario
++        heading: Cambiar correo para {userName}
++        prompt: Ingresa la nueva dirección de correo electrónico. El usuario deberá verificar la nueva dirección antes de que sea su correo de acceso.
++        current-email: Correo actual
++        new-email: Nuevo correo
++        send-verification: Enviar verificación
++        email-required: Se requiere una nueva dirección de correo electrónico.
++        verification-sent: Verificación de cambio de correo enviada. El usuario debe confirmar la nueva dirección antes de que cambie su correo de acceso.
++      role-form:
++        role-name: Nombre del rol
++        enter-name-for-this-role: Ingresa un nombre para este rol
++        role-description: Descripción del rol
++        enter-description-your-role: Ingresa una descripción para tu rol
++        select-permission: Seleccionar permisos
++    table:
++      group-members:
++        no-member: Sin miembros
++    permission-picker:
++      selected: "Seleccionado: "
++      search-permissions-keyword: Buscar permisos por palabras clave
++      loading-permission: Cargando permisos...
++  groups:
++    index:
++      untitled: Sin título
++      delete-group-title: Eliminar grupo {groupName}
++      delete-group-success-message: Grupo {name} eliminado.
++      delete-group: Eliminar grupos
++      delete-groups: Eliminar grupos
++      created: Creado
++      edit-group: Editar grupo...
++      delete-group-label: Eliminar grupo...
++      new-group: Nuevo grupo
++      new-group-created: Nuevo grupo creado.
++      edit-group-title: Editar grupo
++      group-actions: Acciones del grupo
++      changes-group-save: Cambios en el grupo guardados.
++      data-assosciated-this-group-deleted: ¿Estás seguro de que deseas eliminar este grupo? Todos los datos asociados con este grupo también serán eliminados. Esta acción no se puede deshacer.
++  policies:
++    index:
++      title: Políticas
++      delete-policies: Eliminar políticas
++      contact-action: Acciones de contacto
++      edit-policy: Editar política...
++      delete-policy: Eliminar política...
++      new-policy: Nueva política
++      new-policy-created: Nueva política creada.
++      unable-changes-policy-warning: No se pueden realizar cambios en una política {policyType}.
++      edit-policy-title: Editar política
++      policy-actions: Acciones de política
++      changes-policy-saved-success: Cambios en la política guardados.
++      unable-delete-policy-warning: No se puede eliminar una política {policyType}.
++      data-assosciated-this-policy-deleted: ¿Estás seguro de que deseas eliminar esta política? Todos los datos asociados con esta política también serán eliminados. Esta acción no se puede deshacer.
++      policy-deleted: Política {policyName} eliminada.
++  roles:
++    index:
++      delete-roles: Eliminar roles
++      contact-action: Acciones de contacto
++      edit-role: Editar rol...
++      delete-role: Eliminar rol...
++      new-role: Nuevo rol
++      new-role-create: Nuevo rol creado
++      edit-role-title: Editar rol
++      role-actions: Acciones del rol
++      changes-role-saved: Cambios en el rol guardados.
++      data-assosciated-this-role-deleted: ¿Estás seguro de que deseas eliminar este rol? Todos los datos asociados con este rol también serán eliminados. Esta acción no se puede deshacer.
++      role-deleted: Rol {roleName} eliminado.
++      unable-changes-role-warning: No se pueden realizar cambios en un rol {roleType}.
++      unable-delete-role-warning: No se puede eliminar un rol {roleType}.
++  users:
++    index:
++      delete-user-title: Eliminar usuario {userName}
++      delete-user-success-message: Usuario {userName} eliminado.
++      deactivate-user-title: Desactivar la cuenta del usuario {userName}
++      deactivate-user-success-message: Usuario {userName} desactivado.
++      re-activate-user-title: Reactivar la cuenta del usuario {userName}
++      re-activate-user-success-message: Usuario {userName} activado.
++      verify-user-title: Verificar manualmente la cuenta del usuario {userName}
++      verify-user-manually-prompt: Al hacer clic en confirmar, esta acción verificará manualmente la dirección de correo electrónico del usuario. ¿Estás seguro de que deseas omitir la verificación para este usuario?
++      user-verified-success-message: Usuario {userName} verificado.
++      mark-verified-title: Marcar {channel} de {userName} como verificado
++      mark-verified-prompt: Esto marcará el {channel} del usuario como verificado sin requerir su confirmación. ¿Estás seguro?
++      send-verification-title: Enviar verificación de {channel}
++      send-verification-prompt: "{userName} recibirá un enlace en {destination} para confirmarlo. El enlace expira en 48 horas."
++      send-verification: Enviar verificación
++      verification-sent: Enlace de verificación enviado a {destination}.
++      channel-email: correo electrónico
++      channel-phone: número de teléfono
++      send-email-verification: Enviar verificación por correo...
++      send-phone-verification: Enviar verificación por teléfono...
++      mark-email-verified: Marcar correo como verificado...
++      mark-phone-verified: Marcar teléfono como verificado...
++      email-verified: Correo verificado
++      phone-verified: Teléfono verificado
++      verified: Verificado
++      unverified: Sin verificar
++      timezone: Zona horaria
++      date-of-birth: Fecha de nacimiento
++      ip-address: Dirección IP
++      new-user-created: Nuevo usuario agregado a la organización.
++      invite-user: Invitar usuario
++      delete-users: Eliminar usuarios
++      last-login: Último acceso
++      created-at: Creado el
++      updated-at: Actualizado el
++      user-actions: Acciones del usuario
++      edit-user: Editar usuario...
++      view-user-permissions: Ver permisos...
++      re-send-invitation: Reenviar invitación...
++      deactivate-user: Desactivar usuario...
++      activate-user: Activar usuario...
++      delete-user: Eliminar usuario...
++      verify-user: Verificar usuario...
++      change-user-password: Cambiar contraseña del usuario...
++      change-user-email: Cambiar correo del usuario...
++      new-user: Nuevo usuario
++      user-invited-join-your-organization-success: El usuario ha sido invitado a unirse a tu organización.
++      edit-user-title: Editar usuario
++      user-changes-saved-success: Cambios del usuario guardados.
++      error-you-cant-delete-yourself: No puedes eliminarte a ti mismo
++      data-assosciated-user-delete: ¿Estás seguro de que deseas eliminar este usuario? Todos los datos asociados con este usuario también serán eliminados. Esta acción no se puede deshacer.
++      access-account-or-resources-unless-re-activated: ¿Estás seguro de que deseas desactivar este usuario? Este usuario ya no podrá acceder a su cuenta ni a los recursos a menos que sea reactivado.
++      this-user-will-regain-access-to-your-organization: ¿Estás seguro de que deseas reactivar a este usuario? Este usuario recuperará el acceso a tu organización.
++      resend-invitation-to-join-organization: Reenviar invitación para unirse a la organización
++      confirming-fleetbase-will-re-send-invitation-for-user-to-join-your-organization: Al confirmar, se reenviará la invitación para que este usuario se una a tu organización.
++      invitation-resent: Invitación reenviada.
++    invite:
++      title: Invitar usuario
++      description: Ingresa el correo electrónico de la persona que deseas invitar. Si ya tiene una cuenta en la plataforma, recibirá una invitación para unirse a tu organización. Si es un usuario nuevo, se creará una cuenta pendiente y se le pedirá definir una contraseña al aceptar.
++      email-placeholder: colega@ejemplo.com
++      name-placeholder: Nombre completo (requerido para nuevos usuarios)
++      name-help: Requerido únicamente si la persona aún no tiene una cuenta en la plataforma.
++      send-invitation: Enviar invitación
++      email-required: Por favor ingresa un correo electrónico.
++      invitation-sent-existing: Invitación enviada. El usuario recibirá un correo para unirse a tu organización.
++      invitation-sent-new: Invitación enviada. Se ha creado una cuenta pendiente y se le solicitará definir una contraseña.
++    role-required: Selecciona un rol para este usuario.
++    notifications:
++      promoted-existing-account: La cuenta existente de {type} para {name} fue promovida a miembro del equipo.
++  application:
++    access-management: Gestión de acceso
++  home:
++    identity-access-management: Gestión de identidad y acceso
