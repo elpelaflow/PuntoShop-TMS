@@ -1,6 +1,7 @@
 import Model, { attr, hasMany } from '@ember-data/model';
 import { computed } from '@ember/object';
 import { format, formatDistanceToNow } from 'date-fns';
+import { getOwner } from '@ember/application';
 
 export default class PolicyModel extends Model {
     /** @ids */
@@ -28,6 +29,42 @@ export default class PolicyModel extends Model {
     }
 
     /** @computed */
+    get displayName() {
+        if (!this.name) {
+            return '';
+        }
+        try {
+            const intl = getOwner(this)?.lookup('service:intl');
+            if (intl) {
+                const key = `iam.policies.defaults.${this.name.toLowerCase().replace(/[^a-z0-9]+/g, '')}.name`;
+                if (intl.exists(key)) {
+                    return intl.t(key);
+                }
+            }
+        } catch (e) {
+            // fallback
+        }
+        return this.name;
+    }
+
+    get displayDescription() {
+        if (!this.description && !this.name) {
+            return '';
+        }
+        try {
+            const intl = getOwner(this)?.lookup('service:intl');
+            if (intl && this.name) {
+                const key = `iam.policies.defaults.${this.name.toLowerCase().replace(/[^a-z0-9]+/g, '')}.description`;
+                if (intl.exists(key)) {
+                    return intl.t(key);
+                }
+            }
+        } catch (e) {
+            // fallback
+        }
+        return this.description || '';
+    }
+
     @computed('permissions') get permissionsArray() {
         return this.permissions.toArray();
     }

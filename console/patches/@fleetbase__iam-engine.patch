@@ -305,11 +305,60 @@ index 361216b..b46915d 100644
                  icon: 'shield',
                  route: 'console.iam.policies',
                  permission: 'iam list policy',
+diff --git a/addon/controllers/policies/index.js b/addon/controllers/policies/index.js
+index a70e902..af8b52d 100644
+--- a/addon/controllers/policies/index.js
++++ b/addon/controllers/policies/index.js
+@@ -114,7 +114,7 @@ export default class PoliciesIndexController extends Controller {
+         {
+             id: 'name',
+             label: this.intl.t('iam.common.name'),
+-            valuePath: 'name',
++            valuePath: 'displayName',
+             cellComponent: 'table/cell/anchor',
+             permission: 'iam view policy',
+             onClick: this.editPolicy,
+@@ -124,7 +124,7 @@ export default class PoliciesIndexController extends Controller {
+         {
+             id: 'description',
+             label: this.intl.t('iam.common.description'),
+-            valuePath: 'description',
++            valuePath: 'displayDescription',
+             sortable: false,
+             width: '35%',
+         },
+diff --git a/addon/controllers/roles/index.js b/addon/controllers/roles/index.js
+index 212313d..f778ebe 100644
+--- a/addon/controllers/roles/index.js
++++ b/addon/controllers/roles/index.js
+@@ -114,7 +114,7 @@ export default class RolesIndexController extends Controller {
+         {
+             id: 'name',
+             label: this.intl.t('iam.common.name'),
+-            valuePath: 'name',
++            valuePath: 'displayName',
+             cellComponent: 'table/cell/anchor',
+             permission: 'iam view role',
+             onClick: this.editRole,
+@@ -124,7 +124,7 @@ export default class RolesIndexController extends Controller {
+         {
+             id: 'description',
+             label: this.intl.t('iam.common.description'),
+-            valuePath: 'description',
++            valuePath: 'displayDescription',
+             sortable: false,
+             width: '28%',
+         },
 diff --git a/addon/controllers/users/index.js b/addon/controllers/users/index.js
-index e75e060..6605d7e 100644
+index e75e060..aaac96c 100644
 --- a/addon/controllers/users/index.js
 +++ b/addon/controllers/users/index.js
-@@ -152,7 +152,7 @@ export default class UsersIndexController extends Controller {
+@@ -148,11 +148,11 @@ export default class UsersIndexController extends Controller {
+         {
+             id: 'role-name',
+             label: this.intl.t('iam.common.role'),
+-            valuePath: 'role.name',
++            valuePath: 'role.displayName',
              sortable: false,
              filterable: true,
              filterComponent: 'filter/model',
@@ -617,10 +666,10 @@ index ed0c565..a421974 100644
          @rightHeaderWrapperClass="iam-dashboard-actions"
 diff --git a/translations/es-mx.yaml b/translations/es-mx.yaml
 new file mode 100644
-index 0000000..b2fb15b
+index 0000000..754f413
 --- /dev/null
 +++ b/translations/es-mx.yaml
-@@ -0,0 +1,211 @@
+@@ -0,0 +1,485 @@
 +iam:
 +  extension-name: Gestión de Acceso (IAM)
 +  common:
@@ -692,12 +741,14 @@ index 0000000..b2fb15b
 +      change-user-email:
 +        title: Cambiar correo del usuario
 +        heading: Cambiar correo para {userName}
-+        prompt: Ingresa la nueva dirección de correo electrónico. El usuario deberá verificar la nueva dirección antes de que sea su correo de acceso.
++        prompt: Ingresa la nueva dirección de correo electrónico. El usuario deberá
++          verificar la nueva dirección antes de que sea su correo de acceso.
 +        current-email: Correo actual
 +        new-email: Nuevo correo
 +        send-verification: Enviar verificación
 +        email-required: Se requiere una nueva dirección de correo electrónico.
-+        verification-sent: Verificación de cambio de correo enviada. El usuario debe confirmar la nueva dirección antes de que cambie su correo de acceso.
++        verification-sent: Verificación de cambio de correo enviada. El usuario debe
++          confirmar la nueva dirección antes de que cambie su correo de acceso.
 +      role-form:
 +        role-name: Nombre del rol
 +        enter-name-for-this-role: Ingresa un nombre para este rol
@@ -726,7 +777,9 @@ index 0000000..b2fb15b
 +      edit-group-title: Editar grupo
 +      group-actions: Acciones del grupo
 +      changes-group-save: Cambios en el grupo guardados.
-+      data-assosciated-this-group-deleted: ¿Estás seguro de que deseas eliminar este grupo? Todos los datos asociados con este grupo también serán eliminados. Esta acción no se puede deshacer.
++      data-assosciated-this-group-deleted: ¿Estás seguro de que deseas eliminar este
++        grupo? Todos los datos asociados con este grupo también serán
++        eliminados. Esta acción no se puede deshacer.
 +  policies:
 +    index:
 +      title: Políticas
@@ -741,8 +794,159 @@ index 0000000..b2fb15b
 +      policy-actions: Acciones de política
 +      changes-policy-saved-success: Cambios en la política guardados.
 +      unable-delete-policy-warning: No se puede eliminar una política {policyType}.
-+      data-assosciated-this-policy-deleted: ¿Estás seguro de que deseas eliminar esta política? Todos los datos asociados con esta política también serán eliminados. Esta acción no se puede deshacer.
++      data-assosciated-this-policy-deleted: ¿Estás seguro de que deseas eliminar esta
++        política? Todos los datos asociados con esta política también serán
++        eliminados. Esta acción no se puede deshacer.
 +      policy-deleted: Política {policyName} eliminada.
++    defaults:
++      administratoraccess:
++        name: Acceso de administrador
++        description: Política de acceso total a todos los recursos y extensiones de la
++          plataforma.
++      fleetopsfullaccess:
++        name: Acceso total a FleetOps
++        description: Política de acceso completo al sistema de gestión de transporte y
++          logística.
++      fleetopsreadonly:
++        name: Solo lectura en FleetOps
++        description: Política de solo lectura para consulta de operaciones de transporte.
++      dispatchmanager:
++        name: Gestor de despacho
++        description: Política para despachar y gestionar órdenes de transporte.
++      fleetmanager:
++        name: Gestor de flota
++        description: Política para gestionar vehículos, conductores y flotas.
++      usermanager:
++        name: Gestor de usuarios
++        description: Política para administrar usuarios, roles y grupos.
++      iamfullaccess:
++        name: Acceso total a IAM
++        description: Política de control total sobre identidades, accesos y permisos.
++      iamreadonly:
++        name: Solo lectura en IAM
++        description: Política de solo lectura para consulta de usuarios, grupos y políticas.
++      ordermanager:
++        name: Gestor de órdenes
++        description: Política para la creación y gestión integral de órdenes de servicio.
++      ordercoordinator:
++        name: Coordinador de órdenes
++        description: Política para coordinar y dar seguimiento a órdenes sin facultades
++          de despacho total.
++      maintenancemanager:
++        name: Gestor de mantenimiento
++        description: Política para administrar registros de mantenimiento, órdenes de
++          trabajo, refacciones y equipos.
++      driveroperations:
++        name: Operaciones de conductores
++        description: Política para que los conductores gestionen sus viajes y tareas
++          asignadas.
++      customerservice:
++        name: Atención a clientes
++        description: Política para brindar asistencia y soporte a clientes.
++      policymanager:
++        name: Gestor de directivas
++        description: Política para crear y modificar directivas de acceso y asignaciones.
++      developersfullaccess:
++        name: Acceso total a Developers
++        description: Política con acceso completo a las herramientas y recursos de
++          desarrollo.
++      developersreadonly:
++        name: Solo lectura en Developers
++        description: Política de solo lectura para credenciales, registros y webhooks de
++          desarrollo.
++      flbdeveloper:
++        name: Desarrollador Fleetbase
++        description: Política para generar credenciales de API, webhooks y monitorear
++          logs en tiempo real.
++      flbdevprojectmanager:
++        name: Gestor de proyectos de desarrollo
++        description: Política de consulta y lectura sobre recursos técnicos de desarrollo.
++      ledgerfullaccess:
++        name: Acceso total a Ledger
++        description: Política de acceso total al módulo financiero y contable.
++      ledgerreadonly:
++        name: Solo lectura en Ledger
++        description: Política de solo lectura sobre estados financieros, facturación y
++          pagos.
++      ledgersettingsmanager:
++        name: Gestor de configuración de Ledger
++        description: Política para configurar parámetros contables, de facturación y cobro.
++      accountingmanager:
++        name: Gestor contable
++        description: Política para gestionar el catálogo de cuentas y pólizas del libro
++          mayor.
++      financialreporter:
++        name: Reportes financieros
++        description: Política para consultar estados financieros y tableros contables.
++      invoicemanager:
++        name: Gestor de facturas
++        description: Política para generar, timbrar y gestionar facturas y plantillas
++          fiscales.
++      paymentsmanager:
++        name: Gestor de pagos
++        description: Política para administrar pasarelas de pago, cobros, reembolsos y
++          transacciones.
++      walletmanager:
++        name: Gestor de billeteras
++        description: Política para administrar billeteras electrónicas, recargas,
++          transferencias y retiros.
++      operationsadmin:
++        name: Administrador de operaciones
++        description: Política para monitorear actividades, incidencias y consumo de
++          combustible de la flota.
++      serviceareamanager:
++        name: Gestor de zonas de servicio
++        description: Política para delimitar y administrar zonas geográficas de
++          cobertura operativa.
++      serviceratemanager:
++        name: Gestor de tarifas
++        description: Política para administrar tarifas operativas e importación de
++          listas de precios.
++      navigatorsettingsmanager:
++        name: Gestor de Navigator
++        description: Política para configurar preferencias de la app móvil Navigator de
++          conductores.
++      telematicssettingsmanager:
++        name: Gestor de telemática
++        description: Política para administrar preferencias y retención de historial de
++          telemetría.
++      extensionmanager:
++        name: Gestor de extensiones
++        description: Política para la administración completa de extensiones de la
++          plataforma.
++      extensiondeveloper:
++        name: Desarrollador de extensiones
++        description: Política para crear y publicar extensiones.
++      extensionfinance:
++        name: Finanzas de extensiones
++        description: Política para gestionar finanzas y contabilidad de extensiones.
++      extensionmarketing:
++        name: Mercadotecnia de extensiones
++        description: Política para análisis y métricas comerciales de extensiones.
++      extensionsales:
++        name: Ventas de extensiones
++        description: Política para reportes de ventas y licenciamiento de extensiones.
++      inventorymanager:
++        name: Gestor de inventario
++        description: Política para administrar productos, categorías y existencias.
++      marketplacemanager:
++        name: Gestor de Marketplace
++        description: Política para administrar redes y comercios afiliados.
++      promotionsmanager:
++        name: Gestor de promociones
++        description: Política para administrar campañas, descuentos y códigos promocionales.
++      storefrontfullaccess:
++        name: Acceso total a Storefront
++        description: Política de acceso total a canales comerciales.
++      storefrontreadonly:
++        name: Solo lectura en Storefront
++        description: Política de solo lectura para recursos comerciales.
++      registrybridgefullaccess:
++        name: Acceso total a RegistryBridge
++        description: Política de acceso total al puente de registro.
++      registrybridgereadonly:
++        name: Solo lectura en RegistryBridge
++        description: Política de solo lectura al puente de registro.
 +  roles:
 +    index:
 +      delete-roles: Eliminar roles
@@ -754,10 +958,110 @@ index 0000000..b2fb15b
 +      edit-role-title: Editar rol
 +      role-actions: Acciones del rol
 +      changes-role-saved: Cambios en el rol guardados.
-+      data-assosciated-this-role-deleted: ¿Estás seguro de que deseas eliminar este rol? Todos los datos asociados con este rol también serán eliminados. Esta acción no se puede deshacer.
++      data-assosciated-this-role-deleted: ¿Estás seguro de que deseas eliminar este
++        rol? Todos los datos asociados con este rol también serán eliminados.
++        Esta acción no se puede deshacer.
 +      role-deleted: Rol {roleName} eliminado.
 +      unable-changes-role-warning: No se pueden realizar cambios en un rol {roleType}.
 +      unable-delete-role-warning: No se puede eliminar un rol {roleType}.
++    defaults:
++      accountant:
++        name: Contador
++        description: Rol para contadores que gestionan el catálogo de cuentas, pólizas
++          contables y reportes financieros.
++      administrator:
++        name: Administrador
++        description: Rol con acceso total de administración para una organización.
++      billing-specialist:
++        name: Especialista en facturación
++        description: Rol para personal responsable de crear y gestionar facturas y dar
++          seguimiento a cobranzas.
++      customer-service:
++        name: Atención a clientes
++        description: Rol para brindar soporte y atención a clientes.
++      driver:
++        name: Conductor
++        description: Rol para conductores con el acceso necesario para gestionar sus
++          tareas diarias, órdenes y asignación de vehículos.
++      driver-coordinator:
++        name: Coordinador de conductores
++        description: Rol responsable de coordinar conductores, vehículos y órdenes.
++      extension-admin:
++        name: Administrador de extensiones
++        description: Rol con control total sobre las extensiones del sistema.
++      extension-auditor:
++        name: Auditor de extensiones
++        description: Rol para auditar y generar reportes sobre las extensiones.
++      extension-developer:
++        name: Desarrollador de extensiones
++        description: Rol para desarrollar y publicar extensiones.
++      finance-viewer:
++        name: Visualizador de finanzas
++        description: Rol de solo lectura para consultar datos financieros sin permisos
++          de modificación.
++      fleet-supervisor:
++        name: Supervisor de flota
++        description: Rol enfocado en la supervisión operativa de vehículos y conductores.
++      fleet-ops-contact:
++        name: Contacto de Fleet-Ops
++        description: Rol para contactos del sistema operativo.
++      fleet-ops-customer:
++        name: Cliente de Fleet-Ops
++        description: Rol para clientes con acceso para dar seguimiento a sus órdenes de
++          transporte.
++      fleetbase-developer:
++        name: Desarrollador de Fleetbase
++        description: Rol para desarrolladores para crear credenciales de API, webhooks y
++          consultar eventos y registros.
++      iam-administrator:
++        name: Administrador de IAM
++        description: Rol para gestionar usuarios, roles, grupos y políticas de acceso.
++      iam-policy-manager:
++        name: Gestor de políticas de IAM
++        description: Rol para gestionar la definición y asignación de políticas de acceso.
++      iam-user-manager:
++        name: Gestor de usuarios de IAM
++        description: Rol para gestionar cuentas de usuario, accesos e invitaciones.
++      inventory-manager:
++        name: Gestor de inventario
++        description: Rol para gestionar productos y existencias.
++      ledger-administrator:
++        name: Administrador de Ledger
++        description: Acceso administrativo total a facturación, pagos, contabilidad y
++          configuración financiera.
++      maintenance-technician:
++        name: Técnico de mantenimiento
++        description: Rol para técnicos responsables de órdenes de trabajo, equipos y
++          refacciones de la flota.
++      navigator-app-manager:
++        name: Gestor de Navigator
++        description: Rol responsable de configurar la aplicación móvil de navegación de
++          conductores.
++      operations-administrator:
++        name: Administrador de operaciones
++        description: Rol con acceso administrativo completo a todos los aspectos
++          operativos de transporte.
++      operations-manager:
++        name: Gerente de operaciones
++        description: Rol responsable de supervisar la operación logística, despacho y
++          coordinación de flota.
++      payments-operator:
++        name: Operador de pagos
++        description: Rol para procesar pagos, gestionar pasarelas y operaciones de
++          billetera.
++      quality-assurance:
++        name: Control de calidad
++        description: Rol para pruebas y validación de extensiones.
++      service-coordinator:
++        name: Coordinador de servicios
++        description: Rol dedicado a la gestión de tarifas de servicio y zonas de cobertura.
++      storefront-administrator:
++        name: Administrador de Storefront
++        description: Rol para la gestión de recursos comerciales.
++      telematics-settings-manager:
++        name: Gestor de telemática
++        description: Rol responsable de administrar las preferencias e historial de
++          telemetría de la flota.
 +  users:
 +    index:
 +      delete-user-title: Eliminar usuario {userName}
@@ -767,12 +1071,16 @@ index 0000000..b2fb15b
 +      re-activate-user-title: Reactivar la cuenta del usuario {userName}
 +      re-activate-user-success-message: Usuario {userName} activado.
 +      verify-user-title: Verificar manualmente la cuenta del usuario {userName}
-+      verify-user-manually-prompt: Al hacer clic en confirmar, esta acción verificará manualmente la dirección de correo electrónico del usuario. ¿Estás seguro de que deseas omitir la verificación para este usuario?
++      verify-user-manually-prompt: Al hacer clic en confirmar, esta acción verificará
++        manualmente la dirección de correo electrónico del usuario. ¿Estás
++        seguro de que deseas omitir la verificación para este usuario?
 +      user-verified-success-message: Usuario {userName} verificado.
 +      mark-verified-title: Marcar {channel} de {userName} como verificado
-+      mark-verified-prompt: Esto marcará el {channel} del usuario como verificado sin requerir su confirmación. ¿Estás seguro?
++      mark-verified-prompt: Esto marcará el {channel} del usuario como verificado sin
++        requerir su confirmación. ¿Estás seguro?
 +      send-verification-title: Enviar verificación de {channel}
-+      send-verification-prompt: "{userName} recibirá un enlace en {destination} para confirmarlo. El enlace expira en 48 horas."
++      send-verification-prompt: "{userName} recibirá un enlace en {destination} para
++        confirmarlo. El enlace expira en 48 horas."
 +      send-verification: Enviar verificación
 +      verification-sent: Enlace de verificación enviado a {destination}.
 +      channel-email: correo electrónico
@@ -809,25 +1117,40 @@ index 0000000..b2fb15b
 +      edit-user-title: Editar usuario
 +      user-changes-saved-success: Cambios del usuario guardados.
 +      error-you-cant-delete-yourself: No puedes eliminarte a ti mismo
-+      data-assosciated-user-delete: ¿Estás seguro de que deseas eliminar este usuario? Todos los datos asociados con este usuario también serán eliminados. Esta acción no se puede deshacer.
-+      access-account-or-resources-unless-re-activated: ¿Estás seguro de que deseas desactivar este usuario? Este usuario ya no podrá acceder a su cuenta ni a los recursos a menos que sea reactivado.
-+      this-user-will-regain-access-to-your-organization: ¿Estás seguro de que deseas reactivar a este usuario? Este usuario recuperará el acceso a tu organización.
++      data-assosciated-user-delete: ¿Estás seguro de que deseas eliminar este usuario?
++        Todos los datos asociados con este usuario también serán eliminados.
++        Esta acción no se puede deshacer.
++      access-account-or-resources-unless-re-activated: ¿Estás seguro de que deseas
++        desactivar este usuario? Este usuario ya no podrá acceder a su cuenta ni
++        a los recursos a menos que sea reactivado.
++      this-user-will-regain-access-to-your-organization: ¿Estás seguro de que deseas
++        reactivar a este usuario? Este usuario recuperará el acceso a tu
++        organización.
 +      resend-invitation-to-join-organization: Reenviar invitación para unirse a la organización
-+      confirming-fleetbase-will-re-send-invitation-for-user-to-join-your-organization: Al confirmar, se reenviará la invitación para que este usuario se una a tu organización.
++      confirming-fleetbase-will-re-send-invitation-for-user-to-join-your-organization:
++        Al confirmar, se reenviará la invitación para que este usuario se una a
++        tu organización.
 +      invitation-resent: Invitación reenviada.
 +    invite:
 +      title: Invitar usuario
-+      description: Ingresa el correo electrónico de la persona que deseas invitar. Si ya tiene una cuenta en la plataforma, recibirá una invitación para unirse a tu organización. Si es un usuario nuevo, se creará una cuenta pendiente y se le pedirá definir una contraseña al aceptar.
++      description: Ingresa el correo electrónico de la persona que deseas invitar. Si
++        ya tiene una cuenta en la plataforma, recibirá una invitación para
++        unirse a tu organización. Si es un usuario nuevo, se creará una cuenta
++        pendiente y se le pedirá definir una contraseña al aceptar.
 +      email-placeholder: colega@ejemplo.com
 +      name-placeholder: Nombre completo (requerido para nuevos usuarios)
-+      name-help: Requerido únicamente si la persona aún no tiene una cuenta en la plataforma.
++      name-help: Requerido únicamente si la persona aún no tiene una cuenta en la
++        plataforma.
 +      send-invitation: Enviar invitación
 +      email-required: Por favor ingresa un correo electrónico.
-+      invitation-sent-existing: Invitación enviada. El usuario recibirá un correo para unirse a tu organización.
-+      invitation-sent-new: Invitación enviada. Se ha creado una cuenta pendiente y se le solicitará definir una contraseña.
++      invitation-sent-existing: Invitación enviada. El usuario recibirá un correo para
++        unirse a tu organización.
++      invitation-sent-new: Invitación enviada. Se ha creado una cuenta pendiente y se
++        le solicitará definir una contraseña.
 +    role-required: Selecciona un rol para este usuario.
 +    notifications:
-+      promoted-existing-account: La cuenta existente de {type} para {name} fue promovida a miembro del equipo.
++      promoted-existing-account: La cuenta existente de {type} para {name} fue
++        promovida a miembro del equipo.
 +  application:
 +    access-management: Gestión de acceso
 +  home:
