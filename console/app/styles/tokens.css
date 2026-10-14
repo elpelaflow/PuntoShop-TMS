@@ -133,3 +133,113 @@
     --state-info-text: #7dd3fc;
     --state-info-border: #0c4a6e;
 }
+
+/* ==========================================================
+   PALETA PUNTOSHOP (Rojo Carmesí / Neutro Puro)
+   Activada mediante [data-palette="puntoshop"] en <html> o <body>
+   ========================================================== */
+
+/* PuntoShop - Modo Claro */
+:root[data-palette='puntoshop'],
+[data-palette='puntoshop'],
+[data-palette='puntoshop'][data-theme='light'],
+[data-palette='puntoshop'] body:not([data-theme='dark']):not(.dark),
+body[data-palette='puntoshop']:not([data-theme='dark']):not(.dark) {
+    /* Superficies y Fondos */
+    --bg-canvas: #fafafa;
+    --bg-surface: #ffffff;
+    --bg-surface-subtle: #f0f0f0;
+    --bg-overlay: #ffffff;
+
+    /* Textos */
+    --text-primary: #0f0f0f;
+    --text-secondary: #555555;
+    --text-muted: #8c8c8c;
+    --text-inverse: #ffffff;
+
+    /* Bordes */
+    --border-default: #e5e5e5;
+    --border-subtle: #f0f0f0;
+    --border-strong: #a3a3a3;
+
+    /* Marca / Brand */
+    --brand-default: #d61c22;
+    --brand-hover: #b21419;
+    --brand-subtle: rgb(214 28 34 / 8%);
+    --brand-text: #ffffff;
+
+    /* Estados y Retroalimentación: Éxito */
+    --state-success-bg: #ecfdf5;
+    --state-success-text: #047857;
+    --state-success-border: #a7f3d0;
+
+    /* Estados y Retroalimentación: Advertencia */
+    --state-warning-bg: #fffbeb;
+    --state-warning-text: #92400e;
+    --state-warning-border: #fde68a;
+
+    /* Estados y Retroalimentación: Peligro */
+    --state-danger-bg: #fef2f2;
+    --state-danger-text: #b91c1c;
+    --state-danger-border: #fecaca;
+
+    /* Estados y Retroalimentación: Información */
+    --state-info-bg: #f0f9ff;
+    --state-info-text: #0369a1;
+    --state-info-border: #bae6fd;
+}
+
+/* PuntoShop - Modo Oscuro */
+:root[data-palette='puntoshop'][data-theme='dark'],
+:root[data-palette='puntoshop'] [data-theme='dark'],
+:root[data-palette='puntoshop'] .dark,
+[data-palette='puntoshop'][data-theme='dark'],
+[data-palette='puntoshop'].dark,
+[data-palette='puntoshop'] [data-theme='dark'],
+[data-palette='puntoshop'] .dark,
+body[data-palette='puntoshop'][data-theme='dark'],
+body[data-palette='puntoshop'].dark {
+    /* Superficies y Fondos */
+    --bg-canvas: #0f0f0f;
+    --bg-surface: #1a1a1a;
+    --bg-surface-subtle: #262626;
+    --bg-overlay: #1a1a1a;
+
+    /* Textos */
+    --text-primary: #fafafa;
+    --text-secondary: #b0b0b0;
+    --text-muted: #707070;
+    --text-inverse: #0f0f0f;
+
+    /* Bordes */
+    --border-default: #2e2e2e;
+    --border-subtle: #1f1f1f;
+    --border-strong: #404040;
+
+    /* Marca / Brand */
+    --brand-default: #d61c22;
+    --brand-hover: #e53935;
+    --brand-subtle: rgb(214 28 34 / 20%);
+    --brand-text: #ffffff;
+
+    /* Estados y Retroalimentación: Éxito */
+    --state-success-bg: rgb(6 78 59 / 40%);
+    --state-success-text: #6ee7b7;
+    --state-success-border: #065f46;
+
+    /* Estados y Retroalimentación: Advertencia */
+    --state-warning-bg: rgb(120 53 15 / 40%);
+    --state-warning-text: #fcd34d;
+    --state-warning-border: #78350f;
+
+    /* Estados y Retroalimentación: Peligro */
+    --state-danger-bg: rgb(153 27 27 / 35%);
+    --state-danger-text: #fca5a5;
+    --state-danger-border: #7f1d1d;
+
+    /* Estados y Retroalimentación: Información */
+    --state-info-bg: rgb(12 74 110 / 40%);
+    --state-info-text: #7dd3fc;
+    --state-info-border: #0c4a6e;
+}
+
