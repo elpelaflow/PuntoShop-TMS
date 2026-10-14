@@ -39,3 +39,7 @@ builds/osx/frankenphp
 *.dll
 *.so
 *.dylib
+
+# Helm secrets
+infra/helm/secrets.env
+infra/helm/*.txt

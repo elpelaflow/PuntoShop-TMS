@@ -46,14 +46,7 @@ export default class DocsPanelComponent extends Component {
         const href = link.getAttribute('href');
         if (!href) return;
 
-        // External link
-        if (/^https?:\/\//i.test(href)) {
-            link.setAttribute('target', '_blank');
-            link.setAttribute('rel', 'noopener noreferrer');
-            return;
-        }
-
-        // Anchor link within the document
+        // Anchor link within current document
         if (href.startsWith('#')) {
             const id = href.slice(1);
             const target = document.getElementById(id);
@@ -64,8 +57,34 @@ export default class DocsPanelComponent extends Component {
             return;
         }
 
-        // Internal docs link: load in panel
-        event.preventDefault();
-        this.docsPanel.open(href);
+        // Ignore mailto / tel links
+        if (/^(mailto|tel):/i.test(href)) {
+            return;
+        }
+
+        // Intercept any fleetbase.io/docs URLs and route locally
+        const fleetbaseDocsMatch = href.match(/^https?:\/\/(?:www\.)?fleetbase\.io\/docs(?:\/(.*))?$/i);
+        if (fleetbaseDocsMatch) {
+            event.preventDefault();
+            const rawSlug = fleetbaseDocsMatch[1] || 'index';
+            this.docsPanel.open(rawSlug);
+            return;
+        }
+
+        // Intercept relative / internal doc paths (/docs/..., docs/..., or relative .md)
+        const isInternalDoc =
+            href.startsWith('/docs') ||
+            href.startsWith('docs/') ||
+            !/^https?:\/\//i.test(href);
+
+        if (isInternalDoc) {
+            event.preventDefault();
+            this.docsPanel.open(href);
+            return;
+        }
+
+        // Truly external link: open in new tab
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
     }
 }

@@ -17,6 +17,8 @@ class DocsController extends Controller
     public function getDoc(Request $request, ?string $slug = null): JsonResponse
     {
         $slug = trim($slug ?? '', '/');
+        // Strip file extensions (.md, .html)
+        $slug = preg_replace('/\.(md|html)$/i', '', $slug);
         if (empty($slug)) {
             $slug = 'index';
         }

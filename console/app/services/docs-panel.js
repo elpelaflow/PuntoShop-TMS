@@ -146,6 +146,10 @@ export default class DocsPanelService extends Service {
         s = s.replace(/^\/?docs\/?/i, '');
         // Remove query parameters or hash
         s = s.split('?')[0].split('#')[0];
+        // Strip file extensions (.md, .html)
+        s = s.replace(/\.(md|html)$/i, '');
+        // Remove relative path navigations like ../ or ./
+        s = s.replace(/(?:^\.\.\/|^\.\/)+/g, '');
         // Trim slashes
         s = s.replace(/^\/+|\/+$/g, '');
         return s || 'index';
