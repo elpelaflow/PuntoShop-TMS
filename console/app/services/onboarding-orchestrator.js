@@ -217,11 +217,6 @@ export default class OnboardingOrchestratorService extends Service {
 
             const historyIds = JSON.parse(stored);
             this.history = historyIds.map((id) => this.flow.steps.find((s) => s.id === id)).filter(Boolean); // Remove any invalid steps
-
-            console.log(
-                '[OnboardingOrchestrator] Restored history:',
-                this.history.map((s) => s.id)
-            );
         } catch (error) {
             console.warn('[OnboardingOrchestrator] Failed to restore history:', error);
             this.history = [];
