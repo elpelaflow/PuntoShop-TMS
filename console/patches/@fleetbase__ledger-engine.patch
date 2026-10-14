@@ -1944,7 +1944,7 @@ index 30bc55e..5093018 100644
          if (!isValidDate(this.created_at)) {
              return null;
 diff --git a/addon/templates/accounting/general-ledger.hbs b/addon/templates/accounting/general-ledger.hbs
-index f2393c1..ca93451 100644
+index f2393c1..26a7ef6 100644
 --- a/addon/templates/accounting/general-ledger.hbs
 +++ b/addon/templates/accounting/general-ledger.hbs
 @@ -1,4 +1,4 @@
@@ -1967,7 +1967,7 @@ index f2393c1..ca93451 100644
              @type="default"
              @icon={{if this.allExpanded "chevron-up" "chevron-down"}}
 -            @helpText={{if this.allExpanded "Collapse All" "Expand All"}}
-+            @helpText={{if this.allExpanded (t "common.collapse-all" fallback="Contraer todo") (t "common.expand-all" fallback="Expandir todo")}}
++            @helpText={{if this.allExpanded (t "common.collapse-all") (t "common.expand-all")}}
              {{on "click" this.toggleExpandAll}}
          />
      </div>
@@ -1983,7 +1983,7 @@ index f2393c1..ca93451 100644
                              <div class="flex items-center gap-6 text-right">
                                  {{#if row.summary.entry_count}}
 -                                    <span class="text-xs text-gray-400">{{row.summary.entry_count}} entries</span>
-+                                    <span class="text-xs text-gray-400">{{row.summary.entry_count}} {{if (eq row.summary.entry_count 1) (t "ledger.accounting.general-ledger.entry-singular" fallback="póliza") (t "ledger.accounting.general-ledger.entry-plural" fallback="pólizas")}}</span>
++                                    <span class="text-xs text-gray-400">{{row.summary.entry_count}} {{if (eq row.summary.entry_count 1) (t "ledger.accounting.general-ledger.entry-singular") (t "ledger.accounting.general-ledger.entry-plural")}}</span>
                                  {{/if}}
                                  <div class="text-sm font-semibold text-gray-900 dark:text-white">
                                      {{format-currency row.summary.net_balance acct.currency}}
@@ -2060,7 +2060,7 @@ index 2c8c8e4..6dfbe47 100644
          @leftHeaderWrapperClass="ledger-dashboard-title"
          @rightHeaderWrapperClass="ledger-dashboard-actions"
 diff --git a/addon/templates/reports/ar-aging.hbs b/addon/templates/reports/ar-aging.hbs
-index c269b72..675da8c 100644
+index c269b72..dcebd16 100644
 --- a/addon/templates/reports/ar-aging.hbs
 +++ b/addon/templates/reports/ar-aging.hbs
 @@ -1,7 +1,7 @@
@@ -2082,7 +2082,7 @@ index c269b72..675da8c 100644
 +                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.ar-aging.title"}}</h2>
                      {{#if this.data.as_of_date}}
 -                        <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
-+                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.ar-aging.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy") fallback=(concat "Al corte del " (format-date-fns this.data.as_of_date "MMMM d, yyyy"))}}</p>
++                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.ar-aging.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy")}}</p>
                      {{/if}}
                  </div>
                  {{#if this.data.grand_total}}
@@ -2120,7 +2120,7 @@ index c269b72..675da8c 100644
                              </tr>
                          {{else}}
 -                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">No outstanding receivables</td></tr>
-+                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.ar-aging.no-receivables" fallback="No hay cuentas por cobrar vencidas"}}</td></tr>
++                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.ar-aging.no-receivables"}}</td></tr>
                          {{/each}}
                      </tbody>
                  </table>
@@ -2128,12 +2128,12 @@ index c269b72..675da8c 100644
          {{else}}
              <div class="flex flex-col items-center justify-center py-20 text-gray-400">
 -                <p class="text-sm">No report data available. Select a date and refresh.</p>
-+                <p class="text-sm">{{t "ledger.reports.ar-aging.no-data" fallback="No hay datos disponibles para el reporte. Seleccione una fecha y actualice."}}</p>
++                <p class="text-sm">{{t "ledger.reports.ar-aging.no-data"}}</p>
              </div>
          {{/if}}
      </div>
 diff --git a/addon/templates/reports/balance-sheet.hbs b/addon/templates/reports/balance-sheet.hbs
-index 55f1676..9871fd9 100644
+index 55f1676..095d002 100644
 --- a/addon/templates/reports/balance-sheet.hbs
 +++ b/addon/templates/reports/balance-sheet.hbs
 @@ -1,7 +1,7 @@
@@ -2155,7 +2155,7 @@ index 55f1676..9871fd9 100644
 +                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.balance-sheet.title"}}</h2>
                      {{#if this.data.as_of_date}}
 -                        <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
-+                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.balance-sheet.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy") fallback=(concat "Al corte del " (format-date-fns this.data.as_of_date "MMMM d, yyyy"))}}</p>
++                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.balance-sheet.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy")}}</p>
                      {{/if}}
                  </div>
 -                <Badge @color={{if this.data.balanced "green" "red"}}>{{if this.data.balanced "Balanced" "Unbalanced"}}</Badge>
@@ -2166,9 +2166,9 @@ index 55f1676..9871fd9 100644
 -                    (hash label="Assets" items=this.data.assets total=this.data.total_assets)
 -                    (hash label="Liabilities" items=this.data.liabilities total=this.data.total_liabilities)
 -                    (hash label="Equity" items=this.data.equity total=this.data.total_equity)
-+                    (hash label=(t "ledger.reports.balance-sheet.assets" fallback="Activos") items=this.data.assets total=this.data.total_assets)
-+                    (hash label=(t "ledger.reports.balance-sheet.liabilities" fallback="Pasivos") items=this.data.liabilities total=this.data.total_liabilities)
-+                    (hash label=(t "ledger.reports.balance-sheet.equity" fallback="Capital contable") items=this.data.equity total=this.data.total_equity)
++                    (hash label=(t "ledger.reports.balance-sheet.assets") items=this.data.assets total=this.data.total_assets)
++                    (hash label=(t "ledger.reports.balance-sheet.liabilities") items=this.data.liabilities total=this.data.total_liabilities)
++                    (hash label=(t "ledger.reports.balance-sheet.equity") items=this.data.equity total=this.data.total_equity)
                  )
                  as |section|
              }}
@@ -2177,13 +2177,13 @@ index 55f1676..9871fd9 100644
                                  </tr>
                              {{else}}
 -                                <tr><td colspan="3" class="px-4 py-3 text-center text-gray-400 text-xs">No {{section.label}} accounts</td></tr>
-+                                <tr><td colspan="3" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.balance-sheet.no-accounts" section=section.label fallback=(concat "No hay cuentas de " section.label)}}</td></tr>
++                                <tr><td colspan="3" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.balance-sheet.no-accounts" section=section.label}}</td></tr>
                              {{/each}}
                          </tbody>
                          <tfoot>
                              <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
 -                                <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Total {{section.label}}</td>
-+                                <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.balance-sheet.total-section" section=section.label fallback=(concat "Total " section.label)}}</td>
++                                <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.balance-sheet.total-section" section=section.label}}</td>
                                  <td class="px-4 py-2.5 text-right font-bold text-gray-900 dark:text-white">{{format-currency section.total this.companyCurrency}}</td>
                              </tr>
                          </tfoot>
@@ -2199,12 +2199,12 @@ index 55f1676..9871fd9 100644
          {{else}}
              <div class="flex flex-col items-center justify-center py-20 text-gray-400">
 -                <p class="text-sm">No report data available. Select a date and refresh.</p>
-+                <p class="text-sm">{{t "ledger.reports.balance-sheet.no-data" fallback="No hay datos disponibles para el reporte. Seleccione una fecha y actualice."}}</p>
++                <p class="text-sm">{{t "ledger.reports.balance-sheet.no-data"}}</p>
              </div>
          {{/if}}
      </div>
 diff --git a/addon/templates/reports/cash-flow.hbs b/addon/templates/reports/cash-flow.hbs
-index cfc7abe..a40774f 100644
+index cfc7abe..e0224fe 100644
 --- a/addon/templates/reports/cash-flow.hbs
 +++ b/addon/templates/reports/cash-flow.hbs
 @@ -1,4 +1,4 @@
@@ -2249,13 +2249,13 @@ index cfc7abe..a40774f 100644
                              </tr>
                          {{else}}
 -                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">No operating activity data</td></tr>
-+                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.cash-flow.no-operating-data" fallback="Sin datos de actividades de operación"}}</td></tr>
++                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.cash-flow.no-operating-data"}}</td></tr>
                          {{/each}}
                      </tbody>
                      <tfoot>
                          <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
 -                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Net Operating Cash Flow</td>
-+                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-operating" fallback="Flujo neto de efectivo de operación"}}</td>
++                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-operating"}}</td>
                              <td class="px-4 py-2.5 text-right font-bold {{if (gt this.data.net_operating 0) 'text-green-600 dark:text-green-400' 'text-red-600 dark:text-red-400'}}">
                                  {{format-currency this.data.net_operating this.companyCurrency}}
                              </td>
@@ -2273,13 +2273,13 @@ index cfc7abe..a40774f 100644
                              </tr>
                          {{else}}
 -                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">No financing activity data</td></tr>
-+                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.cash-flow.no-financing-data" fallback="Sin datos de actividades de financiamiento"}}</td></tr>
++                            <tr><td colspan="2" class="px-4 py-3 text-center text-gray-400 text-xs">{{t "ledger.reports.cash-flow.no-financing-data"}}</td></tr>
                          {{/each}}
                      </tbody>
                      <tfoot>
                          <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
 -                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Net Financing Cash Flow</td>
-+                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-financing" fallback="Flujo neto de efectivo de financiamiento"}}</td>
++                            <td class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-financing"}}</td>
                              <td class="px-4 py-2.5 text-right font-bold {{if (gt this.data.net_financing 0) 'text-green-600 dark:text-green-400' 'text-red-600 dark:text-red-400'}}">
                                  {{format-currency this.data.net_financing this.companyCurrency}}
                              </td>
@@ -2288,7 +2288,7 @@ index cfc7abe..a40774f 100644
              <div class="border-t-2 border-gray-400 dark:border-gray-700 pt-4">
                  <div class="flex justify-between items-center py-1">
 -                    <span class="text-base font-bold text-gray-900 dark:text-white">Net Change in Cash</span>
-+                    <span class="text-base font-bold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-change" fallback="Variación neta en efectivo"}}</span>
++                    <span class="text-base font-bold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.net-change"}}</span>
                      <span class="text-base font-bold {{if (gt this.data.net_change 0) 'text-green-600 dark:text-green-400' 'text-red-600 dark:text-red-400'}}">
                          {{format-currency this.data.net_change this.companyCurrency}}
                      </span>
@@ -2297,7 +2297,7 @@ index cfc7abe..a40774f 100644
          {{else}}
              <div class="flex flex-col items-center justify-center py-20 text-gray-400">
 -                <p class="text-sm">No report data available. Select a period and refresh.</p>
-+                <p class="text-sm">{{t "ledger.reports.cash-flow.no-data" fallback="No hay datos disponibles para el reporte. Seleccione un período y actualice."}}</p>
++                <p class="text-sm">{{t "ledger.reports.cash-flow.no-data"}}</p>
              </div>
          {{/if}}
      </div>
@@ -2383,7 +2383,7 @@ index 7367443..81f9660 100644
                          {{format-currency this.data.net_income this.companyCurrency}}
                      </span>
 diff --git a/addon/templates/reports/trial-balance.hbs b/addon/templates/reports/trial-balance.hbs
-index ff62cb9..9b4e705 100644
+index ff62cb9..d3574dd 100644
 --- a/addon/templates/reports/trial-balance.hbs
 +++ b/addon/templates/reports/trial-balance.hbs
 @@ -1,7 +1,7 @@
@@ -2405,7 +2405,7 @@ index ff62cb9..9b4e705 100644
 +                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.trial-balance.title"}}</h2>
                      {{#if this.data.as_of_date}}
 -                        <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
-+                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.trial-balance.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy") fallback=(concat "Al corte del " (format-date-fns this.data.as_of_date "MMMM d, yyyy"))}}</p>
++                        <p class="text-sm text-gray-500 mt-0.5">{{t "ledger.reports.trial-balance.as-of" date=(format-date-fns this.data.as_of_date "MMMM d, yyyy")}}</p>
                      {{/if}}
                  </div>
 -                <Badge @color={{if this.data.balanced "green" "red"}}>{{if this.data.balanced "Balanced" "Unbalanced"}}</Badge>
@@ -2449,12 +2449,12 @@ index ff62cb9..9b4e705 100644
          {{else}}
              <div class="flex flex-col items-center justify-center py-20 text-gray-400">
 -                <p class="text-sm">No report data available. Select a date and refresh.</p>
-+                <p class="text-sm">{{t "ledger.reports.trial-balance.no-data" fallback="No hay datos disponibles para el reporte. Seleccione una fecha y actualice."}}</p>
++                <p class="text-sm">{{t "ledger.reports.trial-balance.no-data"}}</p>
              </div>
          {{/if}}
      </div>
 diff --git a/addon/templates/reports/wallet-summary.hbs b/addon/templates/reports/wallet-summary.hbs
-index 2f053e9..9392ec5 100644
+index 2f053e9..eb14d57 100644
 --- a/addon/templates/reports/wallet-summary.hbs
 +++ b/addon/templates/reports/wallet-summary.hbs
 @@ -1,4 +1,4 @@
@@ -2490,7 +2490,7 @@ index 2f053e9..9392ec5 100644
              <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                  <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
 -                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallets by Owner Type</h3>
-+                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.wallet-counts-by-type" fallback="Billeteras por tipo de titular"}}</h3>
++                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.wallet-counts-by-type"}}</h3>
                  </div>
                  <table class="w-full text-sm overflow-hidden">
                      <thead>
@@ -2500,7 +2500,7 @@ index 2f053e9..9392ec5 100644
 -                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Balance</th>
 -                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Currency</th>
 +                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.owner"}}</th>
-+                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.count" fallback="Cantidad"}}</th>
++                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.count"}}</th>
 +                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.balance"}}</th>
 +                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.currency"}}</th>
                          </tr>
@@ -2528,7 +2528,7 @@ index 2f053e9..9392ec5 100644
                  <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                      <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
 -                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Period Transaction Activity</h3>
-+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.period-activity" fallback="Actividad de transacciones del período"}}</h3>
++                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.period-activity"}}</h3>
                      </div>
                      <table class="w-full text-sm overflow-hidden">
                          <thead>
@@ -2540,9 +2540,9 @@ index 2f053e9..9392ec5 100644
 -                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Debit Count</th>
 +                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.currency"}}</th>
 +                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.accounting.journal.credit"}}</th>
-+                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.credit-count" fallback="Cant. Abonos"}}</th>
++                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.credit-count"}}</th>
 +                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.accounting.journal.debit"}}</th>
-+                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.debit-count" fallback="Cant. Cargos"}}</th>
++                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.debit-count"}}</th>
                              </tr>
                          </thead>
                          <tbody>
@@ -2551,7 +2551,7 @@ index 2f053e9..9392ec5 100644
                                  </tr>
                              {{else}}
 -                                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">No transactions in this period</td></tr>
-+                                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.wallet-summary.no-period-transactions" fallback="Sin transacciones en este período"}}</td></tr>
++                                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.wallet-summary.no-period-transactions"}}</td></tr>
                              {{/each}}
                          </tbody>
                      </table>
@@ -2560,7 +2560,7 @@ index 2f053e9..9392ec5 100644
                  <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                      <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
 -                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Top Wallets by Balance</h3>
-+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.top-wallets" fallback="Billeteras con mayor saldo"}}</h3>
++                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.wallet-summary.top-wallets"}}</h3>
                      </div>
                      <table class="w-full text-sm overflow-hidden">
                          <thead>
@@ -2569,10 +2569,10 @@ index 2f053e9..9392ec5 100644
 -                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Owner</th>
 -                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
 -                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Balance</th>
-+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "resource.wallet" fallback="Billetera"}}</th>
-+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.owner" fallback="Titular"}}</th>
-+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.type" fallback="Tipo"}}</th>
-+                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.balance" fallback="Saldo"}}</th>
++                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "resource.wallet"}}</th>
++                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.owner"}}</th>
++                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.type"}}</th>
++                                <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.balance"}}</th>
                              </tr>
                          </thead>
                          <tbody>
@@ -2589,7 +2589,7 @@ index 2f053e9..9392ec5 100644
                                  </tr>
                              {{else}}
 -                                <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-sm">No wallets found</td></tr>
-+                                <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.wallet-summary.no-wallets" fallback="No se encontraron billeteras"}}</td></tr>
++                                <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.reports.wallet-summary.no-wallets"}}</td></tr>
                              {{/each}}
                          </tbody>
                      </table>
@@ -2598,12 +2598,12 @@ index 2f053e9..9392ec5 100644
          {{else}}
              <div class="flex flex-col items-center justify-center py-20 text-gray-400">
 -                <p class="text-sm">No report data available. Select a period and refresh.</p>
-+                <p class="text-sm">{{t "ledger.reports.wallet-summary.no-data" fallback="No hay datos disponibles para el reporte. Seleccione un período y actualice."}}</p>
++                <p class="text-sm">{{t "ledger.reports.wallet-summary.no-data"}}</p>
              </div>
          {{/if}}
      </div>
 diff --git a/addon/templates/settings/accounting.hbs b/addon/templates/settings/accounting.hbs
-index dfb0c21..45897a6 100644
+index dfb0c21..8b2657c 100644
 --- a/addon/templates/settings/accounting.hbs
 +++ b/addon/templates/settings/accounting.hbs
 @@ -1,9 +1,9 @@
@@ -2624,32 +2624,32 @@ index dfb0c21..45897a6 100644
              {{! ── Base Currency & Fiscal Year ────────────────────────────────────── }}
 -            <ContentPanel @title="Currency & Fiscal Year" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Base Currency" @helpText="The reporting currency for all financial statements and the chart of accounts.">
-+            <ContentPanel @title={{t "ledger.settings.accounting.currency-fiscal-title" fallback="Divisa base y año fiscal"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.accounting.base-currency" fallback="Divisa base"}} @helpText={{t "ledger.settings.accounting.base-currency-help" fallback="Divisa de reporte para todos los estados financieros y el catálogo de cuentas."}}>
++            <ContentPanel @title={{t "ledger.settings.accounting.currency-fiscal-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.accounting.base-currency"}} @helpText={{t "ledger.settings.accounting.base-currency-help"}}>
                      <CurrencySelect
                          @currency={{this.effectiveCurrency}}
                          @currencyData={{this.selectedCurrency}}
                          @onCurrencyChange={{this.onSelectCurrency}}
                          @triggerClass="form-select form-input"
 -                        @placeholder={{concat "Default: " this.companyCurrency}}
-+                        @placeholder={{concat (t "common.default" fallback="Predeterminado") ": " this.companyCurrency}}
++                        @placeholder={{concat (t "common.default") ": " this.companyCurrency}}
                          @allowClear={{true}}
                      />
                      {{#unless this.base_currency}}
 -                        <p class="text-xs text-gray-400 mt-1">Using organisation default ({{this.companyCurrency}}). Select a currency above to override.</p>
-+                        <p class="text-xs text-gray-400 mt-1">{{t "ledger.settings.accounting.using-org-currency" currency=this.companyCurrency fallback=(concat "Usando la divisa predeterminada de la organización (" this.companyCurrency "). Seleccione una divisa arriba para anularla.")}}</p>
++                        <p class="text-xs text-gray-400 mt-1">{{t "ledger.settings.accounting.using-org-currency" currency=this.companyCurrency}}</p>
                      {{/unless}}
                  </InputGroup>
  
 -                <InputGroup @name="Fiscal Year Start Month" @helpText="The month in which your organisation's fiscal year begins. Affects period-based financial reports.">
-+                <InputGroup @name={{t "ledger.settings.accounting.fiscal-year-start" fallback="Mes de inicio del año fiscal"}} @helpText={{t "ledger.settings.accounting.fiscal-year-start-help" fallback="Mes en que inicia el año fiscal de su organización. Afecta los reportes financieros periódicos."}}>
++                <InputGroup @name={{t "ledger.settings.accounting.fiscal-year-start"}} @helpText={{t "ledger.settings.accounting.fiscal-year-start-help"}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.fiscalYearMonthOptions}}
                              @selected={{find-by "value" this.fiscal_year_start_month this.fiscalYearMonthOptions}}
                              @onChange={{this.onSelectFiscalYearMonth}}
 -                            @placeholder="Select start month"
-+                            @placeholder={{t "ledger.settings.accounting.select-start-month" fallback="Seleccionar mes de inicio"}}
++                            @placeholder={{t "ledger.settings.accounting.select-start-month"}}
                              @triggerClass="form-select form-input"
                              as |opt|
                          >
@@ -2658,21 +2658,21 @@ index dfb0c21..45897a6 100644
  
              {{! ── Default Accounts ────────────────────────────────────────────────── }}
 -            <ContentPanel @title="Default Accounts" @open={{true}} @wrapperClass="bordered-classic">
-+            <ContentPanel @title={{t "ledger.settings.accounting.default-accounts-title" fallback="Cuentas predeterminadas"}} @open={{true}} @wrapperClass="bordered-classic">
++            <ContentPanel @title={{t "ledger.settings.accounting.default-accounts-title"}} @open={{true}} @wrapperClass="bordered-classic">
                  <div class="text-xs text-gray-500 mb-3">
 -                    These accounts are used automatically when posting transactions unless a specific account is selected on the transaction itself.
-+                    {{t "ledger.settings.accounting.default-accounts-desc" fallback="Estas cuentas se utilizan automáticamente al asentar pólizas a menos que se seleccione una cuenta específica en la transacción."}}
++                    {{t "ledger.settings.accounting.default-accounts-desc"}}
                  </div>
  
 -                <InputGroup @name="Default Revenue Account" @helpText="Applied to income line items on invoices and sales transactions.">
-+                <InputGroup @name={{t "ledger.settings.accounting.revenue-account"}} @helpText={{t "ledger.settings.accounting.revenue-account-help" fallback="Aplicada a partidas de ingresos en facturas y transacciones de venta."}}>
++                <InputGroup @name={{t "ledger.settings.accounting.revenue-account"}} @helpText={{t "ledger.settings.accounting.revenue-account-help"}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.revenueAccounts}}
                              @selected={{this.selectedRevenueAccount}}
                              @onChange={{this.onSelectRevenueAccount}}
 -                            @placeholder="Select revenue account"
-+                            @placeholder={{t "ledger.settings.accounting.select-revenue-account" fallback="Seleccionar cuenta de ingresos"}}
++                            @placeholder={{t "ledger.settings.accounting.select-revenue-account"}}
                              @triggerClass="form-select form-input"
                              @allowClear={{true}}
                              as |account|
@@ -2688,14 +2688,14 @@ index dfb0c21..45897a6 100644
                  </InputGroup>
  
 -                <InputGroup @name="Default Expense Account" @helpText="Applied to cost and expense line items on bills and purchase transactions.">
-+                <InputGroup @name={{t "ledger.settings.accounting.expense-account-title" fallback="Cuenta de gastos predeterminada"}} @helpText={{t "ledger.settings.accounting.expense-account-help" fallback="Aplicada a partidas de costos y gastos en cuentas por pagar y transacciones de compra."}}>
++                <InputGroup @name={{t "ledger.settings.accounting.expense-account-title"}} @helpText={{t "ledger.settings.accounting.expense-account-help"}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.expenseAccounts}}
                              @selected={{this.selectedExpenseAccount}}
                              @onChange={{this.onSelectExpenseAccount}}
 -                            @placeholder="Select expense account"
-+                            @placeholder={{t "ledger.settings.accounting.select-expense-account" fallback="Seleccionar cuenta de gastos"}}
++                            @placeholder={{t "ledger.settings.accounting.select-expense-account"}}
                              @triggerClass="form-select form-input"
                              @allowClear={{true}}
                              as |account|
@@ -2711,14 +2711,14 @@ index dfb0c21..45897a6 100644
                  </InputGroup>
  
 -                <InputGroup @name="Default Accounts Receivable (AR) Account" @helpText="The asset account that tracks money owed to your organisation from customers.">
-+                <InputGroup @name={{t "ledger.settings.accounting.ar-account-title" fallback="Cuenta de cuentas por cobrar (CxC) predeterminada"}} @helpText={{t "ledger.settings.accounting.ar-account-help" fallback="Cuenta de activo que registra los montos adeudados por los clientes a la organización."}}>
++                <InputGroup @name={{t "ledger.settings.accounting.ar-account-title"}} @helpText={{t "ledger.settings.accounting.ar-account-help"}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.arAccounts}}
                              @selected={{this.selectedArAccount}}
                              @onChange={{this.onSelectArAccount}}
 -                            @placeholder="Select AR account"
-+                            @placeholder={{t "ledger.settings.accounting.select-ar-account" fallback="Seleccionar cuenta de CxC"}}
++                            @placeholder={{t "ledger.settings.accounting.select-ar-account"}}
                              @triggerClass="form-select form-input"
                              @allowClear={{true}}
                              as |account|
@@ -2734,14 +2734,14 @@ index dfb0c21..45897a6 100644
                  </InputGroup>
  
 -                <InputGroup @name="Default Accounts Payable (AP) Account" @helpText="The liability account that tracks money your organisation owes to vendors.">
-+                <InputGroup @name={{t "ledger.settings.accounting.ap-account-title" fallback="Cuenta de cuentas por pagar (CxP) predeterminada"}} @helpText={{t "ledger.settings.accounting.ap-account-help" fallback="Cuenta de pasivo que registra los montos que la organización adeuda a proveedores."}}>
++                <InputGroup @name={{t "ledger.settings.accounting.ap-account-title"}} @helpText={{t "ledger.settings.accounting.ap-account-help"}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.apAccounts}}
                              @selected={{this.selectedApAccount}}
                              @onChange={{this.onSelectApAccount}}
 -                            @placeholder="Select AP account"
-+                            @placeholder={{t "ledger.settings.accounting.select-ap-account" fallback="Seleccionar cuenta de CxP"}}
++                            @placeholder={{t "ledger.settings.accounting.select-ap-account"}}
                              @triggerClass="form-select form-input"
                              @allowClear={{true}}
                              as |account|
@@ -2758,17 +2758,17 @@ index dfb0c21..45897a6 100644
              {{! ── Journal Entry Behaviour ────────────────────────────────────────────── }}
 -            <ContentPanel @title="Journal Entry Behaviour" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Auto-Post Journal Entries">
-+            <ContentPanel @title={{t "ledger.settings.accounting.journal-behaviour-title" fallback="Comportamiento de pólizas contables"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.accounting.auto-post-title" fallback="Afectación contable automática de pólizas"}}>
++            <ContentPanel @title={{t "ledger.settings.accounting.journal-behaviour-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.accounting.auto-post-title"}}>
                      <Toggle
                          @isToggled={{this.auto_post_journal_entries}}
 -                        @label="Automatically post journal entries to the general ledger when created, without requiring manual approval."
-+                        @label={{t "ledger.settings.accounting.auto-post-label" fallback="Afectar automáticamente las pólizas al libro mayor al crearse, sin requerir aprobación manual."}}
++                        @label={{t "ledger.settings.accounting.auto-post-label"}}
                          @onToggle={{fn (mut this.auto_post_journal_entries)}}
                      />
                  </InputGroup>
 diff --git a/addon/templates/settings/invoice.hbs b/addon/templates/settings/invoice.hbs
-index 0725577..ad4eb72 100644
+index 0725577..b07209c 100644
 --- a/addon/templates/settings/invoice.hbs
 +++ b/addon/templates/settings/invoice.hbs
 @@ -1,9 +1,9 @@
@@ -2790,8 +2790,8 @@ index 0725577..ad4eb72 100644
 -            <ContentPanel @title="Invoice Numbering" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Invoice Number Prefix" @helpText="This prefix is prepended to every new invoice number, e.g. 'INV-000001'.">
 -                    <Input @value={{this.invoice_prefix}} @type="text" class="w-full form-input" placeholder="INV" />
-+            <ContentPanel @title={{t "ledger.settings.invoice.numbering-title" fallback="Numeración de facturas"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.invoice.prefix"}} @helpText={{t "ledger.settings.invoice.prefix-help" fallback="Este prefijo se antepone al número de cada nueva factura, ej. 'FAC-000001'."}}>
++            <ContentPanel @title={{t "ledger.settings.invoice.numbering-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.prefix"}} @helpText={{t "ledger.settings.invoice.prefix-help"}}>
 +                    <Input @value={{this.invoice_prefix}} @type="text" class="w-full form-input" placeholder="FAC" />
                  </InputGroup>
              </ContentPanel>
@@ -2799,32 +2799,32 @@ index 0725577..ad4eb72 100644
              {{! ── Currency & Payment Terms ────────────────────────────────────── }}
 -            <ContentPanel @title="Currency & Payment Terms" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Default Currency" @helpText="The currency applied to new invoices unless overridden on the invoice itself.">
-+            <ContentPanel @title={{t "ledger.settings.invoice.currency-terms-title" fallback="Divisa y términos de pago"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.invoice.default-currency" fallback="Divisa predeterminada"}} @helpText={{t "ledger.settings.invoice.currency-help" fallback="Divisa aplicada a nuevas facturas a menos que se anule en la propia factura."}}>
++            <ContentPanel @title={{t "ledger.settings.invoice.currency-terms-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.default-currency"}} @helpText={{t "ledger.settings.invoice.currency-help"}}>
                      <CurrencySelect
                          @currency={{this.effectiveCurrency}}
                          @currencyData={{this.selectedCurrency}}
                          @onCurrencyChange={{this.onSelectCurrency}}
                          @triggerClass="form-select form-input"
 -                        @placeholder={{concat "Default: " this.companyCurrency}}
-+                        @placeholder={{concat (t "common.default" fallback="Predeterminado") ": " this.companyCurrency}}
++                        @placeholder={{concat (t "common.default") ": " this.companyCurrency}}
                          @allowClear={{true}}
                      />
                      {{#unless this.default_currency}}
 -                        <p class="text-xs text-gray-400 mt-1">Using organisation default ({{this.companyCurrency}}). Select a currency above to override.</p>
-+                        <p class="text-xs text-gray-400 mt-1">{{t "ledger.settings.invoice.default-currency-org" currency=this.companyCurrency fallback=(concat "Usando la divisa predeterminada de la organización (" this.companyCurrency "). Seleccione una divisa arriba para anularla.")}}</p>
++                        <p class="text-xs text-gray-400 mt-1">{{t "ledger.settings.invoice.default-currency-org" currency=this.companyCurrency}}</p>
                      {{/unless}}
                  </InputGroup>
  
 -                <InputGroup @name="Default Payment Terms" @helpText="Number of days after the invoice date that payment is due.">
-+                <InputGroup @name={{t "ledger.settings.invoice.default-due-days"}} @helpText={{t "ledger.settings.invoice.due-days-help" fallback="Número de días naturales tras la fecha de emisión en que vence el pago."}}>
++                <InputGroup @name={{t "ledger.settings.invoice.default-due-days"}} @helpText={{t "ledger.settings.invoice.due-days-help"}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.paymentTermsOptions}}
                              @selected={{find-by "value" this.payment_terms_days this.paymentTermsOptions}}
                              @onChange={{this.onSelectPaymentTerms}}
 -                            @placeholder="Select payment terms"
-+                            @placeholder={{t "ledger.settings.invoice.select-credit-days" fallback="Seleccionar días de crédito"}}
++                            @placeholder={{t "ledger.settings.invoice.select-credit-days"}}
                              @triggerClass="form-select form-input"
                              as |opt|
                          >
@@ -2835,26 +2835,26 @@ index 0725577..ad4eb72 100644
 -            <ContentPanel @title="Default Invoice Text" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Default Notes" @helpText="These notes appear at the bottom of every new invoice. You can override them per invoice.">
 -                    <Textarea @value={{this.default_notes}} class="w-full form-input" rows="3" placeholder="e.g. Thank you for your business!" />
-+            <ContentPanel @title={{t "ledger.settings.invoice.default-text-title" fallback="Textos predeterminados"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.invoice.default-notes"}} @helpText={{t "ledger.settings.invoice.default-notes-help" fallback="Estas notas aparecen al pie de cada factura nueva. Puede modificarlas en cada factura."}}>
-+                    <Textarea @value={{this.default_notes}} class="w-full form-input" rows="3" placeholder={{t "ledger.settings.invoice.default-notes-placeholder" fallback="ej. ¡Gracias por su preferencia!"}} />
++            <ContentPanel @title={{t "ledger.settings.invoice.default-text-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.default-notes"}} @helpText={{t "ledger.settings.invoice.default-notes-help"}}>
++                    <Textarea @value={{this.default_notes}} class="w-full form-input" rows="3" placeholder={{t "ledger.settings.invoice.default-notes-placeholder"}} />
                  </InputGroup>
  
 -                <InputGroup @name="Default Terms & Conditions" @helpText="Standard terms pre-filled on every new invoice.">
 -                    <Textarea @value={{this.default_terms}} class="w-full form-input" rows="3" placeholder="e.g. Payment is due within 30 days of the invoice date." />
-+                <InputGroup @name={{t "ledger.settings.invoice.default-terms-title" fallback="Términos y condiciones predeterminados"}} @helpText={{t "ledger.settings.invoice.default-terms-help" fallback="Términos estándar prellenados en cada nueva factura."}}>
-+                    <Textarea @value={{this.default_terms}} class="w-full form-input" rows="3" placeholder={{t "ledger.settings.invoice.default-terms-placeholder" fallback="ej. El pago debe liquidarse dentro de los 30 días naturales posteriores a la fecha de emisión."}} />
++                <InputGroup @name={{t "ledger.settings.invoice.default-terms-title"}} @helpText={{t "ledger.settings.invoice.default-terms-help"}}>
++                    <Textarea @value={{this.default_terms}} class="w-full form-input" rows="3" placeholder={{t "ledger.settings.invoice.default-terms-placeholder"}} />
                  </InputGroup>
              </ContentPanel>
  
              {{! ── Default Template ─────────────────────────────────────────────── }}
 -            <ContentPanel @title="Default Invoice Template" @open={{true}} @wrapperClass="bordered-classic">
-+            <ContentPanel @title={{t "ledger.settings.invoice.default-template-title" fallback="Plantilla de factura predeterminada"}} @open={{true}} @wrapperClass="bordered-classic">
++            <ContentPanel @title={{t "ledger.settings.invoice.default-template-title"}} @open={{true}} @wrapperClass="bordered-classic">
                  <InputGroup
 -                    @name="Default Template"
 -                    @helpText="The invoice template applied to all new invoices, including those auto-generated from Fleet-Ops orders. Leave blank to use the system default."
-+                    @name={{t "ledger.settings.invoice.default-template-name" fallback="Plantilla predeterminada"}}
-+                    @helpText={{t "ledger.settings.invoice.default-template-help" fallback="Plantilla aplicada a todas las facturas nuevas, incluidas las generadas desde pedidos de Fleet-Ops. Deje en blanco para usar la del sistema."}}
++                    @name={{t "ledger.settings.invoice.default-template-name"}}
++                    @helpText={{t "ledger.settings.invoice.default-template-help"}}
                  >
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
@@ -2862,7 +2862,7 @@ index 0725577..ad4eb72 100644
                              @selected={{this.selectedTemplate}}
                              @onChange={{this.onSelectDefaultTemplate}}
 -                            @placeholder="Select an invoice template"
-+                            @placeholder={{t "ledger.settings.invoice.select-template-placeholder" fallback="Seleccionar una plantilla de factura"}}
++                            @placeholder={{t "ledger.settings.invoice.select-template-placeholder"}}
                              @triggerClass="form-select form-input"
                              @allowClear={{true}}
                              as |template|
@@ -2871,7 +2871,7 @@ index 0725577..ad4eb72 100644
                      {{#if this.selectedTemplate}}
                          <div class="mt-1 text-[11px] text-gray-500">
 -                            Selected:
-+                            {{t "ledger.settings.invoice.template-selected" fallback="Seleccionada:"}}
++                            {{t "ledger.settings.invoice.template-selected"}}
                              <span class="font-medium">{{this.selectedTemplate.name}}</span>
                          </div>
                      {{/if}}
@@ -2880,9 +2880,9 @@ index 0725577..ad4eb72 100644
 -                            No invoice templates found.
 -                            <LinkTo @route="billing.invoice-templates.index.new" class="underline">Create a template</LinkTo>
 -                            to enable custom invoice branding.
-+                            {{t "ledger.settings.invoice.no-templates-found" fallback="No se encontraron plantillas de factura."}}
-+                            <LinkTo @route="billing.invoice-templates.index.new" class="underline">{{t "ledger.settings.invoice.create-template" fallback="Crear una plantilla"}}</LinkTo>
-+                            {{t "ledger.settings.invoice.enable-branding-text" fallback="para habilitar la personalización de imagen de sus facturas."}}
++                            {{t "ledger.settings.invoice.no-templates-found"}}
++                            <LinkTo @route="billing.invoice-templates.index.new" class="underline">{{t "ledger.settings.invoice.create-template"}}</LinkTo>
++                            {{t "ledger.settings.invoice.enable-branding-text"}}
                          </div>
                      {{/unless}}
                  </InputGroup>
@@ -2891,17 +2891,17 @@ index 0725577..ad4eb72 100644
              {{! ── Automation ───────────────────────────────────────────────────── }}
 -            <ContentPanel @title="Automation" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Auto-Send on Creation">
-+            <ContentPanel @title={{t "ledger.settings.invoice.automation-title" fallback="Automatización"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.invoice.auto-send-title" fallback="Envío automático al emitir"}}>
++            <ContentPanel @title={{t "ledger.settings.invoice.automation-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.auto-send-title"}}>
                      <Toggle
                          @isToggled={{this.auto_send_on_creation}}
 -                        @label="Automatically email the invoice to the customer when it is created."
-+                        @label={{t "ledger.settings.invoice.auto-send-label" fallback="Enviar automáticamente la factura por correo electrónico al cliente cuando se emita."}}
++                        @label={{t "ledger.settings.invoice.auto-send-label"}}
                          @onToggle={{fn (mut this.auto_send_on_creation)}}
                      />
                  </InputGroup>
 diff --git a/addon/templates/settings/payment.hbs b/addon/templates/settings/payment.hbs
-index da21581..3eb0582 100644
+index da21581..a85b1c2 100644
 --- a/addon/templates/settings/payment.hbs
 +++ b/addon/templates/settings/payment.hbs
 @@ -1,9 +1,9 @@
@@ -2922,15 +2922,15 @@ index da21581..3eb0582 100644
              {{! ── Default Gateway ─────────────────────────────────────────────── }}
 -            <ContentPanel @title="Default Payment Gateway" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Default Gateway" @helpText="The gateway used for all invoice payments unless overridden on the individual invoice. Only active gateways are listed.">
-+            <ContentPanel @title={{t "ledger.settings.payment.default-gateway-title" fallback="Pasarela de pago predeterminada"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.payment.default-gateway"}} @helpText={{t "ledger.settings.payment.default-gateway-help" fallback="Pasarela utilizada para todos los cobros de facturas salvo anulación en la factura. Solo se listan pasarelas activas."}}>
++            <ContentPanel @title={{t "ledger.settings.payment.default-gateway-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.payment.default-gateway"}} @helpText={{t "ledger.settings.payment.default-gateway-help"}}>
                      <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
                          <PowerSelect
                              @options={{this.availableGateways}}
                              @selected={{this.selectedGateway}}
                              @onChange={{this.onSelectDefaultGateway}}
 -                            @placeholder="Select a payment gateway"
-+                            @placeholder={{t "ledger.settings.payment.select-gateway-placeholder" fallback="Seleccionar pasarela de pago"}}
++                            @placeholder={{t "ledger.settings.payment.select-gateway-placeholder"}}
                              @triggerClass="form-select form-input"
                              @allowClear={{true}}
                              as |gateway|
@@ -2939,7 +2939,7 @@ index da21581..3eb0582 100644
                      {{#if this.selectedGateway}}
                          <div class="mt-1 text-[11px] text-gray-500">
 -                            Selected:
-+                            {{t "ledger.settings.payment.gateway-selected" fallback="Seleccionada:"}}
++                            {{t "ledger.settings.payment.gateway-selected"}}
                              <span class="font-medium">{{this.selectedGateway.name}}</span>
                              &mdash;
                              <span class="capitalize">{{this.selectedGateway.environment}}</span>
@@ -2950,9 +2950,9 @@ index da21581..3eb0582 100644
 -                            No active gateways found.
 -                            <LinkTo @route="payments.gateways.new" class="underline">Add a gateway</LinkTo>
 -                            to enable online payments.
-+                            {{t "ledger.settings.payment.no-gateways-found" fallback="No se encontraron pasarelas activas."}}
-+                            <LinkTo @route="payments.gateways.new" class="underline">{{t "ledger.settings.payment.add-gateway" fallback="Agregar una pasarela"}}</LinkTo>
-+                            {{t "ledger.settings.payment.enable-online-text" fallback="para habilitar cobros en línea."}}
++                            {{t "ledger.settings.payment.no-gateways-found"}}
++                            <LinkTo @route="payments.gateways.new" class="underline">{{t "ledger.settings.payment.add-gateway"}}</LinkTo>
++                            {{t "ledger.settings.payment.enable-online-text"}}
                          </div>
                      {{/unless}}
                  </InputGroup>
@@ -2961,22 +2961,22 @@ index da21581..3eb0582 100644
              {{! ── Payment Behaviour ───────────────────────────────────────────── }}
 -            <ContentPanel @title="Payment Behaviour" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Allow Partial Payments">
-+            <ContentPanel @title={{t "ledger.settings.payment.behaviour-title" fallback="Comportamiento de cobro"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.payment.allow-partial-payments" fallback="Permitir pagos parciales"}}>
++            <ContentPanel @title={{t "ledger.settings.payment.behaviour-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.payment.allow-partial-payments"}}>
                      <Toggle
                          @isToggled={{this.allow_partial_payments}}
 -                        @label="Allow customers to pay a portion of the invoice amount rather than the full balance."
-+                        @label={{t "ledger.settings.payment.allow-partial-payments-label" fallback="Permitir a los clientes abonar una parte del monto de la factura en lugar del saldo total."}}
++                        @label={{t "ledger.settings.payment.allow-partial-payments-label"}}
                          @onToggle={{fn (mut this.allow_partial_payments)}}
                      />
                  </InputGroup>
  
 -                <InputGroup @name="Auto-Apply Wallet Credit">
-+                <InputGroup @name={{t "ledger.settings.payment.auto-apply-wallet" fallback="Aplicar crédito de billetera automáticamente"}}>
++                <InputGroup @name={{t "ledger.settings.payment.auto-apply-wallet"}}>
                      <Toggle
                          @isToggled={{this.auto_apply_wallet_credit}}
 -                        @label="Automatically apply available wallet balance toward invoice payments before charging the gateway."
-+                        @label={{t "ledger.settings.payment.auto-apply-wallet-label" fallback="Aplicar automáticamente el saldo disponible en la billetera al pago de facturas antes de cobrar en la pasarela."}}
++                        @label={{t "ledger.settings.payment.auto-apply-wallet-label"}}
                          @onToggle={{fn (mut this.auto_apply_wallet_credit)}}
                      />
                  </InputGroup>
@@ -2985,21 +2985,21 @@ index da21581..3eb0582 100644
              {{! ── Notifications ───────────────────────────────────────────────── }}
 -            <ContentPanel @title="Payment Notifications" @open={{true}} @wrapperClass="bordered-classic">
 -                <InputGroup @name="Send Payment Receipt">
-+            <ContentPanel @title={{t "ledger.settings.payment.notifications-title" fallback="Notificaciones de pago"}} @open={{true}} @wrapperClass="bordered-classic">
-+                <InputGroup @name={{t "ledger.settings.payment.send-receipt-title" fallback="Enviar comprobante de pago"}}>
++            <ContentPanel @title={{t "ledger.settings.payment.notifications-title"}} @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.payment.send-receipt-title"}}>
                      <Toggle
                          @isToggled={{this.send_payment_receipt}}
 -                        @label="Email a payment receipt to the customer automatically after a successful payment."
-+                        @label={{t "ledger.settings.payment.send-receipt-label" fallback="Enviar un comprobante de pago por correo al cliente automáticamente tras un cobro exitoso."}}
++                        @label={{t "ledger.settings.payment.send-receipt-label"}}
                          @onToggle={{fn (mut this.send_payment_receipt)}}
                      />
                  </InputGroup>
 diff --git a/translations/es-mx.yaml b/translations/es-mx.yaml
 new file mode 100644
-index 0000000..448c58a
+index 0000000..c702c1f
 --- /dev/null
 +++ b/translations/es-mx.yaml
-@@ -0,0 +1,853 @@
+@@ -0,0 +1,872 @@
 +ledger:
 +  extension-name: Ledger
 +  extension-description: Facturación, pagos, contabilidad e informes financieros en tiempo real.
@@ -3292,7 +3292,9 @@ index 0000000..448c58a
 +      beginning-cash: Efectivo al inicio del período
 +      ending-cash: Efectivo al final del período
 +      no-operating: No hay datos de actividades de operación en este período
++      no-operating-data: Sin datos de actividades de operación
 +      no-financing: No hay datos de actividades de financiamiento en este período
++      no-financing-data: Sin datos de actividades de financiamiento
 +      no-data: No hay datos disponibles para el reporte. Seleccione un período y actualice.
 +    ar-aging:
 +      title: Antigüedad de saldos
@@ -3327,6 +3329,9 @@ index 0000000..448c58a
 +        vendor: Proveedor
 +        unknown: Desconocido
 +      period-activity: Actividad de transacciones del período
++      credit-count: Cant. Abonos
++      debit-count: Cant. Cargos
++      no-period-transactions: Sin transacciones en este período
 +      top-wallets: Billeteras con mayor saldo
 +      table:
 +        currency: Moneda
@@ -3431,6 +3436,8 @@ index 0000000..448c58a
 +      no-entries: No hay movimientos contables registrados para este período.
 +      period: Período contable
 +      entries-count: "{count, plural, =1 {# póliza} other {# pólizas}}"
++      entry-singular: póliza
++      entry-plural: pólizas
 +      no-accounts: No se encontraron cuentas contables.
 +      create-accounts-help: Cree cuentas en el Catálogo de cuentas para ver pólizas aquí.
 +  payments:
@@ -3614,14 +3621,18 @@ index 0000000..448c58a
 +    invoice:
 +      title: Configuración de facturación
 +      description: Defina serie, foliación, vencimientos y valores por defecto para facturación.
++      numbering-title: Numeración de facturas
 +      prefix: Serie / Prefijo
 +      prefix-help: Este prefijo se antepone al número de cada nueva factura, ej. 'FAC-000001'.
 +      next-number: Siguiente número de folio
++      currency-terms-title: Divisa y términos de pago
++      default-currency: Divisa predeterminada
 +      default-due-days: Días de crédito predeterminados
 +      due-days-help: Número de días naturales tras la fecha de emisión en que vence el pago.
 +      select-credit-days: Seleccionar días de crédito
 +      currency-help: Divisa aplicada a nuevas facturas a menos que se anule en la propia factura.
 +      default-currency-org: Usando la divisa predeterminada de la organización ({currency}). Seleccione una divisa arriba para anularla.
++      default-text-title: Textos predeterminados
 +      default-notes: Notas predeterminadas en facturas
 +      default-notes-help: Estas notas aparecen al pie de cada factura nueva. Puede modificarlas en cada factura.
 +      default-notes-placeholder: ej. ¡Gracias por su preferencia!
@@ -3645,12 +3656,15 @@ index 0000000..448c58a
 +    payment:
 +      title: Configuración de pagos
 +      description: Configure la pasarela de cobro principal y políticas de reintento.
++      default-gateway-title: Pasarela de pago predeterminada
 +      default-gateway: Pasarela predeterminada
 +      default-gateway-help: Pasarela utilizada para todos los cobros de facturas salvo anulación en la factura. Solo se listan pasarelas activas.
++      select-gateway-placeholder: Seleccionar pasarela de pago
 +      gateway-selected: "Seleccionada:"
 +      no-gateways-found: No se encontraron pasarelas activas.
 +      add-gateway: Agregar una pasarela
 +      enable-online-text: para habilitar cobros en línea.
++      behaviour-title: Comportamiento de cobro
 +      allow-partial-payments: Permitir pagos parciales
 +      allow-partial-payments-label: Permitir a los clientes abonar una parte del monto de la factura en lugar del saldo total.
 +      auto-apply-wallet: Aplicar crédito de billetera automáticamente
@@ -3665,6 +3679,8 @@ index 0000000..448c58a
 +    accounting:
 +      title: Configuración contable
 +      description: Cuentas contables para asientos automáticos y cierre de ejercicio.
++      currency-fiscal-title: Divisa base y año fiscal
++      base-currency: Divisa base
 +      base-currency-help: Divisa de reporte para todos los estados financieros y el catálogo de cuentas.
 +      using-org-currency: Usando la divisa predeterminada de la organización ({currency}). Seleccione una divisa arriba para anularla.
 +      fiscal-year-start: Mes de inicio del año fiscal
@@ -3718,6 +3734,9 @@ index 0000000..448c58a
 +      confirm: Confirmar reembolso
 +      success: Reembolso emitido con éxito.
 +common:
++  default: Predeterminado
++  collapse-all: Contraer todo
++  expand-all: Expandir todo
 +  ledger: Ledger
 +  overview: Resumen
 +  transactions: Transacciones

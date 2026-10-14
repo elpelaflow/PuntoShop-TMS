@@ -1,6 +1,9 @@
 app:
   name: Fleetbase
 common:
+  reload: Recargar
+  collapse-all: Contraer todo
+  expand-all: Expandir todo
   reload-data: Recargar datos
   unauthorized-access: Acceso no autorizado
   permissions-required-for-changes: Se requieren permisos para realizar cambios
@@ -1125,6 +1128,17 @@ order-status:
   completed: Terminado
   canceled: Cancelado
 column:
+  date: Fecha
+  description: Descripción
+  amount: Monto
+  direction: Dirección
+  payment-method: Método de pago
+  default: Predeterminado
+  environment: Entorno
+  fee: Comisión
+  tax: Impuesto
+  period: Período
+  owner: Titular
   address: Dirección
   country: País
   created-at: Creado en
@@ -4137,7 +4151,9 @@ ledger:
       beginning-cash: Efectivo al inicio del período
       ending-cash: Efectivo al final del período
       no-operating: No hay datos de actividades de operación en este período
+      no-operating-data: Sin datos de actividades de operación
       no-financing: No hay datos de actividades de financiamiento en este período
+      no-financing-data: Sin datos de actividades de financiamiento
       no-data: No hay datos disponibles para el reporte. Seleccione un período y actualice.
     ar-aging:
       title: Antigüedad de saldos
@@ -4172,6 +4188,9 @@ ledger:
         vendor: Proveedor
         unknown: Desconocido
       period-activity: Actividad de transacciones del período
+      credit-count: Cant. Abonos
+      debit-count: Cant. Cargos
+      no-period-transactions: Sin transacciones en este período
       top-wallets: Billeteras con mayor saldo
       table:
         currency: Moneda
@@ -4276,6 +4295,8 @@ ledger:
       no-entries: No hay movimientos contables registrados para este período.
       period: Período contable
       entries-count: "{count, plural, =1 {# póliza} other {# pólizas}}"
+      entry-singular: póliza
+      entry-plural: pólizas
       no-accounts: No se encontraron cuentas contables.
       create-accounts-help: Cree cuentas en el Catálogo de cuentas para ver pólizas aquí.
   payments:
@@ -4459,14 +4480,18 @@ ledger:
     invoice:
       title: Configuración de facturación
       description: Defina serie, foliación, vencimientos y valores por defecto para facturación.
+      numbering-title: Numeración de facturas
       prefix: Serie / Prefijo
       prefix-help: Este prefijo se antepone al número de cada nueva factura, ej. 'FAC-000001'.
       next-number: Siguiente número de folio
+      currency-terms-title: Divisa y términos de pago
+      default-currency: Divisa predeterminada
       default-due-days: Días de crédito predeterminados
       due-days-help: Número de días naturales tras la fecha de emisión en que vence el pago.
       select-credit-days: Seleccionar días de crédito
       currency-help: Divisa aplicada a nuevas facturas a menos que se anule en la propia factura.
       default-currency-org: Usando la divisa predeterminada de la organización ({currency}). Seleccione una divisa arriba para anularla.
+      default-text-title: Textos predeterminados
       default-notes: Notas predeterminadas en facturas
       default-notes-help: Estas notas aparecen al pie de cada factura nueva. Puede modificarlas en cada factura.
       default-notes-placeholder: ej. ¡Gracias por su preferencia!
@@ -4490,12 +4515,15 @@ ledger:
     payment:
       title: Configuración de pagos
       description: Configure la pasarela de cobro principal y políticas de reintento.
+      default-gateway-title: Pasarela de pago predeterminada
       default-gateway: Pasarela predeterminada
       default-gateway-help: Pasarela utilizada para todos los cobros de facturas salvo anulación en la factura. Solo se listan pasarelas activas.
+      select-gateway-placeholder: Seleccionar pasarela de pago
       gateway-selected: "Seleccionada:"
       no-gateways-found: No se encontraron pasarelas activas.
       add-gateway: Agregar una pasarela
       enable-online-text: para habilitar cobros en línea.
+      behaviour-title: Comportamiento de cobro
       allow-partial-payments: Permitir pagos parciales
       allow-partial-payments-label: Permitir a los clientes abonar una parte del monto de la factura en lugar del saldo total.
       auto-apply-wallet: Aplicar crédito de billetera automáticamente
@@ -4510,6 +4538,8 @@ ledger:
     accounting:
       title: Configuración contable
       description: Cuentas contables para asientos automáticos y cierre de ejercicio.
+      currency-fiscal-title: Divisa base y año fiscal
+      base-currency: Divisa base
       base-currency-help: Divisa de reporte para todos los estados financieros y el catálogo de cuentas.
       using-org-currency: Usando la divisa predeterminada de la organización ({currency}). Seleccione una divisa arriba para anularla.
       fiscal-year-start: Mes de inicio del año fiscal
