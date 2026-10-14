@@ -39,15 +39,15 @@
         <Overlay::Body class="no-padding" @wrapperClass="fleetbase-docs-panel-body">
             {{#if this.docsPanel.isLoading}}
                 <div class="flex h-64 flex-col items-center justify-center gap-3 p-6 text-center">
-                    <Spinner @iconClass="text-sky-500 fa-spin-800ms text-2xl" />
-                    <span class="text-sm text-gray-500 dark:text-gray-400">Cargando guía...</span>
+                    <Spinner @iconClass="text-brand fa-spin-800ms text-2xl" />
+                    <span class="text-sm text-secondary">Cargando guía...</span>
                 </div>
             {{else if this.docsPanel.error}}
                 <div class="flex h-64 flex-col items-center justify-center gap-3 p-6 text-center">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-state-danger-bg text-state-danger-text border border-state-danger-border">
                         <FaIcon @icon="exclamation-circle" />
                     </div>
-                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <div class="text-sm font-semibold text-primary">
                         {{this.docsPanel.error}}
                     </div>
                     <Button
@@ -59,7 +59,7 @@
                 </div>
             {{else}}
                 <div
-                    class="docs-content p-6 pb-24 max-w-none text-gray-800 dark:text-gray-200"
+                    class="docs-content p-6 pb-24 max-w-none text-primary"
                     {{on "click" this.handleContentClick}}
                 >
                     {{this.renderedHtml}}
