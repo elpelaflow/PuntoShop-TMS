@@ -1,0 +1,2319 @@
+diff --git a/addon/components/gateway/webhook-events.hbs b/addon/components/gateway/webhook-events.hbs
+index 21229d6..61c32c5 100644
+--- a/addon/components/gateway/webhook-events.hbs
++++ b/addon/components/gateway/webhook-events.hbs
+@@ -5,13 +5,13 @@
+         <table class="w-full text-sm">
+             <thead>
+                 <tr class="border-b border-gray-200 dark:border-gray-700">
+-                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">Date</th>
+-                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">Event Type</th>
+-                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">Gateway Ref</th>
+-                    <th class="text-right py-2 text-xs font-medium text-gray-500 uppercase">Amount</th>
+-                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">Status</th>
+-                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">Refund</th>
+-                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">Reconciliation</th>
++                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.date"}}</th>
++                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.type"}}</th>
++                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.reference"}}</th>
++                    <th class="text-right py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.amount"}}</th>
++                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.status"}}</th>
++                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">Reembolso</th>
++                    <th class="text-left py-2 text-xs font-medium text-gray-500 uppercase">Conciliación</th>
+                 </tr>
+             </thead>
+             <tbody>
+@@ -31,7 +31,7 @@
+                     </tr>
+                 {{else}}
+                     <tr>
+-                        <td colspan="7" class="py-4 text-center text-gray-400 text-xs">No webhook events recorded</td>
++                        <td colspan="7" class="py-4 text-center text-gray-400 text-xs">{{t "ledger.payments.gateways.webhook-events.no-events"}}</td>
+                     </tr>
+                 {{/each}}
+             </tbody>
+diff --git a/addon/components/ledger-dashboard/date-range-control.hbs b/addon/components/ledger-dashboard/date-range-control.hbs
+index af3df5a..0712eb0 100644
+--- a/addon/components/ledger-dashboard/date-range-control.hbs
++++ b/addon/components/ledger-dashboard/date-range-control.hbs
+@@ -5,7 +5,7 @@
+         @onSelect={{this.onDateRangeChanged}}
+         @autoClose={{true}}
+         @buttons={{array "clear"}}
+-        @placeholder="Dashboard period"
++        @placeholder={{t "ledger.dashboard-period"}}
+         class="w-52 form-input form-input-sm"
+     />
+ </div>
+diff --git a/addon/components/modals/issue-refund.hbs b/addon/components/modals/issue-refund.hbs
+index 84b897b..3443b37 100644
+--- a/addon/components/modals/issue-refund.hbs
++++ b/addon/components/modals/issue-refund.hbs
+@@ -11,7 +11,7 @@
+                         {{format-currency summary.total_amount summary.currency}}
+                     </span>
+                     <span class="text-xs text-gray-500">
+-                        Remaining refundable:
++                        Reembolsable restante:
+                         {{format-currency summary.remaining_refundable_amount summary.currency}}
+                     </span>
+                 </div>
+@@ -19,15 +19,15 @@
+ 
+             <div class="grid grid-cols-3 gap-3 mb-4">
+                 <div class="rounded-md border border-gray-200 dark:border-gray-700 p-3">
+-                    <div class="text-xs text-gray-500">Paid</div>
++                    <div class="text-xs text-gray-500">Pagado</div>
+                     <div class="text-sm font-semibold text-gray-900 dark:text-white">{{format-currency summary.amount_paid summary.currency}}</div>
+                 </div>
+                 <div class="rounded-md border border-gray-200 dark:border-gray-700 p-3">
+-                    <div class="text-xs text-gray-500">Refunded</div>
++                    <div class="text-xs text-gray-500">Reembolsado</div>
+                     <div class="text-sm font-semibold text-gray-900 dark:text-white">{{format-currency summary.refunded_amount summary.currency}}</div>
+                 </div>
+                 <div class="rounded-md border border-gray-200 dark:border-gray-700 p-3">
+-                    <div class="text-xs text-gray-500">Available</div>
++                    <div class="text-xs text-gray-500">Disponible</div>
+                     <div class="text-sm font-semibold text-gray-900 dark:text-white">{{format-currency summary.remaining_refundable_amount summary.currency}}</div>
+                 </div>
+             </div>
+@@ -40,7 +40,7 @@
+                     @optionLabel="label"
+                     @optionValue="gateway_transaction_id"
+                     @onChange={{this.selectGatewayTransaction}}
+-                    @placeholder="Select payment..."
++                    @placeholder="Seleccionar pago..."
+                 />
+             </InputGroup>
+ 
+diff --git a/addon/components/modals/record-payment.hbs b/addon/components/modals/record-payment.hbs
+index 2138b81..72d8b2c 100644
+--- a/addon/components/modals/record-payment.hbs
++++ b/addon/components/modals/record-payment.hbs
+@@ -12,19 +12,19 @@
+                         {{format-currency invoice.total invoice.currency}}
+                     </span>
+                     <span class="text-xs text-gray-500">
+-                        Balance:
++                        {{t "column.balance"}}:
+                         {{format-currency invoice.balance invoice.currency}}
+                     </span>
+                 </div>
+             </div>
+ 
+             {{! Amount }}
+-            <InputGroup @name="Amount" @helpText="Amount received. Defaults to the full outstanding balance.">
++            <InputGroup @name={{t "column.amount"}} @helpText="Amount received. Defaults to the full outstanding balance.">
+                 <MoneyInput class="w-full" @value={{@options.amount}} @currency={{invoice.currency}} @onChange={{@options.setAmount}} />
+             </InputGroup>
+ 
+             {{! Payment method }}
+-            <InputGroup @name="Payment Method" @helpText="How the payment was received.">
++            <InputGroup @name={{t "column.payment-method"}} @helpText="How the payment was received.">
+                 <Select
+                     class="w-full"
+                     @value={{@options.paymentMethod}}
+@@ -32,12 +32,12 @@
+                     @optionLabel="label"
+                     @optionValue="value"
+                     @onChange={{@options.setPaymentMethod}}
+-                    @placeholder="Select payment method..."
++                    @placeholder="Seleccionar método de pago..."
+                 />
+             </InputGroup>
+ 
+             {{! Reference / note }}
+-            <InputGroup @name="Reference" @helpText="Optional reference number or note for this payment.">
++            <InputGroup @name={{t "column.reference"}} @helpText="Optional reference number or note for this payment.">
+                 <Input @value={{@options.reference}} @type="text" class="w-full form-input" placeholder="e.g. bank transfer ref, cheque number" {{on "input" @options.setReference}} />
+             </InputGroup>
+         {{/let}}
+diff --git a/addon/components/modals/wallet-top-up.hbs b/addon/components/modals/wallet-top-up.hbs
+index 6e404e7..28e3ce2 100644
+--- a/addon/components/modals/wallet-top-up.hbs
++++ b/addon/components/modals/wallet-top-up.hbs
+@@ -9,18 +9,18 @@
+                 </div>
+                 <div class="flex flex-col items-end">
+                     <span class="text-sm font-bold text-gray-900 dark:text-white">{{format-currency wallet.balance wallet.currency}}</span>
+-                    <span class="text-xs text-gray-500">Current Balance</span>
++                    <span class="text-xs text-gray-500">{{t "column.balance"}}</span>
+                 </div>
+             </div>
+ 
+             {{! Amount input }}
+-            <InputGroup @name="Amount" @helpText="Amount to add to this wallet.">
++            <InputGroup @name={{t "column.amount"}} @helpText="Amount to add to this wallet.">
+                 <MoneyInput class="w-full" @value={{@options.amount}} @currency={{wallet.currency}} @onChange={{@options.setAmount}} />
+             </InputGroup>
+ 
+             {{! Description input }}
+-            <InputGroup @name="Description" @helpText="Optional note for this transaction.">
+-                <Input @value={{@options.description}} @type="text" class="w-full form-input" placeholder="Manual top-up" {{on "input" @options.setDescription}} />
++            <InputGroup @name={{t "column.description"}} @helpText="Optional note for this transaction.">
++                <Input @value={{@options.description}} @type="text" class="w-full form-input" placeholder="Recarga manual" {{on "input" @options.setDescription}} />
+             </InputGroup>
+         {{/let}}
+     </div>
+diff --git a/addon/components/modals/wallet-transfer.hbs b/addon/components/modals/wallet-transfer.hbs
+index f6eb671..26988ad 100644
+--- a/addon/components/modals/wallet-transfer.hbs
++++ b/addon/components/modals/wallet-transfer.hbs
+@@ -4,22 +4,22 @@
+             {{! Source wallet context header }}
+             <div class="flex items-start justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                 <div class="flex flex-col">
+-                    <span class="text-xs text-gray-500 uppercase tracking-wide mb-0.5">From</span>
++                    <span class="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Origen</span>
+                     <span class="text-sm font-semibold text-gray-900 dark:text-white">{{n-a wallet.name}}</span>
+                     <span class="text-xs text-gray-500">{{n-a wallet.subject.name}}</span>
+                 </div>
+                 <div class="flex flex-col items-end">
+                     <span class="text-sm font-bold text-gray-900 dark:text-white">{{format-currency wallet.balance wallet.currency}}</span>
+-                    <span class="text-xs text-gray-500">Available</span>
++                    <span class="text-xs text-gray-500">Disponible</span>
+                 </div>
+             </div>
+ 
+             {{! Destination wallet selector }}
+-            <InputGroup @name="To Wallet" @helpText="Select the destination wallet to transfer funds into.">
++            <InputGroup @name="Billetera de destino" @helpText="Select the destination wallet to transfer funds into.">
+                 <ModelSelect
+                     @modelName="ledger-wallet"
+                     @selectedModel={{@options.toWallet}}
+-                    @placeholder="Search wallets..."
++                    @placeholder="Buscar billeteras..."
+                     @triggerClass="form-select form-input"
+                     @infiniteScroll={{false}}
+                     @renderInPlace={{true}}
+@@ -37,13 +37,13 @@
+             </InputGroup>
+ 
+             {{! Amount input }}
+-            <InputGroup @name="Amount" @helpText="Amount to transfer.">
++            <InputGroup @name={{t "column.amount"}} @helpText="Amount to transfer.">
+                 <MoneyInput class="w-full" @value={{@options.amount}} @currency={{wallet.currency}} @onChange={{@options.setAmount}} />
+             </InputGroup>
+ 
+             {{! Description input }}
+-            <InputGroup @name="Description" @helpText="Optional note for this transfer.">
+-                <Input @value={{@options.description}} @type="text" class="w-full form-input" placeholder="Internal transfer" {{on "input" @options.setDescription}} />
++            <InputGroup @name={{t "column.description"}} @helpText="Optional note for this transfer.">
++                <Input @value={{@options.description}} @type="text" class="w-full form-input" placeholder="Transferencia interna" {{on "input" @options.setDescription}} />
+             </InputGroup>
+         {{/let}}
+     </div>
+diff --git a/addon/components/widget/activity-feed.hbs b/addon/components/widget/activity-feed.hbs
+index f137dcf..d4519e5 100644
+--- a/addon/components/widget/activity-feed.hbs
++++ b/addon/components/widget/activity-feed.hbs
+@@ -1,8 +1,8 @@
+ <div class="ledger-dashboard-widget flex h-full flex-col rounded-md border bg-white shadow-sm dark:bg-gray-800" ...attributes>
+     <div class="ledger-widget-header">
+         <div class="min-w-0">
+-            <div class="ledger-widget-title">Recent Financial Activity</div>
+-            <div class="ledger-widget-subtitle">Latest journal entries posted to the ledger</div>
++            <div class="ledger-widget-title">{{t "ledger.widgets.activity-feed.name"}}</div>
++            <div class="ledger-widget-subtitle">{{t "ledger.widgets.activity-feed.subtitle"}}</div>
+         </div>
+         <button type="button" class="ledger-icon-button" {{on "click" (perform this.loadData)}}><FaIcon @icon="rotate" /></button>
+     </div>
+@@ -27,7 +27,7 @@
+                 {{/each}}
+             </div>
+         {{else}}
+-            <div class="ledger-widget-empty">No recent journal entries.</div>
++            <div class="ledger-widget-empty">{{t "ledger.widgets.activity-feed.empty"}}</div>
+         {{/if}}
+     </div>
+ </div>
+diff --git a/addon/components/widget/ar-aging-summary.hbs b/addon/components/widget/ar-aging-summary.hbs
+index b5506e1..94f75c5 100644
+--- a/addon/components/widget/ar-aging-summary.hbs
++++ b/addon/components/widget/ar-aging-summary.hbs
+@@ -1,8 +1,8 @@
+ <div class="ledger-dashboard-widget flex h-full flex-col rounded-md border bg-white shadow-sm dark:bg-gray-800" ...attributes>
+     <div class="ledger-widget-header">
+         <div class="min-w-0">
+-            <div class="ledger-widget-title">AR Aging Risk</div>
+-            <div class="ledger-widget-subtitle">{{or this.data.total_invoices 0}} open invoices</div>
++            <div class="ledger-widget-title">{{t "ledger.widgets.ar-aging-summary.name"}}</div>
++            <div class="ledger-widget-subtitle">{{or this.data.total_invoices 0}} {{t "ledger.widgets.ar-aging-summary.invoices-suffix"}}</div>
+         </div>
+         <button type="button" class="ledger-icon-button" {{on "click" (perform this.load)}}><FaIcon @icon="rotate" /></button>
+     </div>
+@@ -18,7 +18,7 @@
+                     <div class="ledger-animated-row">
+                         <div class="mb-1 flex items-center justify-between gap-3 text-xs">
+                             <span class="font-semibold text-gray-700 dark:text-gray-200">{{bucket.label}}</span>
+-                            <span class="text-gray-500 dark:text-gray-400">{{bucket.invoice_count}} invoices</span>
++                            <span class="text-gray-500 dark:text-gray-400">{{bucket.invoice_count}} {{t "ledger.widgets.ar-aging-summary.invoices-suffix"}}</span>
+                         </div>
+                         <div class="ledger-progress-track">
+                             <div class="ledger-progress-bar {{bucket.agingClass}}" style={{html-safe (concat "width: " bucket.pct "%")}}></div>
+@@ -27,7 +27,7 @@
+                 {{/each}}
+             </div>
+         {{else}}
+-            <div class="ledger-widget-empty">No outstanding receivables.</div>
++            <div class="ledger-widget-empty">{{t "ledger.widgets.ar-aging-summary.empty"}}</div>
+         {{/if}}
+     </div>
+ </div>
+diff --git a/addon/components/widget/cash-flow-summary.hbs b/addon/components/widget/cash-flow-summary.hbs
+index 8931aa3..4cec0aa 100644
+--- a/addon/components/widget/cash-flow-summary.hbs
++++ b/addon/components/widget/cash-flow-summary.hbs
+@@ -1,8 +1,8 @@
+ <div class="ledger-dashboard-widget ledger-chart-widget flex h-full flex-col rounded-md border bg-white shadow-sm dark:bg-gray-800" ...attributes>
+     <div class="ledger-widget-header">
+         <div class="min-w-0">
+-            <div class="ledger-widget-title">Cash Flow Summary</div>
+-            <div class="ledger-widget-subtitle">{{this.formattedNetChange}} net cash change</div>
++            <div class="ledger-widget-title">{{t "ledger.widgets.cash-flow-summary.name"}}</div>
++            <div class="ledger-widget-subtitle">{{this.formattedNetChange}} {{t "ledger.reports.cash-flow.net-cash-change"}}</div>
+         </div>
+         <button type="button" class="ledger-icon-button" {{on "click" (perform this.load)}}><FaIcon @icon="rotate" /></button>
+     </div>
+@@ -17,7 +17,7 @@
+                 <Chart @type="bar" @labels={{this.labels}} @datasets={{this.datasets}} @options={{this.chartOptions}} />
+             </div>
+         {{else}}
+-            <div class="ledger-widget-empty">No cash flow data yet.</div>
++            <div class="ledger-widget-empty">{{t "ledger.widgets.cash-flow-summary.empty"}}</div>
+         {{/if}}
+     </div>
+ </div>
+diff --git a/addon/components/widget/invoice-status.hbs b/addon/components/widget/invoice-status.hbs
+index 253eeca..631d5b0 100644
+--- a/addon/components/widget/invoice-status.hbs
++++ b/addon/components/widget/invoice-status.hbs
+@@ -1,8 +1,8 @@
+ <div class="ledger-dashboard-widget flex h-full flex-col rounded-md border bg-white shadow-sm dark:bg-gray-800" ...attributes>
+     <div class="ledger-widget-header">
+         <div class="min-w-0">
+-            <div class="ledger-widget-title">Invoice Pipeline</div>
+-            <div class="ledger-widget-subtitle">{{or this.data.total_count 0}} invoices · open balance tracked by status</div>
++            <div class="ledger-widget-title">{{t "ledger.widgets.invoice-status.name"}}</div>
++            <div class="ledger-widget-subtitle">{{or this.data.total_count 0}} {{t "resource.invoices"}} · {{t "column.balance"}}</div>
+         </div>
+         <button type="button" class="ledger-icon-button" {{on "click" (perform this.load)}}><FaIcon @icon="rotate" /></button>
+     </div>
+@@ -27,7 +27,7 @@
+                 {{/each}}
+             </div>
+         {{else}}
+-            <div class="ledger-widget-empty">No invoices yet.</div>
++            <div class="ledger-widget-empty">{{t "ledger.widgets.invoice-status.empty"}}</div>
+         {{/if}}
+     </div>
+ </div>
+diff --git a/addon/components/widget/kpi-active-wallets.hbs b/addon/components/widget/kpi-active-wallets.hbs
+index 70463de..4532d9b 100644
+--- a/addon/components/widget/kpi-active-wallets.hbs
++++ b/addon/components/widget/kpi-active-wallets.hbs
+@@ -1 +1 @@
+-<Widget::LedgerKpiTile @metric="active_wallets" @title="Active Wallets" @icon="wallet" @accent="blue" ...attributes />
++<Widget::LedgerKpiTile @metric="active_wallets" @title={{t "ledger.widgets.kpi-active-wallets.name"}} @icon="wallet" @accent="blue" ...attributes />
+diff --git a/addon/components/widget/kpi-expenses.hbs b/addon/components/widget/kpi-expenses.hbs
+index 7e33882..d243b09 100644
+--- a/addon/components/widget/kpi-expenses.hbs
++++ b/addon/components/widget/kpi-expenses.hbs
+@@ -1 +1 @@
+-<Widget::LedgerKpiTile @metric="total_expenses" @title="Expenses" @icon="receipt" @accent="rose" ...attributes />
++<Widget::LedgerKpiTile @metric="total_expenses" @title={{t "ledger.widgets.kpi-expenses.name"}} @icon="receipt" @accent="rose" ...attributes />
+diff --git a/addon/components/widget/kpi-net-income.hbs b/addon/components/widget/kpi-net-income.hbs
+index d310853..3bbefc7 100644
+--- a/addon/components/widget/kpi-net-income.hbs
++++ b/addon/components/widget/kpi-net-income.hbs
+@@ -1 +1 @@
+-<Widget::LedgerKpiTile @metric="net_income" @title="Net Income" @icon="chart-line" @accent="blue" ...attributes />
++<Widget::LedgerKpiTile @metric="net_income" @title={{t "ledger.widgets.kpi-net-income.name"}} @icon="chart-line" @accent="blue" ...attributes />
+diff --git a/addon/components/widget/kpi-open-invoices.hbs b/addon/components/widget/kpi-open-invoices.hbs
+index 78f078d..becc0a5 100644
+--- a/addon/components/widget/kpi-open-invoices.hbs
++++ b/addon/components/widget/kpi-open-invoices.hbs
+@@ -1 +1 @@
+-<Widget::LedgerKpiTile @metric="open_invoices" @title="Open Invoices" @icon="file-circle-exclamation" @accent="amber" ...attributes />
++<Widget::LedgerKpiTile @metric="open_invoices" @title={{t "ledger.widgets.kpi-open-invoices.name"}} @icon="file-circle-exclamation" @accent="amber" ...attributes />
+diff --git a/addon/components/widget/kpi-outstanding-ar.hbs b/addon/components/widget/kpi-outstanding-ar.hbs
+index b76cc50..7cd9745 100644
+--- a/addon/components/widget/kpi-outstanding-ar.hbs
++++ b/addon/components/widget/kpi-outstanding-ar.hbs
+@@ -1 +1 @@
+-<Widget::LedgerKpiTile @metric="outstanding_ar" @title="Outstanding AR" @icon="file-invoice-dollar" @accent="amber" ...attributes />
++<Widget::LedgerKpiTile @metric="outstanding_ar" @title={{t "ledger.widgets.kpi-outstanding-ar.name"}} @icon="file-invoice-dollar" @accent="amber" ...attributes />
+diff --git a/addon/components/widget/kpi-overdue-ar.hbs b/addon/components/widget/kpi-overdue-ar.hbs
+index 40a9a40..e1ca593 100644
+--- a/addon/components/widget/kpi-overdue-ar.hbs
++++ b/addon/components/widget/kpi-overdue-ar.hbs
+@@ -1 +1 @@
+-<Widget::LedgerKpiTile @metric="overdue_ar" @title="Overdue AR" @icon="clock" @accent="rose" ...attributes />
++<Widget::LedgerKpiTile @metric="overdue_ar" @title={{t "ledger.widgets.kpi-overdue-ar.name"}} @icon="clock" @accent="rose" ...attributes />
+diff --git a/addon/components/widget/kpi-revenue.hbs b/addon/components/widget/kpi-revenue.hbs
+index 1780374..a76c7d3 100644
+--- a/addon/components/widget/kpi-revenue.hbs
++++ b/addon/components/widget/kpi-revenue.hbs
+@@ -1 +1 @@
+-<Widget::LedgerKpiTile @metric="total_revenue" @title="Revenue" @icon="sack-dollar" @accent="green" ...attributes />
++<Widget::LedgerKpiTile @metric="total_revenue" @title={{t "ledger.widgets.kpi-revenue.name"}} @icon="sack-dollar" @accent="green" ...attributes />
+diff --git a/addon/components/widget/kpi-wallet-balance.hbs b/addon/components/widget/kpi-wallet-balance.hbs
+index 3d06ec2..6f65d81 100644
+--- a/addon/components/widget/kpi-wallet-balance.hbs
++++ b/addon/components/widget/kpi-wallet-balance.hbs
+@@ -1 +1 @@
+-<Widget::LedgerKpiTile @metric="wallet_balance" @title="Wallet Balance" @icon="wallet" @accent="violet" ...attributes />
++<Widget::LedgerKpiTile @metric="wallet_balance" @title={{t "ledger.widgets.kpi-wallet-balance.name"}} @icon="wallet" @accent="violet" ...attributes />
+diff --git a/addon/components/widget/ledger-kpi-tile.js b/addon/components/widget/ledger-kpi-tile.js
+index 28b465e..5f07596 100644
+--- a/addon/components/widget/ledger-kpi-tile.js
++++ b/addon/components/widget/ledger-kpi-tile.js
+@@ -7,6 +7,7 @@ import formatCurrency from '@fleetbase/ember-ui/utils/format-currency';
+ export default class WidgetLedgerKpiTileComponent extends Component {
+     @service fetch;
+     @service ledgerDashboard;
++    @service intl;
+ 
+     @tracked data = null;
+     @tracked error = null;
+@@ -22,12 +23,12 @@ export default class WidgetLedgerKpiTileComponent extends Component {
+     }
+ 
+     get title() {
+-        return this.args.title ?? this.metric.label ?? 'Metric';
++        return this.args.title ?? this.metric.label ?? this.intl.t('ledger.widgets.tile.metric');
+     }
+ 
+     get formattedValue() {
+         if (this.metric.multi_currency) {
+-            return 'Multi';
++            return this.intl.t('ledger.widgets.tile.multi');
+         }
+ 
+         const value = this.metric.value ?? 0;
+@@ -46,7 +47,7 @@ export default class WidgetLedgerKpiTileComponent extends Component {
+     get deltaText() {
+         const delta = this.metric.delta_percent;
+         if (typeof delta !== 'number') {
+-            return 'Current';
++            return this.intl.t('ledger.widgets.tile.current');
+         }
+ 
+         return `${delta > 0 ? '+' : ''}${delta}%`;
+@@ -77,10 +78,10 @@ export default class WidgetLedgerKpiTileComponent extends Component {
+ 
+     get footnote() {
+         if (this.metric.multi_currency) {
+-            return 'Grouped by currency';
++            return this.intl.t('ledger.widgets.tile.grouped-by-currency');
+         }
+ 
+-        return this.args.period ?? 'vs previous period';
++        return this.args.period ?? this.intl.t('ledger.widgets.tile.vs-previous-period');
+     }
+ 
+     @task *load() {
+@@ -89,7 +90,7 @@ export default class WidgetLedgerKpiTileComponent extends Component {
+             this.data = response?.data ?? response;
+             this.error = null;
+         } catch (error) {
+-            this.error = error?.message ?? 'Unable to load metric';
++            this.error = error?.message ?? this.intl.t('ledger.widgets.tile.unable-to-load');
+         }
+     }
+ 
+diff --git a/addon/components/widget/report-shortcuts.hbs b/addon/components/widget/report-shortcuts.hbs
+index 8dc8e8b..1f45dbf 100644
+--- a/addon/components/widget/report-shortcuts.hbs
++++ b/addon/components/widget/report-shortcuts.hbs
+@@ -1,8 +1,8 @@
+ <div class="ledger-dashboard-widget flex h-full flex-col overflow-hidden rounded-md border bg-white shadow-sm dark:bg-gray-800" ...attributes>
+     <div class="ledger-widget-header">
+         <div class="min-w-0">
+-            <div class="ledger-widget-title">Financial Reports</div>
+-            <div class="ledger-widget-subtitle">Jump into the source reports behind the dashboard</div>
++            <div class="ledger-widget-title">{{t "ledger.widgets.report-shortcuts.name"}}</div>
++            <div class="ledger-widget-subtitle">{{t "ledger.widgets.report-shortcuts.description"}}</div>
+         </div>
+         <FaIcon @icon="file-lines" class="text-gray-400" />
+     </div>
+@@ -11,23 +11,23 @@
+         <div class="ledger-animated-list ledger-report-grid">
+             <LinkTo @route="reports.income-statement" class="ledger-animated-row ledger-report-link">
+                 <FaIcon @icon="chart-line" />
+-                <span class="ledger-report-label">Income Statement</span>
++                <span class="ledger-report-label">{{t "menu.income-statement"}}</span>
+             </LinkTo>
+             <LinkTo @route="reports.cash-flow" class="ledger-animated-row ledger-report-link">
+                 <FaIcon @icon="money-bill-transfer" />
+-                <span class="ledger-report-label">Cash Flow</span>
++                <span class="ledger-report-label">{{t "menu.cash-flow"}}</span>
+             </LinkTo>
+             <LinkTo @route="reports.ar-aging" class="ledger-animated-row ledger-report-link">
+                 <FaIcon @icon="clock" />
+-                <span class="ledger-report-label">AR Aging</span>
++                <span class="ledger-report-label">{{t "menu.ar-aging"}}</span>
+             </LinkTo>
+             <LinkTo @route="reports.wallet-summary" class="ledger-animated-row ledger-report-link">
+                 <FaIcon @icon="wallet" />
+-                <span class="ledger-report-label">Wallet Summary</span>
++                <span class="ledger-report-label">{{t "menu.wallet-summary"}}</span>
+             </LinkTo>
+             <LinkTo @route="accounting.general-ledger" class="ledger-animated-row ledger-report-link">
+                 <FaIcon @icon="book-open" />
+-                <span class="ledger-report-label">General Ledger</span>
++                <span class="ledger-report-label">{{t "menu.general-ledger"}}</span>
+             </LinkTo>
+         </div>
+     </div>
+diff --git a/addon/components/widget/revenue-trend.hbs b/addon/components/widget/revenue-trend.hbs
+index 1049319..a9c4ead 100644
+--- a/addon/components/widget/revenue-trend.hbs
++++ b/addon/components/widget/revenue-trend.hbs
+@@ -1,8 +1,8 @@
+ <div class="ledger-dashboard-widget ledger-chart-widget flex h-full flex-col rounded-md border bg-white shadow-sm dark:bg-gray-800" ...attributes>
+     <div class="ledger-widget-header">
+         <div class="min-w-0">
+-            <div class="ledger-widget-title">Revenue Trend</div>
+-            <div class="ledger-widget-subtitle">{{this.formattedRevenue}} revenue · {{this.formattedNet}} net</div>
++            <div class="ledger-widget-title">{{t "ledger.widgets.revenue-trend.name"}}</div>
++            <div class="ledger-widget-subtitle">{{this.formattedRevenue}} {{t "ledger.widgets.revenue-trend.name"}} · {{this.formattedNet}} {{t "ledger.widgets.kpi-net-income.name"}}</div>
+         </div>
+         <button type="button" class="ledger-icon-button" {{on "click" (perform this.load)}}><FaIcon @icon="rotate" /></button>
+     </div>
+@@ -17,7 +17,7 @@
+                 <Chart @type="line" @labels={{this.data.labels}} @datasets={{this.chartDatasets}} @options={{this.chartOptions}} />
+             </div>
+         {{else}}
+-            <div class="ledger-widget-empty">No revenue data yet.</div>
++            <div class="ledger-widget-empty">{{t "ledger.widgets.revenue-trend.empty"}}</div>
+         {{/if}}
+     </div>
+ </div>
+diff --git a/addon/components/widget/wallet-balances.hbs b/addon/components/widget/wallet-balances.hbs
+index 3fa50e6..02e6143 100644
+--- a/addon/components/widget/wallet-balances.hbs
++++ b/addon/components/widget/wallet-balances.hbs
+@@ -1,8 +1,8 @@
+ <div class="ledger-dashboard-widget flex h-full flex-col rounded-md border bg-white shadow-sm dark:bg-gray-800" ...attributes>
+     <div class="ledger-widget-header">
+         <div class="min-w-0">
+-            <div class="ledger-widget-title">Wallet Balances</div>
+-            <div class="ledger-widget-subtitle">Grouped by currency with top active wallets</div>
++            <div class="ledger-widget-title">{{t "ledger.widgets.wallet-balances.name"}}</div>
++            <div class="ledger-widget-subtitle">{{t "ledger.widgets.wallet-balances.subtitle"}}</div>
+         </div>
+         <button type="button" class="ledger-icon-button" {{on "click" (perform this.loadData)}}><FaIcon @icon="rotate" /></button>
+     </div>
+@@ -26,7 +26,7 @@
+             </div>
+             {{#if this.topWallets.length}}
+                 <div class="mt-5 border-t border-gray-100 pt-4 dark:border-gray-700">
+-                    <div class="mb-2 text-[10px] font-bold uppercase text-gray-500 dark:text-gray-400">Top Wallets</div>
++                    <div class="mb-2 text-[10px] font-bold uppercase text-gray-500 dark:text-gray-400">{{t "ledger.widgets.wallet-balances.top-wallets"}}</div>
+                     <div class="ledger-animated-list space-y-2">
+                         {{#each this.topWallets as |wallet index|}}
+                             <div class="ledger-animated-row flex items-center gap-3 text-xs">
+@@ -39,7 +39,7 @@
+                 </div>
+             {{/if}}
+         {{else}}
+-            <div class="ledger-widget-empty">No wallet data.</div>
++            <div class="ledger-widget-empty">{{t "ledger.widgets.wallet-balances.empty"}}</div>
+         {{/if}}
+     </div>
+ </div>
+diff --git a/addon/controllers/accounting/general-ledger.js b/addon/controllers/accounting/general-ledger.js
+index 8607e44..a585763 100644
+--- a/addon/controllers/accounting/general-ledger.js
++++ b/addon/controllers/accounting/general-ledger.js
+@@ -6,12 +6,12 @@ import { isArray } from '@ember/array';
+ import { task } from 'ember-concurrency';
+ 
+ const ACCOUNT_TYPES = [
+-    { label: 'All Types', value: null },
+-    { label: 'Asset', value: 'asset' },
+-    { label: 'Liability', value: 'liability' },
+-    { label: 'Equity', value: 'equity' },
+-    { label: 'Revenue', value: 'revenue' },
+-    { label: 'Expense', value: 'expense' },
++    { label: 'Todos los tipos', value: null },
++    { label: 'Activo', value: 'asset' },
++    { label: 'Pasivo', value: 'liability' },
++    { label: 'Capital / Patrimonio', value: 'equity' },
++    { label: 'Ingresos', value: 'revenue' },
++    { label: 'Gastos', value: 'expense' },
+ ];
+ 
+ export default class AccountingGeneralLedgerController extends Controller {
+diff --git a/addon/controllers/application.js b/addon/controllers/application.js
+index 4192a6c..bd140ce 100644
+--- a/addon/controllers/application.js
++++ b/addon/controllers/application.js
+@@ -4,31 +4,32 @@ import { inject as service } from '@ember/service';
+ 
+ export default class ApplicationController extends Controller {
+     @service fetch;
++    @service intl;
+ 
+     get navigationItems() {
+         return [
+             {
+-                label: 'Dashboard',
+-                description: 'Ledger dashboard and financial overview.',
++                label: this.intl.t('ledger.navigation.dashboard.label'),
++                description: this.intl.t('ledger.navigation.dashboard.description'),
+                 icon: 'chart-simple',
+                 route: 'console.ledger.home',
+                 keywords: ['overview', 'metrics', 'finance dashboard'],
+             },
+             {
+-                label: 'Billing',
+-                description: 'Invoices and reusable invoice templates.',
++                label: this.intl.t('ledger.navigation.billing.label'),
++                description: this.intl.t('ledger.navigation.billing.description'),
+                 icon: 'file-invoice-dollar',
+                 children: [
+                     {
+-                        label: 'Invoices',
+-                        description: 'Create, send, and manage customer invoices.',
++                        label: this.intl.t('ledger.navigation.invoices.label'),
++                        description: this.intl.t('ledger.navigation.invoices.description'),
+                         icon: 'file-invoice-dollar',
+                         route: 'console.ledger.billing.invoices.index',
+                         keywords: ['receivables', 'customers', 'payments due'],
+                     },
+                     {
+-                        label: 'Invoice Templates',
+-                        description: 'Design reusable invoice templates.',
++                        label: this.intl.t('ledger.navigation.invoice-templates.label'),
++                        description: this.intl.t('ledger.navigation.invoice-templates.description'),
+                         icon: 'file-code',
+                         route: 'console.ledger.billing.invoice-templates.index',
+                         keywords: ['templates', 'invoice design', 'documents'],
+@@ -36,27 +37,27 @@ export default class ApplicationController extends Controller {
+                 ],
+             },
+             {
+-                label: 'Payments',
+-                description: 'Transactions, wallets, and payment gateways.',
++                label: this.intl.t('ledger.navigation.payments.label'),
++                description: this.intl.t('ledger.navigation.payments.description'),
+                 icon: 'money-bill-transfer',
+                 children: [
+                     {
+-                        label: 'Transactions',
+-                        description: 'Review payment and wallet transaction history.',
++                        label: this.intl.t('ledger.navigation.transactions.label'),
++                        description: this.intl.t('ledger.navigation.transactions.description'),
+                         icon: 'money-bill-transfer',
+                         route: 'console.ledger.payments.transactions.index',
+                         keywords: ['payments', 'charges', 'refunds', 'settlements'],
+                     },
+                     {
+-                        label: 'Wallets',
+-                        description: 'Manage company, customer, and driver wallets.',
++                        label: this.intl.t('ledger.navigation.wallets.label'),
++                        description: this.intl.t('ledger.navigation.wallets.description'),
+                         icon: 'wallet',
+                         route: 'console.ledger.payments.wallets.index',
+                         keywords: ['balances', 'top ups', 'payouts'],
+                     },
+                     {
+-                        label: 'Gateways',
+-                        description: 'Configure payment gateway integrations.',
++                        label: this.intl.t('ledger.navigation.gateways.label'),
++                        description: this.intl.t('ledger.navigation.gateways.description'),
+                         icon: 'credit-card',
+                         route: 'console.ledger.payments.gateways.index',
+                         keywords: ['stripe', 'payment providers', 'checkout'],
+@@ -64,27 +65,27 @@ export default class ApplicationController extends Controller {
+                 ],
+             },
+             {
+-                label: 'Accounting',
+-                description: 'Chart of accounts, journals, and general ledger.',
++                label: this.intl.t('ledger.navigation.accounting.label'),
++                description: this.intl.t('ledger.navigation.accounting.description'),
+                 icon: 'calculator',
+                 children: [
+                     {
+-                        label: 'Chart of Accounts',
+-                        description: 'Manage the ledger account structure.',
++                        label: this.intl.t('ledger.navigation.chart-of-accounts.label'),
++                        description: this.intl.t('ledger.navigation.chart-of-accounts.description'),
+                         icon: 'sitemap',
+                         route: 'console.ledger.accounting.accounts.index',
+                         keywords: ['accounts', 'coa', 'accounting'],
+                     },
+                     {
+-                        label: 'Journal Entries',
+-                        description: 'Browse and create double-entry journal entries.',
++                        label: this.intl.t('ledger.navigation.journal-entries.label'),
++                        description: this.intl.t('ledger.navigation.journal-entries.description'),
+                         icon: 'book',
+                         route: 'console.ledger.accounting.journal.index',
+                         keywords: ['journals', 'debits', 'credits'],
+                     },
+                     {
+-                        label: 'General Ledger',
+-                        description: 'Review posted activity across accounts.',
++                        label: this.intl.t('ledger.navigation.general-ledger.label'),
++                        description: this.intl.t('ledger.navigation.general-ledger.description'),
+                         icon: 'scroll',
+                         route: 'console.ledger.accounting.general-ledger',
+                         keywords: ['ledger', 'posted transactions', 'account activity'],
+@@ -92,48 +93,48 @@ export default class ApplicationController extends Controller {
+                 ],
+             },
+             {
+-                label: 'Reports',
+-                description: 'Financial statements and operational reports.',
++                label: this.intl.t('ledger.navigation.reports.label'),
++                description: this.intl.t('ledger.navigation.reports.description'),
+                 icon: 'chart-line',
+                 children: [
+                     {
+-                        label: 'Income Statement',
+-                        description: 'Revenue, expenses, and net income.',
++                        label: this.intl.t('ledger.navigation.income-statement.label'),
++                        description: this.intl.t('ledger.navigation.income-statement.description'),
+                         icon: 'chart-line',
+                         route: 'console.ledger.reports.income-statement',
+                         keywords: ['profit and loss', 'pnl', 'revenue', 'expenses'],
+                     },
+                     {
+-                        label: 'Balance Sheet',
+-                        description: 'Assets, liabilities, and equity.',
++                        label: this.intl.t('ledger.navigation.balance-sheet.label'),
++                        description: this.intl.t('ledger.navigation.balance-sheet.description'),
+                         icon: 'scale-balanced',
+                         route: 'console.ledger.reports.balance-sheet',
+                         keywords: ['assets', 'liabilities', 'equity'],
+                     },
+                     {
+-                        label: 'Trial Balance',
+-                        description: 'Debit and credit balances by account.',
++                        label: this.intl.t('ledger.navigation.trial-balance.label'),
++                        description: this.intl.t('ledger.navigation.trial-balance.description'),
+                         icon: 'list-check',
+                         route: 'console.ledger.reports.trial-balance',
+                         keywords: ['debits', 'credits', 'balances'],
+                     },
+                     {
+-                        label: 'Cash Flow',
+-                        description: 'Cash movement over the selected period.',
++                        label: this.intl.t('ledger.navigation.cash-flow.label'),
++                        description: this.intl.t('ledger.navigation.cash-flow.description'),
+                         icon: 'water',
+                         route: 'console.ledger.reports.cash-flow',
+                         keywords: ['cash', 'inflow', 'outflow'],
+                     },
+                     {
+-                        label: 'AR Aging',
+-                        description: 'Outstanding receivables by age bucket.',
++                        label: this.intl.t('ledger.navigation.ar-aging.label'),
++                        description: this.intl.t('ledger.navigation.ar-aging.description'),
+                         icon: 'clock',
+                         route: 'console.ledger.reports.ar-aging',
+                         keywords: ['receivables', 'overdue invoices', 'aging'],
+                     },
+                     {
+-                        label: 'Wallet Summary',
+-                        description: 'Wallet balances and activity summary.',
++                        label: this.intl.t('ledger.navigation.wallet-summary.label'),
++                        description: this.intl.t('ledger.navigation.wallet-summary.description'),
+                         icon: 'wallet',
+                         route: 'console.ledger.reports.wallet-summary',
+                         keywords: ['wallet report', 'balances'],
+@@ -141,27 +142,27 @@ export default class ApplicationController extends Controller {
+                 ],
+             },
+             {
+-                label: 'Settings',
+-                description: 'Ledger billing, payment, and accounting settings.',
++                label: this.intl.t('ledger.navigation.settings.label'),
++                description: this.intl.t('ledger.navigation.settings.description'),
+                 icon: 'gear',
+                 children: [
+                     {
+-                        label: 'Invoice Settings',
+-                        description: 'Configure invoice numbering, defaults, and templates.',
++                        label: this.intl.t('ledger.navigation.invoice-settings.label'),
++                        description: this.intl.t('ledger.navigation.invoice-settings.description'),
+                         icon: 'file-invoice',
+                         route: 'console.ledger.settings.invoice',
+                         keywords: ['invoice defaults', 'numbering', 'template'],
+                     },
+                     {
+-                        label: 'Payment Settings',
+-                        description: 'Configure payment defaults and gateway behavior.',
++                        label: this.intl.t('ledger.navigation.payment-settings.label'),
++                        description: this.intl.t('ledger.navigation.payment-settings.description'),
+                         icon: 'gear',
+                         route: 'console.ledger.settings.payment',
+                         keywords: ['payments', 'gateway defaults'],
+                     },
+                     {
+-                        label: 'Accounting Settings',
+-                        description: 'Configure accounting automation and posting behavior.',
++                        label: this.intl.t('ledger.navigation.accounting-settings.label'),
++                        description: this.intl.t('ledger.navigation.accounting-settings.description'),
+                         icon: 'calculator',
+                         route: 'console.ledger.settings.accounting',
+                         keywords: ['journal automation', 'posting', 'accounts'],
+diff --git a/addon/extension.js b/addon/extension.js
+index 82f992c..8e8f7cd 100644
+--- a/addon/extension.js
++++ b/addon/extension.js
+@@ -9,47 +9,47 @@ export default {
+         menuService.registerHeaderMenuItem('Ledger', 'console.ledger', {
+             icon: 'calculator',
+             priority: 4,
+-            description: 'Invoicing, payments, accounting, and real-time financial reporting.',
++            description: 'Facturación, pagos, contabilidad e informes financieros en tiempo real.',
+             shortcuts: [
+                 {
+-                    title: 'Invoices',
+-                    description: 'Create, send, and manage customer invoices.',
++                    title: 'Facturas',
++                    description: 'Cree, envíe y administre facturas a clientes.',
+                     icon: 'file-invoice-dollar',
+                     route: 'console.ledger.billing.invoices',
+                 },
+                 {
+-                    title: 'Wallets',
+-                    description: 'Manage driver, customer, and company wallets and balances.',
++                    title: 'Billeteras',
++                    description: 'Administre billeteras de la empresa, clientes y conductores.',
+                     icon: 'wallet',
+                     route: 'console.ledger.payments.wallets',
+                 },
+                 {
+-                    title: 'Transactions',
+-                    description: 'A chronological record of every transaction.',
++                    title: 'Transacciones',
++                    description: 'Registro cronológico de todas las transacciones.',
+                     icon: 'money-bill-transfer',
+                     route: 'console.ledger.payments.transactions',
+                 },
+                 {
+-                    title: 'Payment Gateways',
+-                    description: 'Configure and manage payment gateway integrations.',
++                    title: 'Pasarelas de pago',
++                    description: 'Configure y administre integraciones de pasarelas de pago.',
+                     icon: 'credit-card',
+                     route: 'console.ledger.payments.gateways',
+                 },
+                 {
+-                    title: 'Chart of Accounts',
+-                    description: 'View and manage the full chart of accounts.',
++                    title: 'Catálogo de cuentas',
++                    description: 'Consulte y administre el catálogo completo de cuentas contables.',
+                     icon: 'sitemap',
+                     route: 'console.ledger.accounting.accounts',
+                 },
+                 {
+-                    title: 'Journal Entries',
+-                    description: 'Browse and create double-entry journal entries.',
++                    title: 'Pólizas contables',
++                    description: 'Consulte y elabore pólizas contables de partida doble.',
+                     icon: 'book',
+                     route: 'console.ledger.accounting.journal',
+                 },
+                 {
+-                    title: 'General Ledger',
+-                    description: 'Review all posted transactions across every account.',
++                    title: 'Libro mayor',
++                    description: 'Revise todas las transacciones asentadas en cada cuenta contable.',
+                     icon: 'book-open',
+                     route: 'console.ledger.accounting.general-ledger',
+                 },
+@@ -143,187 +143,187 @@ export default {
+         const widgets = [
+             new Widget({
+                 id: 'ledger-kpi-revenue',
+-                name: 'Revenue',
+-                description: 'Total revenue for the current period with comparison.',
++                name: 'Ingresos',
++                description: 'Ingresos totales para el período actual con comparativa.',
+                 icon: 'sack-dollar',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/kpi-revenue'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas Rápidas',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-kpi-expenses',
+-                name: 'Expenses',
+-                description: 'Total expenses for the current period with comparison.',
++                name: 'Gastos',
++                description: 'Gastos totales para el período actual con comparativa.',
+                 icon: 'receipt',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/kpi-expenses'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas Rápidas',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-kpi-net-income',
+-                name: 'Net Income',
+-                description: 'Revenue less expenses for the current period.',
++                name: 'Utilidad neta',
++                description: 'Ingresos menos gastos durante el período actual.',
+                 icon: 'chart-line',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/kpi-net-income'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas Rápidas',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-kpi-outstanding-ar',
+-                name: 'Outstanding AR',
+-                description: 'Unpaid receivables balance across open invoices.',
++                name: 'Cuentas por cobrar',
++                description: 'Saldo pendiente de cobro en facturas abiertas.',
+                 icon: 'file-invoice-dollar',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/kpi-outstanding-ar'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas Rápidas',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-kpi-overdue-ar',
+-                name: 'Overdue AR',
+-                description: 'Overdue receivables requiring collection attention.',
++                name: 'Cuentas por cobrar vencidas',
++                description: 'Cuentas por cobrar que requieren gestión de cobranza.',
+                 icon: 'clock',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/kpi-overdue-ar'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas Rápidas',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-kpi-open-invoices',
+-                name: 'Open Invoices',
+-                description: 'Draft, sent, and overdue invoices still requiring action.',
++                name: 'Facturas abiertas',
++                description: 'Facturas en borrador, enviadas y vencidas por gestionar.',
+                 icon: 'file-circle-exclamation',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/kpi-open-invoices'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas Rápidas',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-kpi-wallet-balance',
+-                name: 'Wallet Balance',
+-                description: 'Active wallet balances, grouped by currency when needed.',
++                name: 'Saldo en billeteras',
++                description: 'Saldos activos en billeteras, desglosados por divisa.',
+                 icon: 'wallet',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/kpi-wallet-balance'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas Rápidas',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-kpi-active-wallets',
+-                name: 'Active Wallets',
+-                description: 'Count of active wallets with current balances.',
++                name: 'Billeteras activas',
++                description: 'Cantidad de billeteras activas con saldo disponible.',
+                 icon: 'wallet',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/kpi-active-wallets'),
+                 grid_options: { w: 3, h: 4, minW: 3, minH: 4 },
+-                category: 'KPI Tiles',
++                category: 'Métricas Rápidas',
+                 default: true,
+             }),
+ 
+             new Widget({
+                 id: 'ledger-revenue-trend',
+-                name: 'Revenue Trend',
+-                description: 'Revenue and expense trend over selectable periods.',
++                name: 'Tendencia de ingresos',
++                description: 'Evolución de ingresos y gastos en períodos seleccionables.',
+                 icon: 'chart-line',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/revenue-trend'),
+                 grid_options: { w: 6, h: 9, minW: 5, minH: 8 },
+-                category: 'Analytics',
++                category: 'Analítica',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-cash-flow-summary',
+-                name: 'Cash Flow Summary',
+-                description: 'Operating, financing, and investing cash movement.',
++                name: 'Resumen de flujo de efectivo',
++                description: 'Flujo de efectivo operativo, financiero y de inversión.',
+                 icon: 'money-bill-transfer',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/cash-flow-summary'),
+                 grid_options: { w: 6, h: 9, minW: 5, minH: 8 },
+-                category: 'Analytics',
++                category: 'Analítica',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-invoice-status',
+-                name: 'Invoice Pipeline',
+-                description: 'Counts and balances by invoice status.',
++                name: 'Estatus de facturación',
++                description: 'Recuento y saldo clasificado por estado de factura.',
+                 icon: 'file-invoice-dollar',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/invoice-status'),
+                 grid_options: { w: 4, h: 8, minW: 4, minH: 7 },
+-                category: 'Operations',
++                category: 'Operaciones',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-ar-aging-summary',
+-                name: 'AR Aging Risk',
+-                description: 'Condensed accounts receivable aging buckets.',
++                name: 'Riesgo de antigüedad de saldos',
++                description: 'Rangos consolidados de antigüedad de cuentas por cobrar.',
+                 icon: 'clock',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/ar-aging-summary'),
+                 grid_options: { w: 4, h: 8, minW: 4, minH: 7 },
+-                category: 'Operations',
++                category: 'Operaciones',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-wallet-balances',
+-                name: 'Wallet Balances',
+-                description: 'Total wallet balances grouped by currency across all driver and customer wallets.',
++                name: 'Saldos en billeteras',
++                description: 'Saldos totales agrupados por divisa en billeteras de conductores y clientes.',
+                 icon: 'wallet',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/wallet-balances'),
+                 grid_options: { w: 4, h: 8, minW: 4, minH: 7 },
+-                category: 'Operations',
++                category: 'Operaciones',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-activity-feed',
+-                name: 'Recent Financial Activity',
+-                description: 'Live feed of the most recent double-entry journal entries in the ledger.',
++                name: 'Actividad financiera reciente',
++                description: 'Flujo en vivo de las pólizas contables registradas más recientes.',
+                 icon: 'book',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/activity-feed'),
+                 grid_options: { w: 8, h: 10, minW: 6, minH: 8 },
+-                category: 'Operations',
++                category: 'Operaciones',
+                 default: true,
+             }),
+             new Widget({
+                 id: 'ledger-report-shortcuts',
+-                name: 'Financial Reports',
+-                description: 'Shortcuts into Ledger financial reports.',
++                name: 'Reportes financieros',
++                description: 'Accesos rápidos a los estados contables de Ledger.',
+                 icon: 'file-lines',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/report-shortcuts'),
+                 grid_options: { w: 4, h: 10, minW: 4, minH: 7 },
+-                category: 'Reports',
++                category: 'Reportes',
+                 default: true,
+             }),
+ 
+             new Widget({
+                 id: 'ledger-overview',
+-                name: 'Financial Overview (Legacy)',
+-                description: 'Legacy grouped KPI widget. Replaced by individual Ledger KPI tiles.',
++                name: 'Resumen financiero (Heredado)',
++                description: 'Widget agrupado heredado de KPI. Reemplazado por métricas individuales.',
+                 icon: 'gauge-high',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/overview'),
+                 grid_options: { w: 12, h: 4, minW: 8, minH: 4 },
+                 options: { title: 'Financial Overview' },
+-                category: 'Legacy',
++                category: 'Heredado',
+                 default: false,
+             }),
+             new Widget({
+                 id: 'ledger-revenue-chart',
+-                name: 'Revenue Chart (Legacy)',
+-                description: 'Legacy daily revenue bar widget. Replaced by Revenue Trend.',
++                name: 'Gráfico de ingresos (Heredado)',
++                description: 'Gráfico de barras de ingresos diarios heredado. Reemplazado por Tendencia de ingresos.',
+                 icon: 'chart-line',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/revenue-chart'),
+                 grid_options: { w: 8, h: 6, minW: 6, minH: 6 },
+                 options: { title: 'Revenue Chart' },
+-                category: 'Legacy',
++                category: 'Heredado',
+                 default: false,
+             }),
+             new Widget({
+                 id: 'ledger-invoice-summary',
+-                name: 'Invoice Summary (Legacy)',
+-                description: 'Legacy invoice counts widget. Replaced by Invoice Pipeline.',
++                name: 'Resumen de facturas (Heredado)',
++                description: 'Recuento de facturas heredado. Reemplazado por Estatus de facturación.',
+                 icon: 'file-invoice-dollar',
+                 component: new ExtensionComponent('@fleetbase/ledger-engine', 'widget/invoice-summary'),
+                 grid_options: { w: 4, h: 6, minW: 3, minH: 5 },
+                 options: { title: 'Invoice Summary' },
+-                category: 'Legacy',
++                category: 'Heredado',
+                 default: false,
+             }),
+         ];
+diff --git a/addon/templates/accounting/general-ledger.hbs b/addon/templates/accounting/general-ledger.hbs
+index f2393c1..7d46f7f 100644
+--- a/addon/templates/accounting/general-ledger.hbs
++++ b/addon/templates/accounting/general-ledger.hbs
+@@ -1,4 +1,4 @@
+-<Layout::Section::Header @title="General Ledger" @actionsWrapperClass="flex flex-row items-center space-x-2">
++<Layout::Section::Header @title={{t "menu.general-ledger"}} @actionsWrapperClass="flex flex-row items-center space-x-2">
+     <div class="general-ledger-filters flex flex-row items-center space-x-2">
+         <DatePicker
+             @value={{this.dateRange}}
+@@ -6,7 +6,7 @@
+             @onSelect={{this.onDateRangeChanged}}
+             @autoClose={{true}}
+             @buttons={{array "clear"}}
+-            @placeholder="Select date range"
++            @placeholder={{t "ledger.reports.filter-date"}}
+             class="w-52"
+         />
+         <div class="fleetbase-model-select fleetbase-power-select ember-model-select w-40">
+@@ -26,7 +26,7 @@
+             @size="sm"
+             @type="default"
+             @icon={{if this.allExpanded "chevron-up" "chevron-down"}}
+-            @helpText={{if this.allExpanded "Collapse All" "Expand All"}}
++            @helpText={{if this.allExpanded (t "common.collapse-all" fallback="Contraer todo") (t "common.expand-all" fallback="Expandir todo")}}
+             {{on "click" this.toggleExpandAll}}
+         />
+     </div>
+@@ -73,12 +73,12 @@
+                                     <table class="w-full text-sm">
+                                         <thead>
+                                             <tr class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+-                                                <th class="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">Date</th>
+-                                                <th class="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">Ref #</th>
+-                                                <th class="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">Description</th>
+-                                                <th class="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">Debit</th>
+-                                                <th class="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">Credit</th>
+-                                                <th class="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">Balance</th>
++                                                <th class="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.date"}}</th>
++                                                <th class="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.reference"}}</th>
++                                                <th class="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.description"}}</th>
++                                                <th class="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">{{t "ledger.accounting.journal.debit"}}</th>
++                                                <th class="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">{{t "ledger.accounting.journal.credit"}}</th>
++                                                <th class="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">{{t "column.balance"}}</th>
+                                             </tr>
+                                         </thead>
+                                         <tbody>
+@@ -107,7 +107,7 @@
+                                         </tbody>
+                                         <tfoot>
+                                             <tr class="border-t-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+-                                                <td colspan="3" class="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Totals</td>
++                                                <td colspan="3" class="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">{{t "column.total"}}</td>
+                                                 <td class="px-4 py-2 text-right text-xs font-semibold text-gray-900 dark:text-white">
+                                                     {{format-currency row.summary.total_debits acct.currency}}
+                                                 </td>
+@@ -123,7 +123,7 @@
+                                 </div>
+                             {{else}}
+                                 <div class="px-4 py-6 text-center text-xs text-gray-400 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+-                                    No journal entries for this account{{#if this.date_from}} in the selected period{{/if}}.
++                                    No hay pólizas contables para esta cuenta{{#if this.date_from}} en el período seleccionado{{/if}}.
+                                 </div>
+                             {{/if}}
+                         {{/if}}
+@@ -134,8 +134,8 @@
+         {{else}}
+             <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+                 <FaIcon @icon="book-open" class="w-12 h-12 mb-3 opacity-30" />
+-                <p class="text-sm font-medium">No accounts found.</p>
+-                <p class="text-xs mt-1">Create accounts in the Chart of Accounts to see entries here.</p>
++                <p class="text-sm font-medium">No se encontraron cuentas.</p>
++                <p class="text-xs mt-1">Cree cuentas en el Catálogo de cuentas para ver pólizas aquí.</p>
+             </div>
+         {{/if}}
+     </div>
+diff --git a/addon/templates/application.hbs b/addon/templates/application.hbs
+index 31f5e9a..63dac9a 100644
+--- a/addon/templates/application.hbs
++++ b/addon/templates/application.hbs
+@@ -1,5 +1,5 @@
+ <EmberWormhole @to="sidebar-menu-items">
+-    <Layout::Sidebar::Navigator @items={{this.navigationItems}} @searchPlaceholder="Search Ledger..." @searchProvider={{this.searchNavigation}} />
++    <Layout::Sidebar::Navigator @items={{this.navigationItems}} @searchPlaceholder={{t "ledger.search-placeholder"}} @searchProvider={{this.searchNavigation}} />
+ </EmberWormhole>
+ <Layout::Section::Container>
+     {{outlet}}
+diff --git a/addon/templates/home.hbs b/addon/templates/home.hbs
+index 2c8c8e4..6dfbe47 100644
+--- a/addon/templates/home.hbs
++++ b/addon/templates/home.hbs
+@@ -1,7 +1,7 @@
+ <Layout::Section::Body class="overflow-y-scroll h-full">
+     <Dashboard
+         @defaultDashboardId="ledger"
+-        @defaultDashboardName="Ledger Dashboard"
++        @defaultDashboardName={{t "ledger.dashboard-name"}}
+         @extension="ledger"
+         @leftHeaderWrapperClass="ledger-dashboard-title"
+         @rightHeaderWrapperClass="ledger-dashboard-actions"
+diff --git a/addon/templates/reports/ar-aging.hbs b/addon/templates/reports/ar-aging.hbs
+index c269b72..5d21c7d 100644
+--- a/addon/templates/reports/ar-aging.hbs
++++ b/addon/templates/reports/ar-aging.hbs
+@@ -1,7 +1,7 @@
+-<Layout::Section::Header @title="AR Aging" @actionsWrapperClass="flex flex-row items-center space-x-2">
++<Layout::Section::Header @title={{t "ledger.reports.ar-aging.title"}} @actionsWrapperClass="flex flex-row items-center space-x-2">
+     <div class="flex flex-row items-center space-x-2">
+-        <DatePicker @value={{this.as_of}} @onSelect={{this.onDateChanged}} @autoClose={{true}} @buttons={{array "clear"}} @placeholder="As of date" class="w-44 form-input form-input-sm" />
+-        <Button @size="sm" @type="default" @icon="refresh" @helpText="Refresh" {{on "click" this.reload}} />
++        <DatePicker @value={{this.as_of}} @onSelect={{this.onDateChanged}} @autoClose={{true}} @buttons={{array "clear"}} @placeholder={{t "ledger.reports.as-of-date"}} class="w-44 form-input form-input-sm" />
++        <Button @size="sm" @type="default" @icon="refresh" @helpText={{t "common.refresh"}} {{on "click" this.reload}} />
+     </div>
+ </Layout::Section::Header>
+ <Layout::Section::Body class="overflow-y-auto h-full">
+@@ -11,14 +11,14 @@
+         {{else if this.data}}
+             <div class="flex items-center justify-between mb-6">
+                 <div>
+-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Accounts Receivable Aging</h2>
++                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.ar-aging.title"}}</h2>
+                     {{#if this.data.as_of_date}}
+                         <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
+                     {{/if}}
+                 </div>
+                 {{#if this.data.grand_total}}
+                     <div class="text-right">
+-                        <p class="text-xs text-gray-500 uppercase tracking-wide">Total Outstanding</p>
++                        <p class="text-xs text-gray-500 uppercase tracking-wide">{{t "ledger.reports.ar-aging.total-receivables"}}</p>
+                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{format-currency this.data.grand_total this.companyCurrency}}</p>
+                     </div>
+                 {{/if}}
+@@ -38,16 +38,16 @@
+ 
+             <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                 <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Outstanding Invoices</h3>
++                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.widgets.kpi-outstanding-ar.name"}}</h3>
+                 </div>
+                 <table class="w-full text-sm overflow-hidden">
+                     <thead>
+                         <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+-                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Invoice</th>
+-                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
+-                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Due Date</th>
+-                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Balance</th>
+-                            <th class="px-4 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bucket</th>
++                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "resource.invoice"}}</th>
++                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.customer"}}</th>
++                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.due-date"}}</th>
++                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.balance"}}</th>
++                            <th class="px-4 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rango</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+diff --git a/addon/templates/reports/balance-sheet.hbs b/addon/templates/reports/balance-sheet.hbs
+index 55f1676..fa742f3 100644
+--- a/addon/templates/reports/balance-sheet.hbs
++++ b/addon/templates/reports/balance-sheet.hbs
+@@ -1,7 +1,7 @@
+-<Layout::Section::Header @title="Balance Sheet" @actionsWrapperClass="flex flex-row items-center space-x-2">
++<Layout::Section::Header @title={{t "ledger.reports.balance-sheet.title"}} @actionsWrapperClass="flex flex-row items-center space-x-2">
+     <div class="flex flex-row items-center space-x-2">
+-        <DatePicker @value={{this.as_of}} @onSelect={{this.onDateChanged}} @autoClose={{true}} @buttons={{array "clear"}} @placeholder="As of date" class="w-44 form-input form-input-sm" />
+-        <Button @size="sm" @type="default" @icon="refresh" @helpText="Refresh" {{on "click" this.reload}} />
++        <DatePicker @value={{this.as_of}} @onSelect={{this.onDateChanged}} @autoClose={{true}} @buttons={{array "clear"}} @placeholder={{t "ledger.reports.as-of-date"}} class="w-44 form-input form-input-sm" />
++        <Button @size="sm" @type="default" @icon="refresh" @helpText={{t "common.refresh"}} {{on "click" this.reload}} />
+     </div>
+ </Layout::Section::Header>
+ <Layout::Section::Body class="overflow-y-auto h-full">
+@@ -11,12 +11,12 @@
+         {{else if this.data}}
+             <div class="flex items-center justify-between mb-6">
+                 <div>
+-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Balance Sheet</h2>
++                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.balance-sheet.title"}}</h2>
+                     {{#if this.data.as_of_date}}
+                         <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
+                     {{/if}}
+                 </div>
+-                <Badge @color={{if this.data.balanced "green" "red"}}>{{if this.data.balanced "Balanced" "Unbalanced"}}</Badge>
++                <Badge @color={{if this.data.balanced "green" "red"}}>{{if this.data.balanced "Cuadrado" "Descuadrado"}}</Badge>
+             </div>
+             {{#each
+                 (array
+@@ -53,7 +53,7 @@
+             {{/each}}
+             <div class="border-t-2 border-gray-400 dark:border-gray-700 pt-4">
+                 <div class="flex justify-between items-center py-1">
+-                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Total Liabilities &amp; Equity</span>
++                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{t "ledger.reports.balance-sheet.total-liabilities-and-equity"}}</span>
+                     <span class="text-sm font-bold text-gray-900 dark:text-white">{{format-currency this.data.total_liabilities_and_equity this.companyCurrency}}</span>
+                 </div>
+             </div>
+diff --git a/addon/templates/reports/cash-flow.hbs b/addon/templates/reports/cash-flow.hbs
+index cfc7abe..85e06dc 100644
+--- a/addon/templates/reports/cash-flow.hbs
++++ b/addon/templates/reports/cash-flow.hbs
+@@ -1,4 +1,4 @@
+-<Layout::Section::Header @title="Cash Flow" @actionsWrapperClass="flex flex-row items-center space-x-2">
++<Layout::Section::Header @title={{t "ledger.reports.cash-flow.title"}} @actionsWrapperClass="flex flex-row items-center space-x-2">
+     <div class="flex flex-row items-center space-x-2">
+         <DatePicker
+             @value={{this.dateRange}}
+@@ -6,10 +6,10 @@
+             @onSelect={{this.onDateRangeChanged}}
+             @autoClose={{true}}
+             @buttons={{array "clear"}}
+-            @placeholder="Select period"
++            @placeholder={{t "ledger.reports.period"}}
+             class="w-52 form-input form-input-sm"
+         />
+-        <Button @size="sm" @type="default" @icon="refresh" @helpText="Refresh" {{on "click" this.reload}} />
++        <Button @size="sm" @type="default" @icon="refresh" @helpText={{t "common.refresh"}} {{on "click" this.reload}} />
+     </div>
+ </Layout::Section::Header>
+ <Layout::Section::Body class="overflow-y-auto h-full">
+@@ -19,7 +19,7 @@
+         {{else if this.data}}
+             <div class="flex items-center justify-between mb-6">
+                 <div>
+-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Cash Flow Statement</h2>
++                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.cash-flow.title"}}</h2>
+                     {{#if this.data.period}}
+                         <p class="text-sm text-gray-500 mt-0.5">{{this.data.period}}</p>
+                     {{/if}}
+@@ -29,7 +29,7 @@
+             {{! Operating Activities }}
+             <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                 <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Operating Activities</h3>
++                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.cash-flow.operating-activities"}}</h3>
+                 </div>
+                 <table class="w-full text-sm overflow-hidden">
+                     <tbody>
+@@ -58,7 +58,7 @@
+             {{! Financing Activities }}
+             <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                 <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Financing Activities</h3>
++                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.reports.cash-flow.financing-activities"}}</h3>
+                 </div>
+                 <table class="w-full text-sm overflow-hidden">
+                     <tbody>
+diff --git a/addon/templates/reports/income-statement.hbs b/addon/templates/reports/income-statement.hbs
+index 7367443..81f9660 100644
+--- a/addon/templates/reports/income-statement.hbs
++++ b/addon/templates/reports/income-statement.hbs
+@@ -1,4 +1,4 @@
+-<Layout::Section::Header @title="Income Statement" @actionsWrapperClass="flex flex-row items-center space-x-2">
++<Layout::Section::Header @title={{t "ledger.reports.income-statement.title"}} @actionsWrapperClass="flex flex-row items-center space-x-2">
+     <div class="flex flex-row items-center space-x-2">
+         <DatePicker
+             @value={{this.dateRange}}
+@@ -6,10 +6,10 @@
+             @onSelect={{this.onDateRangeChanged}}
+             @autoClose={{true}}
+             @buttons={{array "clear"}}
+-            @placeholder="Select period"
++            @placeholder={{t "ledger.reports.period"}}
+             class="w-52 form-input form-input-sm"
+         />
+-        <Button @size="sm" @type="default" @icon="refresh" @helpText="Refresh" {{on "click" this.reload}} />
++        <Button @size="sm" @type="default" @icon="refresh" @helpText={{t "common.refresh"}} {{on "click" this.reload}} />
+     </div>
+ </Layout::Section::Header>
+ <Layout::Section::Body class="overflow-y-auto h-full">
+@@ -19,18 +19,18 @@
+         {{else if this.data}}
+             <div class="flex items-center justify-between mb-6">
+                 <div>
+-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Income Statement</h2>
++                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.income-statement.title"}}</h2>
+                     {{#if this.data.period}}
+                         <p class="text-sm text-gray-500 mt-0.5">{{this.data.period}}</p>
+                     {{/if}}
+                 </div>
+-                <Badge @color={{if this.data.profitable "green" "red"}}>{{if this.data.profitable "Profitable" "Net Loss"}}</Badge>
++                <Badge @color={{if this.data.profitable "green" "red"}}>{{if this.data.profitable "Con utilidad" "Pérdida neta"}}</Badge>
+             </div>
+ 
+             {{! Revenue }}
+             <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                 <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Revenue</h3>
++                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.widgets.kpi-revenue.name"}}</h3>
+                 </div>
+                 <table class="w-full text-sm overflow-hidden">
+                     <tbody>
+@@ -46,7 +46,7 @@
+                     </tbody>
+                     <tfoot>
+                         <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
+-                            <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Total Revenue</td>
++                            <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.income-statement.operating-revenue"}}</td>
+                             <td class="px-4 py-2.5 text-right font-bold text-green-600 dark:text-green-400">{{format-currency this.data.total_revenue this.companyCurrency}}</td>
+                         </tr>
+                     </tfoot>
+@@ -56,7 +56,7 @@
+             {{! Expenses }}
+             <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                 <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Expenses</h3>
++                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.widgets.kpi-expenses.name"}}</h3>
+                 </div>
+                 <table class="w-full text-sm overflow-hidden">
+                     <tbody>
+@@ -72,7 +72,7 @@
+                     </tbody>
+                     <tfoot>
+                         <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
+-                            <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Total Expenses</td>
++                            <td colspan="2" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "ledger.widgets.kpi-expenses.name"}} Total</td>
+                             <td class="px-4 py-2.5 text-right font-bold text-red-600 dark:text-red-400">{{format-currency this.data.total_expenses this.companyCurrency}}</td>
+                         </tr>
+                     </tfoot>
+@@ -82,7 +82,7 @@
+             {{! Net Income }}
+             <div class="border-t-2 border-gray-400 dark:border-gray-700 pt-4">
+                 <div class="flex justify-between items-center py-1">
+-                    <span class="text-base font-bold text-gray-900 dark:text-white">Net Income</span>
++                    <span class="text-base font-bold text-gray-900 dark:text-white">{{t "ledger.widgets.kpi-net-income.name"}}</span>
+                     <span class="text-base font-bold {{if this.data.profitable 'text-green-600 dark:text-green-400' 'text-red-600 dark:text-red-400'}}">
+                         {{format-currency this.data.net_income this.companyCurrency}}
+                     </span>
+diff --git a/addon/templates/reports/trial-balance.hbs b/addon/templates/reports/trial-balance.hbs
+index ff62cb9..b7bb25f 100644
+--- a/addon/templates/reports/trial-balance.hbs
++++ b/addon/templates/reports/trial-balance.hbs
+@@ -1,7 +1,7 @@
+-<Layout::Section::Header @title="Trial Balance" @actionsWrapperClass="flex flex-row items-center space-x-2">
++<Layout::Section::Header @title={{t "ledger.reports.trial-balance.title"}} @actionsWrapperClass="flex flex-row items-center space-x-2">
+     <div class="flex flex-row items-center space-x-2">
+-        <DatePicker @value={{this.as_of}} @onSelect={{this.onDateChanged}} @autoClose={{true}} @buttons={{array "clear"}} @placeholder="As of date" class="w-44 form-input form-input-sm" />
+-        <Button @size="sm" @type="default" @icon="refresh" @helpText="Refresh" {{on "click" this.reload}} />
++        <DatePicker @value={{this.as_of}} @onSelect={{this.onDateChanged}} @autoClose={{true}} @buttons={{array "clear"}} @placeholder={{t "ledger.reports.as-of-date"}} class="w-44 form-input form-input-sm" />
++        <Button @size="sm" @type="default" @icon="refresh" @helpText={{t "common.refresh"}} {{on "click" this.reload}} />
+     </div>
+ </Layout::Section::Header>
+ <Layout::Section::Body class="overflow-y-auto h-full">
+@@ -11,23 +11,23 @@
+         {{else if this.data}}
+             <div class="flex items-center justify-between mb-6">
+                 <div>
+-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Trial Balance</h2>
++                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.trial-balance.title"}}</h2>
+                     {{#if this.data.as_of_date}}
+                         <p class="text-sm text-gray-500 mt-0.5">As of {{format-date-fns this.data.as_of_date "MMMM d, yyyy"}}</p>
+                     {{/if}}
+                 </div>
+-                <Badge @color={{if this.data.balanced "green" "red"}}>{{if this.data.balanced "Balanced" "Unbalanced"}}</Badge>
++                <Badge @color={{if this.data.balanced "green" "red"}}>{{if this.data.balanced "Cuadrado" "Descuadrado"}}</Badge>
+             </div>
+ 
+             <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                 <table class="w-full text-sm overflow-hidden">
+                     <thead>
+                         <tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+-                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
+-                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Account</th>
+-                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+-                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Debit</th>
+-                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Credit</th>
++                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.code"}}</th>
++                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "resource.account"}}</th>
++                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.type"}}</th>
++                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.accounting.journal.debit"}}</th>
++                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "ledger.accounting.journal.credit"}}</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+@@ -46,12 +46,12 @@
+                                 </td>
+                             </tr>
+                         {{else}}
+-                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">No account data available</td></tr>
++                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 text-sm">No hay datos de cuentas disponibles</td></tr>
+                         {{/each}}
+                     </tbody>
+                     <tfoot>
+                         <tr class="bg-gray-50 dark:bg-gray-800 border-t-2 border-gray-300 dark:border-gray-700">
+-                            <td colspan="3" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">Totals</td>
++                            <td colspan="3" class="px-4 py-2.5 font-semibold text-gray-900 dark:text-white">{{t "column.total"}}</td>
+                             <td class="px-4 py-2.5 text-right font-bold text-gray-900 dark:text-white">{{format-currency this.data.total_debits this.companyCurrency}}</td>
+                             <td class="px-4 py-2.5 text-right font-bold text-gray-900 dark:text-white">{{format-currency this.data.total_credits this.companyCurrency}}</td>
+                         </tr>
+diff --git a/addon/templates/reports/wallet-summary.hbs b/addon/templates/reports/wallet-summary.hbs
+index 2f053e9..f905c16 100644
+--- a/addon/templates/reports/wallet-summary.hbs
++++ b/addon/templates/reports/wallet-summary.hbs
+@@ -1,4 +1,4 @@
+-<Layout::Section::Header @title="Wallet Summary" @actionsWrapperClass="flex flex-row items-center space-x-2">
++<Layout::Section::Header @title={{t "ledger.reports.wallet-summary.title"}} @actionsWrapperClass="flex flex-row items-center space-x-2">
+     <div class="flex flex-row items-center space-x-2">
+         <DatePicker
+             @value={{this.dateRange}}
+@@ -6,10 +6,10 @@
+             @onSelect={{this.onDateRangeChanged}}
+             @autoClose={{true}}
+             @buttons={{array "clear"}}
+-            @placeholder="Select period"
++            @placeholder={{t "ledger.reports.period"}}
+             class="w-52 form-input form-input-sm"
+         />
+-        <Button @size="sm" @type="default" @icon="refresh" @helpText="Refresh" {{on "click" this.reload}} />
++        <Button @size="sm" @type="default" @icon="refresh" @helpText={{t "common.refresh"}} {{on "click" this.reload}} />
+     </div>
+ </Layout::Section::Header>
+ <Layout::Section::Body class="overflow-y-auto h-full">
+@@ -19,7 +19,7 @@
+         {{else if this.data}}
+             <div class="flex items-center justify-between mb-6">
+                 <div>
+-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Wallet Summary</h2>
++                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{t "ledger.reports.wallet-summary.title"}}</h2>
+                     {{#if this.data.period}}
+                         <p class="text-sm text-gray-500 mt-0.5">
+                             {{this.data.period.from}}
+@@ -33,15 +33,15 @@
+             {{! Wallet counts by owner type }}
+             <div class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                 <div class="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wallets by Owner Type</h3>
++                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Billeteras por tipo de titular</h3>
+                 </div>
+                 <table class="w-full text-sm overflow-hidden">
+                     <thead>
+                         <tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+-                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Owner Type</th>
+-                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Count</th>
+-                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Balance</th>
+-                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Currency</th>
++                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.owner"}}</th>
++                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cantidad</th>
++                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.balance"}}</th>
++                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{t "column.currency"}}</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+@@ -57,7 +57,7 @@
+                                 <td class="px-4 py-2 text-gray-500 font-mono text-xs">{{or row.currency "—"}}</td>
+                             </tr>
+                         {{else}}
+-                            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-sm">No wallet data</td></tr>
++                            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-sm">{{t "ledger.widgets.wallet-balances.empty"}}</td></tr>
+                         {{/each}}
+                     </tbody>
+                 </table>
+diff --git a/addon/templates/settings/accounting.hbs b/addon/templates/settings/accounting.hbs
+index dfb0c21..d8264fe 100644
+--- a/addon/templates/settings/accounting.hbs
++++ b/addon/templates/settings/accounting.hbs
+@@ -1,9 +1,9 @@
+-<Layout::Section::Header @title="Accounting Settings">
++<Layout::Section::Header @title={{t "ledger.settings.accounting.title"}}>
+     <Button
+         @type="primary"
+         @size="sm"
+         @icon="save"
+-        @text="Save Changes"
++        @text={{t "common.save-changes"}}
+         @onClick={{perform this.saveSettings}}
+         @disabled={{this.saveSettings.isRunning}}
+         @isLoading={{or this.saveSettings.isRunning this.getSettings.isRunning}}
+@@ -15,8 +15,8 @@
+         <div class="max-w-3xl my-10 mx-auto space-y-6">
+ 
+             {{! ── Base Currency & Fiscal Year ────────────────────────────────────── }}
+-            <ContentPanel @title="Currency & Fiscal Year" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Base Currency" @helpText="The reporting currency for all financial statements and the chart of accounts.">
++            <ContentPanel @title="Divisa base y año fiscal" @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name="Divisa base" @helpText="The reporting currency for all financial statements and the chart of accounts.">
+                     <CurrencySelect
+                         @currency={{this.effectiveCurrency}}
+                         @currencyData={{this.selectedCurrency}}
+@@ -30,13 +30,13 @@
+                     {{/unless}}
+                 </InputGroup>
+ 
+-                <InputGroup @name="Fiscal Year Start Month" @helpText="The month in which your organisation's fiscal year begins. Affects period-based financial reports.">
++                <InputGroup @name="Mes de inicio del año fiscal" @helpText="The month in which your organisation's fiscal year begins. Affects period-based financial reports.">
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{this.fiscalYearMonthOptions}}
+                             @selected={{find-by "value" this.fiscal_year_start_month this.fiscalYearMonthOptions}}
+                             @onChange={{this.onSelectFiscalYearMonth}}
+-                            @placeholder="Select start month"
++                            @placeholder="Seleccionar mes de inicio"
+                             @triggerClass="form-select form-input"
+                             as |opt|
+                         >
+@@ -47,12 +47,12 @@
+             </ContentPanel>
+ 
+             {{! ── Default Accounts ────────────────────────────────────────────────── }}
+-            <ContentPanel @title="Default Accounts" @open={{true}} @wrapperClass="bordered-classic">
++            <ContentPanel @title="Cuentas predeterminadas" @open={{true}} @wrapperClass="bordered-classic">
+                 <div class="text-xs text-gray-500 mb-3">
+                     These accounts are used automatically when posting transactions unless a specific account is selected on the transaction itself.
+                 </div>
+ 
+-                <InputGroup @name="Default Revenue Account" @helpText="Applied to income line items on invoices and sales transactions.">
++                <InputGroup @name={{t "ledger.settings.accounting.revenue-account"}} @helpText="Applied to income line items on invoices and sales transactions.">
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{this.revenueAccounts}}
+diff --git a/addon/templates/settings/invoice.hbs b/addon/templates/settings/invoice.hbs
+index 0725577..5e64ee7 100644
+--- a/addon/templates/settings/invoice.hbs
++++ b/addon/templates/settings/invoice.hbs
+@@ -1,9 +1,9 @@
+-<Layout::Section::Header @title="Invoice Settings">
++<Layout::Section::Header @title={{t "ledger.settings.invoice.title"}}>
+     <Button
+         @type="primary"
+         @size="sm"
+         @icon="save"
+-        @text="Save Changes"
++        @text={{t "common.save-changes"}}
+         @onClick={{perform this.saveSettings}}
+         @disabled={{this.saveSettings.isRunning}}
+         @isLoading={{or this.saveSettings.isRunning this.getSettings.isRunning}}
+@@ -15,15 +15,15 @@
+         <div class="max-w-3xl my-10 mx-auto space-y-6">
+ 
+             {{! ── Numbering ──────────────────────────────────────────────────── }}
+-            <ContentPanel @title="Invoice Numbering" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Invoice Number Prefix" @helpText="This prefix is prepended to every new invoice number, e.g. 'INV-000001'.">
++            <ContentPanel @title="Numeración de facturas" @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.prefix"}} @helpText="This prefix is prepended to every new invoice number, e.g. 'INV-000001'.">
+                     <Input @value={{this.invoice_prefix}} @type="text" class="w-full form-input" placeholder="INV" />
+                 </InputGroup>
+             </ContentPanel>
+ 
+             {{! ── Currency & Payment Terms ────────────────────────────────────── }}
+-            <ContentPanel @title="Currency & Payment Terms" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Default Currency" @helpText="The currency applied to new invoices unless overridden on the invoice itself.">
++            <ContentPanel @title="Divisa y términos de pago" @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name="Divisa predeterminada" @helpText="The currency applied to new invoices unless overridden on the invoice itself.">
+                     <CurrencySelect
+                         @currency={{this.effectiveCurrency}}
+                         @currencyData={{this.selectedCurrency}}
+@@ -37,13 +37,13 @@
+                     {{/unless}}
+                 </InputGroup>
+ 
+-                <InputGroup @name="Default Payment Terms" @helpText="Number of days after the invoice date that payment is due.">
++                <InputGroup @name={{t "ledger.settings.invoice.default-due-days"}} @helpText="Number of days after the invoice date that payment is due.">
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{this.paymentTermsOptions}}
+                             @selected={{find-by "value" this.payment_terms_days this.paymentTermsOptions}}
+                             @onChange={{this.onSelectPaymentTerms}}
+-                            @placeholder="Select payment terms"
++                            @placeholder="Seleccionar días de crédito"
+                             @triggerClass="form-select form-input"
+                             as |opt|
+                         >
+@@ -54,8 +54,8 @@
+             </ContentPanel>
+ 
+             {{! ── Default Text ─────────────────────────────────────────────────── }}
+-            <ContentPanel @title="Default Invoice Text" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Default Notes" @helpText="These notes appear at the bottom of every new invoice. You can override them per invoice.">
++            <ContentPanel @title="Textos predeterminados" @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.invoice.default-notes"}} @helpText="These notes appear at the bottom of every new invoice. You can override them per invoice.">
+                     <Textarea @value={{this.default_notes}} class="w-full form-input" rows="3" placeholder="e.g. Thank you for your business!" />
+                 </InputGroup>
+ 
+diff --git a/addon/templates/settings/payment.hbs b/addon/templates/settings/payment.hbs
+index da21581..cdcf305 100644
+--- a/addon/templates/settings/payment.hbs
++++ b/addon/templates/settings/payment.hbs
+@@ -1,9 +1,9 @@
+-<Layout::Section::Header @title="Payment Settings">
++<Layout::Section::Header @title={{t "ledger.settings.payment.title"}}>
+     <Button
+         @type="primary"
+         @size="sm"
+         @icon="save"
+-        @text="Save Changes"
++        @text={{t "common.save-changes"}}
+         @onClick={{perform this.saveSettings}}
+         @disabled={{this.saveSettings.isRunning}}
+         @isLoading={{or this.saveSettings.isRunning this.getSettings.isRunning}}
+@@ -15,14 +15,14 @@
+         <div class="max-w-3xl my-10 mx-auto space-y-6">
+ 
+             {{! ── Default Gateway ─────────────────────────────────────────────── }}
+-            <ContentPanel @title="Default Payment Gateway" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Default Gateway" @helpText="The gateway used for all invoice payments unless overridden on the individual invoice. Only active gateways are listed.">
++            <ContentPanel @title="Pasarela de pago predeterminada" @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name={{t "ledger.settings.payment.default-gateway"}} @helpText="The gateway used for all invoice payments unless overridden on the individual invoice. Only active gateways are listed.">
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{this.availableGateways}}
+                             @selected={{this.selectedGateway}}
+                             @onChange={{this.onSelectDefaultGateway}}
+-                            @placeholder="Select a payment gateway"
++                            @placeholder="Seleccionar pasarela de pago"
+                             @triggerClass="form-select form-input"
+                             @allowClear={{true}}
+                             as |gateway|
+@@ -52,8 +52,8 @@
+             </ContentPanel>
+ 
+             {{! ── Payment Behaviour ───────────────────────────────────────────── }}
+-            <ContentPanel @title="Payment Behaviour" @open={{true}} @wrapperClass="bordered-classic">
+-                <InputGroup @name="Allow Partial Payments">
++            <ContentPanel @title="Comportamiento de cobro" @open={{true}} @wrapperClass="bordered-classic">
++                <InputGroup @name="Permitir pagos parciales">
+                     <Toggle
+                         @isToggled={{this.allow_partial_payments}}
+                         @label="Allow customers to pay a portion of the invoice amount rather than the full balance."
+diff --git a/translations/es-mx.yaml b/translations/es-mx.yaml
+new file mode 100644
+index 0000000..df0aaa0
+--- /dev/null
++++ b/translations/es-mx.yaml
+@@ -0,0 +1,626 @@
++ledger:
++  extension-name: Ledger
++  extension-description: Facturación, pagos, contabilidad e informes financieros en tiempo real.
++  search-placeholder: Buscar en Ledger...
++  dashboard-name: Panel de control de Ledger
++  dashboard-period: Período del panel
++  common:
++    ledger: Ledger
++    overview: Resumen
++    transactions: Transacciones
++    continue: Continuar
++    continue-without-saving: Continuar sin guardar
++    continue-without-saving-prompt: ¿Está seguro de que desea salir? Los cambios no guardados se perderán.
++    create-a-new-resource: Crear un nuevo {resource}
++    delete-resource: Eliminar {resource}
++    delete-selected-count: Eliminar {count} seleccionados
++    done: Hecho
++    edit-resource: Editar {resource}
++    edit-resource-name: Editar {name}
++    new: Nuevo
++    print: Imprimir
++    refresh: Actualizar
++    reload: Recargar
++    resource-actions: Acciones de {resource}
++    resource-created-success-name: "{name} creado con éxito."
++    resource-updated-success: "{resource} actualizado exitosamente."
++    unauthorized-access: Acceso no autorizado
++    view-resource: Ver {resource}
++    filter: Filtrar
++    search: Buscar
++    status: Estado
++    type: Tipo
++    all: Todos
++    cancel: Cancelar
++    save: Guardar
++    save-changes: Guardar cambios
++    delete: Eliminar
++    export: Exportar
++    import: Importar
++    details: Detalles
++    close: Cerrar
++    confirm: Confirmar
++  menu:
++    dashboard: Panel de control
++    billing: Facturación
++    invoices: Facturas
++    invoice-templates: Plantillas de facturación
++    payments: Pagos
++    transactions: Transacciones
++    wallets: Billeteras
++    gateways: Pasarelas de pago
++    accounting: Contabilidad
++    chart-of-accounts: Catálogo de cuentas
++    journal-entries: Pólizas contables
++    general-ledger: Libro mayor
++    reports: Reportes financieros
++    income-statement: Estado de resultados
++    balance-sheet: Balance general
++    trial-balance: Balanza de comprobación
++    cash-flow: Flujo de efectivo
++    ar-aging: Antigüedad de saldos
++    wallet-summary: Resumen de billeteras
++    settings: Configuración
++    invoice-settings: Configuración de facturación
++    payment-settings: Configuración de pagos
++    accounting-settings: Configuración contable
++  navigation:
++    dashboard:
++      label: Panel de control
++      description: Panel de control de Ledger y resumen financiero.
++    billing:
++      label: Facturación
++      description: Facturas y plantillas de facturación reutilizables.
++    invoices:
++      label: Facturas
++      description: Cree, envíe y administre facturas a clientes.
++    invoice-templates:
++      label: Plantillas de facturación
++      description: Diseñe plantillas de facturas reutilizables.
++    payments:
++      label: Pagos
++      description: Transacciones, billeteras y pasarelas de pago.
++    transactions:
++      label: Transacciones
++      description: Revise el historial de pagos y movimientos de billeteras.
++    wallets:
++      label: Billeteras
++      description: Administre billeteras de la empresa, clientes y conductores.
++    gateways:
++      label: Pasarelas de pago
++      description: Configure integraciones con pasarelas de pago.
++    accounting:
++      label: Contabilidad
++      description: Catálogo de cuentas, pólizas contables y libro mayor.
++    chart-of-accounts:
++      label: Catálogo de cuentas
++      description: Administre la estructura contable de cuentas.
++    journal-entries:
++      label: Pólizas contables
++      description: Consulte y elabore pólizas contables de partida doble.
++    general-ledger:
++      label: Libro mayor
++      description: Revise los movimientos asentados en todas las cuentas.
++    reports:
++      label: Reportes financieros
++      description: Estados financieros e informes de operación.
++    income-statement:
++      label: Estado de resultados
++      description: Ingresos, costos, gastos y utilidad neta.
++    balance-sheet:
++      label: Balance general
++      description: Activos, pasivos y capital contable.
++    trial-balance:
++      label: Balanza de comprobación
++      description: Saldos deudores y acreedores por cuenta.
++    cash-flow:
++      label: Flujo de efectivo
++      description: Movimientos de efectivo en el período seleccionado.
++    ar-aging:
++      label: Antigüedad de saldos
++      description: Cuentas por cobrar vencidas por rango de antigüedad.
++    wallet-summary:
++      label: Resumen de billeteras
++      description: Saldos consolidados y resumen de actividad en billeteras.
++    settings:
++      label: Configuración
++      description: Ajustes de facturación, pagos y contabilidad de Ledger.
++    invoice-settings:
++      label: Configuración de facturación
++      description: Configure numeración, valores predeterminados y plantillas.
++    payment-settings:
++      label: Configuración de pagos
++      description: Configure parámetros predeterminados de cobro y pasarelas.
++    accounting-settings:
++      label: Configuración contable
++      description: Configure automatización contable y reglas de contabilización.
++  widgets:
++    kpi-revenue:
++      name: Ingresos
++      description: Ingresos totales para el período actual con comparativa.
++      category: Métricas Rápidas
++    kpi-expenses:
++      name: Gastos
++      description: Gastos totales para el período actual con comparativa.
++      category: Métricas Rápidas
++    kpi-net-income:
++      name: Utilidad neta
++      description: Ingresos menos gastos durante el período actual.
++      category: Métricas Rápidas
++    kpi-outstanding-ar:
++      name: Cuentas por cobrar
++      description: Saldo pendiente de cobro en facturas abiertas.
++      category: Métricas Rápidas
++    kpi-overdue-ar:
++      name: Cuentas por cobrar vencidas
++      description: Cuentas por cobrar que requieren gestión de cobranza.
++      category: Métricas Rápidas
++    kpi-open-invoices:
++      name: Facturas abiertas
++      description: Facturas en borrador, enviadas y vencidas por gestionar.
++      category: Métricas Rápidas
++    kpi-wallet-balance:
++      name: Saldo en billeteras
++      description: Saldos activos en billeteras, desglosados por divisa.
++      category: Métricas Rápidas
++    kpi-active-wallets:
++      name: Billeteras activas
++      description: Cantidad de billeteras activas con saldo disponible.
++      category: Métricas Rápidas
++    revenue-trend:
++      name: Tendencia de ingresos
++      description: Evolución de ingresos y gastos en períodos seleccionables.
++      subtitle: "{revenue} ingresos · {net} utilidad neta"
++      empty: Sin datos de ingresos registrados.
++      category: Analítica
++    cash-flow-summary:
++      name: Resumen de flujo de efectivo
++      description: Flujo de efectivo operativo, financiero y de inversión.
++      subtitle: "{net} variación neta de efectivo"
++      empty: Sin datos de flujo de efectivo registrados.
++      category: Analítica
++    invoice-status:
++      name: Estatus de facturación
++      description: Recuento y saldo clasificado por estado de factura.
++      subtitle: "{count} facturas · saldo abierto por estado"
++      empty: No hay facturas registradas.
++      category: Operaciones
++    ar-aging-summary:
++      name: Riesgo de antigüedad de saldos
++      description: Rangos consolidados de antigüedad de cuentas por cobrar.
++      subtitle: "{count} facturas abiertas"
++      invoices-suffix: facturas
++      empty: No hay cuentas por cobrar pendientes.
++      category: Operaciones
++    wallet-balances:
++      name: Saldos en billeteras
++      description: Saldos totales agrupados por divisa en billeteras de conductores y
++        clientes.
++      subtitle: Agrupados por divisa con las principales billeteras activas
++      top-wallets: Principales billeteras
++      empty: No hay datos de billeteras.
++      category: Operaciones
++    activity-feed:
++      name: Actividad financiera reciente
++      description: Flujo en vivo de las pólizas contables registradas más recientes.
++      subtitle: Últimos asientos contables registrados en el libro mayor
++      empty: No hay pólizas contables recientes.
++      category: Operaciones
++    report-shortcuts:
++      name: Reportes financieros
++      description: Accesos rápidos a los estados contables de Ledger.
++      category: Reportes
++    legacy-overview:
++      name: Resumen financiero (Heredado)
++      description: Widget agrupado heredado de KPI. Reemplazado por métricas individuales.
++      category: Heredado
++    legacy-revenue:
++      name: Gráfico de ingresos (Heredado)
++      description: Gráfico de barras de ingresos diarios heredado. Reemplazado por
++        Tendencia de ingresos.
++      category: Heredado
++    legacy-invoice:
++      name: Resumen de facturas (Heredado)
++      description: Recuento de facturas heredado. Reemplazado por Estatus de facturación.
++      category: Heredado
++    tile:
++      vs-previous-period: vs período anterior
++      grouped-by-currency: Agrupado por divisa
++      current: Actual
++      multi: Múltiple
++      metric: Métrica
++      unable-to-load: No se pudo cargar la métrica
++  reports:
++    title: Reportes financieros
++    period: Período
++    generate: Generar reporte
++    export-pdf: Exportar a PDF
++    export-csv: Exportar a CSV
++    as-of-date: Al corte de
++    date-range: Rango de fechas
++    filter-date: Seleccionar fecha o rango
++    income-statement:
++      title: Estado de resultados
++      subtitle: Ingresos, costos de ventas y gastos de operación
++      operating-revenue: Ingresos de operación
++      cost-of-goods-sold: Costo de ventas
++      gross-profit: Utilidad bruta
++      operating-expenses: Gastos de operación
++      operating-income: Utilidad de operación
++      net-income: Utilidad neta
++    balance-sheet:
++      title: Balance general
++      subtitle: Situación financiera de la entidad (Activo, Pasivo y Capital)
++      assets: Activos
++      current-assets: Activo circulante
++      non-current-assets: Activo no circulante
++      total-assets: Total de activos
++      liabilities: Pasivos
++      current-liabilities: Pasivo a corto plazo
++      long-term-liabilities: Pasivo a largo plazo
++      total-liabilities: Total de pasivos
++      equity: Capital contable
++      total-equity: Total capital contable
++      total-liabilities-and-equity: Total pasivo y capital
++    trial-balance:
++      title: Balanza de comprobación
++      subtitle: Sumas y saldos deudor y acreedor por cuenta
++      account-code: Código de cuenta
++      account-name: Nombre de la cuenta
++      debit-balance: Saldo deudor
++      credit-balance: Saldo acreedor
++      total: Sumas iguales
++    cash-flow:
++      title: Flujo de efectivo
++      subtitle: Entradas y salidas de efectivo por tipo de actividad
++      operating-activities: Actividades de operación
++      investing-activities: Actividades de inversión
++      financing-activities: Actividades de financiamiento
++      net-cash-change: Variación neta en efectivo
++      beginning-cash: Efectivo al inicio del período
++      ending-cash: Efectivo al final del período
++    ar-aging:
++      title: Antigüedad de saldos
++      subtitle: Cuentas por cobrar clasificadas por días de vencimiento
++      current: Al corriente
++      days-1-30: 1 a 30 días
++      days-31-60: 31 a 60 días
++      days-61-90: 61 a 90 días
++      days-over-90: Más de 90 días
++      total-receivables: Total cuentas por cobrar
++    wallet-summary:
++      title: Resumen de billeteras
++      subtitle: Consolidado de saldos y movimientos por billetera
++      total-wallets: Total de billeteras
++      active-balances: Saldos activos totales
++  accounting:
++    chart-of-accounts:
++      title: Catálogo de cuentas
++      new: Nueva cuenta contable
++      edit: Editar cuenta contable
++      code: Código de cuenta
++      name: Nombre de la cuenta
++      type: Tipo de cuenta
++      classification: Clasificación
++      parent-account: Cuenta de mayor / Cuenta padre
++      balance: Saldo actual
++      types:
++        asset: Activo
++        liability: Pasivo
++        equity: Capital / Patrimonio
++        revenue: Ingresos
++        expense: Gastos
++    journal:
++      title: Pólizas contables
++      new: Nueva póliza contable
++      edit: Editar póliza contable
++      details: Detalle de póliza
++      entry-number: Número de póliza
++      date: Fecha de póliza
++      memo: Concepto / Descripción
++      lines: Movimientos contables
++      debit: Debe (Cargo)
++      credit: Haber (Abono)
++      add-line: Agregar movimiento
++      total-debit: Total Debe
++      total-credit: Total Haber
++      difference: Diferencia
++      out-of-balance: La póliza no está cuadrada. Los cargos deben ser iguales a los abonos.
++      balanced: Póliza cuadrada
++      account: Cuenta contable
++    general-ledger:
++      title: Libro mayor
++      description: Movimientos y saldos acumulados de todas las cuentas contables.
++      filter-account: Filtrar por cuenta contable...
++      all-accounts: Todas las cuentas
++      opening-balance: Saldo inicial
++      debits: Cargos
++      credits: Abonos
++      net-movement: Movimiento neto
++      closing-balance: Saldo final
++      no-entries: No hay movimientos contables registrados para este período.
++      period: Período contable
++  payments:
++    transactions:
++      title: Transacciones
++      details: Detalles de la transacción
++      types:
++        charge: Cobro
++        refund: Reembolso
++        transfer: Transferencia
++        payout: Liquidación / Dispersión
++      statuses:
++        pending: Pendiente
++        successful: Exitosa
++        failed: Fallida
++        canceled: Cancelada
++    wallets:
++      title: Billeteras
++      new: Nueva billetera
++      edit: Editar billetera
++      details: Detalles de la billetera
++      balance: Saldo disponible
++      currency: Divisa de la billetera
++      owner: Titular
++      types:
++        customer: Cliente
++        driver: Conductor
++        organization: Organización / Empresa
++      modals:
++        top-up:
++          title: Recargar saldo de billetera
++          amount: Monto a recargar
++          source: Origen de los fondos
++          confirm: Confirmar recarga
++          success: Recarga aplicada exitosamente.
++        transfer:
++          title: Transferencia entre billeteras
++          source-wallet: Billetera de origen
++          destination-wallet: Billetera de destino
++          amount: Monto a transferir
++          confirm: Confirmar transferencia
++          success: Transferencia completada exitosamente.
++    gateways:
++      title: Pasarelas de pago
++      new: Conectar nueva pasarela
++      edit: Editar pasarela
++      tabs:
++        overview: Resumen
++        setup: Configuración y credenciales
++        diagnostics: Diagnóstico
++        webhooks: Webhooks
++      statuses:
++        active: Activa
++        inactive: Inactiva
++        sandbox: Modo pruebas (Sandbox)
++        live: Producción (Live)
++      webhook-events:
++        title: Eventos de webhook recibidos
++        no-events: No se han registrado eventos de webhook.
++        status: Estado de entrega
++        received-at: Recibido el
++  billing:
++    invoices:
++      title: Facturas
++      new: Nueva factura
++      edit: Editar factura
++      details: Detalles de la factura
++      overview: Resumen
++      line-items: Conceptos / Partidas
++      transactions: Transacciones asociadas
++      no-transactions: No hay transacciones registradas para esta factura.
++      no-line-items: No hay conceptos agregados a esta factura.
++      subtotal: Subtotal
++      tax: Impuestos
++      discount: Descuento
++      total-due: Total a pagar
++      amount-paid: Monto pagado
++      remaining-balance: Saldo pendiente
++      payment-details: Detalles del pago
++      customer-information: Información del cliente
++      billing-address: Dirección de facturación
++      notes: Notas
++      terms: Términos y condiciones
++      statuses:
++        draft: Borrador
++        sent: Enviada
++        partially_paid: Parcialmente pagada
++        paid: Pagada
++        void: Anulada
++        overdue: Vencida
++        unpaid: Sin pagar
++    invoice-templates:
++      title: Plantillas de facturación
++      new: Nueva plantilla de factura
++      edit: Editar plantilla de factura
++      details: Detalles de la plantilla
++  settings:
++    title: Configuración de Ledger
++    invoice:
++      title: Configuración de facturación
++      description: Defina serie, foliación, vencimientos y valores por defecto para
++        facturación.
++      prefix: Serie / Prefijo
++      prefix-help: Prefijo que antecederá al número de cada factura (ej. FAC-).
++      next-number: Siguiente número de folio
++      default-due-days: Días de crédito predeterminados
++      default-notes: Notas predeterminadas en facturas
++      default-terms: Términos y condiciones predeterminados
++      save-button: Guardar configuración de facturación
++      success: Configuración de facturación guardada.
++    payment:
++      title: Configuración de pagos
++      description: Configure la pasarela de cobro principal y políticas de reintento.
++      default-gateway: Pasarela predeterminada
++      auto-retry: Reintentar cobros fallidos automáticamente
++      currencies: Divisas aceptadas
++      save-button: Guardar configuración de pagos
++      success: Configuración de pagos guardada.
++    accounting:
++      title: Configuración contable
++      description: Cuentas contables para asientos automáticos y cierre de ejercicio.
++      auto-post-invoices: Generar póliza contable automática al emitir factura
++      auto-post-payments: Generar póliza contable automática al registrar pago
++      ar-account: Cuenta de cuentas por cobrar (Clientes)
++      revenue-account: Cuenta de ingresos por ventas
++      tax-account: Cuenta de impuestos trasladados (IVA)
++      bank-account: Cuenta bancaria / Caja predeterminada
++      save-button: Guardar configuración contable
++      success: Configuración contable guardada.
++  modals:
++    record-payment:
++      title: Registrar pago
++      amount-to-pay: Monto a registrar
++      payment-date: Fecha de pago
++      payment-method: Método de pago
++      destination-account: Cuenta de destino
++      reference: Referencia / No. de comprobante
++      notes: Notas adicionales
++      record-button: Confirmar registro de pago
++      success: Pago registrado exitosamente.
++    invoice-preview:
++      title: Vista previa de la factura
++      no-content: No hay vista previa disponible.
++    template-preview:
++      title: Vista previa de la plantilla
++      no-content: No hay vista previa disponible para esta plantilla.
++    issue-refund:
++      title: Emitir reembolso
++      amount: Monto a reembolsar
++      reason: Motivo del reembolso
++      confirm: Confirmar reembolso
++      success: Reembolso emitido con éxito.
++common:
++  ledger: Ledger
++  overview: Resumen
++  transactions: Transacciones
++  continue: Continuar
++  continue-without-saving: Continuar sin guardar
++  continue-without-saving-prompt: ¿Está seguro de que desea salir? Los cambios no guardados se perderán.
++  create-a-new-resource: Crear un nuevo {resource}
++  delete-resource: Eliminar {resource}
++  delete-selected-count: Eliminar {count} seleccionados
++  done: Hecho
++  edit-resource: Editar {resource}
++  edit-resource-name: Editar {name}
++  new: Nuevo
++  print: Imprimir
++  refresh: Actualizar
++  reload: Recargar
++  resource-actions: Acciones de {resource}
++  resource-created-success-name: "{name} creado con éxito."
++  resource-updated-success: "{resource} actualizado exitosamente."
++  unauthorized-access: Acceso no autorizado
++  view-resource: Ver {resource}
++  filter: Filtrar
++  search: Buscar
++  status: Estado
++  type: Tipo
++  all: Todos
++  cancel: Cancelar
++  save: Guardar
++  save-changes: Guardar cambios
++  delete: Eliminar
++  export: Exportar
++  import: Importar
++  details: Detalles
++  close: Cerrar
++  confirm: Confirmar
++resource:
++  account: Cuenta
++  accounts: Cuentas
++  invoice: Factura
++  invoices: Facturas
++  invoice-template: Plantilla de factura
++  invoice-templates: Plantillas de facturación
++  journal: Póliza contable
++  journal-entries: Pólizas contables
++  transaction: Transacción
++  transactions: Transacciones
++  wallet: Billetera
++  wallets: Billeteras
++  gateway: Pasarela de pago
++  gateways: Pasarelas de pago
++  wallet-transaction: Transacción de billetera
++  wallet-transactions: Transacciones de billetera
++column:
++  id: ID
++  number: Número
++  name: Nombre
++  code: Código
++  type: Tipo
++  status: Estado
++  direction: Sentido
++  description: Descripción
++  date: Fecha
++  created-at: Creado el
++  updated-at: Actualizado el
++  amount: Monto
++  balance: Saldo
++  balance-after: Saldo posterior
++  total: Total
++  net-amount: Monto neto
++  fee: Comisión
++  tax: Impuesto
++  currency: Divisa
++  gateway: Pasarela
++  payment-method: Método de pago
++  reference: Referencia
++  memo: Concepto / Nota
++  period: Período
++  settled-at: Liquidado el
++  failure-reason: Motivo de rechazo
++  due-date: Fecha de vencimiento
++  issued-at: Fecha de emisión
++  invoice-date: Fecha de factura
++  customer: Cliente
++  debit-account: Cuenta de cargo (Debe)
++  credit-account: Cuenta de abono (Haber)
++  source: Origen
++  driver: Conductor
++  environment: Entorno
++  default: Predeterminado
++  owner: Propietario
++  payer: Pagador
++  payee: Beneficiario
++  frozen: Congelada
++  orientation: Orientación
++menu:
++  dashboard: Panel de control
++  billing: Facturación
++  invoices: Facturas
++  invoice-templates: Plantillas de facturación
++  payments: Pagos
++  transactions: Transacciones
++  wallets: Billeteras
++  gateways: Pasarelas de pago
++  accounting: Contabilidad
++  chart-of-accounts: Catálogo de cuentas
++  journal-entries: Pólizas contables
++  general-ledger: Libro mayor
++  reports: Reportes financieros
++  income-statement: Estado de resultados
++  balance-sheet: Balance general
++  trial-balance: Balanza de comprobación
++  cash-flow: Flujo de efectivo
++  ar-aging: Antigüedad de saldos
++  wallet-summary: Resumen de billeteras
++  settings: Configuración
++  invoice-settings: Configuración de facturación
++  payment-settings: Configuración de pagos
++  accounting-settings: Configuración contable
++invoice:
++  no-transactions: No hay transacciones registradas para esta factura.
++  actions:
++    preview-invoice: "Vista previa Factura #{number}"
++    preview-invoice-fallback: Vista previa de Factura
++    download-pdf: Descargar PDF
++    record-payment: Registrar Pago
++    record-payment-title: Registrar Pago — {number}
++    copy-payment-link: Copiar enlace de pago
++    copy-invoice-url: Copiar URL de factura
++    payment-link-copied: URL de factura copiada al portapapeles.
++    payment-link-copy-failed: Error al copiar la URL de la factura. Por favor, cópiala manualmente.
++    send: Enviar Factura
++    void: Anular Factura
++    edit: Editar Factura

@@ -3837,6 +3837,496 @@ trailer:
     other: Otro
 ledger:
   extension-name: Ledger
+  extension-description: Facturación, pagos, contabilidad e informes financieros en tiempo real.
+  search-placeholder: Buscar en Ledger...
+  dashboard-name: Panel de control de Ledger
+  dashboard-period: Período del panel
+  common:
+    ledger: Ledger
+    overview: Resumen
+    transactions: Transacciones
+    continue: Continuar
+    continue-without-saving: Continuar sin guardar
+    continue-without-saving-prompt: ¿Está seguro de que desea salir? Los cambios no guardados se perderán.
+    create-a-new-resource: Crear un nuevo {resource}
+    delete-resource: Eliminar {resource}
+    delete-selected-count: Eliminar {count} seleccionados
+    done: Hecho
+    edit-resource: Editar {resource}
+    edit-resource-name: Editar {name}
+    new: Nuevo
+    print: Imprimir
+    refresh: Actualizar
+    reload: Recargar
+    resource-actions: Acciones de {resource}
+    resource-created-success-name: "{name} creado con éxito."
+    resource-updated-success: "{resource} actualizado exitosamente."
+    unauthorized-access: Acceso no autorizado
+    view-resource: Ver {resource}
+    filter: Filtrar
+    search: Buscar
+    status: Estado
+    type: Tipo
+    all: Todos
+    cancel: Cancelar
+    save: Guardar
+    save-changes: Guardar cambios
+    delete: Eliminar
+    export: Exportar
+    import: Importar
+    details: Detalles
+    close: Cerrar
+    confirm: Confirmar
+  menu:
+    dashboard: Panel de control
+    billing: Facturación
+    invoices: Facturas
+    invoice-templates: Plantillas de facturación
+    payments: Pagos
+    transactions: Transacciones
+    wallets: Billeteras
+    gateways: Pasarelas de pago
+    accounting: Contabilidad
+    chart-of-accounts: Catálogo de cuentas
+    journal-entries: Pólizas contables
+    general-ledger: Libro mayor
+    reports: Reportes financieros
+    income-statement: Estado de resultados
+    balance-sheet: Balance general
+    trial-balance: Balanza de comprobación
+    cash-flow: Flujo de efectivo
+    ar-aging: Antigüedad de saldos
+    wallet-summary: Resumen de billeteras
+    settings: Configuración
+    invoice-settings: Configuración de facturación
+    payment-settings: Configuración de pagos
+    accounting-settings: Configuración contable
+  navigation:
+    dashboard:
+      label: Panel de control
+      description: Panel de control de Ledger y resumen financiero.
+    billing:
+      label: Facturación
+      description: Facturas y plantillas de facturación reutilizables.
+    invoices:
+      label: Facturas
+      description: Cree, envíe y administre facturas a clientes.
+    invoice-templates:
+      label: Plantillas de facturación
+      description: Diseñe plantillas de facturas reutilizables.
+    payments:
+      label: Pagos
+      description: Transacciones, billeteras y pasarelas de pago.
+    transactions:
+      label: Transacciones
+      description: Revise el historial de pagos y movimientos de billeteras.
+    wallets:
+      label: Billeteras
+      description: Administre billeteras de la empresa, clientes y conductores.
+    gateways:
+      label: Pasarelas de pago
+      description: Configure integraciones con pasarelas de pago.
+    accounting:
+      label: Contabilidad
+      description: Catálogo de cuentas, pólizas contables y libro mayor.
+    chart-of-accounts:
+      label: Catálogo de cuentas
+      description: Administre la estructura contable de cuentas.
+    journal-entries:
+      label: Pólizas contables
+      description: Consulte y elabore pólizas contables de partida doble.
+    general-ledger:
+      label: Libro mayor
+      description: Revise los movimientos asentados en todas las cuentas.
+    reports:
+      label: Reportes financieros
+      description: Estados financieros e informes de operación.
+    income-statement:
+      label: Estado de resultados
+      description: Ingresos, costos, gastos y utilidad neta.
+    balance-sheet:
+      label: Balance general
+      description: Activos, pasivos y capital contable.
+    trial-balance:
+      label: Balanza de comprobación
+      description: Saldos deudores y acreedores por cuenta.
+    cash-flow:
+      label: Flujo de efectivo
+      description: Movimientos de efectivo en el período seleccionado.
+    ar-aging:
+      label: Antigüedad de saldos
+      description: Cuentas por cobrar vencidas por rango de antigüedad.
+    wallet-summary:
+      label: Resumen de billeteras
+      description: Saldos consolidados y resumen de actividad en billeteras.
+    settings:
+      label: Configuración
+      description: Ajustes de facturación, pagos y contabilidad de Ledger.
+    invoice-settings:
+      label: Configuración de facturación
+      description: Configure numeración, valores predeterminados y plantillas.
+    payment-settings:
+      label: Configuración de pagos
+      description: Configure parámetros predeterminados de cobro y pasarelas.
+    accounting-settings:
+      label: Configuración contable
+      description: Configure automatización contable y reglas de contabilización.
+  widgets:
+    kpi-revenue:
+      name: Ingresos
+      description: Ingresos totales para el período actual con comparativa.
+      category: Métricas Rápidas
+    kpi-expenses:
+      name: Gastos
+      description: Gastos totales para el período actual con comparativa.
+      category: Métricas Rápidas
+    kpi-net-income:
+      name: Utilidad neta
+      description: Ingresos menos gastos durante el período actual.
+      category: Métricas Rápidas
+    kpi-outstanding-ar:
+      name: Cuentas por cobrar
+      description: Saldo pendiente de cobro en facturas abiertas.
+      category: Métricas Rápidas
+    kpi-overdue-ar:
+      name: Cuentas por cobrar vencidas
+      description: Cuentas por cobrar que requieren gestión de cobranza.
+      category: Métricas Rápidas
+    kpi-open-invoices:
+      name: Facturas abiertas
+      description: Facturas en borrador, enviadas y vencidas por gestionar.
+      category: Métricas Rápidas
+    kpi-wallet-balance:
+      name: Saldo en billeteras
+      description: Saldos activos en billeteras, desglosados por divisa.
+      category: Métricas Rápidas
+    kpi-active-wallets:
+      name: Billeteras activas
+      description: Cantidad de billeteras activas con saldo disponible.
+      category: Métricas Rápidas
+    revenue-trend:
+      name: Tendencia de ingresos
+      description: Evolución de ingresos y gastos en períodos seleccionables.
+      subtitle: "{revenue} ingresos · {net} utilidad neta"
+      empty: Sin datos de ingresos registrados.
+      category: Analítica
+    cash-flow-summary:
+      name: Resumen de flujo de efectivo
+      description: Flujo de efectivo operativo, financiero y de inversión.
+      subtitle: "{net} variación neta de efectivo"
+      empty: Sin datos de flujo de efectivo registrados.
+      category: Analítica
+    invoice-status:
+      name: Estatus de facturación
+      description: Recuento y saldo clasificado por estado de factura.
+      subtitle: "{count} facturas · saldo abierto por estado"
+      empty: No hay facturas registradas.
+      category: Operaciones
+    ar-aging-summary:
+      name: Riesgo de antigüedad de saldos
+      description: Rangos consolidados de antigüedad de cuentas por cobrar.
+      subtitle: "{count} facturas abiertas"
+      invoices-suffix: facturas
+      empty: No hay cuentas por cobrar pendientes.
+      category: Operaciones
+    wallet-balances:
+      name: Saldos en billeteras
+      description: Saldos totales agrupados por divisa en billeteras de conductores y
+        clientes.
+      subtitle: Agrupados por divisa con las principales billeteras activas
+      top-wallets: Principales billeteras
+      empty: No hay datos de billeteras.
+      category: Operaciones
+    activity-feed:
+      name: Actividad financiera reciente
+      description: Flujo en vivo de las pólizas contables registradas más recientes.
+      subtitle: Últimos asientos contables registrados en el libro mayor
+      empty: No hay pólizas contables recientes.
+      category: Operaciones
+    report-shortcuts:
+      name: Reportes financieros
+      description: Accesos rápidos a los estados contables de Ledger.
+      category: Reportes
+    legacy-overview:
+      name: Resumen financiero (Heredado)
+      description: Widget agrupado heredado de KPI. Reemplazado por métricas individuales.
+      category: Heredado
+    legacy-revenue:
+      name: Gráfico de ingresos (Heredado)
+      description: Gráfico de barras de ingresos diarios heredado. Reemplazado por
+        Tendencia de ingresos.
+      category: Heredado
+    legacy-invoice:
+      name: Resumen de facturas (Heredado)
+      description: Recuento de facturas heredado. Reemplazado por Estatus de facturación.
+      category: Heredado
+    tile:
+      vs-previous-period: vs período anterior
+      grouped-by-currency: Agrupado por divisa
+      current: Actual
+      multi: Múltiple
+      metric: Métrica
+      unable-to-load: No se pudo cargar la métrica
+  reports:
+    title: Reportes financieros
+    period: Período
+    generate: Generar reporte
+    export-pdf: Exportar a PDF
+    export-csv: Exportar a CSV
+    as-of-date: Al corte de
+    date-range: Rango de fechas
+    filter-date: Seleccionar fecha o rango
+    income-statement:
+      title: Estado de resultados
+      subtitle: Ingresos, costos de ventas y gastos de operación
+      operating-revenue: Ingresos de operación
+      cost-of-goods-sold: Costo de ventas
+      gross-profit: Utilidad bruta
+      operating-expenses: Gastos de operación
+      operating-income: Utilidad de operación
+      net-income: Utilidad neta
+    balance-sheet:
+      title: Balance general
+      subtitle: Situación financiera de la entidad (Activo, Pasivo y Capital)
+      assets: Activos
+      current-assets: Activo circulante
+      non-current-assets: Activo no circulante
+      total-assets: Total de activos
+      liabilities: Pasivos
+      current-liabilities: Pasivo a corto plazo
+      long-term-liabilities: Pasivo a largo plazo
+      total-liabilities: Total de pasivos
+      equity: Capital contable
+      total-equity: Total capital contable
+      total-liabilities-and-equity: Total pasivo y capital
+    trial-balance:
+      title: Balanza de comprobación
+      subtitle: Sumas y saldos deudor y acreedor por cuenta
+      account-code: Código de cuenta
+      account-name: Nombre de la cuenta
+      debit-balance: Saldo deudor
+      credit-balance: Saldo acreedor
+      total: Sumas iguales
+    cash-flow:
+      title: Flujo de efectivo
+      subtitle: Entradas y salidas de efectivo por tipo de actividad
+      operating-activities: Actividades de operación
+      investing-activities: Actividades de inversión
+      financing-activities: Actividades de financiamiento
+      net-cash-change: Variación neta en efectivo
+      beginning-cash: Efectivo al inicio del período
+      ending-cash: Efectivo al final del período
+    ar-aging:
+      title: Antigüedad de saldos
+      subtitle: Cuentas por cobrar clasificadas por días de vencimiento
+      current: Al corriente
+      days-1-30: 1 a 30 días
+      days-31-60: 31 a 60 días
+      days-61-90: 61 a 90 días
+      days-over-90: Más de 90 días
+      total-receivables: Total cuentas por cobrar
+    wallet-summary:
+      title: Resumen de billeteras
+      subtitle: Consolidado de saldos y movimientos por billetera
+      total-wallets: Total de billeteras
+      active-balances: Saldos activos totales
+  accounting:
+    chart-of-accounts:
+      title: Catálogo de cuentas
+      new: Nueva cuenta contable
+      edit: Editar cuenta contable
+      code: Código de cuenta
+      name: Nombre de la cuenta
+      type: Tipo de cuenta
+      classification: Clasificación
+      parent-account: Cuenta de mayor / Cuenta padre
+      balance: Saldo actual
+      types:
+        asset: Activo
+        liability: Pasivo
+        equity: Capital / Patrimonio
+        revenue: Ingresos
+        expense: Gastos
+    journal:
+      title: Pólizas contables
+      new: Nueva póliza contable
+      edit: Editar póliza contable
+      details: Detalle de póliza
+      entry-number: Número de póliza
+      date: Fecha de póliza
+      memo: Concepto / Descripción
+      lines: Movimientos contables
+      debit: Debe (Cargo)
+      credit: Haber (Abono)
+      add-line: Agregar movimiento
+      total-debit: Total Debe
+      total-credit: Total Haber
+      difference: Diferencia
+      out-of-balance: La póliza no está cuadrada. Los cargos deben ser iguales a los abonos.
+      balanced: Póliza cuadrada
+      account: Cuenta contable
+    general-ledger:
+      title: Libro mayor
+      description: Movimientos y saldos acumulados de todas las cuentas contables.
+      filter-account: Filtrar por cuenta contable...
+      all-accounts: Todas las cuentas
+      opening-balance: Saldo inicial
+      debits: Cargos
+      credits: Abonos
+      net-movement: Movimiento neto
+      closing-balance: Saldo final
+      no-entries: No hay movimientos contables registrados para este período.
+      period: Período contable
+  payments:
+    transactions:
+      title: Transacciones
+      details: Detalles de la transacción
+      types:
+        charge: Cobro
+        refund: Reembolso
+        transfer: Transferencia
+        payout: Liquidación / Dispersión
+      statuses:
+        pending: Pendiente
+        successful: Exitosa
+        failed: Fallida
+        canceled: Cancelada
+    wallets:
+      title: Billeteras
+      new: Nueva billetera
+      edit: Editar billetera
+      details: Detalles de la billetera
+      balance: Saldo disponible
+      currency: Divisa de la billetera
+      owner: Titular
+      types:
+        customer: Cliente
+        driver: Conductor
+        organization: Organización / Empresa
+      modals:
+        top-up:
+          title: Recargar saldo de billetera
+          amount: Monto a recargar
+          source: Origen de los fondos
+          confirm: Confirmar recarga
+          success: Recarga aplicada exitosamente.
+        transfer:
+          title: Transferencia entre billeteras
+          source-wallet: Billetera de origen
+          destination-wallet: Billetera de destino
+          amount: Monto a transferir
+          confirm: Confirmar transferencia
+          success: Transferencia completada exitosamente.
+    gateways:
+      title: Pasarelas de pago
+      new: Conectar nueva pasarela
+      edit: Editar pasarela
+      tabs:
+        overview: Resumen
+        setup: Configuración y credenciales
+        diagnostics: Diagnóstico
+        webhooks: Webhooks
+      statuses:
+        active: Activa
+        inactive: Inactiva
+        sandbox: Modo pruebas (Sandbox)
+        live: Producción (Live)
+      webhook-events:
+        title: Eventos de webhook recibidos
+        no-events: No se han registrado eventos de webhook.
+        status: Estado de entrega
+        received-at: Recibido el
+  billing:
+    invoices:
+      title: Facturas
+      new: Nueva factura
+      edit: Editar factura
+      details: Detalles de la factura
+      overview: Resumen
+      line-items: Conceptos / Partidas
+      transactions: Transacciones asociadas
+      no-transactions: No hay transacciones registradas para esta factura.
+      no-line-items: No hay conceptos agregados a esta factura.
+      subtotal: Subtotal
+      tax: Impuestos
+      discount: Descuento
+      total-due: Total a pagar
+      amount-paid: Monto pagado
+      remaining-balance: Saldo pendiente
+      payment-details: Detalles del pago
+      customer-information: Información del cliente
+      billing-address: Dirección de facturación
+      notes: Notas
+      terms: Términos y condiciones
+      statuses:
+        draft: Borrador
+        sent: Enviada
+        partially_paid: Parcialmente pagada
+        paid: Pagada
+        void: Anulada
+        overdue: Vencida
+        unpaid: Sin pagar
+    invoice-templates:
+      title: Plantillas de facturación
+      new: Nueva plantilla de factura
+      edit: Editar plantilla de factura
+      details: Detalles de la plantilla
+  settings:
+    title: Configuración de Ledger
+    invoice:
+      title: Configuración de facturación
+      description: Defina serie, foliación, vencimientos y valores por defecto para
+        facturación.
+      prefix: Serie / Prefijo
+      prefix-help: Prefijo que antecederá al número de cada factura (ej. FAC-).
+      next-number: Siguiente número de folio
+      default-due-days: Días de crédito predeterminados
+      default-notes: Notas predeterminadas en facturas
+      default-terms: Términos y condiciones predeterminados
+      save-button: Guardar configuración de facturación
+      success: Configuración de facturación guardada.
+    payment:
+      title: Configuración de pagos
+      description: Configure la pasarela de cobro principal y políticas de reintento.
+      default-gateway: Pasarela predeterminada
+      auto-retry: Reintentar cobros fallidos automáticamente
+      currencies: Divisas aceptadas
+      save-button: Guardar configuración de pagos
+      success: Configuración de pagos guardada.
+    accounting:
+      title: Configuración contable
+      description: Cuentas contables para asientos automáticos y cierre de ejercicio.
+      auto-post-invoices: Generar póliza contable automática al emitir factura
+      auto-post-payments: Generar póliza contable automática al registrar pago
+      ar-account: Cuenta de cuentas por cobrar (Clientes)
+      revenue-account: Cuenta de ingresos por ventas
+      tax-account: Cuenta de impuestos trasladados (IVA)
+      bank-account: Cuenta bancaria / Caja predeterminada
+      save-button: Guardar configuración contable
+      success: Configuración contable guardada.
+  modals:
+    record-payment:
+      title: Registrar pago
+      amount-to-pay: Monto a registrar
+      payment-date: Fecha de pago
+      payment-method: Método de pago
+      destination-account: Cuenta de destino
+      reference: Referencia / No. de comprobante
+      notes: Notas adicionales
+      record-button: Confirmar registro de pago
+      success: Pago registrado exitosamente.
+    invoice-preview:
+      title: Vista previa de la factura
+      no-content: No hay vista previa disponible.
+    template-preview:
+      title: Vista previa de la plantilla
+      no-content: No hay vista previa disponible para esta plantilla.
+    issue-refund:
+      title: Emitir reembolso
+      amount: Monto a reembolsar
+      reason: Motivo del reembolso
+      confirm: Confirmar reembolso
+      success: Reembolso emitido con éxito.
 invoice:
   no-transactions: No hay transacciones registradas para esta factura.
   actions:
