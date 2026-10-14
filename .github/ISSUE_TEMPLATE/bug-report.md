@@ -1,5 +1,5 @@
 ---
-name: "\U0001FAB2Bug Report"
+name: "Bug Report"
 about: Report a bug to help us improve.
 title: ''
 labels: ''

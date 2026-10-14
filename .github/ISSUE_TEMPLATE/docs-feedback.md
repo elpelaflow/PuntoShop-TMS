@@ -1,5 +1,5 @@
 ---
-name: "\U0001F4DA Docs Feedback"
+name: "Docs Feedback"
 about: Improve Fleetbase Documentation
 title: ''
 labels: ''
