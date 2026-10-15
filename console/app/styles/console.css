@@ -552,15 +552,120 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
 /* 7. Acciones de Navegación, Sidebar y Pestañas */
 [data-palette='puntoshop'] .next-sidebar-navigator-primary-action,
 [data-palette='puntoshop'] a.next-sidebar-navigator-primary-action,
-[data-palette='puntoshop'] button.next-sidebar-navigator-primary-action {
+[data-palette='puntoshop'] button.next-sidebar-navigator-primary-action,
+[data-palette='puntoshop'] .next-sidebar-navigator-primary-action.fleet-ops-sidebar-primary-action,
+body[data-palette='puntoshop'][data-theme='dark'] .next-sidebar-navigator-primary-action.fleet-ops-sidebar-primary-action,
+body[data-palette='puntoshop'][data-theme='light'] .next-sidebar-navigator-primary-action.fleet-ops-sidebar-primary-action {
     background-color: var(--brand-default) !important;
+    border: 1px solid var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    --tw-ring-color: transparent !important;
+    box-shadow: none !important;
     color: #ffffff !important;
 }
 
 [data-palette='puntoshop'] .next-sidebar-navigator-primary-action:hover,
 [data-palette='puntoshop'] a.next-sidebar-navigator-primary-action:hover,
-[data-palette='puntoshop'] button.next-sidebar-navigator-primary-action:hover {
+[data-palette='puntoshop'] button.next-sidebar-navigator-primary-action:hover,
+[data-palette='puntoshop'] .next-sidebar-navigator-primary-action.fleet-ops-sidebar-primary-action:hover,
+body[data-palette='puntoshop'][data-theme='dark'] .next-sidebar-navigator-primary-action.fleet-ops-sidebar-primary-action:hover,
+body[data-palette='puntoshop'][data-theme='light'] .next-sidebar-navigator-primary-action.fleet-ops-sidebar-primary-action:hover {
     background-color: var(--brand-hover) !important;
+    border-color: var(--brand-hover) !important;
+}
+
+/* Botón 'Create fleet' y acciones vacías del monitor de operaciones */
+[data-palette='puntoshop'] .fleet-ops-operations-monitor-empty-action {
+    background-color: var(--brand-default) !important;
+    border: 1px solid var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-operations-monitor-empty-action:hover {
+    background-color: var(--brand-hover) !important;
+    border-color: var(--brand-hover) !important;
+}
+
+/* Navbar superior - Items al hacer hover, activos y abiertos */
+[data-palette='puntoshop'] .next-view-header-item:hover,
+[data-palette='puntoshop'] .next-view-header-item.active,
+[data-palette='puntoshop'] .next-view-header-item.is-open,
+[data-palette='puntoshop'] a.next-view-header-item:hover,
+[data-palette='puntoshop'] a.next-view-header-item.active,
+[data-palette='puntoshop'] button.next-view-header-item:hover,
+[data-palette='puntoshop'] button.next-view-header-item.active,
+[data-palette='puntoshop'] body[data-theme='light'] a.next-view-header-item:hover,
+[data-palette='puntoshop'] body[data-theme='light'] a.next-view-header-item.active,
+[data-palette='puntoshop'] body[data-theme='light'] .next-view-header-item:hover,
+[data-palette='puntoshop'] body[data-theme='light'] .next-view-header-item.active,
+[data-palette='puntoshop'] body[data-theme='light'] .next-view-header-item.is-open {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+/* Menú desplegable de perfil de usuario - Items en hover y activos */
+[data-palette='puntoshop'] .next-dd-menu .next-dd-item:hover,
+[data-palette='puntoshop'] .next-dd-menu .next-dd-item.active,
+[data-palette='puntoshop'] .next-dd-menu .next-dd-item.active.ember-basic-dropdown-trigger,
+[data-palette='puntoshop'] .next-dd-menu .next-dd-item.ember-basic-dropdown-trigger:hover,
+[data-palette='puntoshop'] body[data-theme='light'] .next-dd-menu .next-dd-item:hover,
+[data-palette='puntoshop'] body[data-theme='light'] .next-dd-menu .next-dd-item.active {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+/* Modal Customise Navigation */
+[data-palette='puntoshop'] .snm-customizer-header .text-blue-400,
+[data-palette='puntoshop'] .snm-customizer-col-title .text-blue-400,
+[data-palette='puntoshop'] .snm-customizer-pinned-check {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .snm-customizer-all-item.is-pinned,
+[data-palette='puntoshop'] body[data-theme='light'] .snm-customizer-all-item.is-pinned {
+    background-color: var(--brand-subtle) !important;
+    border-color: var(--brand-default) !important;
+    color: var(--brand-hover) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .snm-customizer-all-item.is-pinned {
+    background-color: rgb(214 28 34 / 20%) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .snm-btn-primary {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .snm-btn-primary:hover {
+    background-color: var(--brand-hover) !important;
+}
+
+[data-palette='puntoshop'] .snm-dropdown-item:hover .snm-dropdown-item-icon,
+[data-palette='puntoshop'] body[data-theme='light'] .snm-dropdown-item:hover .snm-dropdown-item-icon,
+[data-palette='puntoshop'] .snm-dropdown-card-link:hover .snm-dropdown-card-icon,
+[data-palette='puntoshop'] body[data-theme='light'] .snm-dropdown-card[href]:hover .snm-dropdown-card-icon,
+[data-palette='puntoshop'] .snm-dropdown-customise-link:hover,
+[data-palette='puntoshop'] body[data-theme='light'] .snm-dropdown-customise-link:hover {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .snm-dropdown-pin-btn:active,
+[data-palette='puntoshop'] body[data-theme='light'] .snm-dropdown-pin-btn:active {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+/* Selector de Chips de Vistas de Mapa (Mapa, Tabla, Tablero) */
+[data-palette='puntoshop'] .next-map-container-view-switch > button.active,
+[data-palette='puntoshop'] body[data-theme='dark'] .next-map-container-view-switch > button.active,
+[data-palette='puntoshop'] body[data-theme='light'] .next-map-container-view-switch > button.active {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
 }
 
 [data-palette='puntoshop'] {
@@ -607,4 +712,5 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
 [data-palette='puntoshop'] .fa-spin.text-blue-600 {
     color: var(--brand-default) !important;
 }
+
 
