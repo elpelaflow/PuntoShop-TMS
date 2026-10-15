@@ -263,14 +263,34 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
    Si se quita el atributo o se pone "default", el sistema vuelve 100% al azul.
    ========================================================== */
 
-/* 1. Botones Primarios y Wrappers (Elimina contornos azules residuales) */
+/* 1. Neutralización Global del Anillo Azul de Tailwind (Focus Rings) */
+[data-palette='puntoshop'],
+[data-palette='puntoshop'] * {
+    --tw-ring-color: transparent !important;
+}
+
+[data-palette='puntoshop'] :focus {
+    --tw-ring-color: var(--brand-default) !important;
+}
+
+/* 2. Botones y Wrappers (Elimina contornos residuales y asigna paleta de marca) */
 [data-palette='puntoshop'] .btn-wrapper {
     --tw-ring-color: transparent !important;
     --tw-ring-shadow: none !important;
     --tw-shadow: none !important;
     box-shadow: none !important;
+    border-color: transparent !important;
 }
 
+[data-palette='puntoshop'] .btn,
+[data-palette='puntoshop'] button.btn,
+[data-palette='puntoshop'] a.btn {
+    --tw-ring-color: transparent !important;
+    --tw-ring-offset-color: transparent !important;
+    --tw-ring-shadow: none !important;
+}
+
+/* Botones Primarios */
 [data-palette='puntoshop'] .btn.btn-primary,
 [data-palette='puntoshop'] button.btn.btn-primary,
 [data-palette='puntoshop'] a.btn.btn-primary,
@@ -313,6 +333,42 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
     outline: none !important;
 }
 
+/* Botones Secundarios (que por defecto usan azul) */
+[data-palette='puntoshop'] .btn.btn-secondary,
+[data-palette='puntoshop'] button.btn.btn-secondary,
+[data-palette='puntoshop'] a.btn.btn-secondary,
+[data-palette='puntoshop'] .fc-button.btn-secondary,
+[data-palette='puntoshop'] .snm-btn-secondary {
+    background-color: var(--brand-subtle) !important;
+    border-color: var(--brand-default) !important;
+    color: var(--brand-default) !important;
+    outline: none !important;
+}
+
+[data-palette='puntoshop'] .btn.btn-secondary:hover:not(:disabled),
+[data-palette='puntoshop'] button.btn.btn-secondary:hover:not(:disabled),
+[data-palette='puntoshop'] a.btn.btn-secondary:hover:not(:disabled) {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+/* Botones Magic (usados en dashboard) */
+[data-palette='puntoshop'] .btn.btn-magic,
+[data-palette='puntoshop'] button.btn.btn-magic,
+[data-palette='puntoshop'] a.btn.btn-magic {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .btn.btn-magic:hover:not(:disabled),
+[data-palette='puntoshop'] button.btn.btn-magic:hover:not(:disabled),
+[data-palette='puntoshop'] a.btn.btn-magic:hover:not(:disabled) {
+    background-color: var(--brand-hover) !important;
+    border-color: var(--brand-hover) !important;
+}
+
 [data-palette='puntoshop'][data-theme='dark'] .btn.btn-primary,
 [data-palette='puntoshop'] .dark .btn.btn-primary,
 [data-palette='puntoshop'] body[data-theme='dark'] .btn.btn-primary {
@@ -328,20 +384,114 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
     border-color: var(--brand-hover) !important;
 }
 
-/* 2. Redirección de Utilidades Azules y Sky de Tailwind (FleetOps, IAM, Developers, Navbar) */
+/* 3. Badges de Estado Informativo / Azul ("Current", badges de paneles) */
+[data-palette='puntoshop'] .status-badge.info-status-badge > span,
+[data-palette='puntoshop'] .status-badge.blue-status-badge > span,
+[data-palette='puntoshop'] .status-badge.sky-status-badge > span {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .status-badge.info-status-badge > span svg,
+[data-palette='puntoshop'] .status-badge.blue-status-badge > span svg,
+[data-palette='puntoshop'] .status-badge.sky-status-badge > span svg {
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .next-content-panel-wrapper .next-content-panel-container .next-content-panel > .next-content-panel-header .next-content-panel-header-right .status-badge.info-status-badge > span {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+/* 4. Recuadros de Íconos en Widgets de Engines (Developers, IAM, Ledger, FleetOps) */
+[data-palette='puntoshop'] .developers-activity-icon,
+[data-palette='puntoshop'] .iam-widget-icon,
+[data-palette='puntoshop'] .iam-kpi-icon,
+[data-palette='puntoshop'] .ledger-gateway-kpi-icon,
+[data-palette='puntoshop'] .fleet-ops-pulse-icon {
+    background-color: var(--brand-subtle) !important;
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'][data-theme='dark'] .developers-activity-icon,
+[data-palette='puntoshop'] .dark .developers-activity-icon,
+[data-palette='puntoshop'][data-theme='dark'] .iam-widget-icon,
+[data-palette='puntoshop'] .dark .iam-widget-icon,
+[data-palette='puntoshop'][data-theme='dark'] .iam-kpi-icon,
+[data-palette='puntoshop'] .dark .iam-kpi-icon,
+[data-palette='puntoshop'][data-theme='dark'] .ledger-gateway-kpi-icon,
+[data-palette='puntoshop'] .dark .ledger-gateway-kpi-icon {
+    background-color: rgb(214 28 34 / 20%) !important;
+    color: #fca5a5 !important;
+}
+
+/* 5. Tarjetas y Widgets con Acento de Fondo Azul */
+[data-palette='puntoshop'] .developers-kpi-accent-blue {
+    background-image: linear-gradient(135deg, rgb(214 28 34 / 10%) 0%, rgb(214 28 34 / 0%) 64%) !important;
+}
+
+[data-palette='puntoshop'] .iam-kpi-accent-blue,
+[data-palette='puntoshop'] .ledger-kpi-accent-blue,
+[data-palette='puntoshop'] .ledger-gateway-kpi-accent-blue {
+    border-color: rgb(214 28 34 / 28%) !important;
+    background-image: linear-gradient(135deg, rgb(214 28 34 / 10%) 0%, rgb(214 28 34 / 0%) 62%) !important;
+}
+
+[data-palette='puntoshop'] .iam-coverage-hero {
+    background-color: var(--brand-subtle) !important;
+}
+
+[data-palette='puntoshop'][data-theme='dark'] .iam-coverage-hero,
+[data-palette='puntoshop'] .dark .iam-coverage-hero {
+    background-color: rgb(214 28 34 / 16%) !important;
+}
+
+[data-palette='puntoshop'] .iam-action-link:hover {
+    border-color: var(--brand-default) !important;
+    background-color: var(--brand-subtle) !important;
+    color: var(--brand-hover) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-kpi-tile-pop.kpi-accent-neutral {
+    background-image: linear-gradient(135deg, rgb(214 28 34 / 5%) 0%, rgb(214 28 34 / 0%) 65%) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-pulse-tile.pulse-accent-blue {
+    border-color: rgb(214 28 34 / 25%) !important;
+    background-image: linear-gradient(135deg, rgb(214 28 34 / 10%) 0%, rgb(214 28 34 / 0%) 65%) !important;
+}
+
+[data-palette='puntoshop'] .pulse-accent-blue .fleet-ops-pulse-stripe {
+    background-color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .pulse-accent-blue .fleet-ops-pulse-value {
+    color: var(--brand-default) !important;
+}
+
+/* 6. Redirección de Utilidades Azules y Sky de Tailwind (FleetOps, IAM, Developers, Navbar) */
 /* Fondos sólidos */
 [data-palette='puntoshop'] .bg-blue-600,
 [data-palette='puntoshop'] .bg-blue-500,
 [data-palette='puntoshop'] .bg-blue-700,
+[data-palette='puntoshop'] .bg-blue-800,
+[data-palette='puntoshop'] .bg-blue-900,
 [data-palette='puntoshop'] .bg-sky-500,
-[data-palette='puntoshop'] .bg-sky-600 {
+[data-palette='puntoshop'] .bg-sky-600,
+[data-palette='puntoshop'] .bg-sky-700,
+[data-palette='puntoshop'] .bg-sky-800,
+[data-palette='puntoshop'] .bg-sky-900 {
     background-color: var(--brand-default) !important;
 }
 
 [data-palette='puntoshop'] .hover\:bg-blue-700:hover,
 [data-palette='puntoshop'] .hover\:bg-blue-600:hover,
+[data-palette='puntoshop'] .hover\:bg-blue-800:hover,
 [data-palette='puntoshop'] .hover\:bg-sky-600:hover,
-[data-palette='puntoshop'] .hover\:bg-sky-400:hover {
+[data-palette='puntoshop'] .hover\:bg-sky-400:hover,
+[data-palette='puntoshop'] .hover\:bg-sky-700:hover {
     background-color: var(--brand-hover) !important;
 }
 
@@ -350,7 +500,8 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
 [data-palette='puntoshop'] .bg-blue-100,
 [data-palette='puntoshop'] .bg-blue-200,
 [data-palette='puntoshop'] .bg-sky-50,
-[data-palette='puntoshop'] .bg-sky-100 {
+[data-palette='puntoshop'] .bg-sky-100,
+[data-palette='puntoshop'] .bg-sky-200 {
     background-color: var(--brand-subtle) !important;
 }
 
@@ -358,6 +509,7 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
 [data-palette='puntoshop'] .text-blue-600,
 [data-palette='puntoshop'] .text-blue-500,
 [data-palette='puntoshop'] .text-blue-700,
+[data-palette='puntoshop'] .text-blue-800,
 [data-palette='puntoshop'] .text-sky-500,
 [data-palette='puntoshop'] .text-sky-600,
 [data-palette='puntoshop'] .text-sky-400 {
@@ -374,8 +526,10 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
 [data-palette='puntoshop'] .border-blue-600,
 [data-palette='puntoshop'] .border-blue-500,
 [data-palette='puntoshop'] .border-blue-700,
+[data-palette='puntoshop'] .border-blue-800,
 [data-palette='puntoshop'] .border-sky-500,
-[data-palette='puntoshop'] .border-sky-600 {
+[data-palette='puntoshop'] .border-sky-600,
+[data-palette='puntoshop'] .border-sky-700 {
     border-color: var(--brand-default) !important;
 }
 
@@ -395,7 +549,7 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
     --tw-ring-color: var(--brand-default) !important;
 }
 
-/* 3. Acciones de Navegación, Sidebar y Pestañas */
+/* 7. Acciones de Navegación, Sidebar y Pestañas */
 [data-palette='puntoshop'] .next-sidebar-navigator-primary-action,
 [data-palette='puntoshop'] a.next-sidebar-navigator-primary-action,
 [data-palette='puntoshop'] button.next-sidebar-navigator-primary-action {
@@ -421,7 +575,7 @@ body[data-theme='dark'] .oauth-provider-google .oauth-provider-logo-google svg {
     color: var(--brand-default) !important;
 }
 
-/* 4. Badges, Pills y Controles de Formulario */
+/* 8. Badges, Pills y Controles de Formulario */
 [data-palette='puntoshop'] .badge.badge-primary,
 [data-palette='puntoshop'] .badge-primary,
 [data-palette='puntoshop'] span.badge-primary,

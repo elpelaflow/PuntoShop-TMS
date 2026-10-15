@@ -747,3 +747,34 @@ index 0000000..149d6ac
 +        websockets: WebSockets
 +        logs: Registros
 +        events: Eventos
+diff --git a/addon/components/widget/developers-chart.js b/addon/components/widget/developers-chart.js
+index 4519965..53bc861 100644
+--- a/addon/components/widget/developers-chart.js
++++ b/addon/components/widget/developers-chart.js
+@@ -7,6 +7,13 @@ import { task } from 'ember-concurrency';
+-const COLORS = [
++const DEFAULT_COLORS = [
+     ['#2563eb', 'rgba(37, 99, 235, 0.15)'],
+     ['#10b981', 'rgba(16, 185, 129, 0.15)'],
+     ['#ef4444', 'rgba(239, 68, 68, 0.15)'],
+     ['#f59e0b', 'rgba(245, 158, 11, 0.15)'],
+ ];
++
++const PUNTOSHOP_COLORS = [
++    ['#d61c22', 'rgba(214, 28, 34, 0.15)'],
++    ['#10b981', 'rgba(16, 185, 129, 0.15)'],
++    ['#ef4444', 'rgba(239, 68, 68, 0.15)'],
++    ['#f59e0b', 'rgba(245, 158, 11, 0.15)'],
++];
+ 
+ export default class WidgetDevelopersChartComponent extends Component {
+@@ -29,3 +36,6 @@ export default class WidgetDevelopersChartComponent extends Component {
+     get datasets() {
++        const isPuntoShop = typeof document !== 'undefined' && document.documentElement.getAttribute('data-palette') === 'puntoshop';
++        const colors = isPuntoShop ? PUNTOSHOP_COLORS : DEFAULT_COLORS;
++
+-        return (this.data?.datasets ?? []).map((dataset, index) => {
+-            const color = COLORS[index % COLORS.length];
++        return (this.data?.datasets ?? []).map((dataset, index) => {
++            const color = colors[index % colors.length];
+
