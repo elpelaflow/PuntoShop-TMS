@@ -998,7 +998,26 @@ body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-docs-a
     border-color: var(--brand-default) !important;
 }
 
-/* 13. Centro de Control y Ajustes de Fleet-Ops (Control Hub) */
+/* 13. Centros de Control de Fleet-Ops (Configuración, Maintenance Hub, Radar) */
+/* Enlaces de acciones en paneles KPI superiores (Abrir cronogramas vencidos, etc.) */
+[data-palette='puntoshop'] .fleet-ops-control-hub-kpi-action,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-kpi-action,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-kpi-action {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-control-hub-kpi:hover .fleet-ops-control-hub-kpi-action {
+    color: var(--brand-hover) !important;
+}
+
+/* Efectos hover en tarjetas KPI, enlaces y acciones */
+[data-palette='puntoshop'] .fleet-ops-control-hub-kpi:hover,
+[data-palette='puntoshop'] .fleet-ops-control-hub-link:hover,
+[data-palette='puntoshop'] .fleet-ops-control-hub-action:hover {
+    border-color: var(--brand-default) !important;
+}
+
+/* Íconos de tarjetas de enlace */
 [data-palette='puntoshop'] .fleet-ops-control-hub-link-icon,
 [data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-link-icon {
     color: var(--brand-default) !important;
@@ -1010,30 +1029,67 @@ body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-docs-a
     background-color: rgb(214 28 34 / 20%) !important;
 }
 
-[data-palette='puntoshop'] .fleet-ops-control-hub-link:hover {
-    border-color: var(--brand-default) !important;
+/* Íconos de la Cola de Acciones y Acciones Prioritarias (elimina el azul hardcoded #2563eb) */
+[data-palette='puntoshop'] .fleet-ops-control-hub-action svg,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-action svg,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action svg {
+    color: var(--brand-default) !important;
 }
 
+/* Acciones con tono de éxito (verde semántico) */
+[data-palette='puntoshop'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-green svg,
+[data-palette='puntoshop'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-success svg,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-green svg,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-success svg {
+    color: #047857 !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-green svg,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-success svg {
+    color: #34d399 !important;
+}
+
+/* Acciones con tono de advertencia (ámbar) */
+[data-palette='puntoshop'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-amber svg,
+[data-palette='puntoshop'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-warning svg,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-amber svg,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-warning svg {
+    color: #b45309 !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-amber svg,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-warning svg {
+    color: #fbbf24 !important;
+}
+
+/* Acciones y KPIs con tono azul o info (mapeados a rojo corporativo) */
 [data-palette='puntoshop'] .fleet-ops-control-hub-tone-blue,
-[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-tone-blue {
+[data-palette='puntoshop'] .fleet-ops-control-hub-tone-info,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-tone-blue,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-tone-info {
     background: linear-gradient(135deg, rgba(214, 28, 34, 0.12), rgba(214, 28, 34, 0.03) 52%, #fff 100%), #fff !important;
     border-color: rgb(214 28 34 / 25%) !important;
 }
 
 [data-palette='puntoshop'] .fleet-ops-control-hub-tone-blue svg,
-[data-palette='puntoshop'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-blue svg {
+[data-palette='puntoshop'] .fleet-ops-control-hub-tone-info svg,
+[data-palette='puntoshop'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-blue svg,
+[data-palette='puntoshop'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-info svg {
     color: var(--brand-default) !important;
 }
 
-[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-tone-blue {
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-tone-blue,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-tone-info {
     background: linear-gradient(135deg, rgba(214, 28, 34, 0.2), rgba(214, 28, 34, 0.06) 52%, #1f2937 100%), #1f2937 !important;
     border-color: rgba(214, 28, 34, 0.45) !important;
 }
 
-[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-blue svg {
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-blue svg,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-info svg {
     color: var(--brand-default) !important;
 }
 
+/* Íconos KPI y contadores */
 [data-palette='puntoshop'] .fleet-ops-control-hub-kpi-icon,
 [data-palette='puntoshop'] .fleet-ops-control-hub-link-count {
     color: var(--brand-default) !important;
@@ -1046,6 +1102,7 @@ body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-docs-a
     background-color: rgb(214 28 34 / 20%) !important;
 }
 
+/* Botón primario del hub */
 [data-palette='puntoshop'] .fleet-ops-control-hub-primary-action {
     background-color: var(--brand-default) !important;
     border-color: var(--brand-default) !important;
@@ -1056,6 +1113,7 @@ body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-docs-a
     background-color: var(--brand-hover) !important;
     border-color: var(--brand-hover) !important;
 }
+
 
 
 
