@@ -1,321 +1,153 @@
-diff --git a/addon/components/custom-fields-manager.hbs b/addon/components/custom-fields-manager.hbs
-index e105bab..6a0198a 100644
---- a/addon/components/custom-fields-manager.hbs
-+++ b/addon/components/custom-fields-manager.hbs
-@@ -1,11 +1,11 @@
- <div class="rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
-     <div>
--        <div class="rounded-md px-3 py-2">{{or @title "Custom Fields Manager"}}</div>
-+        <div class="rounded-md px-3 py-2">{{or @title (t "settings.custom-fields.manager-title" default="Administrador de campos personalizados")}}</div>
-         <TabNavigation @tabs={{this.tabs}} @onTabChange={{this.onTabChange}} @contentClass="bg-gray-100 dark:bg-gray-800 px-4 py-2" as |activeTab|>
-             {{#each this.subjects as |subject|}}
-                 <div class="subject-custom-fields {{if (eq activeTab.id subject.model) 'block' 'hidden'}}">
-                     <div class="flex flex-row justify-end mb-4 space-x-4">
--                        <Button @type="primary" @icon="square-plus" @text="New field group" @onClick={{fn this.createGroup subject}} @permission="fleet-ops update custom-field" />
-+                        <Button @type="primary" @icon="square-plus" @text={{t "settings.custom-fields.new-field-group" default="Nuevo grupo de campos"}} @onClick={{fn this.createGroup subject}} @permission="fleet-ops update custom-field" />
-                     </div>
-                     <div class="space-y-4">
-                         {{#each subject.groups as |group|}}
-@@ -14,12 +14,12 @@
-                                     <Button
-                                         @type="primary"
-                                         @icon="square-plus"
--                                        @text="Create new custom field"
-+                                        @text={{t "settings.custom-fields.create-new-field" default="Crear nuevo campo personalizado"}}
-                                         @onClick={{fn this.createCustomField subject group}}
-                                         @permission="fleet-ops update custom-field"
-                                     />
-                                     <DropdownButton
--                                        @text={{concat "Grid Size : " (or group.meta.grid_size 1)}}
-+                                        @text={{concat (t "settings.custom-fields.grid-size" default="Tamaño de cuadrícula: ") (or group.meta.grid_size 1)}}
-                                         @textClass="text-sm mr-2"
-                                         @buttonClass="flex-row-reverse w-44 justify-between"
-                                         @icon="caret-down"
-@@ -85,11 +85,10 @@
-                                     <div class="text-center">
-                                         <FaIcon @icon="layer-group" @size="2x" class="text-gray-400 mb-2" />
-                                         <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">
--                                            No custom field groups
-+                                            {{t "settings.custom-fields.no-groups" default="Sin grupos de campos personalizados"}}
-                                         </div>
-                                         <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">
--                                            Add your first field group to start adding custom fields for
--                                            {{pluralize subject.label}}
-+                                            {{t "settings.custom-fields.add-first-group-desc" subject=(pluralize subject.label) default="Agregue su primer grupo de campos para comenzar a agregar campos personalizados para {subject}"}}
-                                         </div>
-                                     </div>
-                                 </div>
-diff --git a/addon/components/custom-fields-manager.js b/addon/components/custom-fields-manager.js
-index cb72971..00b4e72 100644
---- a/addon/components/custom-fields-manager.js
-+++ b/addon/components/custom-fields-manager.js
-@@ -147,7 +147,7 @@ export default class CustomFieldsManagerComponent extends Component {
-         });
+diff --git a/addon/components/chart.js b/addon/components/chart.js
+index 2e1e5b272f7cfa078a23d037bae1987d43288b07..c045e2fc9f43812ef91b0e1c05ad03e73d83b36a 100644
+--- a/addon/components/chart.js	
++++ b/addon/components/chart.js	
+@@ -89,6 +89,36 @@ export default class ChartComponent extends Component {
+             }
+         }
  
-         this.modalsManager.show('modals/custom-field-group-form', {
--            title: 'New custom field group',
-+            title: this.intl ? this.intl.t('settings.custom-fields.new-group-modal-title', { default: 'Nuevo grupo de campos personalizados' }) : 'Nuevo grupo de campos personalizados',
-             acceptButtonIcon: 'check',
-             acceptButtonIconPrefix: 'fas',
-             declineButtonIcon: 'times',
-@@ -172,7 +172,7 @@ export default class CustomFieldsManagerComponent extends Component {
- 
-     @action createCustomField(subject, group) {
-         const customField = this.store.createRecord('custom-field', {
--            label: 'Untitled Field',
-+            label: this.intl ? this.intl.t('settings.custom-fields.untitled-field', { default: 'Campo sin título' }) : 'Campo sin título',
-             category_uuid: group.id,
-             subject_uuid: this.currentUser.companyId,
-             subject_type: 'company',
-@@ -187,9 +187,9 @@ export default class CustomFieldsManagerComponent extends Component {
- 
-     @action deleteGroup(group, subject) {
-         this.modalsManager.confirm({
--            title: 'Delete this field group?',
--            body: 'Once this field group is deleted it will not be recoverable and you will lose all custom fields inside.',
--            acceptButtonText: 'Delete',
-+            title: this.intl ? this.intl.t('settings.custom-fields.delete-group-title', { default: '¿Eliminar este grupo de campos?' }) : '¿Eliminar este grupo de campos?',
-+            body: this.intl ? this.intl.t('settings.custom-fields.delete-group-body', { default: 'Una vez eliminado este grupo de campos, no se podrá recuperar y se perderán todos los campos personalizados dentro de él.' }) : 'Una vez eliminado este grupo de campos, no se podrá recuperar y se perderán todos los campos personalizados dentro de él.',
-+            acceptButtonText: this.intl ? this.intl.t('common.delete', { default: 'Eliminar' }) : 'Eliminar',
-             acceptButtonType: 'danger',
-             confirm: async (modal) => {
-                 modal.startLoading();
-@@ -212,9 +212,9 @@ export default class CustomFieldsManagerComponent extends Component {
- 
-     @action deleteCustomField(customField, subject) {
-         this.modalsManager.confirm({
--            title: 'Delete this custom field?',
--            body: 'Once this custom field is deleted it will not be recoverable and you will lose all data assosciated.',
--            acceptButtonText: 'Delete',
-+            title: this.intl ? this.intl.t('settings.custom-fields.delete-field-title', { default: '¿Eliminar este campo personalizado?' }) : '¿Eliminar este campo personalizado?',
-+            body: this.intl ? this.intl.t('settings.custom-fields.delete-field-body', { default: 'Una vez eliminado este campo personalizado, no se podrá recuperar y se perderán todos los datos asociados.' }) : 'Una vez eliminado este campo personalizado, no se podrá recuperar y se perderán todos los datos asociados.',
-+            acceptButtonText: this.intl ? this.intl.t('common.delete', { default: 'Eliminar' }) : 'Eliminar',
-             confirm: async (modal) => {
-                 modal.startLoading();
- 
-diff --git a/addon/components/dashboard/widget-card.js b/addon/components/dashboard/widget-card.js
-index a89811c..1602300 100644
---- a/addon/components/dashboard/widget-card.js
-+++ b/addon/components/dashboard/widget-card.js
-@@ -1,4 +1,5 @@
++        const isPuntoShop = typeof document !== 'undefined' && document.documentElement.getAttribute('data-palette') === 'puntoshop';
++        if (isPuntoShop && Array.isArray(options.data.datasets)) {
++            const remapColor = (color) => {
++                if (typeof color === 'string') {
++                    return color
++                        .replace(/rgba?\(37,\s*99,\s*235/g, 'rgba(214, 28, 34')
++                        .replace(/rgba?\(52,\s*133,\s*226/g, 'rgba(214, 28, 34')
++                        .replace(/rgba?\(59,\s*130,\s*246/g, 'rgba(214, 28, 34')
++                        .replace(/#2563eb/gi, '#d61c22')
++                        .replace(/#3485e2/gi, '#d61c22')
++                        .replace(/#3b82f6/gi, '#d61c22');
++                }
++                if (Array.isArray(color)) {
++                    return color.map(remapColor);
++                }
++                return color;
++            };
++
++            options.data.datasets = options.data.datasets.map((ds) => {
++                const updated = { ...ds };
++                if (updated.backgroundColor) {
++                    updated.backgroundColor = remapColor(updated.backgroundColor);
++                }
++                if (updated.borderColor) {
++                    updated.borderColor = remapColor(updated.borderColor);
++                }
++                return updated;
++            });
++        }
++
+         this.useDateFns();
+         this.chart = new Chart(ctx, options);
+     }
+diff --git a/addon/components/layout/resource/panel/header-actions.hbs b/addon/components/layout/resource/panel/header-actions.hbs
+index c23f73dc43f3c2ab0d1f55b3d7281dc6c81a43d3..d76f6a1fa90282e3cc086091ccdcf0c41e83709c 100644
+--- a/addon/components/layout/resource/panel/header-actions.hbs	
++++ b/addon/components/layout/resource/panel/header-actions.hbs	
+@@ -5,7 +5,7 @@
+             <Button
+                 @type="primary"
+                 @icon={{if @resource.isNew "check" "save"}}
+-                @text={{if @resource.isNew (concat "Create " this.modelName) "Save Changes"}}
++                @text={{this.buttonText}}
+                 @onClick={{perform @saveTask @resource @saveOptions}}
+                 @disabled={{@saveDisabled}}
+                 @isLoading={{@saveTask.isRunning}}
+@@ -14,7 +14,7 @@
+             <Button
+                 @type="primary"
+                 @icon={{if @resource.isNew "check" "save"}}
+-                @text={{if @resource.isNew (concat "Create " this.modelName) "Save Changes"}}
++                @text={{this.buttonText}}
+                 @onClick={{perform @saveTask @resource @saveOptions}}
+                 @disabled={{or @saveDisabled (cannot-write @resource schema=@authSchema)}}
+                 @isLoading={{@saveTask.isRunning}}
+diff --git a/addon/components/layout/resource/panel/header-actions.js b/addon/components/layout/resource/panel/header-actions.js
+index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..427ceb867a1ae5c19c1fb24ceeffb02852bc7d91 100644
+--- a/addon/components/layout/resource/panel/header-actions.js	
++++ b/addon/components/layout/resource/panel/header-actions.js	
+@@ -1,7 +1,36 @@
  import Component from '@glimmer/component';
 +import { inject as service } from '@ember/service';
+ import titleize from 'ember-cli-string-helpers/utils/titleize';
  
- /**
-  * Single card in the widget picker.
-@@ -8,6 +9,8 @@ import Component from '@glimmer/component';
-  *                          @onHover={{fn}} @onUnhover={{fn}} />
-  */
- export default class DashboardWidgetCardComponent extends Component {
++const RESOURCE_TRANSLATIONS = {
++    driver: 'Conductor',
++    vehicle: 'Vehículo',
++    trailer: 'Remolque',
++    fleet: 'Flota',
++    vendor: 'Proveedor',
++    contact: 'Contacto',
++    customer: 'Cliente',
++    place: 'Lugar',
++    'fuel-report': 'Informe de combustible',
++    'fuel-transaction': 'Transacción de combustible',
++    issue: 'Asunto',
++    order: 'Pedido',
++    'service-rate': 'Tarifa de servicio',
++    'custom-field': 'Campo personalizado',
++    'custom-entity': 'Entidad personalizada',
++    user: 'Usuario',
++    organization: 'Organización',
++};
++
+ export default class LayoutResourcePanelHeaderActionsComponent extends Component {
 +    @service intl;
 +
-     get isAdded() {
-         return (this.args.addedCount ?? 0) > 0;
++    get modelKey() {
++        const model = this.args.resource;
++        const raw = this.args.modelName ?? model?.constructor?.modelName ?? model?._internalModel?.modelName ?? '';
++        return String(raw).toLowerCase().replace(/[_ ]/g, '-');
++    }
++
+     get modelName() {
+         if (this.args.modelName) return this.args.modelName;
+         const model = this.args.resource;
+@@ -13,4 +42,48 @@ export default class LayoutResourcePanelHeaderActionsComponent extends Component
+         const normalized = modelName.replace(/[-_]/g, ' ');
+         return titleize(normalized);
      }
-@@ -33,7 +36,10 @@ export default class DashboardWidgetCardComponent extends Component {
-      */
-     get addedShortBadge() {
-         const n = this.args.addedCount;
--        return n > 1 ? `Added ×${n}` : 'Added';
-+        if (n > 1) {
-+            return this.intl?.t ? this.intl.t('dashboard-widget-panel.badge-added-count', { count: n, default: `Agregado ×${n}` }) : `Agregado ×${n}`;
++
++    get buttonText() {
++        if (this.args.btnText) {
++            return this.args.btnText;
 +        }
-+        return this.intl?.t ? this.intl.t('dashboard-widget-panel.badge-added', { default: 'Agregado' }) : 'Agregado';
-     }
- 
-     /** Subtle Tailwind chip colour driven by the registry `category`. */
-diff --git a/addon/components/report-builder.hbs b/addon/components/report-builder.hbs
-index 423ac1b..40afd25 100644
---- a/addon/components/report-builder.hbs
-+++ b/addon/components/report-builder.hbs
-@@ -1,11 +1,11 @@
- <div class="form-wrapper" ...attributes>
-     <div class="px-2">
--        <ContentPanel @title="Report Details" @open={{true}}>
-+        <ContentPanel @title="Detalles del informe" @open={{true}}>
-             <div class="flex flex-col space-y-2">
--                <InputGroup @name="Title" @value={{@report.title}} />
--                <InputGroup @name="Description" @value={{@report.description}} />
--                <InputGroup @name="Tags">
--                    <ModelTagInput @model={{@report}} @placeholder="Add tags to the report" as |tag|>
-+                <InputGroup @name="Título" @value={{@report.title}} />
-+                <InputGroup @name="Descripción" @value={{@report.description}} />
-+                <InputGroup @name="Etiquetas">
-+                    <ModelTagInput @model={{@report}} @placeholder="Agregar etiquetas al informe" as |tag|>
-                         {{tag}}
-                     </ModelTagInput>
-                 </InputGroup>
-@@ -16,7 +16,7 @@
-     <TabNavigation @tabs={{this.tabs}} @contextApi={{fn (mut this.tabContext)}}>
-         <:actions>
-             <div class="flex flex-row space-x-2 pr-2">
--                <Button @type="magic" @icon="play" @text="Execute" @size="xs" @onClick={{perform this.execute}} @isLoading={{this.execute.isRunning}} />
-+                <Button @type="magic" @icon="play" @text="Ejecutar" @size="xs" @onClick={{perform this.execute}} @isLoading={{this.execute.isRunning}} />
-             </div>
-         </:actions>
-         <:default as |activeTab|>
-@@ -80,8 +80,8 @@
-                             <div class="flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600 p-6 rounded-xl bg-gray-50 dark:bg-gray-800">
-                                 <div class="text-center">
-                                     <FaIcon @icon="triangle-exclamation" @size="2x" class="text-gray-400 mb-2" />
--                                    <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">No report preview</div>
--                                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Configure the report and press the execute button to preview the results.</div>
-+                                    <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">Sin vista previa del informe</div>
-+                                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Configure el informe y presione el botón ejecutar para previsualizar los resultados.</div>
-                                 </div>
-                             </div>
-                         </div>
-diff --git a/addon/components/report-builder.js b/addon/components/report-builder.js
-index 4e4f6ad..0285fd3 100644
---- a/addon/components/report-builder.js
-+++ b/addon/components/report-builder.js
-@@ -23,12 +23,12 @@ export default class ReportBuilderComponent extends Component {
-     @tracked tabs = [
-         {
-             id: 'configuration',
--            label: 'Configuration',
-+            label: 'Configuración',
-             icon: 'filter',
-         },
-         {
-             id: 'preview',
--            label: 'Preview',
-+            label: 'Vista previa',
-             icon: 'table',
-         },
-     ];
-@@ -50,7 +50,7 @@ export default class ReportBuilderComponent extends Component {
-             );
-             this.tables = isArray(this.schema.tables) ? this.schema.tables : [];
-         } catch (e) {
--            this.notifications.error('Failed to load data sources');
-+            this.notifications.error('Error al cargar las fuentes de datos');
-         }
-     }
- 
-diff --git a/addon/components/report-builder/condition-value.hbs b/addon/components/report-builder/condition-value.hbs
-index 697cb45..fcef54c 100644
---- a/addon/components/report-builder/condition-value.hbs
-+++ b/addon/components/report-builder/condition-value.hbs
-@@ -7,10 +7,10 @@
- {{else if this.isBoolean}}
-     <div class="report-builder-boolean-value flex flex-row items-center space-x-4">
-         <RadioButton @name={{this.booleanGroupName}} @value={{true}} @groupValue={{this.booleanValue}} @changed={{this.change}} @radioClass="form-radio">
--            <span class="ml-1.5 text-sm">True</span>
-+            <span class="ml-1.5 text-sm">Verdadero</span>
-         </RadioButton>
-         <RadioButton @name={{this.booleanGroupName}} @value={{false}} @groupValue={{this.booleanValue}} @changed={{this.change}} @radioClass="form-radio">
--            <span class="ml-1.5 text-sm">False</span>
-+            <span class="ml-1.5 text-sm">Falso</span>
-         </RadioButton>
-     </div>
- {{else if this.isJSON}}
-diff --git a/addon/components/report-builder/export-options.hbs b/addon/components/report-builder/export-options.hbs
-index 5de00b6..fe22d19 100644
---- a/addon/components/report-builder/export-options.hbs
-+++ b/addon/components/report-builder/export-options.hbs
-@@ -4,12 +4,12 @@
-             @options={{this.exportOptions}}
-             @selected={{this.format}}
-             @onChange={{this.setFormat}}
--            @placeholder="Export format..."
-+            @placeholder="Formato de exportación..."
-             @triggerClass="form-select form-input form-input-sm"
-             as |option|
-         >
-             {{option.label}}
-         </PowerSelect>
-     </div>
--    <Button @text="Export" @icon="download" @size="sm" @type="default" @disabled={{@disabled}} @onClick={{this.export}} />
-+    <Button @text="Exportar" @icon="download" @size="sm" @type="default" @disabled={{@disabled}} @onClick={{this.export}} />
- </div>
-\ No newline at end of file
-diff --git a/addon/components/report-builder/query-builder.hbs b/addon/components/report-builder/query-builder.hbs
-index 29d3d4b..9699213 100644
---- a/addon/components/report-builder/query-builder.hbs
-+++ b/addon/components/report-builder/query-builder.hbs
-@@ -1,24 +1,24 @@
- <div class="rounded-md border border-gray-200 dark:border-gray-700 shadow-sm flex-1">
-     <div class="flex flex-row items-center justify-between rounded-t-md px-4 py-2 bg-gray-300 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-         <div>
--            <div class="font-semibold text-sm">Query Builder</div>
-+            <div class="font-semibold text-sm">Constructor de consultas</div>
-         </div>
-         <div class="flex flex-row space-x-2">
--            <Button @type="danger" @icon="trash" @text="Clear" @size="xs" @onClick={{or @onClear (noop)}} />
--            <Button @type="magic" @icon="play" @text="Execute Query" @size="xs" @onClick={{or @onExecute (noop)}} />
--            <Button @type="primary" @icon="save" @text="Save Report" @size="xs" @onClick={{or @onSave (noop)}} />
-+            <Button @type="danger" @icon="trash" @text="Limpiar" @size="xs" @onClick={{or @onClear (noop)}} />
-+            <Button @type="magic" @icon="play" @text="Ejecutar consulta" @size="xs" @onClick={{or @onExecute (noop)}} />
-+            <Button @type="primary" @icon="save" @text="Guardar informe" @size="xs" @onClick={{or @onSave (noop)}} />
-         </div>
-     </div>
-     <div class="px-4 py-2">
-         <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">
-             <div class="lg:col-span-2">
--                <InputGroup @name="Primary Table">
-+                <InputGroup @name="Tabla principal">
-                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
-                         <PowerSelect
-                             @options={{@tables}}
-                             @selected={{this.primaryTable}}
-                             @onChange={{fn (mut this.primaryTable)}}
--                            @placeholder="Select a table..."
-+                            @placeholder="Seleccionar una tabla..."
-                             @triggerClass="form-select form-input"
-                             as |option|
-                         >
-@@ -31,7 +31,7 @@
-                 </InputGroup>
-             </div>
-             <div class="lg:col-span-3">
--                <InputGroup @name="Select Columns" />
-+                <InputGroup @name="Seleccionar columnas" />
-             </div>
-         </div>
-     </div>
-diff --git a/addon/components/report/data.hbs b/addon/components/report/data.hbs
-index 9a60093..6abaa70 100644
---- a/addon/components/report/data.hbs
-+++ b/addon/components/report/data.hbs
-@@ -25,8 +25,8 @@
-             <div class="flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600 p-6 rounded-xl bg-gray-50 dark:bg-gray-800">
-                 <div class="text-center">
-                     <FaIcon @icon="triangle-exclamation" @size="2x" class="text-gray-400 mb-2" />
--                    <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">No report preview</div>
--                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Configure the report and press the execute button to preview the results.</div>
-+                    <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">Sin vista previa del informe</div>
-+                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Configure el informe y presione el botón ejecutar para previsualizar los resultados.</div>
-                 </div>
-             </div>
-         </div>
-diff --git a/addon/components/report/details.hbs b/addon/components/report/details.hbs
-index 215aab6..7905b29 100644
---- a/addon/components/report/details.hbs
-+++ b/addon/components/report/details.hbs
-@@ -1,20 +1,20 @@
- <div class="details-wrapper" ...attributes>
--    <ContentPanel @title="Report Details" @open={{true}} @wrapperClass="bordered-top">
-+    <ContentPanel @title="Detalles del informe" @open={{true}} @wrapperClass="bordered-top">
-         <div class="grid grid-cols-2 gap-2 text-xs dark:text-gray-100">
-             <div class="field-info-container">
--                <div class="field-name">Title</div>
-+                <div class="field-name">Título</div>
-                 <div class="field-value">{{n-a @resource.title}}</div>
-             </div>
-             <div class="field-info-container">
--                <div class="field-name">Description</div>
-+                <div class="field-name">Descripción</div>
-                 <div class="field-value">{{n-a @resource.description}}</div>
-             </div>
-             <div class="field-info-container">
--                <div class="field-name">Date Created</div>
-+                <div class="field-name">Fecha de creación</div>
-                 <div class="field-value">{{@resource.createdAt}}</div>
-             </div>
-             <div class="field-info-container col-span-2">
--                <div class="field-name">Tags</div>
-+                <div class="field-name">Etiquetas</div>
-                 <div class="field-value flex flex-row items-center space-x-1">
-                     {{#each @resource.tags as |tag|}}
-                         <div class="rounded-xl border text-sm border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-0.5 flex items-center justify-center">{{tag}}</div>
++
++        const isNew = this.args.resource?.isNew ?? true;
++        if (!isNew) {
++            if (this.intl && typeof this.intl.t === 'function') {
++                try {
++                    const translated = this.intl.t('common.save-changes');
++                    if (translated && !translated.startsWith('Missing translation')) {
++                        return translated;
++                    }
++                } catch (_) {}
++            }
++            return 'Guardar cambios';
++        }
++
++        let translatedModel = null;
++        if (this.intl && typeof this.intl.t === 'function' && this.modelKey) {
++            try {
++                const res = this.intl.t(`resource.${this.modelKey}`);
++                if (res && !res.startsWith('Missing translation')) {
++                    translatedModel = res;
++                }
++            } catch (_) {}
++        }
++        if (!translatedModel) {
++            translatedModel = RESOURCE_TRANSLATIONS[this.modelKey] || this.modelName;
++        }
++
++        let createWord = 'Crear';
++        if (this.intl && typeof this.intl.t === 'function') {
++            try {
++                const res = this.intl.t('common.create');
++                if (res && !res.startsWith('Missing translation')) {
++                    createWord = res;
++                }
++            } catch (_) {}
++        }
++
++        return `${createWord} ${translatedModel}`;
++    }
+ }

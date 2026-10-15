@@ -713,4 +713,52 @@ body[data-palette='puntoshop'][data-theme='light'] .next-sidebar-navigator-prima
     color: var(--brand-default) !important;
 }
 
+/* 9. Panel de Chat y Mensajería */
+[data-palette='puntoshop'] .chat-inbox-empty-icon,
+[data-palette='puntoshop'] body[data-theme='light'] .chat-inbox-empty-icon {
+    color: var(--brand-default) !important;
+    background-color: var(--brand-subtle) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .chat-inbox-empty-icon,
+body[data-palette='puntoshop'][data-theme='dark'] .chat-inbox-empty-icon {
+    border-color: var(--brand-default) !important;
+    color: var(--brand-default) !important;
+    background-color: rgb(214 28 34 / 15%) !important;
+}
+
+[data-palette='puntoshop'] .chat-inbox-conversation-avatar-empty,
+[data-palette='puntoshop'] .chat-inbox-conversation-avatar-count,
+[data-palette='puntoshop'] .chat-compose-contact-check,
+[data-palette='puntoshop'] .chat-compose-selected-user {
+    color: var(--brand-default) !important;
+    background-color: var(--brand-subtle) !important;
+    border-color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .chat-inbox-conversation-avatar-empty,
+[data-palette='puntoshop'] body[data-theme='dark'] .chat-inbox-conversation-avatar-count,
+[data-palette='puntoshop'] body[data-theme='dark'] .chat-compose-contact-check,
+[data-palette='puntoshop'] body[data-theme='dark'] .chat-compose-selected-user {
+    border-color: var(--brand-default) !important;
+    color: var(--brand-default) !important;
+    background-color: rgb(214 28 34 / 15%) !important;
+}
+
+[data-palette='puntoshop'] .chat-tray-unread-notifications-badge {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .chat-inbox-conversation-row.is-open,
+[data-palette='puntoshop'] .chat-inbox-conversation-row.has-unread {
+    border-color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .chat-compose-form > input:focus {
+    border-color: var(--brand-default) !important;
+    box-shadow: 0 0 0 1px var(--brand-default) !important;
+}
+
+
 
