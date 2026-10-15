@@ -1005,13 +1005,22 @@ layout:
   header:
     menus:
       organization:
+        home: Inicio
         settings: Configuración de la organización
         create-or-join: Crear o unirse a organizaciones
         explore-extensions: Explorar extensiones
+        admin: Administración
+        logout: Cerrar sesión
       user:
         view-profile: Ver perfil
         keyboard-shortcuts: Mostrar atajos de teclado
         changelog: Registro de cambios
+        developers: Desarrolladores
+        documentation: Documentación
+        dark-mode: Modo oscuro
+        logout: Cerrar sesión
+        join-discord: Unirse a la comunidad de Discord
+        help-and-support: Ayuda y soporte
 fleet-ops:
   extension-name: Fleet-Ops
   common:

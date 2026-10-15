@@ -1,3 +1,52 @@
+diff --git a/addon/components/badge.hbs b/addon/components/badge.hbs
+index 49fa85aa050de46d9767c594f5e16ac828c5e506..d3cbce8b43f99bc123e82dec1742e92b8bfeca45 100644
+--- a/addon/components/badge.hbs	
++++ b/addon/components/badge.hbs	
+@@ -13,9 +13,9 @@
+         {{else}}
+             {{#unless @hideText}}
+                 {{#if @disableHumanize}}
+-                    {{or @text @status}}
++                    {{or this.displayText @text @status}}
+                 {{else}}
+-                    {{safe-humanize (or @text @status)}}
++                    {{safe-humanize (or this.displayText @text @status)}}
+                 {{/if}}
+             {{/unless}}
+         {{/if}}
+diff --git a/addon/components/badge.js b/addon/components/badge.js
+index 7ee3bf5fb2e4710bb6bc433cdb61c099ecb3d72a..774042dc5bfbe6409a1eab60c62362a0a98ee4ee 100644
+--- a/addon/components/badge.js	
++++ b/addon/components/badge.js	
+@@ -14,6 +14,16 @@ const BADGE_ICON_SIZE = {
+     lg: 'sm',
+ };
+ 
++const BADGE_TRANSLATIONS = {
++    administrator: 'Administrador',
++    admin: 'Administrador',
++    user: 'Usuario',
++    manager: 'Gerente',
++    driver: 'Conductor',
++    customer: 'Cliente',
++    vendor: 'Proveedor',
++};
++
+ export default class BadgeComponent extends Component {
+     get sizeClass() {
+         return BADGE_SIZE_CLASS[this.args.size];
+@@ -22,4 +32,11 @@ export default class BadgeComponent extends Component {
+     get iconSize() {
+         return this.args.iconSize ?? BADGE_ICON_SIZE[this.args.size] ?? 'xs';
+     }
++
++    get displayText() {
++        const raw = this.args.text ?? this.args.status;
++        if (typeof raw !== 'string') return raw;
++        const lower = raw.trim().toLowerCase();
++        return BADGE_TRANSLATIONS[lower] ?? raw;
++    }
+ }
 diff --git a/addon/components/button.hbs b/addon/components/button.hbs
 index c36cca6d08e06bd5983ae200cce0360ce91c3cea..60ee94aa0aaffadb9656da5718cf05c385ec0e08 100644
 --- a/addon/components/button.hbs	
@@ -194,6 +243,37 @@ index cb7297163c8f2e8b43e192b2e22ee915b3fe2b33..00b4e727364d45533f46d757b1c0741d
              confirm: async (modal) => {
                  modal.startLoading();
  
+diff --git a/addon/components/dashboard/widget-card.js b/addon/components/dashboard/widget-card.js
+index a89811c3d97dc4c44adb33da69c2598a217ecc06..16023005163571a5eeac769cb5e8dae191493864 100644
+--- a/addon/components/dashboard/widget-card.js	
++++ b/addon/components/dashboard/widget-card.js	
+@@ -1,4 +1,5 @@
+ import Component from '@glimmer/component';
++import { inject as service } from '@ember/service';
+ 
+ /**
+  * Single card in the widget picker.
+@@ -8,6 +9,8 @@ import Component from '@glimmer/component';
+  *                          @onHover={{fn}} @onUnhover={{fn}} />
+  */
+ export default class DashboardWidgetCardComponent extends Component {
++    @service intl;
++
+     get isAdded() {
+         return (this.args.addedCount ?? 0) > 0;
+     }
+@@ -33,7 +36,10 @@ export default class DashboardWidgetCardComponent extends Component {
+      */
+     get addedShortBadge() {
+         const n = this.args.addedCount;
+-        return n > 1 ? `Added ×${n}` : 'Added';
++        if (n > 1) {
++            return this.intl?.t ? this.intl.t('dashboard-widget-panel.badge-added-count', { count: n, default: `Agregado ×${n}` }) : `Agregado ×${n}`;
++        }
++        return this.intl?.t ? this.intl.t('dashboard-widget-panel.badge-added', { default: 'Agregado' }) : 'Agregado';
+     }
+ 
+     /** Subtle Tailwind chip colour driven by the registry `category`. */
 diff --git a/addon/components/kanban/column.hbs b/addon/components/kanban/column.hbs
 index 410feba0e6a523c83f619ceca812918856231141..c924f9f459f3b01f05e91eb41522bdc067ff9a57 100644
 --- a/addon/components/kanban/column.hbs	
@@ -216,6 +296,284 @@ index 410feba0e6a523c83f619ceca812918856231141..c924f9f459f3b01f05e91eb41522bdc0
              </button>
          </div>
      {{/unless}}
+diff --git a/addon/components/layout/header/dark-mode-toggle.hbs b/addon/components/layout/header/dark-mode-toggle.hbs
+index a49999fc60210ce40e6b7447a8477a21d89ba608..890f53f5d2006c0c66b72dcded2bd86e5eabef0a 100644
+--- a/addon/components/layout/header/dark-mode-toggle.hbs	
++++ b/addon/components/layout/header/dark-mode-toggle.hbs	
+@@ -1,6 +1,6 @@
+ <a href="#" class="{{@wrapperClass}} next-dd-item hover:bg-gray-800">
+     <Toggle @isToggled={{this.userPrefersDarkMode}} @onToggle={{this.switchDarkMode}} />
+     <span class="ml-1">
+-        Dark Mode
++        {{t "layout.header.menus.user.dark-mode" default="Modo oscuro"}}
+     </span>
+ </a>
+\ No newline at end of file
+diff --git a/addon/components/layout/header/dropdown/item.hbs b/addon/components/layout/header/dropdown/item.hbs
+index 0c8638127e26260f813a5300df71f9aa474f109a..a1701949f38c4e059ccadebe1adeabc0f48fe5af 100644
+--- a/addon/components/layout/header/dropdown/item.hbs	
++++ b/addon/components/layout/header/dropdown/item.hbs	
+@@ -45,7 +45,7 @@
+                         {{/if}}
+                     {{/each}}
+                 {{else}}
+-                    <div class="{{@item.class}}">{{@item.text}}</div>
++                    <div class="{{@item.class}}">{{this.translatedText}}</div>
+                 {{/if}}
+             {{/if}}
+         </div>
+@@ -59,9 +59,9 @@
+                 <FaIcon @icon={{@item.icon}} @size={{or @item.iconSize "sm"}} class={{or @item.iconClass "mr-2"}} />
+             {{/if}}
+             {{#if @item.intl}}
+-                <span>{{t @item.intl}}</span>
++                <span>{{t @item.intl default=this.translatedText}}</span>
+             {{else}}
+-                <span>{{@item.text}}</span>
++                <span>{{this.translatedText}}</span>
+             {{/if}}
+         </LinkTo>
+     </div>
+@@ -80,9 +80,9 @@
+                 <FaIcon @icon={{@item.icon}} @size={{or @item.iconSize "sm"}} class={{or @item.iconClass "mr-2"}} />
+             {{/if}}
+             {{#if @item.intl}}
+-                <span>{{t @item.intl}}</span>
++                <span>{{t @item.intl default=this.translatedText}}</span>
+             {{else}}
+-                <span>{{@item.text}}</span>
++                <span>{{this.translatedText}}</span>
+             {{/if}}
+         </a>
+     </div>
+@@ -95,9 +95,9 @@
+                 <FaIcon @icon={{@item.icon}} @size={{or @item.iconSize "sm"}} class={{or @item.iconClass "mr-2"}} />
+             {{/if}}
+             {{#if @item.intl}}
+-                <span>{{t @item.intl}}</span>
++                <span>{{t @item.intl default=this.translatedText}}</span>
+             {{else}}
+-                <span>{{@item.text}}</span>
++                <span>{{this.translatedText}}</span>
+             {{/if}}
+         </a>
+     </div>
+diff --git a/addon/components/layout/header/dropdown/item.js b/addon/components/layout/header/dropdown/item.js
+index 35de903c4e321a89930c5bfc73c5907f4d7b800e..800279976ee0e7db871845c3ae2e8dfb9d3646a6 100644
+--- a/addon/components/layout/header/dropdown/item.js	
++++ b/addon/components/layout/header/dropdown/item.js	
+@@ -5,11 +5,35 @@ import { bool } from '@ember/object/computed';
+ import { ExtensionComponent } from '@fleetbase/ember-core/contracts';
+ import isMenuItemActive from '../../../../utils/is-menu-item-active';
+ 
++const DD_TRANSLATIONS = {
++    'home': 'Inicio',
++    'organization settings': 'Configuración de la organización',
++    'create or join organizations': 'Crear o unirse a organizaciones',
++    'explore extensions': 'Explorar extensiones',
++    'admin': 'Administración',
++    'logout': 'Cerrar sesión',
++    'view profile': 'Ver perfil',
++    'show keyboard shortcuts': 'Mostrar atajos de teclado',
++    'changelog': 'Registro de cambios',
++    'developers': 'Desarrolladores',
++    'documentation': 'Documentación',
++    'help & support': 'Ayuda y soporte',
++    'join discord community': 'Unirse a la comunidad de Discord',
++    'dark mode': 'Modo oscuro',
++};
++
+ export default class LayoutHeaderDropdownItemComponent extends Component {
+     @bool('args.item.onClick') isInteractive;
+     @bool('args.item.href') isAnchor;
+     @bool('args.item.seperator') isSeperator;
+ 
++    get translatedText() {
++        const text = this.args.item?.text;
++        if (typeof text !== 'string') return text;
++        const lower = text.trim().toLowerCase();
++        return DD_TRANSLATIONS[lower] ?? text;
++    }
++
+     @computed('args.item.{route,onClick}') get isLink() {
+         return this.args.item && typeof this.args.item.route === 'string' && typeof this.args.item.onClick !== 'function';
+     }
+diff --git a/addon/components/layout/header.js b/addon/components/layout/header.js
+index 98f8bbb3899edf295e4747e20f7ba8d9ddfb472e..b681a496a596233793ee474d18584d87c20dd918 100644
+--- a/addon/components/layout/header.js	
++++ b/addon/components/layout/header.js	
+@@ -13,6 +13,21 @@ import config from 'ember-get-config';
+  * @class LayoutHeaderComponent
+  * @extends {Component}
+  */
++const ROLE_TRANSLATIONS = {
++    administrator: 'Administrador',
++    admin: 'Administrador',
++    user: 'Usuario',
++    manager: 'Gerente',
++    driver: 'Conductor',
++    customer: 'Cliente',
++    vendor: 'Proveedor',
++};
++
++function translateRole(role) {
++    if (!role || typeof role !== 'string') return role;
++    return ROLE_TRANSLATIONS[role.toLowerCase()] ?? role;
++}
++
+ export default class LayoutHeaderComponent extends Component {
+     @service store;
+     @service router;
+@@ -49,7 +64,7 @@ export default class LayoutHeaderComponent extends Component {
+                 text: [
+                     this.currentUser.companyName,
+                     this.currentUser.email,
+-                    { component: 'badge', disableHumanize: true, text: this.currentUser.roleName, status: 'info', hideStatusDot: false, wrapperClass: 'mt-1' },
++                    { component: 'badge', disableHumanize: true, text: translateRole(this.currentUser.roleName), status: 'info', hideStatusDot: false, wrapperClass: 'mt-1' },
+                 ],
+                 class: 'flex flex-row items-center px-3 rounded-md text-gray-800 text-sm dark:text-gray-300 leading-1',
+                 wrapperClass: 'next-dd-session-user-wrapper',
+@@ -91,19 +106,22 @@ export default class LayoutHeaderComponent extends Component {
+             {
+                 id: 'console-home',
+                 route: 'console.home',
+-                text: 'Home',
++                text: 'Inicio',
++                intl: 'layout.header.menus.organization.home',
+                 icon: 'house',
+             },
+             {
+                 id: 'organization-settings',
+                 route: 'console.settings.index',
+-                text: 'Organization settings',
++                text: 'Configuración de la organización',
++                intl: 'layout.header.menus.organization.settings',
+                 icon: 'gear',
+             },
+             {
+                 id: 'create-or-join-organizations',
+                 href: 'javascript:;',
+-                text: 'Create or join organizations',
++                text: 'Crear o unirse a organizaciones',
++                intl: 'layout.header.menus.organization.create-or-join',
+                 action: 'createOrJoinOrg',
+                 icon: 'building',
+             },
+@@ -114,7 +132,8 @@ export default class LayoutHeaderComponent extends Component {
+             staticMenuItems.push({
+                 id: 'explore-extensions',
+                 route: 'console.extensions',
+-                text: 'Explore extensions',
++                text: 'Explorar extensiones',
++                intl: 'layout.header.menus.organization.explore-extensions',
+                 icon: 'puzzle-piece',
+             });
+         }
+@@ -159,7 +178,8 @@ export default class LayoutHeaderComponent extends Component {
+                 },
+                 {
+                     route: 'console.admin',
+-                    text: 'Admin',
++                    text: 'Administración',
++                    intl: 'layout.header.menus.organization.admin',
+                     icon: 'toolbox',
+                 }
+             );
+@@ -172,7 +192,8 @@ export default class LayoutHeaderComponent extends Component {
+             },
+             {
+                 href: 'javascript:;',
+-                text: 'Logout',
++                text: 'Cerrar sesión',
++                intl: 'layout.header.menus.organization.logout',
+                 action: 'invalidateSession',
+                 icon: 'person-running',
+             }
+@@ -191,7 +212,7 @@ export default class LayoutHeaderComponent extends Component {
+         // Prepare menu items
+         const menuItems = [
+             {
+-                text: [this.currentUser.name, { component: 'badge', disableHumanize: true, text: this.currentUser.roleName, status: 'info', hideStatusDot: false, wrapperClass: 'mt-1' }],
++                text: [this.currentUser.name, { component: 'badge', disableHumanize: true, text: translateRole(this.currentUser.roleName), status: 'info', hideStatusDot: false, wrapperClass: 'mt-1' }],
+                 class: 'flex flex-row items-center px-3 rounded-md text-gray-800 text-sm dark:text-gray-300 leading-1',
+                 wrapperClass: 'next-dd-session-user-wrapper',
+             },
+@@ -202,13 +223,15 @@ export default class LayoutHeaderComponent extends Component {
+                 id: 'view-profile-user-nav-item',
+                 wrapperClass: 'view-profile-user-nav-item',
+                 route: 'console.account.index',
+-                text: 'View Profile',
++                text: 'Ver perfil',
++                intl: 'layout.header.menus.user.view-profile',
+             },
+             {
+                 id: 'show-keyboard-shortcuts-user-nav-item',
+                 wrapperClass: 'show-keyboard-shortcuts-user-nav-item',
+                 href: 'javascript:;',
+-                text: 'Show keyboard shortcuts',
++                text: 'Mostrar atajos de teclado',
++                intl: 'layout.header.menus.user.keyboard-shortcuts',
+                 disabled: true,
+                 action: 'showKeyboardShortcuts',
+             },
+@@ -219,7 +242,8 @@ export default class LayoutHeaderComponent extends Component {
+                 id: 'changelog-user-nav-item',
+                 wrapperClass: 'changelog-user-nav-item',
+                 href: 'javascript:;',
+-                text: 'Changelog',
++                text: 'Registro de cambios',
++                intl: 'layout.header.menus.user.changelog',
+                 action: 'viewChangelog',
+             },
+         ];
+@@ -230,7 +254,8 @@ export default class LayoutHeaderComponent extends Component {
+                 id: 'developers-user-nav-item',
+                 wrapperClass: 'developers-user-nav-item',
+                 route: 'console.developers',
+-                text: 'Developers',
++                text: 'Desarrolladores',
++                intl: 'layout.header.menus.user.developers',
+             });
+         }
+ 
+@@ -240,7 +265,8 @@ export default class LayoutHeaderComponent extends Component {
+                 id: 'discord',
+                 href: 'https://discord.gg/MJQgxHwN',
+                 target: '_discord',
+-                text: 'Join Discord Community',
++                text: 'Unirse a la comunidad de Discord',
++                intl: 'layout.header.menus.user.join-discord',
+                 icon: 'arrow-up-right-from-square',
+             },
+             {
+@@ -248,13 +274,15 @@ export default class LayoutHeaderComponent extends Component {
+                 wrapperClass: 'support-user-nav-item',
+                 href: 'https://github.com/fleetbase/fleetbase/issues',
+                 target: '_support',
+-                text: 'Help & Support',
++                text: 'Ayuda y soporte',
++                intl: 'layout.header.menus.user.help-and-support',
+                 icon: 'arrow-up-right-from-square',
+             },
+             {
+                 id: 'docs-user-nav-item',
+                 wrapperClass: 'docs-user-nav-item',
+-                text: 'Documentation',
++                text: 'Documentación',
++                intl: 'layout.header.menus.user.documentation',
+                 icon: 'book-open',
+                 onClick: () => this.docsPanel.open('https://www.fleetbase.io/docs', { title: 'Fleetbase Documentation', source: 'user-menu' }),
+             },
+@@ -290,7 +318,8 @@ export default class LayoutHeaderComponent extends Component {
+             },
+             {
+                 href: 'javascript:;',
+-                text: 'Logout',
++                text: 'Cerrar sesión',
++                intl: 'layout.header.menus.user.logout',
+                 action: 'invalidateSession',
+                 icon: 'person-running',
+             }
 diff --git a/addon/components/layout/resource/panel/header-actions.hbs b/addon/components/layout/resource/panel/header-actions.hbs
 index c23f73dc43f3c2ab0d1f55b3d7281dc6c81a43d3..d76f6a1fa90282e3cc086091ccdcf0c41e83709c 100644
 --- a/addon/components/layout/resource/panel/header-actions.hbs	
@@ -239,7 +597,7 @@ index c23f73dc43f3c2ab0d1f55b3d7281dc6c81a43d3..d76f6a1fa90282e3cc086091ccdcf0c4
                  @disabled={{or @saveDisabled (cannot-write @resource schema=@authSchema)}}
                  @isLoading={{@saveTask.isRunning}}
 diff --git a/addon/components/layout/resource/panel/header-actions.js b/addon/components/layout/resource/panel/header-actions.js
-index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..427ceb867a1ae5c19c1fb24ceeffb02852bc7d91 100644
+index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..2112711d8a40f86867172f3c95fcc910362c67ca 100644
 --- a/addon/components/layout/resource/panel/header-actions.js	
 +++ b/addon/components/layout/resource/panel/header-actions.js	
 @@ -1,7 +1,36 @@
@@ -279,53 +637,25 @@ index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..427ceb867a1ae5c19c1fb24ceeffb028
      get modelName() {
          if (this.args.modelName) return this.args.modelName;
          const model = this.args.resource;
-@@ -13,4 +42,48 @@ export default class LayoutResourcePanelHeaderActionsComponent extends Component
+@@ -13,4 +42,20 @@ export default class LayoutResourcePanelHeaderActionsComponent extends Component
          const normalized = modelName.replace(/[-_]/g, ' ');
          return titleize(normalized);
      }
 +
 +    get buttonText() {
-+        if (this.args.btnText) {
-+            return this.args.btnText;
++        if (this.args.saveButtonText) {
++            return this.args.saveButtonText;
 +        }
 +
-+        const isNew = this.args.resource?.isNew ?? true;
-+        if (!isNew) {
-+            if (this.intl && typeof this.intl.t === 'function') {
-+                try {
-+                    const translated = this.intl.t('common.save-changes');
-+                    if (translated && !translated.startsWith('Missing translation')) {
-+                        return translated;
-+                    }
-+                } catch (_) {}
++        if (this.args.resource?.isNew) {
++            const translatedResource = RESOURCE_TRANSLATIONS[this.modelKey];
++            if (translatedResource) {
++                return `Crear ${translatedResource.toLowerCase()}`;
 +            }
-+            return 'Guardar cambios';
++            return `Crear ${this.modelName.toLowerCase()}`;
 +        }
 +
-+        let translatedModel = null;
-+        if (this.intl && typeof this.intl.t === 'function' && this.modelKey) {
-+            try {
-+                const res = this.intl.t(`resource.${this.modelKey}`);
-+                if (res && !res.startsWith('Missing translation')) {
-+                    translatedModel = res;
-+                }
-+            } catch (_) {}
-+        }
-+        if (!translatedModel) {
-+            translatedModel = RESOURCE_TRANSLATIONS[this.modelKey] || this.modelName;
-+        }
-+
-+        let createWord = 'Crear';
-+        if (this.intl && typeof this.intl.t === 'function') {
-+            try {
-+                const res = this.intl.t('common.create');
-+                if (res && !res.startsWith('Missing translation')) {
-+                    createWord = res;
-+                }
-+            } catch (_) {}
-+        }
-+
-+        return `${createWord} ${translatedModel}`;
++        return 'Guardar cambios';
 +    }
  }
 diff --git a/addon/components/model-select.hbs b/addon/components/model-select.hbs
@@ -352,6 +682,40 @@ index 460919361d69f63738b1dd237d68f02cd58273c3..fc57884a0721f44c521e97a60fd12501
          @selected={{this.selectedModel}}
          @selectedItemComponent={{@selectedItemComponent}}
          @tabindex={{@tabindex}}
+diff --git a/addon/components/notification-tray.hbs b/addon/components/notification-tray.hbs
+index ffdc7ec658f820640c483c6ebac6325c9f92e94e..847a35d55cffc0c260ce96b99c669282ad4afe22 100644
+--- a/addon/components/notification-tray.hbs	
++++ b/addon/components/notification-tray.hbs	
+@@ -22,25 +22,25 @@
+             <div class="notification-tray-panel">
+                 <div>
+                     <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex flex-row space-x-4">
+-                        <h1 class="text-black dark:text-gray-100 text-sm font-bold">{{pluralize this.notifications.length "Unread Notification"}}</h1>
++                        <h1 class="text-black dark:text-gray-100 text-sm font-bold">{{if (eq this.notifications.length 1) (t "common.unread-notification" default="1 notificación no leída") (concat this.notifications.length " " (t "common.unread-notifications" default="notificaciones no leídas"))}}</h1>
+                     </div>
+                     <div class="h-48 overflow-y-scroll p-2">
+                         {{#each this.notifications as |notification|}}
+                             <a href="javascript:;" class="notification-item {{if notification._isRemoving 'opacity-50'}}" {{on "click" (fn this.onClickNotification notification)}}>
+                                 <h3 class="font-semibold text-small truncate">{{notification.data.subject}}</h3>
+                                 <p class="text-xs mb-1.5 truncate">{{notification.data.message}}</p>
+-                                <span class="text-xs">Received: {{notification.createdAgo}}</span>
++                                <span class="text-xs">{{t "common.received" default="Recibido"}}: {{notification.createdAgo}}</span>
+                             </a>
+                         {{else}}
+                             <div class="flex flex-1 items-center justify-center w-full h-full">
+-                                <span class="text-base text-gray-800 dark:text-gray-300 italic">No unread notifications</span>
++                                <span class="text-base text-gray-800 dark:text-gray-300 italic">{{t "common.no-unread-notifications" default="Sin notificaciones no leídas"}}</span>
+                             </div>
+                         {{/each}}
+                     </div>
+                 </div>
+                 <div class="px-2 py-1.5 border-t border-gray-200 dark:border-gray-700 flex flex-row space-x-4">
+                     <LinkTo @route="console.notifications" class="notification-tray-view-all-link" {{on "click" this.onPressViewAllNotifications}}>
+-                        View all notifications
++                        {{t "common.view-all-notifications" default="Ver todas las notificaciones"}}
+                     </LinkTo>
+                 </div>
+             </div>
 diff --git a/addon/components/pagination.hbs b/addon/components/pagination.hbs
 index 6006fc29f1927ff23d25f56b50f7114600550144..5d7e9de9b2b3c51d7891cda3ffb3417310165b2b 100644
 --- a/addon/components/pagination.hbs	
@@ -402,6 +766,201 @@ index 6006fc29f1927ff23d25f56b50f7114600550144..5d7e9de9b2b3c51d7891cda3ffb34173
 +                {{t "common.results" default="resultados"}}
              </p>
          </div>
+ 
+diff --git a/addon/components/report/data.hbs b/addon/components/report/data.hbs
+index 9a600931a389b14110634912b1602f56ee5aaf44..6abaa70498d8fdcc0124f63091f7aed74082d8d1 100644
+--- a/addon/components/report/data.hbs	
++++ b/addon/components/report/data.hbs	
+@@ -25,8 +25,8 @@
+             <div class="flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600 p-6 rounded-xl bg-gray-50 dark:bg-gray-800">
+                 <div class="text-center">
+                     <FaIcon @icon="triangle-exclamation" @size="2x" class="text-gray-400 mb-2" />
+-                    <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">No report preview</div>
+-                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Configure the report and press the execute button to preview the results.</div>
++                    <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">Sin vista previa del informe</div>
++                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Configure el informe y presione el botón ejecutar para previsualizar los resultados.</div>
+                 </div>
+             </div>
+         </div>
+diff --git a/addon/components/report/details.hbs b/addon/components/report/details.hbs
+index 215aab6559d02b0af467f52e14f7541de9706135..7905b2983bf3f6946ac64535bf37e0b2d8376abf 100644
+--- a/addon/components/report/details.hbs	
++++ b/addon/components/report/details.hbs	
+@@ -1,20 +1,20 @@
+ <div class="details-wrapper" ...attributes>
+-    <ContentPanel @title="Report Details" @open={{true}} @wrapperClass="bordered-top">
++    <ContentPanel @title="Detalles del informe" @open={{true}} @wrapperClass="bordered-top">
+         <div class="grid grid-cols-2 gap-2 text-xs dark:text-gray-100">
+             <div class="field-info-container">
+-                <div class="field-name">Title</div>
++                <div class="field-name">Título</div>
+                 <div class="field-value">{{n-a @resource.title}}</div>
+             </div>
+             <div class="field-info-container">
+-                <div class="field-name">Description</div>
++                <div class="field-name">Descripción</div>
+                 <div class="field-value">{{n-a @resource.description}}</div>
+             </div>
+             <div class="field-info-container">
+-                <div class="field-name">Date Created</div>
++                <div class="field-name">Fecha de creación</div>
+                 <div class="field-value">{{@resource.createdAt}}</div>
+             </div>
+             <div class="field-info-container col-span-2">
+-                <div class="field-name">Tags</div>
++                <div class="field-name">Etiquetas</div>
+                 <div class="field-value flex flex-row items-center space-x-1">
+                     {{#each @resource.tags as |tag|}}
+                         <div class="rounded-xl border text-sm border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-0.5 flex items-center justify-center">{{tag}}</div>
+diff --git a/addon/components/report-builder/condition-value.hbs b/addon/components/report-builder/condition-value.hbs
+index 697cb4554cfca22cdc27fdc9594d97618c9fd1c5..fcef54ce3f2e7d4a6f1eeaef2e3f8850e711c5c7 100644
+--- a/addon/components/report-builder/condition-value.hbs	
++++ b/addon/components/report-builder/condition-value.hbs	
+@@ -7,10 +7,10 @@
+ {{else if this.isBoolean}}
+     <div class="report-builder-boolean-value flex flex-row items-center space-x-4">
+         <RadioButton @name={{this.booleanGroupName}} @value={{true}} @groupValue={{this.booleanValue}} @changed={{this.change}} @radioClass="form-radio">
+-            <span class="ml-1.5 text-sm">True</span>
++            <span class="ml-1.5 text-sm">Verdadero</span>
+         </RadioButton>
+         <RadioButton @name={{this.booleanGroupName}} @value={{false}} @groupValue={{this.booleanValue}} @changed={{this.change}} @radioClass="form-radio">
+-            <span class="ml-1.5 text-sm">False</span>
++            <span class="ml-1.5 text-sm">Falso</span>
+         </RadioButton>
+     </div>
+ {{else if this.isJSON}}
+diff --git a/addon/components/report-builder/export-options.hbs b/addon/components/report-builder/export-options.hbs
+index 5de00b60aa2811208630e19371a95e89dd0d1764..fe22d19386043992a27ffe82c194ffe06ca46c72 100644
+--- a/addon/components/report-builder/export-options.hbs	
++++ b/addon/components/report-builder/export-options.hbs	
+@@ -4,12 +4,12 @@
+             @options={{this.exportOptions}}
+             @selected={{this.format}}
+             @onChange={{this.setFormat}}
+-            @placeholder="Export format..."
++            @placeholder="Formato de exportación..."
+             @triggerClass="form-select form-input form-input-sm"
+             as |option|
+         >
+             {{option.label}}
+         </PowerSelect>
+     </div>
+-    <Button @text="Export" @icon="download" @size="sm" @type="default" @disabled={{@disabled}} @onClick={{this.export}} />
++    <Button @text="Exportar" @icon="download" @size="sm" @type="default" @disabled={{@disabled}} @onClick={{this.export}} />
+ </div>
+\ No newline at end of file
+diff --git a/addon/components/report-builder/query-builder.hbs b/addon/components/report-builder/query-builder.hbs
+index 29d3d4b40a0c7e48db94ce8073339004282b6041..9699213405c895c2ef468ce3616fca105acb7996 100644
+--- a/addon/components/report-builder/query-builder.hbs	
++++ b/addon/components/report-builder/query-builder.hbs	
+@@ -1,24 +1,24 @@
+ <div class="rounded-md border border-gray-200 dark:border-gray-700 shadow-sm flex-1">
+     <div class="flex flex-row items-center justify-between rounded-t-md px-4 py-2 bg-gray-300 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+         <div>
+-            <div class="font-semibold text-sm">Query Builder</div>
++            <div class="font-semibold text-sm">Constructor de consultas</div>
+         </div>
+         <div class="flex flex-row space-x-2">
+-            <Button @type="danger" @icon="trash" @text="Clear" @size="xs" @onClick={{or @onClear (noop)}} />
+-            <Button @type="magic" @icon="play" @text="Execute Query" @size="xs" @onClick={{or @onExecute (noop)}} />
+-            <Button @type="primary" @icon="save" @text="Save Report" @size="xs" @onClick={{or @onSave (noop)}} />
++            <Button @type="danger" @icon="trash" @text="Limpiar" @size="xs" @onClick={{or @onClear (noop)}} />
++            <Button @type="magic" @icon="play" @text="Ejecutar consulta" @size="xs" @onClick={{or @onExecute (noop)}} />
++            <Button @type="primary" @icon="save" @text="Guardar informe" @size="xs" @onClick={{or @onSave (noop)}} />
+         </div>
+     </div>
+     <div class="px-4 py-2">
+         <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">
+             <div class="lg:col-span-2">
+-                <InputGroup @name="Primary Table">
++                <InputGroup @name="Tabla principal">
+                     <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
+                         <PowerSelect
+                             @options={{@tables}}
+                             @selected={{this.primaryTable}}
+                             @onChange={{fn (mut this.primaryTable)}}
+-                            @placeholder="Select a table..."
++                            @placeholder="Seleccionar una tabla..."
+                             @triggerClass="form-select form-input"
+                             as |option|
+                         >
+@@ -31,7 +31,7 @@
+                 </InputGroup>
+             </div>
+             <div class="lg:col-span-3">
+-                <InputGroup @name="Select Columns" />
++                <InputGroup @name="Seleccionar columnas" />
+             </div>
+         </div>
+     </div>
+diff --git a/addon/components/report-builder.hbs b/addon/components/report-builder.hbs
+index 423ac1b8f99efc6e67220a33a8c2ce616dc77157..40afd250e5591a318262928a41fb62a42db0b4ff 100644
+--- a/addon/components/report-builder.hbs	
++++ b/addon/components/report-builder.hbs	
+@@ -1,11 +1,11 @@
+ <div class="form-wrapper" ...attributes>
+     <div class="px-2">
+-        <ContentPanel @title="Report Details" @open={{true}}>
++        <ContentPanel @title="Detalles del informe" @open={{true}}>
+             <div class="flex flex-col space-y-2">
+-                <InputGroup @name="Title" @value={{@report.title}} />
+-                <InputGroup @name="Description" @value={{@report.description}} />
+-                <InputGroup @name="Tags">
+-                    <ModelTagInput @model={{@report}} @placeholder="Add tags to the report" as |tag|>
++                <InputGroup @name="Título" @value={{@report.title}} />
++                <InputGroup @name="Descripción" @value={{@report.description}} />
++                <InputGroup @name="Etiquetas">
++                    <ModelTagInput @model={{@report}} @placeholder="Agregar etiquetas al informe" as |tag|>
+                         {{tag}}
+                     </ModelTagInput>
+                 </InputGroup>
+@@ -16,7 +16,7 @@
+     <TabNavigation @tabs={{this.tabs}} @contextApi={{fn (mut this.tabContext)}}>
+         <:actions>
+             <div class="flex flex-row space-x-2 pr-2">
+-                <Button @type="magic" @icon="play" @text="Execute" @size="xs" @onClick={{perform this.execute}} @isLoading={{this.execute.isRunning}} />
++                <Button @type="magic" @icon="play" @text="Ejecutar" @size="xs" @onClick={{perform this.execute}} @isLoading={{this.execute.isRunning}} />
+             </div>
+         </:actions>
+         <:default as |activeTab|>
+@@ -80,8 +80,8 @@
+                             <div class="flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600 p-6 rounded-xl bg-gray-50 dark:bg-gray-800">
+                                 <div class="text-center">
+                                     <FaIcon @icon="triangle-exclamation" @size="2x" class="text-gray-400 mb-2" />
+-                                    <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">No report preview</div>
+-                                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Configure the report and press the execute button to preview the results.</div>
++                                    <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">Sin vista previa del informe</div>
++                                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Configure el informe y presione el botón ejecutar para previsualizar los resultados.</div>
+                                 </div>
+                             </div>
+                         </div>
+diff --git a/addon/components/report-builder.js b/addon/components/report-builder.js
+index 4e4f6adec37ce6d07003c9ffa6178fe9ce027057..0285fd3dc1f8fba34e6a1686d977b2359b04e33d 100644
+--- a/addon/components/report-builder.js	
++++ b/addon/components/report-builder.js	
+@@ -23,12 +23,12 @@ export default class ReportBuilderComponent extends Component {
+     @tracked tabs = [
+         {
+             id: 'configuration',
+-            label: 'Configuration',
++            label: 'Configuración',
+             icon: 'filter',
+         },
+         {
+             id: 'preview',
+-            label: 'Preview',
++            label: 'Vista previa',
+             icon: 'table',
+         },
+     ];
+@@ -50,7 +50,7 @@ export default class ReportBuilderComponent extends Component {
+             );
+             this.tables = isArray(this.schema.tables) ? this.schema.tables : [];
+         } catch (e) {
+-            this.notifications.error('Failed to load data sources');
++            this.notifications.error('Error al cargar las fuentes de datos');
+         }
+     }
  
 diff --git a/addon/components/table/empty-state.hbs b/addon/components/table/empty-state.hbs
 index 4b4e37e9f4cd9a814996bd3a7e97c402c496581b..5c61398d145c25b17329f25a64fac2850d508f6b 100644
