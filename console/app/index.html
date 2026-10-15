@@ -21,6 +21,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
     <link integrity="" rel="stylesheet" href="{{rootURL}}assets/vendor.css">
     <link integrity="" rel="stylesheet" href="{{rootURL}}assets/@fleetbase/console.css">
+    <style>
+      html[data-palette='puntoshop'] .fleetbase-loader:not(.green-loader) {
+        border-color: rgba(214, 28, 34, 0.75) !important;
+        border-bottom-color: #f87171 !important;
+      }
+    </style>
 
     {{content-for "head-footer"}}
   </head>

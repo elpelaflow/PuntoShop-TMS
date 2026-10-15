@@ -982,6 +982,82 @@ body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-docs-a
     border-color: var(--brand-default) !important;
 }
 
+/* 12. Boot Loader y Dropzones globales (Avatares / Subir archivos) */
+[data-palette='puntoshop'] .fleetbase-loader:not(.green-loader) {
+    border-color: rgba(214, 28, 34, 0.75) !important;
+    border-bottom-color: #f87171 !important;
+}
+
+[data-palette='puntoshop'] .text-indigo-500,
+[data-palette='puntoshop'] .dropzone .text-indigo-500,
+[data-palette='puntoshop'] .file-dropzone .text-indigo-500 {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .dropzone.border-dashed.dark\:border-indigo-500 {
+    border-color: var(--brand-default) !important;
+}
+
+/* 13. Centro de Control y Ajustes de Fleet-Ops (Control Hub) */
+[data-palette='puntoshop'] .fleet-ops-control-hub-link-icon,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-link-icon {
+    color: var(--brand-default) !important;
+    background-color: var(--brand-subtle) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-link-icon {
+    color: var(--brand-default) !important;
+    background-color: rgb(214 28 34 / 20%) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-control-hub-link:hover {
+    border-color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-control-hub-tone-blue,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-tone-blue {
+    background: linear-gradient(135deg, rgba(214, 28, 34, 0.12), rgba(214, 28, 34, 0.03) 52%, #fff 100%), #fff !important;
+    border-color: rgb(214 28 34 / 25%) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-control-hub-tone-blue svg,
+[data-palette='puntoshop'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-blue svg {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-tone-blue {
+    background: linear-gradient(135deg, rgba(214, 28, 34, 0.2), rgba(214, 28, 34, 0.06) 52%, #1f2937 100%), #1f2937 !important;
+    border-color: rgba(214, 28, 34, 0.45) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-action.fleet-ops-control-hub-tone-blue svg {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-control-hub-kpi-icon,
+[data-palette='puntoshop'] .fleet-ops-control-hub-link-count {
+    color: var(--brand-default) !important;
+    background-color: var(--brand-subtle) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-kpi-icon,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-link-count {
+    color: var(--brand-default) !important;
+    background-color: rgb(214 28 34 / 20%) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-control-hub-primary-action {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-control-hub-primary-action:hover {
+    background-color: var(--brand-hover) !important;
+    border-color: var(--brand-hover) !important;
+}
+
+
 
 
 
