@@ -149,20 +149,20 @@ index 2e1e5b272f7cfa078a23d037bae1987d43288b07..c045e2fc9f43812ef91b0e1c05ad03e7
          this.chart = new Chart(ctx, options);
      }
 diff --git a/addon/components/custom-fields-manager.hbs b/addon/components/custom-fields-manager.hbs
-index e105bab42f9f9c5452022db93efe2e090bd45391..6a0198a9d1be7452f17dc5cb4be0d46eae94e7dd 100644
+index e105bab42f9f9c5452022db93efe2e090bd45391..65697f7f9809f8dea19e255dc3a85c3a1a4da69d 100644
 --- a/addon/components/custom-fields-manager.hbs	
 +++ b/addon/components/custom-fields-manager.hbs	
 @@ -1,11 +1,11 @@
  <div class="rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
      <div>
 -        <div class="rounded-md px-3 py-2">{{or @title "Custom Fields Manager"}}</div>
-+        <div class="rounded-md px-3 py-2">{{or @title (t "settings.custom-fields.manager-title" default="Administrador de campos personalizados")}}</div>
++        <div class="rounded-md px-3 py-2">{{or @title (t "settings.custom-fields.manager-title")}}</div>
          <TabNavigation @tabs={{this.tabs}} @onTabChange={{this.onTabChange}} @contentClass="bg-gray-100 dark:bg-gray-800 px-4 py-2" as |activeTab|>
              {{#each this.subjects as |subject|}}
                  <div class="subject-custom-fields {{if (eq activeTab.id subject.model) 'block' 'hidden'}}">
                      <div class="flex flex-row justify-end mb-4 space-x-4">
 -                        <Button @type="primary" @icon="square-plus" @text="New field group" @onClick={{fn this.createGroup subject}} @permission="fleet-ops update custom-field" />
-+                        <Button @type="primary" @icon="square-plus" @text={{t "settings.custom-fields.new-field-group" default="Nuevo grupo de campos"}} @onClick={{fn this.createGroup subject}} @permission="fleet-ops update custom-field" />
++                        <Button @type="primary" @icon="square-plus" @text={{t "settings.custom-fields.new-field-group"}} @onClick={{fn this.createGroup subject}} @permission="fleet-ops update custom-field" />
                      </div>
                      <div class="space-y-4">
                          {{#each subject.groups as |group|}}
@@ -171,13 +171,13 @@ index e105bab42f9f9c5452022db93efe2e090bd45391..6a0198a9d1be7452f17dc5cb4be0d46e
                                          @type="primary"
                                          @icon="square-plus"
 -                                        @text="Create new custom field"
-+                                        @text={{t "settings.custom-fields.create-new-field" default="Crear nuevo campo personalizado"}}
++                                        @text={{t "settings.custom-fields.create-new-field"}}
                                          @onClick={{fn this.createCustomField subject group}}
                                          @permission="fleet-ops update custom-field"
                                      />
                                      <DropdownButton
 -                                        @text={{concat "Grid Size : " (or group.meta.grid_size 1)}}
-+                                        @text={{concat (t "settings.custom-fields.grid-size" default="Tamaño de cuadrícula: ") (or group.meta.grid_size 1)}}
++                                        @text={{concat (t "settings.custom-fields.grid-size") (or group.meta.grid_size 1)}}
                                          @textClass="text-sm mr-2"
                                          @buttonClass="flex-row-reverse w-44 justify-between"
                                          @icon="caret-down"
@@ -186,17 +186,17 @@ index e105bab42f9f9c5452022db93efe2e090bd45391..6a0198a9d1be7452f17dc5cb4be0d46e
                                          <FaIcon @icon="layer-group" @size="2x" class="text-gray-400 mb-2" />
                                          <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">
 -                                            No custom field groups
-+                                            {{t "settings.custom-fields.no-groups" default="Sin grupos de campos personalizados"}}
++                                            {{t "settings.custom-fields.no-groups"}}
                                          </div>
                                          <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">
 -                                            Add your first field group to start adding custom fields for
 -                                            {{pluralize subject.label}}
-+                                            {{t "settings.custom-fields.add-first-group-desc" subject=(pluralize subject.label) default="Agregue su primer grupo de campos para comenzar a agregar campos personalizados para {subject}"}}
++                                            {{t "settings.custom-fields.add-first-group-desc" subject=(pluralize subject.label)}}
                                          </div>
                                      </div>
                                  </div>
 diff --git a/addon/components/custom-fields-manager.js b/addon/components/custom-fields-manager.js
-index cb7297163c8f2e8b43e192b2e22ee915b3fe2b33..00b4e727364d45533f46d757b1c0741da82e5baf 100644
+index cb7297163c8f2e8b43e192b2e22ee915b3fe2b33..bdaf4bcf587016d1d704353503bb13fccb4a7337 100644
 --- a/addon/components/custom-fields-manager.js	
 +++ b/addon/components/custom-fields-manager.js	
 @@ -147,7 +147,7 @@ export default class CustomFieldsManagerComponent extends Component {
@@ -204,7 +204,7 @@ index cb7297163c8f2e8b43e192b2e22ee915b3fe2b33..00b4e727364d45533f46d757b1c0741d
  
          this.modalsManager.show('modals/custom-field-group-form', {
 -            title: 'New custom field group',
-+            title: this.intl ? this.intl.t('settings.custom-fields.new-group-modal-title', { default: 'Nuevo grupo de campos personalizados' }) : 'Nuevo grupo de campos personalizados',
++            title: this.intl ? this.intl.t('settings.custom-fields.new-group-modal-title') : 'New custom field group',
              acceptButtonIcon: 'check',
              acceptButtonIconPrefix: 'fas',
              declineButtonIcon: 'times',
@@ -213,7 +213,7 @@ index cb7297163c8f2e8b43e192b2e22ee915b3fe2b33..00b4e727364d45533f46d757b1c0741d
      @action createCustomField(subject, group) {
          const customField = this.store.createRecord('custom-field', {
 -            label: 'Untitled Field',
-+            label: this.intl ? this.intl.t('settings.custom-fields.untitled-field', { default: 'Campo sin título' }) : 'Campo sin título',
++            label: this.intl ? this.intl.t('settings.custom-fields.untitled-field') : 'Untitled Field',
              category_uuid: group.id,
              subject_uuid: this.currentUser.companyId,
              subject_type: 'company',
@@ -224,9 +224,9 @@ index cb7297163c8f2e8b43e192b2e22ee915b3fe2b33..00b4e727364d45533f46d757b1c0741d
 -            title: 'Delete this field group?',
 -            body: 'Once this field group is deleted it will not be recoverable and you will lose all custom fields inside.',
 -            acceptButtonText: 'Delete',
-+            title: this.intl ? this.intl.t('settings.custom-fields.delete-group-title', { default: '¿Eliminar este grupo de campos?' }) : '¿Eliminar este grupo de campos?',
-+            body: this.intl ? this.intl.t('settings.custom-fields.delete-group-body', { default: 'Una vez eliminado este grupo de campos, no se podrá recuperar y se perderán todos los campos personalizados dentro de él.' }) : 'Una vez eliminado este grupo de campos, no se podrá recuperar y se perderán todos los campos personalizados dentro de él.',
-+            acceptButtonText: this.intl ? this.intl.t('common.delete', { default: 'Eliminar' }) : 'Eliminar',
++            title: this.intl ? this.intl.t('settings.custom-fields.delete-group-title') : 'Delete this field group?',
++            body: this.intl ? this.intl.t('settings.custom-fields.delete-group-body') : 'Once this field group is deleted it will not be recoverable and you will lose all custom fields inside.',
++            acceptButtonText: this.intl ? this.intl.t('common.delete') : 'Delete',
              acceptButtonType: 'danger',
              confirm: async (modal) => {
                  modal.startLoading();
@@ -237,9 +237,9 @@ index cb7297163c8f2e8b43e192b2e22ee915b3fe2b33..00b4e727364d45533f46d757b1c0741d
 -            title: 'Delete this custom field?',
 -            body: 'Once this custom field is deleted it will not be recoverable and you will lose all data assosciated.',
 -            acceptButtonText: 'Delete',
-+            title: this.intl ? this.intl.t('settings.custom-fields.delete-field-title', { default: '¿Eliminar este campo personalizado?' }) : '¿Eliminar este campo personalizado?',
-+            body: this.intl ? this.intl.t('settings.custom-fields.delete-field-body', { default: 'Una vez eliminado este campo personalizado, no se podrá recuperar y se perderán todos los datos asociados.' }) : 'Una vez eliminado este campo personalizado, no se podrá recuperar y se perderán todos los datos asociados.',
-+            acceptButtonText: this.intl ? this.intl.t('common.delete', { default: 'Eliminar' }) : 'Eliminar',
++            title: this.intl ? this.intl.t('settings.custom-fields.delete-field-title') : 'Delete this custom field?',
++            body: this.intl ? this.intl.t('settings.custom-fields.delete-field-body') : 'Once this custom field is deleted it will not be recoverable and you will lose all data assosciated.',
++            acceptButtonText: this.intl ? this.intl.t('common.delete') : 'Delete',
              confirm: async (modal) => {
                  modal.startLoading();
  
@@ -297,7 +297,7 @@ index 410feba0e6a523c83f619ceca812918856231141..c924f9f459f3b01f05e91eb41522bdc0
          </div>
      {{/unless}}
 diff --git a/addon/components/layout/header/dark-mode-toggle.hbs b/addon/components/layout/header/dark-mode-toggle.hbs
-index a49999fc60210ce40e6b7447a8477a21d89ba608..890f53f5d2006c0c66b72dcded2bd86e5eabef0a 100644
+index a49999fc60210ce40e6b7447a8477a21d89ba608..99a7b31b6c539d171f296d7d9a95ebb6c9a13e82 100644
 --- a/addon/components/layout/header/dark-mode-toggle.hbs	
 +++ b/addon/components/layout/header/dark-mode-toggle.hbs	
 @@ -1,6 +1,6 @@
@@ -305,12 +305,12 @@ index a49999fc60210ce40e6b7447a8477a21d89ba608..890f53f5d2006c0c66b72dcded2bd86e
      <Toggle @isToggled={{this.userPrefersDarkMode}} @onToggle={{this.switchDarkMode}} />
      <span class="ml-1">
 -        Dark Mode
-+        {{t "layout.header.menus.user.dark-mode" default="Modo oscuro"}}
++        {{t "layout.header.menus.user.dark-mode"}}
      </span>
  </a>
 \ No newline at end of file
 diff --git a/addon/components/layout/header/dropdown/item.hbs b/addon/components/layout/header/dropdown/item.hbs
-index 0c8638127e26260f813a5300df71f9aa474f109a..a1701949f38c4e059ccadebe1adeabc0f48fe5af 100644
+index 0c8638127e26260f813a5300df71f9aa474f109a..377041d8d045a99b60a1caa7e13d29760fb62997 100644
 --- a/addon/components/layout/header/dropdown/item.hbs	
 +++ b/addon/components/layout/header/dropdown/item.hbs	
 @@ -45,7 +45,7 @@
@@ -322,36 +322,27 @@ index 0c8638127e26260f813a5300df71f9aa474f109a..a1701949f38c4e059ccadebe1adeabc0
                  {{/if}}
              {{/if}}
          </div>
-@@ -59,9 +59,9 @@
-                 <FaIcon @icon={{@item.icon}} @size={{or @item.iconSize "sm"}} class={{or @item.iconClass "mr-2"}} />
-             {{/if}}
+@@ -61,7 +61,7 @@
              {{#if @item.intl}}
--                <span>{{t @item.intl}}</span>
-+                <span>{{t @item.intl default=this.translatedText}}</span>
+                 <span>{{t @item.intl}}</span>
              {{else}}
 -                <span>{{@item.text}}</span>
 +                <span>{{this.translatedText}}</span>
              {{/if}}
          </LinkTo>
      </div>
-@@ -80,9 +80,9 @@
-                 <FaIcon @icon={{@item.icon}} @size={{or @item.iconSize "sm"}} class={{or @item.iconClass "mr-2"}} />
-             {{/if}}
+@@ -82,7 +82,7 @@
              {{#if @item.intl}}
--                <span>{{t @item.intl}}</span>
-+                <span>{{t @item.intl default=this.translatedText}}</span>
+                 <span>{{t @item.intl}}</span>
              {{else}}
 -                <span>{{@item.text}}</span>
 +                <span>{{this.translatedText}}</span>
              {{/if}}
          </a>
      </div>
-@@ -95,9 +95,9 @@
-                 <FaIcon @icon={{@item.icon}} @size={{or @item.iconSize "sm"}} class={{or @item.iconClass "mr-2"}} />
-             {{/if}}
+@@ -97,7 +97,7 @@
              {{#if @item.intl}}
--                <span>{{t @item.intl}}</span>
-+                <span>{{t @item.intl default=this.translatedText}}</span>
+                 <span>{{t @item.intl}}</span>
              {{else}}
 -                <span>{{@item.text}}</span>
 +                <span>{{this.translatedText}}</span>
@@ -359,10 +350,15 @@ index 0c8638127e26260f813a5300df71f9aa474f109a..a1701949f38c4e059ccadebe1adeabc0
          </a>
      </div>
 diff --git a/addon/components/layout/header/dropdown/item.js b/addon/components/layout/header/dropdown/item.js
-index 35de903c4e321a89930c5bfc73c5907f4d7b800e..800279976ee0e7db871845c3ae2e8dfb9d3646a6 100644
+index 35de903c4e321a89930c5bfc73c5907f4d7b800e..a2869603ee8b92a444a957b247ef7465ef17885b 100644
 --- a/addon/components/layout/header/dropdown/item.js	
 +++ b/addon/components/layout/header/dropdown/item.js	
-@@ -5,11 +5,35 @@ import { bool } from '@ember/object/computed';
+@@ -1,15 +1,46 @@
+ import Component from '@glimmer/component';
++import { inject as service } from '@ember/service';
+ import { computed } from '@ember/object';
+ import { isBlank } from '@ember/utils';
+ import { bool } from '@ember/object/computed';
  import { ExtensionComponent } from '@fleetbase/ember-core/contracts';
  import isMenuItemActive from '../../../../utils/is-menu-item-active';
  
@@ -384,6 +380,7 @@ index 35de903c4e321a89930c5bfc73c5907f4d7b800e..800279976ee0e7db871845c3ae2e8dfb
 +};
 +
  export default class LayoutHeaderDropdownItemComponent extends Component {
++    @service intl;
      @bool('args.item.onClick') isInteractive;
      @bool('args.item.href') isAnchor;
      @bool('args.item.seperator') isSeperator;
@@ -391,8 +388,13 @@ index 35de903c4e321a89930c5bfc73c5907f4d7b800e..800279976ee0e7db871845c3ae2e8dfb
 +    get translatedText() {
 +        const text = this.args.item?.text;
 +        if (typeof text !== 'string') return text;
-+        const lower = text.trim().toLowerCase();
-+        return DD_TRANSLATIONS[lower] ?? text;
++        const current = this.intl?.currentLocale;
++        const isSpanish = Array.isArray(current) ? current[0]?.startsWith('es') : (typeof current === 'string' && current.startsWith('es'));
++        if (isSpanish) {
++            const lower = text.trim().toLowerCase();
++            return DD_TRANSLATIONS[lower] ?? text;
++        }
++        return text;
 +    }
 +
      @computed('args.item.{route,onClick}') get isLink() {
@@ -659,7 +661,7 @@ index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..2112711d8a40f86867172f3c95fcc910
 +    }
  }
 diff --git a/addon/components/model-select.hbs b/addon/components/model-select.hbs
-index 460919361d69f63738b1dd237d68f02cd58273c3..fc57884a0721f44c521e97a60fd1250113af1ca1 100644
+index 460919361d69f63738b1dd237d68f02cd58273c3..602e7afe86e7b6bdbe5f0ff75d9222efbd5b6487 100644
 --- a/addon/components/model-select.hbs	
 +++ b/addon/components/model-select.hbs	
 @@ -25,7 +25,7 @@
@@ -667,7 +669,7 @@ index 460919361d69f63738b1dd237d68f02cd58273c3..fc57884a0721f44c521e97a60fd12501
          @matcher={{@matcher}}
          @matchTriggerWidth={{@matchTriggerWidth}}
 -        @noMatchesMessage={{@noMatchesMessage}}
-+        @noMatchesMessage={{or @noMatchesMessage (t "common.no-matches-found" default="No se encontraron resultados")}}
++        @noMatchesMessage={{or @noMatchesMessage (t "common.no-matches-found")}}
          @onBlur={{@onBlur}}
          @onChange={{this.change}}
          @onClose={{this.onClose}}
@@ -677,13 +679,13 @@ index 460919361d69f63738b1dd237d68f02cd58273c3..fc57884a0721f44c521e97a60fd12501
          @searchFieldPosition={{@searchFieldPosition}}
 -        @searchMessage={{@searchMessage}}
 -        @searchPlaceholder={{@searchPlaceholder}}
-+        @searchMessage={{or @searchMessage (t "common.type-to-search" default="Escribe para buscar...")}}
-+        @searchPlaceholder={{or @searchPlaceholder (t "common.type-to-search" default="Escribe para buscar...")}}
++        @searchMessage={{or @searchMessage (t "common.type-to-search")}}
++        @searchPlaceholder={{or @searchPlaceholder (t "common.type-to-search")}}
          @selected={{this.selectedModel}}
          @selectedItemComponent={{@selectedItemComponent}}
          @tabindex={{@tabindex}}
 diff --git a/addon/components/notification-tray.hbs b/addon/components/notification-tray.hbs
-index ffdc7ec658f820640c483c6ebac6325c9f92e94e..847a35d55cffc0c260ce96b99c669282ad4afe22 100644
+index ffdc7ec658f820640c483c6ebac6325c9f92e94e..146f4d616cb9c4f725115c1f553ce5ac397e329c 100644
 --- a/addon/components/notification-tray.hbs	
 +++ b/addon/components/notification-tray.hbs	
 @@ -22,25 +22,25 @@
@@ -691,7 +693,7 @@ index ffdc7ec658f820640c483c6ebac6325c9f92e94e..847a35d55cffc0c260ce96b99c669282
                  <div>
                      <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex flex-row space-x-4">
 -                        <h1 class="text-black dark:text-gray-100 text-sm font-bold">{{pluralize this.notifications.length "Unread Notification"}}</h1>
-+                        <h1 class="text-black dark:text-gray-100 text-sm font-bold">{{if (eq this.notifications.length 1) (t "common.unread-notification" default="1 notificación no leída") (concat this.notifications.length " " (t "common.unread-notifications" default="notificaciones no leídas"))}}</h1>
++                        <h1 class="text-black dark:text-gray-100 text-sm font-bold">{{if (eq this.notifications.length 1) (t "common.unread-notification") (concat this.notifications.length " " (t "common.unread-notifications"))}}</h1>
                      </div>
                      <div class="h-48 overflow-y-scroll p-2">
                          {{#each this.notifications as |notification|}}
@@ -699,12 +701,12 @@ index ffdc7ec658f820640c483c6ebac6325c9f92e94e..847a35d55cffc0c260ce96b99c669282
                                  <h3 class="font-semibold text-small truncate">{{notification.data.subject}}</h3>
                                  <p class="text-xs mb-1.5 truncate">{{notification.data.message}}</p>
 -                                <span class="text-xs">Received: {{notification.createdAgo}}</span>
-+                                <span class="text-xs">{{t "common.received" default="Recibido"}}: {{notification.createdAgo}}</span>
++                                <span class="text-xs">{{t "common.received"}}: {{notification.createdAgo}}</span>
                              </a>
                          {{else}}
                              <div class="flex flex-1 items-center justify-center w-full h-full">
 -                                <span class="text-base text-gray-800 dark:text-gray-300 italic">No unread notifications</span>
-+                                <span class="text-base text-gray-800 dark:text-gray-300 italic">{{t "common.no-unread-notifications" default="Sin notificaciones no leídas"}}</span>
++                                <span class="text-base text-gray-800 dark:text-gray-300 italic">{{t "common.no-unread-notifications"}}</span>
                              </div>
                          {{/each}}
                      </div>
@@ -712,12 +714,12 @@ index ffdc7ec658f820640c483c6ebac6325c9f92e94e..847a35d55cffc0c260ce96b99c669282
                  <div class="px-2 py-1.5 border-t border-gray-200 dark:border-gray-700 flex flex-row space-x-4">
                      <LinkTo @route="console.notifications" class="notification-tray-view-all-link" {{on "click" this.onPressViewAllNotifications}}>
 -                        View all notifications
-+                        {{t "common.view-all-notifications" default="Ver todas las notificaciones"}}
++                        {{t "common.view-all-notifications"}}
                      </LinkTo>
                  </div>
              </div>
 diff --git a/addon/components/pagination.hbs b/addon/components/pagination.hbs
-index 6006fc29f1927ff23d25f56b50f7114600550144..5d7e9de9b2b3c51d7891cda3ffb3417310165b2b 100644
+index 6006fc29f1927ff23d25f56b50f7114600550144..f93285892a917a258c80ffa66c32e24922bcfd75 100644
 --- a/addon/components/pagination.hbs	
 +++ b/addon/components/pagination.hbs	
 @@ -8,38 +8,38 @@
@@ -725,11 +727,11 @@ index 6006fc29f1927ff23d25f56b50f7114600550144..5d7e9de9b2b3c51d7891cda3ffb34173
              aria-disabled={{if this.cannotStepBackward "true" "false"}}
              tabindex="-1"
 -            aria-label="Previous"
-+            aria-label={{t "common.previous" default="Anterior"}}
++            aria-label={{t "common.previous"}}
              {{on "click" (fn this.incrementPage -1)}}
          >
 -            Previous
-+            {{t "common.previous" default="Anterior"}}
++            {{t "common.previous"}}
          </a>
          <a
              href="#"
@@ -737,33 +739,33 @@ index 6006fc29f1927ff23d25f56b50f7114600550144..5d7e9de9b2b3c51d7891cda3ffb34173
              class="ml-3 direction-button {{@directionButtonClass}} {{if this.cannotStepForward 'disabled'}}"
              aria-disabled={{if this.cannotStepForward "true" "false"}}
 -            aria-label="Next"
-+            aria-label={{t "common.next" default="Siguiente"}}
++            aria-label={{t "common.next"}}
              {{on "click" (fn this.incrementPage 1)}}
          >
 -            Next
-+            {{t "common.next" default="Siguiente"}}
++            {{t "common.next"}}
          </a>
      </div>
      <div class="fleetbase-pagination-meta-info-wrapper hidden sm:flex-1 sm:flex sm:items-center sm:justify-between {{@metaInfoWrapperClass}}">
          <div class={{concat "fleetbase-pagination-meta-info" " " @metaInfoClass}}>
              <p class="fleetbase-pagination-meta-info-content text-sm leading-5 text-gray-700 pagination-showing {{@metaInfoParagraph}}">
 -                Showing
-+                {{t "common.showing" default="Mostrando"}}
++                {{t "common.showing"}}
                  <span class="font-medium">
                      {{this.from}}
                  </span>
 -                to
-+                {{t "common.to" default="a"}}
++                {{t "common.to"}}
                  <span class="font-medium">
                      {{this.to}}
                  </span>
 -                of
-+                {{t "common.of" default="de"}}
++                {{t "common.of"}}
                  <span class="font-medium">
                      {{this.totalResults}}
                  </span>
 -                results
-+                {{t "common.results" default="resultados"}}
++                {{t "common.results"}}
              </p>
          </div>
  
@@ -1153,7 +1155,7 @@ index 84e9884a16427b2e144e0150fe3d33cd42189133..9402582271b6ba91c7305907c180eb14
  
      get docsTitle() {
 diff --git a/addon/components/table.hbs b/addon/components/table.hbs
-index 3dcbfdf5fcda68492e4f540495608b92275e1c0f..eee0b9dca33cef49f6e4710fb6b34afd4ee87fb8 100644
+index 3dcbfdf5fcda68492e4f540495608b92275e1c0f..e2e11f2689ca499ac56190fe4ea8e1d7a08412e7 100644
 --- a/addon/components/table.hbs	
 +++ b/addon/components/table.hbs	
 @@ -78,7 +78,7 @@
@@ -1161,7 +1163,7 @@ index 3dcbfdf5fcda68492e4f540495608b92275e1c0f..eee0b9dca33cef49f6e4710fb6b34afd
                                          </div>
                                      {{/if}}
 -                                    <div class="next-table-empty-state-title">{{or @emptyStateTitle "No records found"}}</div>
-+                                    <div class="next-table-empty-state-title">{{or @emptyStateTitle (t "common.no-records-found" default="No se encontraron registros")}}</div>
++                                    <div class="next-table-empty-state-title">{{or @emptyStateTitle (t "common.no-records-found")}}</div>
                                      {{#if @emptyStateDescription}}
                                          <div class="next-table-empty-state-description">{{@emptyStateDescription}}</div>
                                      {{/if}}

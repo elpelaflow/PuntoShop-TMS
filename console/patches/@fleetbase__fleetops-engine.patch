@@ -3679,12 +3679,12 @@ index 16b2528853b3e9d1cabdc1bf28dccdb474e15da2..42a29e13a6025bf275be81a4f64d6f76
      }
  
 diff --git a/addon/components/order/form/details.hbs b/addon/components/order/form/details.hbs
-index fec97dabebb8852b49f545168527cd9fb530f191..16b6ead576dd88c78d79e63abf4127312d639379 100644
+index fec97dabebb8852b49f545168527cd9fb530f191..7da61bf43da76e1b5584936215fb0f002594e827 100644
 --- a/addon/components/order/form/details.hbs	
 +++ b/addon/components/order/form/details.hbs	
 @@ -1,4 +1,4 @@
 -<ContentPanel @title="Details" @open={{true}} @wrapperClass="bordered-top">
-+<ContentPanel @title={{t "common.details" default="Detalles"}} @open={{true}} @wrapperClass="bordered-top">
++<ContentPanel @title={{t "common.details"}} @open={{true}} @wrapperClass="bordered-top">
      <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
          <InputGroup @name={{t "order.fields.order-type"}} @helpText={{t "order.fields.order-type-help-text"}} @required={{true}}>
              <div class="fleetbase-model-select fleetbase-power-select ember-model-select">
@@ -3692,9 +3692,9 @@ index fec97dabebb8852b49f545168527cd9fb530f191..16b6ead576dd88c78d79e63abf412731
                      @selectedItemComponent={{component "select-option/order-config" compact=true}}
                      @onChange={{perform this.selectOrderConfig}}
                      @placeholder={{t "order.fields.order-type-placeholder"}}
-+                    @searchPlaceholder={{t "common.type-to-search" default="Escribe para buscar..."}}
-+                    @searchMessage={{t "common.type-to-search" default="Escribe para buscar..."}}
-+                    @noMatchesMessage={{t "common.no-matches-found" default="No se encontraron resultados"}}
++                    @searchPlaceholder={{t "common.type-to-search"}}
++                    @searchMessage={{t "common.type-to-search"}}
++                    @noMatchesMessage={{t "common.no-matches-found"}}
                      @triggerClass="form-select form-input"
                      @disabled={{or (cannot-write @resource) this.orderTypeLocked}}
                      as |orderConfig|
@@ -3702,9 +3702,9 @@ index fec97dabebb8852b49f545168527cd9fb530f191..16b6ead576dd88c78d79e63abf412731
                          @selected={{find-by "value" @resource.pod_method (get-fleet-ops-options "podOptions")}}
                          @onChange={{set-model-attr @resource "pod_method"}}
                          @placeholder={{t "order.fields.proof-delivery-placeholder"}}
-+                        @searchPlaceholder={{t "common.type-to-search" default="Escribe para buscar..."}}
-+                        @searchMessage={{t "common.type-to-search" default="Escribe para buscar..."}}
-+                        @noMatchesMessage={{t "common.no-matches-found" default="No se encontraron resultados"}}
++                        @searchPlaceholder={{t "common.type-to-search"}}
++                        @searchMessage={{t "common.type-to-search"}}
++                        @noMatchesMessage={{t "common.no-matches-found"}}
                          @triggerClass="form-select form-input"
                          @disabled={{cannot-write @resource}}
                          as |option|
@@ -4146,7 +4146,7 @@ index 0cacd4c9f90d4102515dc538fc5481eb9cff98f0..843574c9e61ce6aecf3212e07511e526
      /** Derived Ember Data model name for the currently selected asset type. */
      @tracked assetModelName = null;
 diff --git a/addon/components/positions-replay.hbs b/addon/components/positions-replay.hbs
-index 909c797dfa88bbedad2f87ee1077a81b9972ad87..a091132cb9eb9f4f34ecf025c3975dc41319e4a6 100644
+index 909c797dfa88bbedad2f87ee1077a81b9972ad87..6d06e78753a44d5a8f0d02aefe249ac476e3a8a5 100644
 --- a/addon/components/positions-replay.hbs	
 +++ b/addon/components/positions-replay.hbs	
 @@ -82,28 +82,28 @@
@@ -4280,7 +4280,7 @@ index 909c797dfa88bbedad2f87ee1077a81b9972ad87..a091132cb9eb9f4f34ecf025c3975dc4
          <div class="positions-replay-table">
              <div class="px-3">
 -                <h3 class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">Position Data</h3>
-+                <h3 class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">{{t "fleet-ops.operations.map.drawer.position-data" default="Datos de posición"}}</h3>
++                <h3 class="text-[11px] uppercase tracking-wide text-gray-500 font-semibold">{{t "fleet-ops.operations.map.drawer.position-data"}}</h3>
              </div>
              <div class="overflow-x-auto">
                  <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -4289,27 +4289,27 @@ index 909c797dfa88bbedad2f87ee1077a81b9972ad87..a091132cb9eb9f4f34ecf025c3975dc4
                              </th>
                              <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
 -                                Timestamp
-+                                {{t "fleet-ops.operations.map.drawer.timestamp" default="Marca de tiempo"}}
++                                {{t "fleet-ops.operations.map.drawer.timestamp"}}
                              </th>
                              <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
 -                                Latitude
-+                                {{t "fleet-ops.operations.map.drawer.latitude" default="Latitud"}}
++                                {{t "fleet-ops.operations.map.drawer.latitude"}}
                              </th>
                              <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
 -                                Longitude
-+                                {{t "fleet-ops.operations.map.drawer.longitude" default="Longitud"}}
++                                {{t "fleet-ops.operations.map.drawer.longitude"}}
                              </th>
                              <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
 -                                Speed (km/h)
-+                                {{t "fleet-ops.operations.map.drawer.speed-kmh" default="Velocidad (km/h)"}}
++                                {{t "fleet-ops.operations.map.drawer.speed-kmh"}}
                              </th>
                              <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
 -                                Heading
-+                                {{t "fleet-ops.operations.map.drawer.heading" default="Rumbo"}}
++                                {{t "fleet-ops.operations.map.drawer.heading"}}
                              </th>
                              <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
 -                                Altitude (m)
-+                                {{t "fleet-ops.operations.map.drawer.altitude-m" default="Altitud (m)"}}
++                                {{t "fleet-ops.operations.map.drawer.altitude-m"}}
                              </th>
                          </tr>
                      </thead>
@@ -4318,11 +4318,11 @@ index 909c797dfa88bbedad2f87ee1077a81b9972ad87..a091132cb9eb9f4f34ecf025c3975dc4
                  <FaIcon @icon="map-marked-alt" @size="2x" class="text-gray-400 mb-2" />
                  <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300">
 -                    No Positions Found
-+                    {{t "fleet-ops.operations.map.drawer.no-positions-found" default="No se encontraron posiciones"}}
++                    {{t "fleet-ops.operations.map.drawer.no-positions-found"}}
                  </h3>
                  <p class="text-sm text-gray-500 dark:text-gray-400">
 -                    Try adjusting your filters or select a different date range.
-+                    {{t "fleet-ops.operations.map.drawer.no-positions-found-help" default="Prueba ajustando los filtros o selecciona un rango de fechas diferente."}}
++                    {{t "fleet-ops.operations.map.drawer.no-positions-found-help"}}
                  </p>
              </div>
          {{/if}}
@@ -10741,7 +10741,7 @@ index fa20dc7cb0597c0a7ffb6f6022864ac8d357ecd9..d854827bbda87371e578fe6a69754139
      }}
  />
 diff --git a/addon/templates/operations/orders/index.hbs b/addon/templates/operations/orders/index.hbs
-index 718abb1beaccdbe4df4653882f77164519da6b26..cddec4b078601ab05e68ab9b9bde798eb5796b3f 100644
+index 718abb1beaccdbe4df4653882f77164519da6b26..703347e0139cdf25b2e683f1424f9306331c7126 100644
 --- a/addon/templates/operations/orders/index.hbs	
 +++ b/addon/templates/operations/orders/index.hbs	
 @@ -51,19 +51,19 @@
@@ -10753,32 +10753,32 @@ index 718abb1beaccdbe4df4653882f77164519da6b26..cddec4b078601ab05e68ab9b9bde798e
 -            filteredTitle="No orders match your filters"
 -            filteredDescription="Adjust the search, bulk search, or filters to find another order."
 -            primaryText="New order"
-+            title=(t "order.empty-state.title" default="Crea tu primer pedido")
-+            description=(t "order.empty-state.description" default="Los pedidos son el centro de Fleet-Ops: planifica rutas, asigna conductores y vehículos, rastrea el progreso y recopila pruebas.")
-+            filteredTitle=(t "order.empty-state.filtered-title" default="Ningún pedido coincide con tus filtros")
-+            filteredDescription=(t "order.empty-state.filtered-description" default="Ajusta la búsqueda o los filtros para encontrar otro pedido.")
-+            primaryText=(t "order.empty-state.primary-text" default="Nuevo pedido")
++            title=(t "order.empty-state.title")
++            description=(t "order.empty-state.description")
++            filteredTitle=(t "order.empty-state.filtered-title")
++            filteredDescription=(t "order.empty-state.filtered-description")
++            primaryText=(t "order.empty-state.primary-text")
              primaryIcon="plus"
              primaryAction=this.orderActions.transition.create
 -            secondaryText="Import"
-+            secondaryText=(t "common.import" default="Importar")
++            secondaryText=(t "common.import")
              secondaryIcon="upload"
              secondaryAction=this.importOrders
              docsSlug="fleet-ops/operations/orders/overview"
 -            docsTitle="Orders guide"
 -            docsText="Order guide"
-+            docsTitle=(t "order.empty-state.docs-title" default="Guía de pedidos")
-+            docsText=(t "order.empty-state.docs-text" default="Guía de pedidos")
++            docsTitle=(t "order.empty-state.docs-title")
++            docsText=(t "order.empty-state.docs-text")
              docsSource="fleet-ops-empty-orders"
          }}
          @tfootVerticalOffset="7"
 diff --git a/addon/templates/settings/custom-fields.hbs b/addon/templates/settings/custom-fields.hbs
-index 988e6ad5b1be629de3b6bd95586fe41bcacea35f..f0366554044b34df205bbbc53c2f8606c3064e57 100644
+index 988e6ad5b1be629de3b6bd95586fe41bcacea35f..03d4ad317affa7ba19b0df882f454ca0b3a34d2b 100644
 --- a/addon/templates/settings/custom-fields.hbs	
 +++ b/addon/templates/settings/custom-fields.hbs	
 @@ -1,4 +1,4 @@
 -<Layout::Section::Header @title={{t "settings.custom-fields"}} />
-+<Layout::Section::Header @title={{t "settings.custom-fields.title" default=(t "menu.custom-fields" default="Campos personalizados")}} />
++<Layout::Section::Header @title={{t "settings.custom-fields.title"}} />
  
  <Layout::Section::Body class="overflow-y-scroll-i h-full">
      <div class="container mx-auto h-screen">

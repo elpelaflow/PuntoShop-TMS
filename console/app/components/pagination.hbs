@@ -7,38 +7,38 @@
             class="direction-button {{@directionButtonClass}} {{if this.cannotStepBackward 'disabled'}}"
             aria-disabled={{if this.cannotStepBackward "true" "false"}}
             tabindex="-1"
-            aria-label={{t "common.previous" default="Anterior"}}
+            aria-label={{t "common.previous"}}
             {{on "click" (fn this.incrementPage -1)}}
         >
-            {{t "common.previous" default="Anterior"}}
+            {{t "common.previous"}}
         </a>
         <a
             href="#"
             id="fleetbase-pagination-next-button"
             class="ml-3 direction-button {{@directionButtonClass}} {{if this.cannotStepForward 'disabled'}}"
             aria-disabled={{if this.cannotStepForward "true" "false"}}
-            aria-label={{t "common.next" default="Siguiente"}}
+            aria-label={{t "common.next"}}
             {{on "click" (fn this.incrementPage 1)}}
         >
-            {{t "common.next" default="Siguiente"}}
+            {{t "common.next"}}
         </a>
     </div>
     <div class="fleetbase-pagination-meta-info-wrapper hidden sm:flex-1 sm:flex sm:items-center sm:justify-between {{@metaInfoWrapperClass}}">
         <div class={{concat "fleetbase-pagination-meta-info" " " @metaInfoClass}}>
             <p class="fleetbase-pagination-meta-info-content text-sm leading-5 text-gray-700 pagination-showing {{@metaInfoParagraph}}">
-                {{t "common.showing" default="Mostrando"}}
+                {{t "common.showing"}}
                 <span class="font-medium">
                     {{this.from}}
                 </span>
-                {{t "common.to" default="a"}}
+                {{t "common.to"}}
                 <span class="font-medium">
                     {{this.to}}
                 </span>
-                {{t "common.of" default="de"}}
+                {{t "common.of"}}
                 <span class="font-medium">
                     {{this.totalResults}}
                 </span>
-                {{t "common.results" default="resultados"}}
+                {{t "common.results"}}
             </p>
         </div>
 
