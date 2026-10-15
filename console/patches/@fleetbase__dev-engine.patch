@@ -1,7 +1,7 @@
 diff --git a/addon/components/modals/api-key-form.hbs b/addon/components/modals/api-key-form.hbs
-index 49433a5..8bab10e 100644
---- a/addon/components/modals/api-key-form.hbs
-+++ b/addon/components/modals/api-key-form.hbs
+index 49433a54c7400431d4af85a86c83ba9f6baf5bba..67e4ece79631ba1fb1f4a0430010090c9145f77b 100644
+--- a/addon/components/modals/api-key-form.hbs	
++++ b/addon/components/modals/api-key-form.hbs	
 @@ -16,9 +16,15 @@
                      {{t "developers.component.modals.api-key-form.select-expiration-date"}}
                  </option>
@@ -22,9 +22,9 @@ index 49433a5..8bab10e 100644
              </select>
              <p class="text-xs dark:text-gray-100">
 diff --git a/addon/components/modals/roll-api-key-form.hbs b/addon/components/modals/roll-api-key-form.hbs
-index 76ab83b..690c7d7 100644
---- a/addon/components/modals/roll-api-key-form.hbs
-+++ b/addon/components/modals/roll-api-key-form.hbs
+index 76ab83b990f46230f227ea82251fa7c6b783844b..960809c63023f52a45abccf55796ef7f97168bd6 100644
+--- a/addon/components/modals/roll-api-key-form.hbs	
++++ b/addon/components/modals/roll-api-key-form.hbs	
 @@ -51,9 +51,15 @@
                          {{t "developers.component.modals.roll-api-key-form.select-date"}}
                      </option>
@@ -45,9 +45,9 @@ index 76ab83b..690c7d7 100644
                  </select>
                  <p class="dark:text-gray-100">
 diff --git a/addon/components/webhook/attempts.hbs b/addon/components/webhook/attempts.hbs
-index e656932..e41eac4 100644
---- a/addon/components/webhook/attempts.hbs
-+++ b/addon/components/webhook/attempts.hbs
+index e656932a37f5eeef17123cb75fcbe347a73c4334..60ca533f24ef8ad6b50bc85ffbe341ca16d03230 100644
+--- a/addon/components/webhook/attempts.hbs	
++++ b/addon/components/webhook/attempts.hbs	
 @@ -35,10 +35,10 @@
                  </div>
                  <div class="rounded-lg border borer-gray-300 dark:border-gray-700 shadow-sm">
@@ -62,10 +62,49 @@ index e656932..e41eac4 100644
                          {{/if}}
                      </div>
                  </div>
+diff --git a/addon/components/widget/developers-chart.js b/addon/components/widget/developers-chart.js
+index 1f0891b12c9f31529a809b91161167e833b7d73f..58fef25d53a4c73d660420cdf30081ddc1c1ac4c 100644
+--- a/addon/components/widget/developers-chart.js	
++++ b/addon/components/widget/developers-chart.js	
+@@ -4,13 +4,20 @@ import { inject as service } from '@ember/service';
+ import { action } from '@ember/object';
+ import { task } from 'ember-concurrency';
+ 
+-const COLORS = [
++const DEFAULT_COLORS = [
+     ['#2563eb', 'rgba(37, 99, 235, 0.15)'],
+     ['#10b981', 'rgba(16, 185, 129, 0.15)'],
+     ['#ef4444', 'rgba(239, 68, 68, 0.15)'],
+     ['#f59e0b', 'rgba(245, 158, 11, 0.15)'],
+ ];
+ 
++const PUNTOSHOP_COLORS = [
++    ['#d61c22', 'rgba(214, 28, 34, 0.15)'],
++    ['#10b981', 'rgba(16, 185, 129, 0.15)'],
++    ['#ef4444', 'rgba(239, 68, 68, 0.15)'],
++    ['#f59e0b', 'rgba(245, 158, 11, 0.15)'],
++];
++
+ export default class WidgetDevelopersChartComponent extends Component {
+     @service fetch;
+ 
+@@ -27,8 +34,11 @@ export default class WidgetDevelopersChartComponent extends Component {
+     }
+ 
+     get datasets() {
++        const isPuntoShop = typeof document !== 'undefined' && document.documentElement.getAttribute('data-palette') === 'puntoshop';
++        const colors = isPuntoShop ? PUNTOSHOP_COLORS : DEFAULT_COLORS;
++
+         return (this.data?.datasets ?? []).map((dataset, index) => {
+-            const color = COLORS[index % COLORS.length];
++            const color = colors[index % colors.length];
+ 
+             return {
+                 ...dataset,
 diff --git a/addon/controllers/api-keys/index.js b/addon/controllers/api-keys/index.js
-index c8e6cf2..95486c9 100644
---- a/addon/controllers/api-keys/index.js
-+++ b/addon/controllers/api-keys/index.js
+index c8e6cf2fad162645d3f31382469260ec4e6e1b4a..55129c3442d6f81c592b3d845740346debf93274 100644
+--- a/addon/controllers/api-keys/index.js	
++++ b/addon/controllers/api-keys/index.js	
 @@ -36,7 +36,14 @@ export default class ApiKeysIndexController extends Controller {
       *
       * @var {Array}
@@ -92,9 +131,9 @@ index c8e6cf2..95486c9 100644
              wrapperClass: 'flex items-center justify-end mx-2',
              align: 'right',
 diff --git a/addon/controllers/application.js b/addon/controllers/application.js
-index b4a16cc..83ec6f2 100644
---- a/addon/controllers/application.js
-+++ b/addon/controllers/application.js
+index b4a16cc07fb0ffbd09f8cf011494b5075bbec19c..f4302ac994067d1cf70098929a9f18a284daf576 100644
+--- a/addon/controllers/application.js	
++++ b/addon/controllers/application.js	
 @@ -11,14 +11,14 @@ export default class ApplicationController extends Controller {
          return [
              {
@@ -149,9 +188,9 @@ index b4a16cc..83ec6f2 100644
                  route: 'console.developers.events',
                  permission: 'developers list event',
 diff --git a/addon/controllers/webhooks/index.js b/addon/controllers/webhooks/index.js
-index 5814883..2a82804 100644
---- a/addon/controllers/webhooks/index.js
-+++ b/addon/controllers/webhooks/index.js
+index 5814883cc18f387ef81368111b70b55004de603d..b731dd1fb0aa185f39ee2f6b08b72355096cd5a9 100644
+--- a/addon/controllers/webhooks/index.js	
++++ b/addon/controllers/webhooks/index.js	
 @@ -148,7 +148,7 @@ export default class WebhooksIndexController extends BaseController {
              ddButtonText: false,
              ddButtonIcon: 'ellipsis-h',
@@ -162,9 +201,9 @@ index 5814883..2a82804 100644
              wrapperClass: 'flex items-center justify-end mx-2',
              width: '10%',
 diff --git a/addon/extension.js b/addon/extension.js
-index 86d852b..f2f5432 100644
---- a/addon/extension.js
-+++ b/addon/extension.js
+index 86d852bb98ef2d4024ab458a37544c66f3a6c767..425ff04cbdc113af099b835bd29108474ad2e2ac 100644
+--- a/addon/extension.js	
++++ b/addon/extension.js	
 @@ -6,38 +6,38 @@ export default {
          const widgetService = universe.getService('widget');
  
@@ -414,9 +453,9 @@ index 86d852b..f2f5432 100644
              }),
          ];
 diff --git a/addon/services/api-key-actions.js b/addon/services/api-key-actions.js
-index 90f7cb6..81bacb6 100644
---- a/addon/services/api-key-actions.js
-+++ b/addon/services/api-key-actions.js
+index 90f7cb69ffb63c983a5ce9101fc73611732801fe..ef46c214f6248f3c1dca9b17e2fec061ed055b1c 100644
+--- a/addon/services/api-key-actions.js	
++++ b/addon/services/api-key-actions.js	
 @@ -5,7 +5,14 @@ import { action } from '@ember/object';
   * API key actions shared by the Developers console and other engines (for example Fleetbase AI).
   */
@@ -434,9 +473,9 @@ index 90f7cb6..81bacb6 100644
      constructor() {
          super(...arguments);
 diff --git a/addon/templates/application.hbs b/addon/templates/application.hbs
-index c4cc71f..4e52854 100644
---- a/addon/templates/application.hbs
-+++ b/addon/templates/application.hbs
+index c4cc71f88ff19dceb285c139631abfb763c08ec8..92624c7bbbc804c0abc247cd6ca229057e8cc30a 100644
+--- a/addon/templates/application.hbs	
++++ b/addon/templates/application.hbs	
 @@ -1,5 +1,5 @@
  <EmberWormhole @to="sidebar-menu-items">
 -    <Layout::Sidebar::Navigator @items={{this.navigationItems}} @searchPlaceholder="Search Dev..." @searchProvider={{this.searchNavigation}} />
@@ -445,9 +484,9 @@ index c4cc71f..4e52854 100644
  
  <Layout::Section::Container>
 diff --git a/addon/templates/sockets/view.hbs b/addon/templates/sockets/view.hbs
-index 86ebc5e..a4a187d 100644
---- a/addon/templates/sockets/view.hbs
-+++ b/addon/templates/sockets/view.hbs
+index 86ebc5eeabc272ee0f2cf78a66ed71079ae2429d..537272921de8a61da969fc2a10f18a957b3ccb8e 100644
+--- a/addon/templates/sockets/view.hbs	
++++ b/addon/templates/sockets/view.hbs	
 @@ -6,7 +6,7 @@
      <div class="h-screen overflow-y-scroll pb-40">
          <div class="py-6 max-w-4xl mx-auto">
@@ -459,9 +498,9 @@ index 86ebc5e..a4a187d 100644
                  @title={{@model.name}}
 diff --git a/translations/es-mx.yaml b/translations/es-mx.yaml
 new file mode 100644
-index 0000000..149d6ac
+index 0000000000000000000000000000000000000000..08d737980e66038b01c9117e9bb0361125a518d1
 --- /dev/null
-+++ b/translations/es-mx.yaml
++++ b/translations/es-mx.yaml	
 @@ -0,0 +1,284 @@
 +developers:
 +  extension-name: Desarrolladores
@@ -747,34 +786,3 @@ index 0000000..149d6ac
 +        websockets: WebSockets
 +        logs: Registros
 +        events: Eventos
-diff --git a/addon/components/widget/developers-chart.js b/addon/components/widget/developers-chart.js
-index 4519965..53bc861 100644
---- a/addon/components/widget/developers-chart.js
-+++ b/addon/components/widget/developers-chart.js
-@@ -7,6 +7,13 @@ import { task } from 'ember-concurrency';
--const COLORS = [
-+const DEFAULT_COLORS = [
-     ['#2563eb', 'rgba(37, 99, 235, 0.15)'],
-     ['#10b981', 'rgba(16, 185, 129, 0.15)'],
-     ['#ef4444', 'rgba(239, 68, 68, 0.15)'],
-     ['#f59e0b', 'rgba(245, 158, 11, 0.15)'],
- ];
-+
-+const PUNTOSHOP_COLORS = [
-+    ['#d61c22', 'rgba(214, 28, 34, 0.15)'],
-+    ['#10b981', 'rgba(16, 185, 129, 0.15)'],
-+    ['#ef4444', 'rgba(239, 68, 68, 0.15)'],
-+    ['#f59e0b', 'rgba(245, 158, 11, 0.15)'],
-+];
- 
- export default class WidgetDevelopersChartComponent extends Component {
-@@ -29,3 +36,6 @@ export default class WidgetDevelopersChartComponent extends Component {
-     get datasets() {
-+        const isPuntoShop = typeof document !== 'undefined' && document.documentElement.getAttribute('data-palette') === 'puntoshop';
-+        const colors = isPuntoShop ? PUNTOSHOP_COLORS : DEFAULT_COLORS;
-+
--        return (this.data?.datasets ?? []).map((dataset, index) => {
--            const color = COLORS[index % COLORS.length];
-+        return (this.data?.datasets ?? []).map((dataset, index) => {
-+            const color = colors[index % colors.length];
-
