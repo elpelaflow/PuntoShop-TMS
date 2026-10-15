@@ -23,6 +23,8 @@ common:
   two-factor: Dos Factores
   remove: Remover
   cancel: Cancelar
+  no-records-found: No se encontraron registros
+  no-matches-found: No se encontraron resultados
   confirm: Confirmar
   close: Cerrar
   open: Abrir
@@ -1128,6 +1130,7 @@ order-status:
   completed: Terminado
   canceled: Cancelado
 column:
+  route-type: Tipo de ruta
   date: Fecha
   description: Descripción
   amount: Monto
@@ -1184,11 +1187,11 @@ column:
   created-by: Creado por
   customer: Cliente
   driver-assigned: Conductor asignado
-  dropoff: Dejar
+  dropoff: Entrega
   facilitator: Facilitador
   items: Elementos
   payload: Carga útil
-  pickup: Levantar
+  pickup: Recogida
   scheduled-at: Programado en
   tracking: Seguimiento
   transaction: Transacción

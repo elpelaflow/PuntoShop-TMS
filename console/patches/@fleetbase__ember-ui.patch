@@ -1,3 +1,63 @@
+diff --git a/addon/components/button.hbs b/addon/components/button.hbs
+index c36cca6d08e06bd5983ae200cce0360ce91c3cea..60ee94aa0aaffadb9656da5718cf05c385ec0e08 100644
+--- a/addon/components/button.hbs	
++++ b/addon/components/button.hbs	
+@@ -29,9 +29,9 @@
+                     />
+                 </span>
+             {{/if}}
+-            {{#if @text}}
++            {{#if this.text}}
+                 <span class="{{@textClass}} {{if @responsive 'sm:hidden'}}">
+-                    {{@text}}
++                    {{this.text}}
+                 </span>
+             {{/if}}
+             {{yield}}
+@@ -40,9 +40,9 @@
+             <Attach::Tooltip @class="clean" @animation="scale" @placement={{or @tooltipPlacement "top"}}>
+                 <InputInfo @text={{t "common.unauthorized"}} />
+             </Attach::Tooltip>
+-        {{else if @helpText}}
++        {{else if this.helpText}}
+             <Attach::Tooltip @class="clean" @animation="scale" @placement={{or @tooltipPlacement "top"}}>
+-                <InputInfo @text={{@helpText}} @exampleText={{@exampleText}} />
++                <InputInfo @text={{this.helpText}} @exampleText={{@exampleText}} />
+             </Attach::Tooltip>
+         {{/if}}
+     </span>
+diff --git a/addon/components/button.js b/addon/components/button.js
+index 4d4d93d0760d978cc724a67abb44ce5f39afea8b..12e67332516d09416b32a2ea7a4971be171e1f91 100644
+--- a/addon/components/button.js	
++++ b/addon/components/button.js	
+@@ -48,6 +48,27 @@ export default class ButtonComponent extends Component {
+      */
+     @not('isSecondary') isNotSecondary;
+ 
++    @computed('args.text') get text() {
++        const text = this.args.text;
++        if (!text || typeof text !== 'string') return text;
++        const lower = text.trim().toLowerCase();
++        if (lower === 'refresh') return 'Actualizar';
++        if (lower === 'new') return 'Nuevo';
++        if (lower === 'import') return 'Importar';
++        if (lower === 'export') return 'Exportar';
++        if (lower === 'save changes') return 'Guardar cambios';
++        if (lower === 'cancel') return 'Cancelar';
++        return text;
++    }
++
++    @computed('args.helpText') get helpText() {
++        const helpText = this.args.helpText;
++        if (!helpText || typeof helpText !== 'string') return helpText;
++        const lower = helpText.trim().toLowerCase();
++        if (lower === 'refresh') return 'Actualizar';
++        return helpText;
++    }
++
+     /**
+      * Determines if icon be displayed
+      *
 diff --git a/addon/components/chart.js b/addon/components/chart.js
 index 2e1e5b272f7cfa078a23d037bae1987d43288b07..c045e2fc9f43812ef91b0e1c05ad03e73d83b36a 100644
 --- a/addon/components/chart.js	
@@ -39,6 +99,123 @@ index 2e1e5b272f7cfa078a23d037bae1987d43288b07..c045e2fc9f43812ef91b0e1c05ad03e7
          this.useDateFns();
          this.chart = new Chart(ctx, options);
      }
+diff --git a/addon/components/custom-fields-manager.hbs b/addon/components/custom-fields-manager.hbs
+index e105bab42f9f9c5452022db93efe2e090bd45391..6a0198a9d1be7452f17dc5cb4be0d46eae94e7dd 100644
+--- a/addon/components/custom-fields-manager.hbs	
++++ b/addon/components/custom-fields-manager.hbs	
+@@ -1,11 +1,11 @@
+ <div class="rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
+     <div>
+-        <div class="rounded-md px-3 py-2">{{or @title "Custom Fields Manager"}}</div>
++        <div class="rounded-md px-3 py-2">{{or @title (t "settings.custom-fields.manager-title" default="Administrador de campos personalizados")}}</div>
+         <TabNavigation @tabs={{this.tabs}} @onTabChange={{this.onTabChange}} @contentClass="bg-gray-100 dark:bg-gray-800 px-4 py-2" as |activeTab|>
+             {{#each this.subjects as |subject|}}
+                 <div class="subject-custom-fields {{if (eq activeTab.id subject.model) 'block' 'hidden'}}">
+                     <div class="flex flex-row justify-end mb-4 space-x-4">
+-                        <Button @type="primary" @icon="square-plus" @text="New field group" @onClick={{fn this.createGroup subject}} @permission="fleet-ops update custom-field" />
++                        <Button @type="primary" @icon="square-plus" @text={{t "settings.custom-fields.new-field-group" default="Nuevo grupo de campos"}} @onClick={{fn this.createGroup subject}} @permission="fleet-ops update custom-field" />
+                     </div>
+                     <div class="space-y-4">
+                         {{#each subject.groups as |group|}}
+@@ -14,12 +14,12 @@
+                                     <Button
+                                         @type="primary"
+                                         @icon="square-plus"
+-                                        @text="Create new custom field"
++                                        @text={{t "settings.custom-fields.create-new-field" default="Crear nuevo campo personalizado"}}
+                                         @onClick={{fn this.createCustomField subject group}}
+                                         @permission="fleet-ops update custom-field"
+                                     />
+                                     <DropdownButton
+-                                        @text={{concat "Grid Size : " (or group.meta.grid_size 1)}}
++                                        @text={{concat (t "settings.custom-fields.grid-size" default="Tamaño de cuadrícula: ") (or group.meta.grid_size 1)}}
+                                         @textClass="text-sm mr-2"
+                                         @buttonClass="flex-row-reverse w-44 justify-between"
+                                         @icon="caret-down"
+@@ -85,11 +85,10 @@
+                                     <div class="text-center">
+                                         <FaIcon @icon="layer-group" @size="2x" class="text-gray-400 mb-2" />
+                                         <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">
+-                                            No custom field groups
++                                            {{t "settings.custom-fields.no-groups" default="Sin grupos de campos personalizados"}}
+                                         </div>
+                                         <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">
+-                                            Add your first field group to start adding custom fields for
+-                                            {{pluralize subject.label}}
++                                            {{t "settings.custom-fields.add-first-group-desc" subject=(pluralize subject.label) default="Agregue su primer grupo de campos para comenzar a agregar campos personalizados para {subject}"}}
+                                         </div>
+                                     </div>
+                                 </div>
+diff --git a/addon/components/custom-fields-manager.js b/addon/components/custom-fields-manager.js
+index cb7297163c8f2e8b43e192b2e22ee915b3fe2b33..00b4e727364d45533f46d757b1c0741da82e5baf 100644
+--- a/addon/components/custom-fields-manager.js	
++++ b/addon/components/custom-fields-manager.js	
+@@ -147,7 +147,7 @@ export default class CustomFieldsManagerComponent extends Component {
+         });
+ 
+         this.modalsManager.show('modals/custom-field-group-form', {
+-            title: 'New custom field group',
++            title: this.intl ? this.intl.t('settings.custom-fields.new-group-modal-title', { default: 'Nuevo grupo de campos personalizados' }) : 'Nuevo grupo de campos personalizados',
+             acceptButtonIcon: 'check',
+             acceptButtonIconPrefix: 'fas',
+             declineButtonIcon: 'times',
+@@ -172,7 +172,7 @@ export default class CustomFieldsManagerComponent extends Component {
+ 
+     @action createCustomField(subject, group) {
+         const customField = this.store.createRecord('custom-field', {
+-            label: 'Untitled Field',
++            label: this.intl ? this.intl.t('settings.custom-fields.untitled-field', { default: 'Campo sin título' }) : 'Campo sin título',
+             category_uuid: group.id,
+             subject_uuid: this.currentUser.companyId,
+             subject_type: 'company',
+@@ -187,9 +187,9 @@ export default class CustomFieldsManagerComponent extends Component {
+ 
+     @action deleteGroup(group, subject) {
+         this.modalsManager.confirm({
+-            title: 'Delete this field group?',
+-            body: 'Once this field group is deleted it will not be recoverable and you will lose all custom fields inside.',
+-            acceptButtonText: 'Delete',
++            title: this.intl ? this.intl.t('settings.custom-fields.delete-group-title', { default: '¿Eliminar este grupo de campos?' }) : '¿Eliminar este grupo de campos?',
++            body: this.intl ? this.intl.t('settings.custom-fields.delete-group-body', { default: 'Una vez eliminado este grupo de campos, no se podrá recuperar y se perderán todos los campos personalizados dentro de él.' }) : 'Una vez eliminado este grupo de campos, no se podrá recuperar y se perderán todos los campos personalizados dentro de él.',
++            acceptButtonText: this.intl ? this.intl.t('common.delete', { default: 'Eliminar' }) : 'Eliminar',
+             acceptButtonType: 'danger',
+             confirm: async (modal) => {
+                 modal.startLoading();
+@@ -212,9 +212,9 @@ export default class CustomFieldsManagerComponent extends Component {
+ 
+     @action deleteCustomField(customField, subject) {
+         this.modalsManager.confirm({
+-            title: 'Delete this custom field?',
+-            body: 'Once this custom field is deleted it will not be recoverable and you will lose all data assosciated.',
+-            acceptButtonText: 'Delete',
++            title: this.intl ? this.intl.t('settings.custom-fields.delete-field-title', { default: '¿Eliminar este campo personalizado?' }) : '¿Eliminar este campo personalizado?',
++            body: this.intl ? this.intl.t('settings.custom-fields.delete-field-body', { default: 'Una vez eliminado este campo personalizado, no se podrá recuperar y se perderán todos los datos asociados.' }) : 'Una vez eliminado este campo personalizado, no se podrá recuperar y se perderán todos los datos asociados.',
++            acceptButtonText: this.intl ? this.intl.t('common.delete', { default: 'Eliminar' }) : 'Eliminar',
+             confirm: async (modal) => {
+                 modal.startLoading();
+ 
+diff --git a/addon/components/kanban/column.hbs b/addon/components/kanban/column.hbs
+index 410feba0e6a523c83f619ceca812918856231141..c924f9f459f3b01f05e91eb41522bdc067ff9a57 100644
+--- a/addon/components/kanban/column.hbs	
++++ b/addon/components/kanban/column.hbs	
+@@ -71,7 +71,7 @@
+ 
+         {{#unless this.cards.length}}
+             <div class="kanban-column-empty">
+-                <p class="kanban-empty-text">No {{pluralize (or @subject "card")}} yet</p>
++                <p class="kanban-empty-text">{{#if (eq @subject "order")}}Sin pedidos aún{{else}}Sin {{pluralize (or @subject "tarjeta")}} aún{{/if}}</p>
+             </div>
+         {{/unless}}
+     </div>
+@@ -79,7 +79,7 @@
+     {{#unless @readonly}}
+         <div class="kanban-column-footer">
+             <button type="button" class="kanban-add-card-button" {{on "click" this.onCreateCard}} disabled={{@disabled}}>
+-                + Add a {{or @subject "card"}}
++                + {{#if (eq @subject "order")}}Agregar un pedido{{else}}Agregar {{or @subject "tarjeta"}}{{/if}}
+             </button>
+         </div>
+     {{/unless}}
 diff --git a/addon/components/layout/resource/panel/header-actions.hbs b/addon/components/layout/resource/panel/header-actions.hbs
 index c23f73dc43f3c2ab0d1f55b3d7281dc6c81a43d3..d76f6a1fa90282e3cc086091ccdcf0c41e83709c 100644
 --- a/addon/components/layout/resource/panel/header-actions.hbs	
@@ -151,3 +328,281 @@ index 42f0e798ab29eb53a17da906b9d4f0512dc2826f..427ceb867a1ae5c19c1fb24ceeffb028
 +        return `${createWord} ${translatedModel}`;
 +    }
  }
+diff --git a/addon/components/model-select.hbs b/addon/components/model-select.hbs
+index 460919361d69f63738b1dd237d68f02cd58273c3..fc57884a0721f44c521e97a60fd1250113af1ca1 100644
+--- a/addon/components/model-select.hbs	
++++ b/addon/components/model-select.hbs	
+@@ -25,7 +25,7 @@
+         @multiple={{@multiple}}
+         @matcher={{@matcher}}
+         @matchTriggerWidth={{@matchTriggerWidth}}
+-        @noMatchesMessage={{@noMatchesMessage}}
++        @noMatchesMessage={{or @noMatchesMessage (t "common.no-matches-found" default="No se encontraron resultados")}}
+         @onBlur={{@onBlur}}
+         @onChange={{this.change}}
+         @onClose={{this.onClose}}
+@@ -44,8 +44,8 @@
+         @searchEnabled={{get-default-value @searchEnabled true}}
+         @searchField={{@searchField}}
+         @searchFieldPosition={{@searchFieldPosition}}
+-        @searchMessage={{@searchMessage}}
+-        @searchPlaceholder={{@searchPlaceholder}}
++        @searchMessage={{or @searchMessage (t "common.type-to-search" default="Escribe para buscar...")}}
++        @searchPlaceholder={{or @searchPlaceholder (t "common.type-to-search" default="Escribe para buscar...")}}
+         @selected={{this.selectedModel}}
+         @selectedItemComponent={{@selectedItemComponent}}
+         @tabindex={{@tabindex}}
+diff --git a/addon/components/pagination.hbs b/addon/components/pagination.hbs
+index 6006fc29f1927ff23d25f56b50f7114600550144..5d7e9de9b2b3c51d7891cda3ffb3417310165b2b 100644
+--- a/addon/components/pagination.hbs	
++++ b/addon/components/pagination.hbs	
+@@ -8,38 +8,38 @@
+                 assistive technology actually reads. incrementPage still guards the boundary. --}}
+             aria-disabled={{if this.cannotStepBackward "true" "false"}}
+             tabindex="-1"
+-            aria-label="Previous"
++            aria-label={{t "common.previous" default="Anterior"}}
+             {{on "click" (fn this.incrementPage -1)}}
+         >
+-            Previous
++            {{t "common.previous" default="Anterior"}}
+         </a>
+         <a
+             href="#"
+             id="fleetbase-pagination-next-button"
+             class="ml-3 direction-button {{@directionButtonClass}} {{if this.cannotStepForward 'disabled'}}"
+             aria-disabled={{if this.cannotStepForward "true" "false"}}
+-            aria-label="Next"
++            aria-label={{t "common.next" default="Siguiente"}}
+             {{on "click" (fn this.incrementPage 1)}}
+         >
+-            Next
++            {{t "common.next" default="Siguiente"}}
+         </a>
+     </div>
+     <div class="fleetbase-pagination-meta-info-wrapper hidden sm:flex-1 sm:flex sm:items-center sm:justify-between {{@metaInfoWrapperClass}}">
+         <div class={{concat "fleetbase-pagination-meta-info" " " @metaInfoClass}}>
+             <p class="fleetbase-pagination-meta-info-content text-sm leading-5 text-gray-700 pagination-showing {{@metaInfoParagraph}}">
+-                Showing
++                {{t "common.showing" default="Mostrando"}}
+                 <span class="font-medium">
+                     {{this.from}}
+                 </span>
+-                to
++                {{t "common.to" default="a"}}
+                 <span class="font-medium">
+                     {{this.to}}
+                 </span>
+-                of
++                {{t "common.of" default="de"}}
+                 <span class="font-medium">
+                     {{this.totalResults}}
+                 </span>
+-                results
++                {{t "common.results" default="resultados"}}
+             </p>
+         </div>
+ 
+diff --git a/addon/components/table/empty-state.hbs b/addon/components/table/empty-state.hbs
+index 4b4e37e9f4cd9a814996bd3a7e97c402c496581b..5c61398d145c25b17329f25a64fac2850d508f6b 100644
+--- a/addon/components/table/empty-state.hbs	
++++ b/addon/components/table/empty-state.hbs	
+@@ -20,7 +20,7 @@
+                     @type="default"
+                     @size={{this.actionButtonSize}}
+                     @icon={{@secondaryIcon}}
+-                    @text={{@secondaryText}}
++                    @text={{or this.secondaryText @secondaryText}}
+                     @onClick={{@secondaryAction}}
+                     class="next-table-empty-state-secondary-action"
+                 />
+@@ -30,7 +30,7 @@
+                     @type="primary"
+                     @size={{this.actionButtonSize}}
+                     @icon={{@primaryIcon}}
+-                    @text={{@primaryText}}
++                    @text={{or this.primaryText @primaryText}}
+                     @onClick={{@primaryAction}}
+                     class="next-table-empty-state-primary-action"
+                 />
+diff --git a/addon/components/table/empty-state.js b/addon/components/table/empty-state.js
+index 84e9884a16427b2e144e0150fe3d33cd42189133..9402582271b6ba91c7305907c180eb14a166fa84 100644
+--- a/addon/components/table/empty-state.js	
++++ b/addon/components/table/empty-state.js	
+@@ -3,6 +3,104 @@ import { action } from '@ember/object';
+ import { inject as service } from '@ember/service';
+ import window from 'ember-window-mock';
+ 
++const DOCS_TRANSLATIONS = {
++    'orders guide': 'Guía de pedidos',
++    'order guide': 'Guía de pedidos',
++    'drivers guide': 'Guía de conductores',
++    'driver guide': 'Guía de conductores',
++    'vehicles guide': 'Guía de vehículos',
++    'vehicle guide': 'Guía de vehículos',
++    'fleets guide': 'Guía de flotas',
++    'fleet guide': 'Guía de flotas',
++    'places guide': 'Guía de lugares',
++    'contacts guide': 'Guía de contactos',
++    'vendors guide': 'Guía de proveedores',
++    'vendor guide': 'Guía de proveedores',
++    'fuel reports guide': 'Guía de reportes de combustible',
++    'issues guide': 'Guía de problemas',
++    'service rates guide': 'Guía de tarifas de servicio',
++    'integrated vendors guide': 'Guía de proveedores integrados',
++    'read guide': 'Ver guía',
++};
++
++const ACTION_TRANSLATIONS = {
++    'new order': 'Nuevo pedido',
++    'new driver': 'Nuevo conductor',
++    'new vehicle': 'Nuevo vehículo',
++    'new fleet': 'Nueva flota',
++    'new place': 'Nuevo lugar',
++    'new contact': 'Nuevo contacto',
++    'new customer': 'Nuevo cliente',
++    'new vendor': 'Nuevo proveedor',
++    'new issue': 'Nuevo problema',
++    'new fuel report': 'Nuevo reporte de combustible',
++    'new service rate': 'Nueva tarifa de servicio',
++    new: 'Nuevo',
++    refresh: 'Actualizar',
++    import: 'Importar',
++    export: 'Exportar',
++};
++
++const TEXT_TRANSLATIONS = {
++    'create your first order': 'Crea tu primer pedido',
++    'add your first driver': 'Agrega tu primer conductor',
++    'add your first vehicle': 'Agrega tu primer vehículo',
++    'create your first fleet': 'Crea tu primera flota',
++    'add your first place': 'Agrega tu primer lugar',
++    'add your first contact': 'Agrega tu primer contacto',
++    'add your first customer': 'Agrega tu primer cliente',
++    'add your first vendor': 'Agrega tu primer proveedor',
++    'add your first issue': 'Agrega tu primer problema',
++    'add your first fuel report': 'Agrega tu primer reporte de combustible',
++    'no records found': 'No se encontraron registros',
++    'no orders yet': 'Sin pedidos aún',
++    'no orders match your filters': 'Ningún pedido coincide con tus filtros',
++    'no drivers match your search': 'Ningún conductor coincide con tu búsqueda',
++    'no drivers match your filters': 'Ningún conductor coincide con tus filtros',
++    'no vehicles match your filters': 'Ningún vehículo coincide con tus filtros',
++    'no fleets match your filters': 'Ninguna flota coincide con tus filtros',
++    'no places match your filters': 'Ningún lugar coincide con tus filtros',
++    'no contacts match your filters': 'Ningún contacto coincide con tus filtros',
++    'no customers match your filters': 'Ningún cliente coincide con tus filtros',
++    'no vendors match your filters': 'Ningún proveedor coincide con tus filtros',
++    'no vehicles visible': 'Sin vehículos visibles',
++    'no drivers visible': 'Sin conductores visibles',
++    'no places visible': 'Sin lugares visibles',
++    'no positions loaded': 'Sin posiciones cargadas',
++    'no vehicles match this search': 'Ningún vehículo coincide con esta búsqueda',
++    'no drivers match this search': 'Ningún conductor coincide con esta búsqueda',
++    'no places match this search': 'Ningún lugar coincide con esta búsqueda',
++    'orders are the center of fleet-ops: plan routes, assign drivers and vehicles, track progress, and collect proof.': 'Los pedidos son el centro de Fleet-Ops: planifica rutas, asigna conductores y vehículos, rastrea el progreso y recopila pruebas.',
++    'drivers power dispatching, live fleet visibility, assignments, and delivery activity.': 'Los conductores impulsan el despacho, la visibilidad en vivo de la flota, las asignaciones y la actividad de entrega.',
++    'vehicles connect assignments, live tracking, fleet capacity, maintenance, and compliance history.': 'Los vehículos conectan asignaciones, rastreo en vivo, capacidad de flota, mantenimiento e historial de cumplimiento.',
++    'fleets help group vehicles and drivers for dispatching, reporting, and operational coverage.': 'Las flotas ayudan a agrupar vehículos y conductores para despacho, reportes y cobertura operativa.',
++    'places keep frequent pickup, dropoff, facility, and service locations ready for orders and routing.': 'Los lugares mantienen ubicaciones frecuentes de recolección, entrega, instalaciones y servicio listas para pedidos y rutas.',
++    'contacts keep customer, vendor, and internal stakeholder details ready for orders and communication.': 'Los contactos mantienen listos los detalles de clientes, proveedores y partes interesadas para pedidos y comunicación.',
++    'customers give orders an owner, contact details, and account context for service history.': 'Los clientes proporcionan a los pedidos un propietario, detalles de contacto y contexto de cuenta para el historial de servicio.',
++    'vendors let your team manage external carriers, service providers, and operational partners.': 'Los proveedores permiten a tu equipo gestionar transportistas externos, proveedores de servicios y socios operativos.',
++    'adjust the search, bulk search, or filters to find another order.': 'Ajusta la búsqueda, búsqueda masiva o filtros para encontrar otro pedido.',
++    'adjust the search or filters to find another driver.': 'Ajusta la búsqueda o filtros para encontrar otro conductor.',
++    'adjust the search or filters to find another vehicle.': 'Ajusta la búsqueda o filtros para encontrar otro vehículo.',
++    'adjust the search or filters to find another fleet.': 'Ajusta la búsqueda o filtros para encontrar otra flota.',
++    'adjust the search or filters to find another saved location.': 'Ajusta la búsqueda o filtros para encontrar otra ubicación guardada.',
++    'adjust the search or filters to find another contact.': 'Ajusta la búsqueda o filtros para encontrar otro contacto.',
++    'adjust the search or filters to find another customer.': 'Ajusta la búsqueda o filtros para encontrar otro cliente.',
++    'adjust the search or filters to find another vendor.': 'Ajusta la búsqueda o filtros para encontrar otro proveedor.',
++    'vehicles appear here when they are available in the live map context.': 'Los vehículos aparecen aquí cuando están disponibles en el contexto del mapa en vivo.',
++    'drivers appear here when they are available in the live map context.': 'Los conductores aparecen aquí cuando están disponibles en el contexto del mapa en vivo.',
++    'places appear here when they are available in the current map context.': 'Los lugares aparecen aquí cuando están disponibles en el contexto del mapa actual.',
++    'adjust the search to find another vehicle.': 'Ajusta la búsqueda para encontrar otro vehículo.',
++    'adjust the search to find another driver.': 'Ajusta la búsqueda para encontrar otro conductor.',
++    'adjust the search to find another place.': 'Ajusta la búsqueda para encontrar otro lugar.',
++    'select a trackable and date range to load position history for replay.': 'Selecciona un rastreable y un rango de fechas para cargar el historial de posiciones para reproducción.',
++};
++
++function translateFallback(val) {
++    if (!val || typeof val !== 'string') return val;
++    const lower = val.trim().toLowerCase();
++    return TEXT_TRANSLATIONS[lower] ?? val;
++}
++
+ export default class TableEmptyStateComponent extends Component {
+     @service docsPanel;
+ 
+@@ -18,26 +116,26 @@ export default class TableEmptyStateComponent extends Component {
+ 
+     get title() {
+         if (this.hasSearchOrFilter && this.args.filteredTitle) {
+-            return this.args.filteredTitle;
++            return translateFallback(this.args.filteredTitle);
+         }
+ 
+-        return this.args.title ?? 'No records yet';
++        return translateFallback(this.args.title) ?? 'Sin registros aún';
+     }
+ 
+     get description() {
+         if (this.hasSearchOrFilter && this.args.filteredDescription) {
+-            return this.args.filteredDescription;
++            return translateFallback(this.args.filteredDescription);
+         }
+ 
+-        return this.args.description;
++        return translateFallback(this.args.description);
+     }
+ 
+     get note() {
+         if (this.hasSearchOrFilter && this.args.filteredNote) {
+-            return this.args.filteredNote;
++            return translateFallback(this.args.filteredNote);
+         }
+ 
+-        return this.args.note;
++        return translateFallback(this.args.note);
+     }
+ 
+     get icon() {
+@@ -61,7 +159,24 @@ export default class TableEmptyStateComponent extends Component {
+     }
+ 
+     get docsText() {
+-        return this.args.docsText ?? 'Read guide';
++        const raw = this.args.docsText;
++        if (!raw || typeof raw !== 'string') return 'Ver guía';
++        const lower = raw.trim().toLowerCase();
++        return DOCS_TRANSLATIONS[lower] ?? raw;
++    }
++
++    get primaryText() {
++        const raw = this.args.primaryText;
++        if (!raw || typeof raw !== 'string') return raw;
++        const lower = raw.trim().toLowerCase();
++        return ACTION_TRANSLATIONS[lower] ?? raw;
++    }
++
++    get secondaryText() {
++        const raw = this.args.secondaryText;
++        if (!raw || typeof raw !== 'string') return raw;
++        const lower = raw.trim().toLowerCase();
++        return ACTION_TRANSLATIONS[lower] ?? raw;
+     }
+ 
+     get docsTitle() {
+diff --git a/addon/components/table.hbs b/addon/components/table.hbs
+index 3dcbfdf5fcda68492e4f540495608b92275e1c0f..eee0b9dca33cef49f6e4710fb6b34afd4ee87fb8 100644
+--- a/addon/components/table.hbs	
++++ b/addon/components/table.hbs	
+@@ -78,7 +78,7 @@
+                                             <FaIcon @icon={{@emptyStateIcon}} @prefix={{@emptyStateIconPrefix}} />
+                                         </div>
+                                     {{/if}}
+-                                    <div class="next-table-empty-state-title">{{or @emptyStateTitle "No records found"}}</div>
++                                    <div class="next-table-empty-state-title">{{or @emptyStateTitle (t "common.no-records-found" default="No se encontraron registros")}}</div>
+                                     {{#if @emptyStateDescription}}
+                                         <div class="next-table-empty-state-description">{{@emptyStateDescription}}</div>
+                                     {{/if}}
