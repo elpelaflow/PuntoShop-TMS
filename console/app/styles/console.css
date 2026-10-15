@@ -1114,6 +1114,35 @@ body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-docs-a
     border-color: var(--brand-hover) !important;
 }
 
+/* 14. Barra lateral de navegación (Sidebar Navigation / Account / Next Nav Items) */
+[data-palette='puntoshop'] .next-sidebar .next-nav-item.active,
+[data-palette='puntoshop'] .next-view-container > nav.next-sidebar a.next-nav-item.active,
+[data-palette='puntoshop'] body[data-theme='light'] .next-view-container > nav.next-sidebar a.next-nav-item.active,
+[data-palette='puntoshop'] body[data-theme='dark'] .next-sidebar .next-nav-item.active {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .next-sidebar .next-nav-item.active .next-nav-item-icon-container svg,
+[data-palette='puntoshop'] .next-view-container > nav.next-sidebar a.next-nav-item.active .next-nav-item-icon-container svg,
+[data-palette='puntoshop'] body[data-theme='light'] .next-view-container > nav.next-sidebar a.next-nav-item.active .next-nav-item-icon-container svg,
+[data-palette='puntoshop'] body[data-theme='dark'] .next-sidebar .next-nav-item.active .next-nav-item-icon-container svg {
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='light'] .next-sidebar .next-content-panel-wrapper .next-content-panel-container .next-content-panel > .next-content-panel-header.next-sidebar-panel-toggle:hover {
+    background-color: var(--brand-subtle) !important;
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .next-sidebar > .next-sidebar-content + .gutter:hover::before,
+[data-palette='puntoshop'] .next-sidebar.sidebar-is-resizing > .next-sidebar-content + .gutter::before,
+[data-palette='puntoshop'] .next-content-overlay > .next-content-overlay-panel-container > .next-content-overlay-panel + .gutter:hover {
+    background-color: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+}
+
+
 
 
 
