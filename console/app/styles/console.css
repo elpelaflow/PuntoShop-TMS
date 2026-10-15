@@ -760,5 +760,229 @@ body[data-palette='puntoshop'][data-theme='dark'] .chat-inbox-empty-icon {
     box-shadow: 0 0 0 1px var(--brand-default) !important;
 }
 
+/* 10. Estados Vacíos (Empty States) y Enlaces de Guía (Read Guide) */
+[data-palette='puntoshop'] .next-table-empty-state-icon,
+[data-palette='puntoshop'] body[data-theme='light'] .next-table-empty-state-icon {
+    color: var(--brand-default) !important;
+    background-color: var(--brand-subtle) !important;
+    border-color: rgb(214 28 34 / 20%) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .next-table-empty-state-icon,
+body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-icon,
+[data-palette='puntoshop'] [data-theme='dark'] .next-table-empty-state-icon {
+    color: var(--brand-default) !important;
+    background-color: rgb(214 28 34 / 15%) !important;
+    border-color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .next-table-empty-state-action {
+    background-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .next-table-empty-state-action:hover {
+    background-color: var(--brand-hover) !important;
+}
+
+[data-palette='puntoshop'] .next-table-empty-state-docs-action,
+[data-palette='puntoshop'] body[data-theme='light'] .next-table-empty-state-docs-action {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .next-table-empty-state-docs-action:hover,
+[data-palette='puntoshop'] body[data-theme='light'] .next-table-empty-state-docs-action:hover {
+    color: var(--brand-hover) !important;
+    background-color: var(--brand-subtle) !important;
+    border-color: rgb(214 28 34 / 20%) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .next-table-empty-state-docs-action,
+body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-docs-action,
+[data-palette='puntoshop'] [data-theme='dark'] .next-table-empty-state-docs-action {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .next-table-empty-state-docs-action:hover,
+body[data-palette='puntoshop'][data-theme='dark'] .next-table-empty-state-docs-action:hover,
+[data-palette='puntoshop'] [data-theme='dark'] .next-table-empty-state-docs-action:hover {
+    color: #ffffff !important;
+    background-color: rgb(214 28 34 / 20%) !important;
+    border-color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .docs-content a {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .docs-content a:hover {
+    color: var(--brand-hover) !important;
+}
+
+[data-palette='puntoshop'] .fleetbase-docs-panel-overlay .bg-blue-100 {
+    background-color: var(--brand-subtle) !important;
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleetbase-docs-panel-overlay .dark\:bg-blue-900\/40,
+[data-palette='puntoshop'] [data-theme='dark'] .fleetbase-docs-panel-overlay .dark\:bg-blue-900\/40 {
+    background-color: rgb(214 28 34 / 20%) !important;
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleetbase-docs-panel-loading .text-sky-500 {
+    color: var(--brand-default) !important;
+}
+
+/* 11. Módulo Radar en Fleet-Ops (Recursos -> Radar) */
+/* Textos de encabezado / cejas (RECURSOS, RESUMEN MATUTINO) */
+[data-palette='puntoshop'] .fleet-ops-control-hub-eyebrow,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-control-hub-eyebrow,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-control-hub-eyebrow {
+    color: var(--brand-default) !important;
+}
+
+/* Selector de vista: Lista / Agenda */
+[data-palette='puntoshop'] .fleet-ops-radar-view-toggle-button.is-active,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-view-toggle-button.is-active,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-view-toggle-button.is-active {
+    background: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+/* Pestañas de estado (Abiertos, Pospuestos, Resueltos) con subrayado activo */
+[data-palette='puntoshop'] .fleet-ops-radar-tab.is-active,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-tab.is-active {
+    border-bottom-color: var(--brand-default) !important;
+    color: #111827 !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-tab.is-active {
+    border-bottom-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+/* Chips de filtros de Radar (Vencidos, Vence esta semana, etc.) */
+[data-palette='puntoshop'] .fleet-ops-radar-pill.is-active,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-pill.is-active,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-pill.is-active {
+    background: var(--brand-default) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-pill:hover,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-pill:hover,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-pill:hover {
+    border-color: var(--brand-default) !important;
+}
+
+/* Vistas guardadas (+ Guardar actual, etc.) */
+[data-palette='puntoshop'] .fleet-ops-radar-saved-view.is-active,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-saved-view.is-active {
+    border-color: var(--brand-default) !important;
+    color: var(--brand-hover) !important;
+    background: var(--brand-subtle) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-saved-view.is-active {
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+    background: rgb(214 28 34 / 20%) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-saved-view:hover {
+    border-color: var(--brand-default) !important;
+    color: var(--brand-default) !important;
+}
+
+/* Enlaces del briefing */
+[data-palette='puntoshop'] .fleet-ops-radar-briefing-link,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-briefing-link,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-briefing-link {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-briefing-link:hover {
+    color: var(--brand-hover) !important;
+}
+
+/* Filas, selección y acciones en Radar */
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-row.is-selected,
+[data-palette='puntoshop'] .fleet-ops-radar-row.is-selected {
+    background: var(--brand-subtle) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-row.is-selected {
+    background: rgb(214 28 34 / 15%) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-row.is-selected .fleet-ops-radar-row-check {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-row.is-focused {
+    box-shadow: inset 3px 0 0 var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-row-title:hover,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-row-title:hover,
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-row-title:hover {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-row-open:hover {
+    color: var(--brand-default) !important;
+}
+
+/* Barra de acciones masivas (Bulk bar) en Radar */
+[data-palette='puntoshop'] .fleet-ops-radar-bulk-bar,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-bulk-bar {
+    border-color: rgb(214 28 34 / 25%) !important;
+    background: var(--brand-subtle) !important;
+    color: var(--brand-hover) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-bulk-bar {
+    background: rgb(214 28 34 / 15%) !important;
+    border-color: var(--brand-default) !important;
+    color: #ffffff !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-bulk-bar .fleet-ops-radar-row-check {
+    color: var(--brand-default) !important;
+}
+
+/* Avatares de usuario en Radar */
+[data-palette='puntoshop'] .fleet-ops-radar-avatar.is-user,
+[data-palette='puntoshop'] body[data-theme='light'] .fleet-ops-radar-avatar.is-user {
+    background: var(--brand-subtle) !important;
+    color: var(--brand-hover) !important;
+}
+
+[data-palette='puntoshop'] body[data-theme='dark'] .fleet-ops-radar-avatar.is-user {
+    background: rgb(214 28 34 / 20%) !important;
+    color: #ffffff !important;
+}
+
+/* Vista Agenda en Radar (hora actual y drag target) */
+[data-palette='puntoshop'] .fleet-ops-radar-agenda-now {
+    background: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-agenda-now em {
+    color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-agenda-lane.is-drop-target .fleet-ops-radar-agenda-track {
+    outline-color: var(--brand-default) !important;
+}
+
+[data-palette='puntoshop'] .fleet-ops-radar-agenda-entry:hover {
+    border-color: var(--brand-default) !important;
+}
+
+
+
 
 
